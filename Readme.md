@@ -1,3 +1,7 @@
+# “We verify before we compute. We compute only what we can verify.”
+
+
+
 NSFCA — Neuro-Symbolic Financial Computation Agent
 
                  ┌──────────────────────────────────┐
