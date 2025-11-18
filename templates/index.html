@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VerifiQuant 問答介面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script>
+      window.TOPIC_OPTIONS = {{ topic_options | tojson }};
+    </script>
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1>VerifiQuant 計算服務</h1>
+        <p>輸入問題並選擇可用的 Domain / Topic，系統會檢索資料卡完成計算。</p>
+      </header>
+      <form id="question-form">
+        <label>
+          問題描述
+          <textarea id="question" name="question" rows="5" placeholder="例如：我投資50000，預期一年後得到60000，折現率8%，NPV是多少？" required></textarea>
+        </label>
+        <label>
+          Domain
+          <select id="domain" name="domain">
+            <option value="">全部領域</option>
+            {% for domain in domain_options %}
+            <option value="{{ domain }}">{{ domain }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          Topic
+          <select id="topic" name="topic">
+            <option value="">全部主題</option>
+          </select>
+        </label>
+        <button type="submit">送出問題</button>
+      </form>
+      <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <span>LLM 計算中，請稍候…</span>
+      </div>
+      <section id="result" class="result hidden"></section>
+    </div>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
+

@@ -1,7 +1,3 @@
-# “We verify before we compute. We compute only what we can verify.”
-
-
-
 NSFCA — Neuro-Symbolic Financial Computation Agent
 
                  ┌──────────────────────────────────┐
@@ -90,8 +86,3 @@ NSFCA — Neuro-Symbolic Financial Computation Agent
 2. Does verification reduce critical errors in financial computations?
 3. Can confidence gating reduce hallucination-driven wrong answers to near-zero?
 4. **Do portfolio managers feel comfortable using such a system?**
-
-
-python verifiquant.py \
-    --question """John Doe can invest $107641 in Amazon Web Services Expansion. The project will save $24450 per year for 4 years, after which it can be sold for $54788 but will incur an environmental cleanup cost of $28699. Given a discount rate of 7.58%, what is the NPV?""" \
-    --domain "Investment Analysis" --topic "Net Present Value"
