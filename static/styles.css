@@ -106,10 +106,51 @@ button:hover {
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
-  white-space: pre-wrap;
 }
 
 .hidden {
   display: none;
+}
+
+code {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  background: #f3f4f6;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  font-weight: 600;
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.badge-sympy {
+  background: #0f766e;
+}
+
+.badge-llm {
+  background: #c026d3;
+}
+
+.steps-list {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.3rem;
+  line-height: 1.6;
+}
+
+.result-output {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 

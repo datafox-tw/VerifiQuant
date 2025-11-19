@@ -1,20 +1,20 @@
 [
   {
     "id": "template_single_year_npv",
-    "name": "NPV: Single cash flow after 1 year",
-    "short_description": "Calculates the Net Present Value (NPV) for an initial investment and a single cash flow received after one year, using a given discount rate.",
+    "name": "NPV: Single cash flow in year 1",
+    "short_description": "Calculates the Net Present Value for an initial investment, given a single expected cash flow in the first year and a discount rate.",
     "domain": "Investment Analysis",
-    "topic": "Npv",
+    "topic": "Net Present Value",
     "inputs": [
       {
         "name": "x",
         "type": "float",
-        "description": "Initial investment at time 0."
+        "description": "Initial investment amount."
       },
       {
         "name": "C",
         "type": "float",
-        "description": "Cash flow received after 1 year."
+        "description": "Cash flow expected at the end of year 1."
       },
       {
         "name": "r",
@@ -41,10 +41,10 @@
   },
   {
     "id": "template_two_year_npv",
-    "name": "NPV: two cash flows (common rate)",
-    "short_description": "Calculates Net Present Value for an initial investment, with cash inflows in year 1 and year 2, using a common discount rate.",
+    "name": "NPV: two cash flows (years 1 & 2)",
+    "short_description": "Calculates Net Present Value for an initial investment with cash inflows in year 1 and year 2, using a common discount rate.",
     "domain": "Investment Analysis",
-    "topic": "NPV",
+    "topic": "Npv",
     "inputs": [
       {
         "name": "x",
@@ -64,14 +64,14 @@
       {
         "name": "r",
         "type": "float",
-        "description": "discount rate as decimal"
+        "description": "discount rate as percentage"
       }
     ],
     "output_var": "NPV",
     "sympy_formulas": [
       {
         "variable": "PV_total",
-        "formula": "C1/(1+r) + C2/(1+r)**2"
+        "formula": "C1/(1+r/100) + C2/((1+r/100)**2)"
       },
       {
         "variable": "NPV",
@@ -80,71 +80,15 @@
     ],
     "tags": [
       "npv",
-      "basic",
+      "financial-template",
       "multi-period",
-      "financial-template"
+      "two-year"
     ]
   },
   {
     "id": "template_three_year_with_salvage_npv",
     "name": "NPV: Two Annual Inflows + Salvage in Year 3",
-    "short_description": "Calculates Net Present Value given an initial investment (x), two annual operating cash flows (C1, C2), and a salvage value at year 3, using a discount rate (r).",
-    "domain": "Investment Analysis",
-    "topic": "Net Present Value",
-    "inputs": [
-      {
-        "name": "x",
-        "type": "float",
-        "description": "Initial investment"
-      },
-      {
-        "name": "C1",
-        "type": "float",
-        "description": "Cash flow at year 1"
-      },
-      {
-        "name": "C2",
-        "type": "float",
-        "description": "Cash flow at year 2"
-      },
-      {
-        "name": "salvage",
-        "type": "float",
-        "description": "Salvage value at year 3"
-      },
-      {
-        "name": "r",
-        "type": "float",
-        "description": "Discount rate as decimal"
-      }
-    ],
-    "output_var": "NPV",
-    "sympy_formulas": [
-      {
-        "variable": "PV_op",
-        "formula": "C1/(1+r) + C2/((1+r)**2)"
-      },
-      {
-        "variable": "PV_salvage",
-        "formula": "salvage/((1+r)**3)"
-      },
-      {
-        "variable": "NPV",
-        "formula": "PV_op + PV_salvage - x"
-      }
-    ],
-    "tags": [
-      "npv",
-      "financial-template",
-      "investment-analysis",
-      "salvage-value",
-      "multi-period"
-    ]
-  },
-  {
-    "id": "template_annuity_plus_salvage_npv",
-    "name": "NPV: 4-year annuity savings with salvage value",
-    "short_description": "Calculates the Net Present Value (NPV) of an initial investment that generates a 4-year annuity of savings and includes a salvage value at the end of the project's life, using a specified discount rate.",
+    "short_description": "Calculates Net Present Value (NPV) for an investment with an initial outlay, two annual cash inflows (Year 1 and Year 2), and a salvage value at the end of the third year.",
     "domain": "Investment Analysis",
     "topic": "Net Present Value",
     "inputs": [
@@ -154,26 +98,86 @@
         "description": "Initial investment amount"
       },
       {
-        "name": "annual_save",
+        "name": "C1",
         "type": "float",
-        "description": "Annual savings generated each year for 4 years"
+        "description": "Cash flow at the end of year 1"
+      },
+      {
+        "name": "C2",
+        "type": "float",
+        "description": "Cash flow at the end of year 2"
       },
       {
         "name": "salvage",
         "type": "float",
-        "description": "Salvage value at the end of year 4"
+        "description": "Salvage value at the end of year 3"
       },
       {
         "name": "r",
         "type": "float",
-        "description": "Discount rate in percentage (e.g., 8 for 8%)"
+        "description": "Discount rate as a decimal (e.g., 0.08 for 8%)"
+      }
+    ],
+    "output_var": "NPV",
+    "sympy_formulas": [
+      {
+        "variable": "PV_op",
+        "formula": "C1/(1+r) + C2/(1+r)**2"
+      },
+      {
+        "variable": "PV_salvage",
+        "formula": "salvage/(1+r)**3"
+      },
+      {
+        "variable": "NPV",
+        "formula": "PV_op + PV_salvage - x"
+      }
+    ],
+    "tags": [
+      "npv",
+      "multi-period",
+      "salvage",
+      "financial-template"
+    ]
+  },
+  {
+    "id": "template_annuity_plus_salvage_npv",
+    "name": "NPV: Annuity of Savings plus Salvage",
+    "short_description": "Calculates Net Present Value for an initial investment that generates an annuity of savings for 'n' years, plus a salvage value at the end of year 'n', discounted at rate 'r'.",
+    "domain": "Investment Analysis",
+    "topic": "Net Present Value",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "Initial investment amount."
+      },
+      {
+        "name": "annual_save",
+        "type": "float",
+        "description": "Annual savings generated by the investment."
+      },
+      {
+        "name": "salvage",
+        "type": "float",
+        "description": "Salvage value received at the end of year 'n'."
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Discount rate as a decimal (e.g., 0.05 for 5%)."
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of years the annuity is received and when the salvage value is realized."
       }
     ],
     "output_var": "NPV",
     "sympy_formulas": [
       {
         "variable": "annuity_factor",
-        "formula": "(1 - (1 + r / 100)**(-4)) / (r / 100)"
+        "formula": "(1 - 1/(1+r)**n)/r"
       },
       {
         "variable": "PV_annuity",
@@ -181,7 +185,7 @@
       },
       {
         "variable": "PV_salvage",
-        "formula": "salvage / ((1 + r / 100)**4)"
+        "formula": "salvage / (1+r)**n"
       },
       {
         "variable": "NPV",
@@ -191,15 +195,14 @@
     "tags": [
       "npv",
       "annuity",
-      "salvage-value",
-      "investment-analysis",
+      "salvage",
       "financial-template"
     ]
   },
   {
     "id": "template_annuity_salvage_cleanup_npv",
-    "name": "NPV: 4-year savings annuity, salvage, and cleanup",
-    "short_description": "Calculates NPV for an investment with a 4-year savings annuity, a salvage value, and an environmental cleanup cost at the end of year 4, discounted at rate r.",
+    "name": "NPV: Annuity, Salvage, and Cleanup Cost over N years",
+    "short_description": "Calculates Net Present Value for a project with an initial investment, annual savings (annuity) for 'n' years, a salvage value at the end, and a cleanup cost also at the end of 'n' years, all discounted at a rate 'r'.",
     "domain": "Investment Analysis",
     "topic": "Net Present Value",
     "inputs": [
@@ -211,33 +214,34 @@
       {
         "name": "annual_save",
         "type": "float",
-        "description": "Annual savings generated for n years"
+        "description": "Annual savings generated by the project (annuity cash flow)"
       },
       {
         "name": "salvage",
         "type": "float",
-        "description": "Salvage value at the end of year n"
+        "description": "Salvage value received at the end of the project (year n)"
       },
       {
         "name": "cleanup",
         "type": "float",
-        "description": "Environmental cleanup cost at the end of year n"
+        "description": "Environmental cleanup cost incurred at the end of the project (year n)"
       },
       {
         "name": "r",
         "type": "float",
-        "description": "Discount rate as a decimal"
+        "description": "Discount rate as a decimal (e.g., 0.05 for 5%)"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of years for which the project operates and savings accrue"
       }
     ],
     "output_var": "NPV",
     "sympy_formulas": [
       {
-        "variable": "n",
-        "formula": "4"
-      },
-      {
         "variable": "pv_factor",
-        "formula": "(1 - 1/((1+r)**n)) / r"
+        "formula": "(1 - 1/(1+r)**n) / r"
       },
       {
         "variable": "PV_annuity",
@@ -245,11 +249,11 @@
       },
       {
         "variable": "PV_salvage",
-        "formula": "salvage / ((1+r)**n)"
+        "formula": "salvage / (1+r)**n"
       },
       {
         "variable": "PV_cleanup",
-        "formula": "cleanup / ((1+r)**n)"
+        "formula": "cleanup / (1+r)**n"
       },
       {
         "variable": "NPV",
@@ -258,10 +262,11 @@
     ],
     "tags": [
       "npv",
+      "financial-template",
       "annuity",
       "salvage",
       "cleanup",
-      "financial-template"
+      "multi-period"
     ]
   }
 ]

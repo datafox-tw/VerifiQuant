@@ -10,7 +10,7 @@ from rag_pipeline.calculator import evaluate_card
 from rag_pipeline.card_selector import select_card_with_llm
 from rag_pipeline.input_extractor import extract_inputs_with_llm
 from rag_pipeline.retrieval import fetch_candidates
-
+from copy import deepcopy
 
 def solve_question(
     question: str,
@@ -19,11 +19,13 @@ def solve_question(
     *,
     selector_model: str,
     extractor_model: str,
+    calculator_model: str,
     top_k: int = 3,
     alpha: float = 0.4,
     domain: Optional[str] = None,
     topic: Optional[str] = None,
 ) -> Dict[str, object]:
+    golden_question = deepcopy(question)
     candidates = fetch_candidates(
         store,
         query=question,
@@ -37,13 +39,16 @@ def solve_question(
             "status": "refused",
             "reason": "No relevant cards found for the given question.",
         }
-
+    print(candidates)
+    print("=======")
     selection = select_card_with_llm(
         client=client,
         model=selector_model,
         user_question=question,
         candidates=candidates,
     )
+    print(selection)
+    print("=======")
 
     chosen_card = next(
         (candidate.card for candidate in candidates if candidate.card.id == selection.chosen_id),
@@ -54,11 +59,14 @@ def solve_question(
             "status": "refused",
             "reason": f"LLM selected card {selection.chosen_id} which was not retrieved.",
         }
+    print(chosen_card)
+    print("==================")
 
+    question = golden_question
     extraction = extract_inputs_with_llm(
         client=client,
         model=extractor_model,
-        user_question=question,
+        user_question=golden_question,
         card=chosen_card,
     )
     if extraction.missing_inputs:
@@ -73,7 +81,17 @@ def solve_question(
     #         "reason": "Missing inputs from user question.",
     #         "missing_inputs": selection.missing_inputs,
     #     }
-    result = evaluate_card(chosen_card, extraction.provided_inputs)
+    result = evaluate_card(
+        chosen_card,
+        extraction.provided_inputs,
+        question=question,
+        fallback_client=client,
+        fallback_model=calculator_model,
+    )
+    if result.fallback:
+        print("Used fallback calculation.")
+    else:
+        print("Used symbolic evaluation.")
     return {
         "status": "success",
         "card_id": chosen_card.id,
@@ -89,6 +107,7 @@ def solve_question(
         ],
         "output_var": result.output_var,
         "output_value": result.output_value,
+        "is_fallback": result.fallback,
     }
 
 
@@ -111,6 +130,11 @@ def main() -> None:
         "--extractor-model",
         default="gemini-2.5-flash",
         help="Model for input extraction.",
+    )
+    parser.add_argument(
+        "--calculator-model",
+        default="gemini-2.5-flash",
+        help="Model for fallback calculations when symbolic evaluation fails.",
     )
     parser.add_argument(
         "--question",
@@ -137,7 +161,6 @@ def main() -> None:
     if not api_key:
         raise EnvironmentError("GEMINI_API_KEY is not set.")
     client = genai.Client(api_key=api_key)
-
     store = DefinitionStore.load(args.store)
     outcome = solve_question(
         args.question,
@@ -145,6 +168,7 @@ def main() -> None:
         client,
         selector_model=args.selector_model,
         extractor_model=args.extractor_model,
+        calculator_model=args.calculator_model,
         alpha=args.alpha,
         domain=args.domain,
         topic=args.topic,

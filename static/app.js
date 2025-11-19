@@ -30,32 +30,38 @@ function setLoading(isLoading) {
 function renderResult(data) {
   resultEl.classList.remove("hidden");
   if (data.status === "success") {
-    const stepsText = data.steps
+    const stepsList = data.steps
       .map(
         (step, idx) =>
-          `${idx + 1}. ${step.variable} = ${step.formula} = ${step.value.toFixed(
-            4
-          )}`
+          `<li><code>${idx + 1}. ${step.variable} = ${
+            step.formula || "公式"
+          } = ${Number(step.value).toFixed(4)}</code></li>`
       )
-      .join("\n");
-    resultEl.textContent = [
-      `狀態：成功`,
-      `使用卡片：${data.card_id}`,
-      `理由：${data.selection_reason}`,
-      `輸入值：${JSON.stringify(data.inputs, null, 2)}`,
-      `步驟：\n${stepsText}`,
-      `輸出：${data.output_var} = ${data.output_value}`,
-    ].join("\n\n");
+      .join("");
+    const calcMode = data.is_fallback ? "LLM fallback" : "SymPy";
+    const modeClass = data.is_fallback ? "badge-llm" : "badge-sympy";
+    resultEl.innerHTML = `
+      <div class="meta-row">
+        <span>狀態：<strong>成功</strong></span>
+        <span>計算模式：<span class="badge ${modeClass}">${calcMode}</span></span>
+      </div>
+      <p>使用卡片：<code>${data.card_id}</code></p>
+      <p>LLM 選擇理由：${data.selection_reason}</p>
+      <p>輸入值：</p>
+      <pre>${JSON.stringify(data.inputs, null, 2)}</pre>
+      <p>計算步驟：</p>
+      <ol class="steps-list">${stepsList}</ol>
+      <p class="result-output">${data.output_var} = <strong>${data.output_value}</strong></p>
+    `;
   } else if (data.status === "refused") {
-    resultEl.textContent = [
-      `狀態：拒絕`,
-      `原因：${data.reason}`,
-      data.missing_inputs
-        ? `缺少欄位：${data.missing_inputs.join(", ")}`
-        : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const missing = data.missing_inputs?.length
+      ? `<p>缺少欄位：${data.missing_inputs.join(", ")}</p>`
+      : "";
+    resultEl.innerHTML = `
+      <p>狀態：<strong>拒絕</strong></p>
+      <p>原因：${data.reason}</p>
+      ${missing}
+    `;
   } else {
     resultEl.textContent = data.message || "系統發生未知錯誤";
   }

@@ -157,9 +157,10 @@ Use the docstring and code block below to infer:
 1. A concise user-facing `name`.
 2. A `short_description` explaining the scenario and goal.
 3. Inputs (variable type, role, and timing if relevant). If type is unclear, choose float.
-4. Output variable (usually the final value calculated).
-5. Symbolic expressions in SymPy-compatible strings. Use lower-case `r` for decimal rates unless the code clearly uses percentages.
-6. Tags: include at least `{topic_slug}`, `npv`, `financial-template`.
+4. **VERY IMPORTANT**: all of the deterministic and random inputs should be included. for example, if the code uses `year=4`, include `year` as an input, and don't set the variable to be 4. Make it be the same as random variable do.
+5. Output variable (usually the final value calculated).
+6. Symbolic expressions in SymPy-compatible strings. Use lower-case `r` for decimal rates unless the code clearly uses percentages.
+7. Tags: include at least `{topic_slug}`, `npv`, `financial-template`.
 
 Return ONLY JSON that conforms to the provided schema.
 
@@ -314,7 +315,7 @@ def main() -> None:
                 cards.append(card)
                 count += 1
                 # 成功後，休息一小段時間以保持禮貌，然後跳出重試循環
-                time.sleep(3) 
+                time.sleep(5) 
                 break 
                 
             except genai.errors.ServerError as e:

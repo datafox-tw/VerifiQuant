@@ -63,9 +63,11 @@ def create_app():
                 client=app.config["GENAI_CLIENT"],
                 selector_model=os.environ.get("SELECTOR_MODEL", "gemini-2.5-flash"),
                 extractor_model=os.environ.get("EXTRACTOR_MODEL", "gemini-2.5-flash"),
+                calculator_model=os.environ.get("CALCULATOR_MODEL", "gemini-2.5-flash"),
                 domain=domain,
                 topic=topic,
             )
+
             return jsonify(result)
         except Exception as exc:
             return jsonify({"status": "error", "message": str(exc)}), 500
