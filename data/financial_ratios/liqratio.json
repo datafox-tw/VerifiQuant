@@ -1,0 +1,415 @@
+[
+  {
+    "id": "q2",
+    "name": "Quantize to Two Decimal Places (Financial Rounding)",
+    "short_description": "Applies financial-style rounding (ROUND_HALF_UP) to a given numerical value, quantizing it to two decimal places.",
+    "domain": "Financial Ratios",
+    "topic": "Liqratio",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be quantized"
+      }
+    ],
+    "output_var": "quantized_x",
+    "sympy_formulas": [
+      {
+        "variable": "quantized_x",
+        "formula": "round(x, 2)"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "rounding",
+      "quantization",
+      "decimal precision"
+    ]
+  },
+  {
+    "id": "money",
+    "name": "Format Number as USD",
+    "short_description": "Formats a numerical value into a USD currency string with thousands separators and two decimal places.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted as currency."
+      }
+    ],
+    "output_var": "formatted_value",
+    "sympy_formulas": [],
+    "tags": [
+      "liqratio",
+      "formatting",
+      "currency",
+      "utility"
+    ]
+  },
+  {
+    "id": "ratio2",
+    "name": "Ratio Calculation (2-Decimal Precision)",
+    "short_description": "Calculates the ratio of two numbers and formats the result to two decimal places.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "numer",
+        "type": "float",
+        "description": "Numerator of the ratio"
+      },
+      {
+        "name": "denom",
+        "type": "float",
+        "description": "Denominator of the ratio"
+      }
+    ],
+    "output_var": "Ratio",
+    "sympy_formulas": [
+      {
+        "variable": "Ratio",
+        "formula": "numer / denom"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "ratio",
+      "calculation",
+      "precision"
+    ]
+  },
+  {
+    "id": "ensure_quick_assets_reasonable",
+    "name": "Adjust Inventories for Realistic Quick Assets",
+    "short_description": "Adjusts inventory levels to ensure that quick assets (Current Assets minus Inventories and Prepaid Expenses) remain positive or within a realistic range by capping inventories and prepaid expenses to a percentage of current assets.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "ca",
+        "type": "integer",
+        "description": "Total Current Assets"
+      },
+      {
+        "name": "inv",
+        "type": "integer",
+        "description": "Inventories"
+      },
+      {
+        "name": "prepaids",
+        "type": "integer",
+        "description": "Prepaid Expenses"
+      }
+    ],
+    "output_var": "adjusted_inv",
+    "sympy_formulas": [
+      {
+        "variable": "max_inv_pre_limit",
+        "formula": "0.85 * ca"
+      },
+      {
+        "variable": "adjusted_inv",
+        "formula": "Piecewise((Max(0, max_inv_pre_limit - prepaids), (inv + prepaids) > max_inv_pre_limit), (inv, True))"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "liquidity_ratios",
+      "inventories",
+      "quick_assets",
+      "scenario_generation",
+      "data_validation"
+    ]
+  },
+  {
+    "id": "template_current_ratio_simple",
+    "name": "Simple Current Ratio",
+    "short_description": "Calculates the current ratio using current assets and current liabilities.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "ca",
+        "type": "float",
+        "description": "Current assets of the company."
+      },
+      {
+        "name": "cl",
+        "type": "float",
+        "description": "Current liabilities of the company."
+      }
+    ],
+    "output_var": "current_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "current_ratio",
+        "formula": "ca / cl"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "current ratio",
+      "liquidity"
+    ]
+  },
+  {
+    "id": "template_quick_ratio_simple",
+    "name": "Quick Ratio (acid-test)",
+    "short_description": "Quick Ratio (acid-test) = (Current Assets \n Inventories) \n Current Liabilities.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "ca",
+        "type": "float",
+        "description": "Current Assets"
+      },
+      {
+        "name": "inv",
+        "type": "float",
+        "description": "Inventories"
+      },
+      {
+        "name": "cl",
+        "type": "float",
+        "description": "Current Liabilities"
+      }
+    ],
+    "output_var": "quick_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "quick_ratio",
+        "formula": "(ca - inv) / cl"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "quick ratio",
+      "liquidity"
+    ]
+  },
+  {
+    "id": "template_both_ratios_intermediate",
+    "name": "Current and Quick Ratios (Prepaid Excluded)",
+    "short_description": "Compute Current and Quick Ratios, specifically excluding prepaid expenses from quick assets calculation.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "ca",
+        "type": "float",
+        "description": "Total current assets of the company."
+      },
+      {
+        "name": "inv",
+        "type": "float",
+        "description": "Inventories held by the company."
+      },
+      {
+        "name": "pre",
+        "type": "float",
+        "description": "Prepaid expenses of the company."
+      },
+      {
+        "name": "cl",
+        "type": "float",
+        "description": "Total current liabilities of the company."
+      }
+    ],
+    "output_var": "current_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "current_ratio",
+        "formula": "ca / cl"
+      },
+      {
+        "variable": "quick_ratio",
+        "formula": "(ca - inv - pre) / cl"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "current ratio",
+      "quick ratio",
+      "liquidity",
+      "financial ratios"
+    ]
+  },
+  {
+    "id": "template_quick_ratio_reach_target_intermediate",
+    "name": "Quick Ratio: Additional Quick Assets to Reach Target",
+    "short_description": "Given a minimum quick ratio requirement, compute additional quick assets needed.",
+    "domain": "Financial Ratios",
+    "topic": "Liqratio",
+    "inputs": [
+      {
+        "name": "ca",
+        "type": "float",
+        "description": "current assets"
+      },
+      {
+        "name": "inv",
+        "type": "float",
+        "description": "inventories"
+      },
+      {
+        "name": "pre",
+        "type": "float",
+        "description": "prepaid expenses"
+      },
+      {
+        "name": "cl",
+        "type": "float",
+        "description": "current liabilities"
+      },
+      {
+        "name": "target",
+        "type": "float",
+        "description": "minimum quick ratio requirement"
+      }
+    ],
+    "output_var": "additional_needed",
+    "sympy_formulas": [
+      {
+        "variable": "quick_assets_now",
+        "formula": "ca - inv - pre"
+      },
+      {
+        "variable": "required_quick_assets",
+        "formula": "target * cl"
+      },
+      {
+        "variable": "gap",
+        "formula": "required_quick_assets - quick_assets_now"
+      },
+      {
+        "variable": "additional_needed",
+        "formula": "Max(0, gap)"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "quick ratio",
+      "liquidity",
+      "target"
+    ]
+  },
+  {
+    "id": "template_liquidity_minimum_quick_ratio_advanced",
+    "name": "Minimum Quick Ratio: Advanced Balance Sheet Analysis",
+    "short_description": "Full balance sheet breakdown to compute Current Ratio, Quick Ratio, and the additional quick assets needed to meet a specified minimum quick ratio threshold.",
+    "domain": "Financial Ratios",
+    "topic": "Liquidity Ratios",
+    "inputs": [
+      {
+        "name": "cash",
+        "type": "float",
+        "description": "Amount of cash on the balance sheet."
+      },
+      {
+        "name": "mkt",
+        "type": "float",
+        "description": "Value of marketable securities."
+      },
+      {
+        "name": "ar",
+        "type": "float",
+        "description": "Value of accounts receivable."
+      },
+      {
+        "name": "inv",
+        "type": "float",
+        "description": "Value of inventory."
+      },
+      {
+        "name": "pre",
+        "type": "float",
+        "description": "Value of prepaid expenses."
+      },
+      {
+        "name": "cl",
+        "type": "float",
+        "description": "Total current liabilities."
+      },
+      {
+        "name": "target",
+        "type": "float",
+        "description": "Minimum Quick Ratio desired as a decimal (e.g., 1.5 for 1.5:1)."
+      }
+    ],
+    "output_var": "additional_needed",
+    "sympy_formulas": [
+      {
+        "variable": "current_assets",
+        "formula": "cash + mkt + ar + inv + pre"
+      },
+      {
+        "variable": "quick_assets",
+        "formula": "cash + mkt + ar"
+      },
+      {
+        "variable": "current_ratio",
+        "formula": "current_assets / cl"
+      },
+      {
+        "variable": "quick_ratio",
+        "formula": "quick_assets / cl"
+      },
+      {
+        "variable": "required_quick_assets",
+        "formula": "target * cl"
+      },
+      {
+        "variable": "additional_needed",
+        "formula": "Max(0, required_quick_assets - quick_assets)"
+      }
+    ],
+    "tags": [
+      "liqratio",
+      "liquidity",
+      "current_ratio",
+      "quick_ratio",
+      "balance_sheet",
+      "financial_ratios"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Financial Template Problem Generator",
+    "short_description": "A utility function that generates multiple instances of various financial ratio problems from pre-defined templates, assigning random seeds to each, and saves the collected problems to a specified JSON output file.",
+    "domain": "Financial Ratios",
+    "topic": "Template Generation",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The file path where the generated financial problems will be saved in JSON format."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of unique problem instances to generate for each individual financial template defined within the function."
+      }
+    ],
+    "output_var": "total_problems_generated",
+    "sympy_formulas": [
+      {
+        "variable": "num_templates_available",
+        "formula": "5"
+      },
+      {
+        "variable": "total_problems_generated",
+        "formula": "num_templates_available * num_instances"
+      }
+    ],
+    "tags": [
+      "utility",
+      "generator",
+      "scripting",
+      "problem generation",
+      "financial ratios"
+    ]
+  }
+]

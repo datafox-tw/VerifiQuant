@@ -1,0 +1,319 @@
+[
+  {
+    "id": "validate_inputs",
+    "name": "Depreciation Input Validation",
+    "short_description": "Ensures that inputs for asset depreciation calculations meet necessary constraints, including positive cost and useful life, months_used between 1 and 12 (if provided), and non-negative salvage_value less than cost (if provided).",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "cost",
+        "type": "float",
+        "description": "The original cost of the asset."
+      },
+      {
+        "name": "useful_life",
+        "type": "float",
+        "description": "The estimated useful life of the asset in years."
+      },
+      {
+        "name": "months_used",
+        "type": "integer",
+        "description": "Number of months the asset was used in the first year (optional, for partial year depreciation)."
+      },
+      {
+        "name": "salvage_value",
+        "type": "float",
+        "description": "The estimated salvage value of the asset at the end of its useful life (optional)."
+      }
+    ],
+    "output_var": "is_valid",
+    "sympy_formulas": [],
+    "tags": [
+      "depreciation_and_amortization",
+      "validation",
+      "input_checks",
+      "asset_management"
+    ]
+  },
+  {
+    "id": "template_depreciation_straight_line",
+    "name": "Straight-Line Depreciation Expense",
+    "short_description": "Calculates the annual depreciation expense for an asset using the straight-line method, considering its initial cost, useful life, and salvage value.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "cost",
+        "type": "float",
+        "description": "The initial cost of the asset."
+      },
+      {
+        "name": "useful_life",
+        "type": "integer",
+        "description": "The estimated useful life of the asset in years."
+      },
+      {
+        "name": "salvage_value",
+        "type": "float",
+        "description": "The estimated salvage value of the asset at the end of its useful life."
+      }
+    ],
+    "output_var": "depreciation_expense",
+    "sympy_formulas": [
+      {
+        "variable": "depreciable_amount",
+        "formula": "cost - salvage_value"
+      },
+      {
+        "variable": "depreciation_expense",
+        "formula": "depreciable_amount / useful_life"
+      }
+    ],
+    "tags": [
+      "depreciation_and_amortization",
+      "straight_line",
+      "depreciation",
+      "asset_accounting"
+    ]
+  },
+  {
+    "id": "template_sum_of_years_digits",
+    "name": "Sum-of-the-Years-Digits Depreciation",
+    "short_description": "A company applies the sum-of-the-years-digits (SYD) method to depreciate an asset. The objective is to determine the depreciation expense for a specific year.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "cost",
+        "type": "integer",
+        "description": "Initial cost of the asset"
+      },
+      {
+        "name": "useful_life",
+        "type": "integer",
+        "description": "Useful life of the asset in years"
+      },
+      {
+        "name": "year",
+        "type": "integer",
+        "description": "The specific year for which depreciation is calculated (1-indexed)"
+      }
+    ],
+    "output_var": "depreciation_expense",
+    "sympy_formulas": [
+      {
+        "variable": "sum_of_years",
+        "formula": "useful_life * (useful_life + 1) / 2"
+      },
+      {
+        "variable": "depreciation_factor",
+        "formula": "(useful_life - year + 1) / sum_of_years"
+      },
+      {
+        "variable": "depreciation_expense",
+        "formula": "cost * depreciation_factor"
+      }
+    ],
+    "tags": [
+      "depreciation_and_amortization",
+      "SYD",
+      "sum_of_years_digits",
+      "depreciation_expense"
+    ]
+  },
+  {
+    "id": "template_partial_year_and_disposal_depreciation",
+    "name": "Partial-Year Depreciation and Asset Disposal",
+    "short_description": "Calculates depreciation for an asset acquired mid-year and the gain or loss on its disposal before the end of its useful life, using straight-line depreciation with full-month convention.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "cost",
+        "type": "float",
+        "description": "Initial cost of the asset."
+      },
+      {
+        "name": "useful_life",
+        "type": "integer",
+        "description": "Estimated useful life of the asset in years."
+      },
+      {
+        "name": "months_held_in_first_year",
+        "type": "integer",
+        "description": "Number of months the asset was held and depreciated in the acquisition year (e.g., 3 for April acquisition, assuming full-month convention)."
+      },
+      {
+        "name": "sale_year",
+        "type": "integer",
+        "description": "The year number (from acquisition) when the asset is sold. Must be less than useful_life."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "The price at which the asset is sold."
+      }
+    ],
+    "output_var": "gain_or_loss",
+    "sympy_formulas": [
+      {
+        "variable": "annual_depreciation",
+        "formula": "cost / useful_life"
+      },
+      {
+        "variable": "partial_year_depreciation",
+        "formula": "annual_depreciation * (months_held_in_first_year / 12)"
+      },
+      {
+        "variable": "full_years",
+        "formula": "sale_year - 1"
+      },
+      {
+        "variable": "depreciation_full_years",
+        "formula": "full_years * annual_depreciation"
+      },
+      {
+        "variable": "accumulated_depreciation",
+        "formula": "partial_year_depreciation + depreciation_full_years"
+      },
+      {
+        "variable": "book_value_at_sale",
+        "formula": "cost - accumulated_depreciation"
+      },
+      {
+        "variable": "gain_or_loss",
+        "formula": "sale_price - book_value_at_sale"
+      }
+    ],
+    "tags": [
+      "depreciation_and_amortization",
+      "straight_line_depreciation",
+      "partial_year",
+      "asset_disposal",
+      "gain_loss"
+    ]
+  },
+  {
+    "id": "template_impairment_with_value_in_use",
+    "name": "Asset Impairment Loss (Value in Use)",
+    "short_description": "Calculates the impairment loss of an asset by comparing its carrying amount with the higher of net selling price and value in use.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "cost",
+        "type": "float",
+        "description": "Original cost of the asset"
+      },
+      {
+        "name": "accumulated_depreciation",
+        "type": "float",
+        "description": "Total accumulated depreciation of the asset"
+      },
+      {
+        "name": "net_selling_price",
+        "type": "float",
+        "description": "Estimated net selling price (fair value less costs to sell) of the asset"
+      },
+      {
+        "name": "value_in_use",
+        "type": "float",
+        "description": "Calculated value in use of the asset (present value of future cash flows)"
+      }
+    ],
+    "output_var": "impairment_loss",
+    "sympy_formulas": [
+      {
+        "variable": "carrying_amount",
+        "formula": "cost - accumulated_depreciation"
+      },
+      {
+        "variable": "recoverable_amount",
+        "formula": "Max(net_selling_price, value_in_use)"
+      },
+      {
+        "variable": "impairment_loss",
+        "formula": "Max(0, carrying_amount - recoverable_amount)"
+      }
+    ],
+    "tags": [
+      "depreciation_and_amortization",
+      "impairment",
+      "asset_valuation",
+      "accounting_standards"
+    ]
+  },
+  {
+    "id": "template_asset_impairment_reversal",
+    "name": "Asset Impairment Loss Reversal",
+    "short_description": "Calculates the carrying amount of an asset after an impairment loss and subsequent reversal, verifying compliance with IFRS rules that limit the reversal amount to not exceed the carrying amount net of depreciation had no impairment occurred.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Depreciation And Amortization",
+    "inputs": [
+      {
+        "name": "original_cost",
+        "type": "float",
+        "description": "Original cost of the asset."
+      },
+      {
+        "name": "useful_life",
+        "type": "integer",
+        "description": "Estimated useful life of the asset in years."
+      },
+      {
+        "name": "years_used",
+        "type": "integer",
+        "description": "Number of years the asset was used before the initial impairment."
+      },
+      {
+        "name": "impairment_loss",
+        "type": "float",
+        "description": "The previously recognized impairment loss amount."
+      },
+      {
+        "name": "reversal_amount",
+        "type": "float",
+        "description": "The amount of impairment loss reversal recognized."
+      }
+    ],
+    "output_var": "adjusted_carrying_amount",
+    "sympy_formulas": [
+      {
+        "variable": "annual_depreciation",
+        "formula": "original_cost / useful_life"
+      },
+      {
+        "variable": "accumulated_depreciation",
+        "formula": "annual_depreciation * years_used"
+      },
+      {
+        "variable": "carrying_before_impairment",
+        "formula": "original_cost - accumulated_depreciation"
+      },
+      {
+        "variable": "impaired_carrying_amount",
+        "formula": "carrying_before_impairment - impairment_loss"
+      },
+      {
+        "variable": "adjusted_carrying_amount",
+        "formula": "impaired_carrying_amount + reversal_amount"
+      },
+      {
+        "variable": "max_post_reversal",
+        "formula": "carrying_before_impairment"
+      },
+      {
+        "variable": "IFRS_compliant",
+        "formula": "adjusted_carrying_amount <= max_post_reversal"
+      }
+    ],
+    "tags": [
+      "depreciation_and_amortization",
+      "asset_impairment",
+      "impairment_reversal",
+      "ifrs",
+      "accounting"
+    ]
+  }
+]

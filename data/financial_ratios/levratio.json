@@ -1,0 +1,419 @@
+[
+  {
+    "id": "fmt_usd",
+    "name": "Format Currency (USD)",
+    "short_description": "Formats a numerical value into a USD currency string with commas and 2 decimal places.",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted as USD currency."
+      }
+    ],
+    "output_var": "formatted_x",
+    "sympy_formulas": [
+      {
+        "variable": "formatted_x",
+        "formula": "x"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "formatting",
+      "utility",
+      "currency",
+      "usd"
+    ]
+  },
+  {
+    "id": "round_money",
+    "name": "Round Money Value",
+    "short_description": "A utility function to round a monetary value to a predefined number of decimal places (MONEY_DP).",
+    "domain": "Financial Ratios",
+    "topic": "Levratio",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The financial value to be rounded."
+      }
+    ],
+    "output_var": "rounded_value",
+    "sympy_formulas": [
+      {
+        "variable": "rounded_value",
+        "formula": "round(x, MONEY_DP)"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "rounding",
+      "utility",
+      "formatting"
+    ]
+  },
+  {
+    "id": "bound_ratio",
+    "name": "Leverage Ratio Bound Check",
+    "short_description": "Checks if the ratio of liabilities to equity falls within a specified realistic band.",
+    "domain": "Financial Ratios",
+    "topic": "Levratio",
+    "inputs": [
+      {
+        "name": "liabilities",
+        "type": "float",
+        "description": "Total liabilities of the entity."
+      },
+      {
+        "name": "equity",
+        "type": "float",
+        "description": "Total equity of the entity."
+      },
+      {
+        "name": "rmin",
+        "type": "float",
+        "description": "Minimum acceptable value for the liabilities-to-equity ratio."
+      },
+      {
+        "name": "rmax",
+        "type": "float",
+        "description": "Maximum acceptable value for the liabilities-to-equity ratio."
+      }
+    ],
+    "output_var": "ratio_within_bounds",
+    "sympy_formulas": [
+      {
+        "variable": "r",
+        "formula": "liabilities / equity"
+      },
+      {
+        "variable": "ratio_within_bounds",
+        "formula": "And(rmin <= r, r <= rmax)"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "ratio",
+      "bounds",
+      "validation",
+      "financial_health"
+    ]
+  },
+  {
+    "id": "sample_liab_equity",
+    "name": "Sample Liabilities and Equity for Debt-to-Equity Ratio",
+    "short_description": "Generates random liabilities and equity values within specified ranges, ensuring their Debt-to-Equity (D/E) ratio falls within defined minimum and maximum bounds.",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "L_range_min",
+        "type": "float",
+        "description": "Minimum value for the Liabilities sampling range."
+      },
+      {
+        "name": "L_range_max",
+        "type": "float",
+        "description": "Maximum value for the Liabilities sampling range."
+      },
+      {
+        "name": "E_range_min",
+        "type": "float",
+        "description": "Minimum value for the Equity sampling range."
+      },
+      {
+        "name": "E_range_max",
+        "type": "float",
+        "description": "Maximum value for the Equity sampling range."
+      },
+      {
+        "name": "rmin",
+        "type": "float",
+        "description": "Minimum acceptable Debt-to-Equity ratio."
+      },
+      {
+        "name": "rmax",
+        "type": "float",
+        "description": "Maximum acceptable Debt-to-Equity ratio."
+      }
+    ],
+    "output_var": "DE_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "DE_ratio",
+        "formula": "L / E"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt_to_equity",
+      "sampling",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_debt_to_equity_simple",
+    "name": "Debt-to-Equity Ratio (Simple)",
+    "short_description": "Compute basic D/E = Total Liabilities / Shareholders' Equity.",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "total_liabilities",
+        "type": "float",
+        "description": "Total Liabilities of the company."
+      },
+      {
+        "name": "shareholders_equity",
+        "type": "float",
+        "description": "Total Shareholders' Equity of the company."
+      }
+    ],
+    "output_var": "de",
+    "sympy_formulas": [
+      {
+        "variable": "de",
+        "formula": "total_liabilities / shareholders_equity"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt-to-equity",
+      "leverage",
+      "financial_ratios"
+    ]
+  },
+  {
+    "id": "template_debt_to_equity_convertible_debt",
+    "name": "Debt-to-Equity with Convertible Debt Conversion",
+    "short_description": "Compute current Debt-to-Equity (D/E) ratio and D/E ratio after all convertible debt converts to equity.",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "L",
+        "type": "float",
+        "description": "Total Liabilities"
+      },
+      {
+        "name": "E",
+        "type": "float",
+        "description": "Shareholders' Equity"
+      },
+      {
+        "name": "convertible_debt",
+        "type": "float",
+        "description": "Amount of convertible debt"
+      }
+    ],
+    "output_var": "de_after",
+    "sympy_formulas": [
+      {
+        "variable": "de_before",
+        "formula": "L / E"
+      },
+      {
+        "variable": "L_after",
+        "formula": "L - convertible_debt"
+      },
+      {
+        "variable": "E_after",
+        "formula": "E + convertible_debt"
+      },
+      {
+        "variable": "de_after",
+        "formula": "L_after / E_after"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt_to_equity",
+      "convertible_debt",
+      "leverage_ratio"
+    ]
+  },
+  {
+    "id": "template_debt_to_equity_capital_injection",
+    "name": "Debt-to-Equity Ratio (D/E) with Equity Injection",
+    "short_description": "Compute D/E before and after a primary equity raise (no change to liabilities).",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "L",
+        "type": "float",
+        "description": "Total liabilities"
+      },
+      {
+        "name": "E",
+        "type": "float",
+        "description": "Shareholders' equity before capital injection"
+      },
+      {
+        "name": "injection",
+        "type": "float",
+        "description": "Amount of new equity injected"
+      }
+    ],
+    "output_var": "de_after",
+    "sympy_formulas": [
+      {
+        "variable": "de_before",
+        "formula": "L / E"
+      },
+      {
+        "variable": "E_after",
+        "formula": "E + injection"
+      },
+      {
+        "variable": "de_after",
+        "formula": "L / E_after"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt-to-equity",
+      "leverage",
+      "equity raise",
+      "capital structure"
+    ]
+  },
+  {
+    "id": "template_debt_to_equity_debt_repayment",
+    "name": "Debt to Equity Ratio: Debt Repayment & New Borrowing",
+    "short_description": "Compute D/E before and after simultaneous debt repayment and new borrowing.",
+    "domain": "Financial Ratios",
+    "topic": "Leverage Ratios",
+    "inputs": [
+      {
+        "name": "L",
+        "type": "float",
+        "description": "Initial total liabilities"
+      },
+      {
+        "name": "E",
+        "type": "float",
+        "description": "Initial shareholders’ equity"
+      },
+      {
+        "name": "repay",
+        "type": "float",
+        "description": "Amount of existing debt repaid"
+      },
+      {
+        "name": "borrow",
+        "type": "float",
+        "description": "Amount of new debt borrowed"
+      }
+    ],
+    "output_var": "DE_ratios",
+    "sympy_formulas": [
+      {
+        "variable": "DE_before",
+        "formula": "L / E"
+      },
+      {
+        "variable": "L_after",
+        "formula": "L - repay + borrow"
+      },
+      {
+        "variable": "DE_after",
+        "formula": "L_after / E"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt_to_equity",
+      "leverage",
+      "debt_repayment",
+      "borrowing"
+    ]
+  },
+  {
+    "id": "template_debt_to_equity_scenario_analysis",
+    "name": "Debt to Equity Ratio: Scenario Analysis",
+    "short_description": "Compute baseline D/E ratio, then analyze its change under two financing scenarios: issuing new debt or issuing new equity.",
+    "domain": "Financial Ratios",
+    "topic": "Debt to Equity Ratio",
+    "inputs": [
+      {
+        "name": "L",
+        "type": "float",
+        "description": "Total Liabilities"
+      },
+      {
+        "name": "E",
+        "type": "float",
+        "description": "Shareholders' Equity"
+      },
+      {
+        "name": "issue_debt",
+        "type": "float",
+        "description": "Amount of new debt to issue"
+      },
+      {
+        "name": "issue_equity",
+        "type": "float",
+        "description": "Amount of new equity to issue"
+      }
+    ],
+    "output_var": "Debt to Equity Ratios",
+    "sympy_formulas": [
+      {
+        "variable": "de_base",
+        "formula": "L / E"
+      },
+      {
+        "variable": "L_s1",
+        "formula": "L + issue_debt"
+      },
+      {
+        "variable": "de_s1",
+        "formula": "L_s1 / E"
+      },
+      {
+        "variable": "E_s2",
+        "formula": "E + issue_equity"
+      },
+      {
+        "variable": "de_s2",
+        "formula": "L / E_s2"
+      }
+    ],
+    "tags": [
+      "levratio",
+      "debt to equity",
+      "scenario analysis",
+      "leverage",
+      "financing"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Template Problem Generator",
+    "short_description": "A utility function to generate diverse problem instances for various financial templates, randomizing inputs and saving the questions and solutions to a JSON file.",
+    "domain": "Financial Ratios",
+    "topic": "Levratio",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "Path to the output JSON file where generated problems will be saved."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "Number of problem instances to generate for each financial template."
+      }
+    ],
+    "output_var": "problems_generated_count",
+    "sympy_formulas": [],
+    "tags": [
+      "levratio",
+      "utility",
+      "generator"
+    ]
+  }
+]

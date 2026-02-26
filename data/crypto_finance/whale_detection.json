@@ -1,0 +1,236 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Float Value",
+    "short_description": "Generates a random floating-point number within a specified range [low, high], rounded to two decimal places. This is a utility function often used to create variable inputs for other models.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The lower bound (inclusive) for the random value generation."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The upper bound (inclusive) for the random value generation."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "random_uniform_value(low, high, decimals=2)"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "random_number_generation",
+      "utility",
+      "data_generation"
+    ]
+  },
+  {
+    "id": "template_large_transfer_detection",
+    "name": "Large Transfer Whale Detection",
+    "short_description": "Detects a 'whale' transaction by calculating the excess amount of a transfer over a predefined threshold.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "transfer_amount",
+        "type": "float",
+        "description": "The amount of cryptocurrency transferred in a transaction."
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "The predefined amount that flags a transfer as a whale transaction."
+      }
+    ],
+    "output_var": "excess",
+    "sympy_formulas": [
+      {
+        "variable": "excess",
+        "formula": "transfer_amount - threshold"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "crypto",
+      "transaction",
+      "threshold",
+      "monitoring"
+    ]
+  },
+  {
+    "id": "template_wallet_activity_detection",
+    "name": "Wallet Activity Whale Detection (Basic)",
+    "short_description": "Calculates the ratio of a wallet's transfer amount to a predefined whale detection threshold.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "transfer_amount",
+        "type": "float",
+        "description": "The amount of cryptocurrency transferred in a single transaction."
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "The predefined threshold for detecting whale activity."
+      }
+    ],
+    "output_var": "ratio",
+    "sympy_formulas": [
+      {
+        "variable": "ratio",
+        "formula": "transfer_amount / threshold"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "crypto",
+      "wallet_activity",
+      "ratio"
+    ]
+  },
+  {
+    "id": "template_multiple_transaction_analysis",
+    "name": "Multi-transaction Whale Detection Analysis",
+    "short_description": "Analyzes multiple cryptocurrency transactions to determine the total amount exceeding a specified whale detection threshold.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "trans1",
+        "type": "float",
+        "description": "Amount of the first transaction."
+      },
+      {
+        "name": "trans2",
+        "type": "float",
+        "description": "Amount of the second transaction."
+      },
+      {
+        "name": "trans3",
+        "type": "float",
+        "description": "Amount of the third transaction."
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "The whale detection threshold for each individual transaction."
+      }
+    ],
+    "output_var": "total_excess",
+    "sympy_formulas": [
+      {
+        "variable": "excess1",
+        "formula": "Max(trans1 - threshold, 0)"
+      },
+      {
+        "variable": "excess2",
+        "formula": "Max(trans2 - threshold, 0)"
+      },
+      {
+        "variable": "excess3",
+        "formula": "Max(trans3 - threshold, 0)"
+      },
+      {
+        "variable": "total_excess",
+        "formula": "excess1 + excess2 + excess3"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "crypto",
+      "transaction_analysis",
+      "excess_amount",
+      "multi-transaction"
+    ]
+  },
+  {
+    "id": "template_threshold_adjustment_detection",
+    "name": "Whale Detection: Variable Threshold Adjustment",
+    "short_description": "Calculates the excess amount of a transaction over a whale detection threshold that is adjusted by a given percentage factor.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "trans_amount",
+        "type": "float",
+        "description": "The observed transaction amount."
+      },
+      {
+        "name": "orig_threshold",
+        "type": "float",
+        "description": "The initial whale detection threshold."
+      },
+      {
+        "name": "factor",
+        "type": "float",
+        "description": "The percentage adjustment factor for the threshold (e.g., 5 for 5%, -2 for -2%)."
+      }
+    ],
+    "output_var": "excess",
+    "sympy_formulas": [
+      {
+        "variable": "new_threshold",
+        "formula": "orig_threshold * (1 + factor / 100)"
+      },
+      {
+        "variable": "excess",
+        "formula": "Max(0, trans_amount - new_threshold)"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "threshold_adjustment",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_cross_exchange_impact",
+    "name": "Cross-Exchange Whale Transaction Impact",
+    "short_description": "Calculates the net excess of a cross-exchange transfer amount over a whale detection threshold, after accounting for exchange fees.",
+    "domain": "Crypto Finance",
+    "topic": "Whale Detection",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "float",
+        "description": "The initial transfer amount between exchanges."
+      },
+      {
+        "name": "fee_percent",
+        "type": "float",
+        "description": "The percentage fee applied by the receiving exchange."
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "The whale detection threshold."
+      }
+    ],
+    "output_var": "net_excess",
+    "sympy_formulas": [
+      {
+        "variable": "effective_amount",
+        "formula": "amount * (1 - fee_percent / 100)"
+      },
+      {
+        "variable": "net_excess",
+        "formula": "Max(effective_amount - threshold, 0)"
+      }
+    ],
+    "tags": [
+      "whale_detection",
+      "crypto",
+      "cross-exchange",
+      "fees",
+      "advanced"
+    ]
+  }
+]

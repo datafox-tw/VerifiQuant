@@ -1,0 +1,214 @@
+[
+  {
+    "id": "template_market_cap_calculation",
+    "name": "Market Cap Calculation",
+    "short_description": "Calculates the market capitalization of a crypto token based on its circulating supply and current price.",
+    "domain": "Crypto Finance",
+    "topic": "Tokenomics",
+    "inputs": [
+      {
+        "name": "supply",
+        "type": "integer",
+        "description": "The total circulating supply of tokens."
+      },
+      {
+        "name": "price",
+        "type": "float",
+        "description": "The current price per token in USD."
+      }
+    ],
+    "output_var": "market_cap",
+    "sympy_formulas": [
+      {
+        "variable": "market_cap",
+        "formula": "supply * price"
+      }
+    ],
+    "tags": [
+      "tokenomics",
+      "market cap",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_token_price_calculation",
+    "name": "Token Price Calculation",
+    "short_description": "Calculates the price per token by dividing the total market capitalization by the circulating supply of tokens.",
+    "domain": "Crypto Finance",
+    "topic": "Tokenomics",
+    "inputs": [
+      {
+        "name": "market_cap",
+        "type": "float",
+        "description": "The total market capitalization of the crypto token."
+      },
+      {
+        "name": "supply",
+        "type": "integer",
+        "description": "The total circulating supply of the crypto token."
+      }
+    ],
+    "output_var": "price",
+    "sympy_formulas": [
+      {
+        "variable": "price",
+        "formula": "market_cap / supply"
+      }
+    ],
+    "tags": [
+      "tokenomics",
+      "crypto",
+      "token price",
+      "market cap",
+      "supply"
+    ]
+  },
+  {
+    "id": "template_staking_reward_effect",
+    "name": "Staking Reward Effect on Market Cap",
+    "short_description": "Calculates the new market capitalization of a crypto token after a percentage of tokens are locked through staking, leading to a price increase.",
+    "domain": "Crypto Finance",
+    "topic": "Tokenomics",
+    "inputs": [
+      {
+        "name": "supply",
+        "type": "integer",
+        "description": "Initial circulating supply of tokens."
+      },
+      {
+        "name": "price",
+        "type": "float",
+        "description": "Initial trading price per token in USD."
+      },
+      {
+        "name": "lock_percent",
+        "type": "float",
+        "description": "Percentage of tokens locked through staking."
+      },
+      {
+        "name": "price_increase",
+        "type": "float",
+        "description": "Percentage increase in token price due to staking."
+      }
+    ],
+    "output_var": "new_market_cap",
+    "sympy_formulas": [
+      {
+        "variable": "effective_supply",
+        "formula": "supply * (1 - lock_percent/100)"
+      },
+      {
+        "variable": "new_price",
+        "formula": "price * (1 + price_increase/100)"
+      },
+      {
+        "variable": "new_market_cap",
+        "formula": "effective_supply * new_price"
+      }
+    ],
+    "tags": [
+      "tokenomics",
+      "staking",
+      "market_cap",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_emission_schedule_impact",
+    "name": "Emission Schedule Impact on Market Cap",
+    "short_description": "Calculates the new market capitalization of a crypto token after additional tokens are issued, assuming the price per token remains constant.",
+    "domain": "Crypto Finance",
+    "topic": "Tokenomics",
+    "inputs": [
+      {
+        "name": "supply",
+        "type": "integer",
+        "description": "Current circulating supply of the crypto token."
+      },
+      {
+        "name": "price",
+        "type": "float",
+        "description": "Current price per token in USD."
+      },
+      {
+        "name": "emission_percent",
+        "type": "float",
+        "description": "Percentage of the current supply to be issued as new tokens."
+      }
+    ],
+    "output_var": "new_market_cap",
+    "sympy_formulas": [
+      {
+        "variable": "new_supply",
+        "formula": "supply * (1 + emission_percent/100)"
+      },
+      {
+        "variable": "new_market_cap",
+        "formula": "new_supply * price"
+      }
+    ],
+    "tags": [
+      "tokenomics",
+      "emission",
+      "supply",
+      "market cap",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_multi_factor_tokenomics",
+    "name": "Multifactor Tokenomics Analysis",
+    "short_description": "Calculates the final market capitalization of a crypto token considering initial supply and price, token burn, new token emission, and market-driven price adjustments.",
+    "domain": "Crypto Finance",
+    "topic": "Tokenomics",
+    "inputs": [
+      {
+        "name": "supply",
+        "type": "integer",
+        "description": "Initial circulating supply of the crypto token."
+      },
+      {
+        "name": "price",
+        "type": "float",
+        "description": "Initial price of the crypto token in USD."
+      },
+      {
+        "name": "burn_percent",
+        "type": "float",
+        "description": "Percentage of tokens burned from the supply (e.g., 5 for 5%)."
+      },
+      {
+        "name": "emission_percent",
+        "type": "float",
+        "description": "Percentage of new tokens issued relative to the supply (e.g., 10 for 10%)."
+      },
+      {
+        "name": "market_reaction",
+        "type": "float",
+        "description": "Percentage change in token price due to market reaction (e.g., -5 for -5% or 10 for 10%)."
+      }
+    ],
+    "output_var": "final_market_cap",
+    "sympy_formulas": [
+      {
+        "variable": "adjusted_supply",
+        "formula": "supply * (1 - burn_percent/100) * (1 + emission_percent/100)"
+      },
+      {
+        "variable": "adjusted_price",
+        "formula": "price * (1 + market_reaction/100)"
+      },
+      {
+        "variable": "final_market_cap",
+        "formula": "adjusted_supply * adjusted_price"
+      }
+    ],
+    "tags": [
+      "tokenomics",
+      "crypto",
+      "market cap",
+      "supply",
+      "price adjustment"
+    ]
+  }
+]

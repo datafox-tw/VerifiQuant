@@ -1,0 +1,270 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Float within Range",
+    "short_description": "Generates a random floating-point number uniformly distributed between a specified lower and upper bound, rounded to two decimal places.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The lower bound of the range for the random value generation."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The upper bound of the range for the random value generation."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "Uniform(low, high)"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "random_generation",
+      "utility",
+      "monte_carlo"
+    ]
+  },
+  {
+    "id": "template_portfolio_single_factor",
+    "name": "Single Factor Portfolio Stress Test Impact",
+    "short_description": "Calculate the impact on a portfolio's value due to a single stress factor change, given the portfolio's sensitivity.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "The initial value of the portfolio."
+      },
+      {
+        "name": "factor_change",
+        "type": "float",
+        "description": "The percentage change in the stress factor."
+      },
+      {
+        "name": "sensitivity",
+        "type": "float",
+        "description": "The portfolio's sensitivity to the stress factor."
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact",
+        "formula": "portfolio_value * (factor_change / 100) * sensitivity"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "risk_management",
+      "portfolio_management",
+      "sensitivity_analysis"
+    ]
+  },
+  {
+    "id": "template_sensitivity_of_stock",
+    "name": "Stock Sensitivity to External Shock",
+    "short_description": "Calculates the impact on a stock's value given an external shock and its sensitivity.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "stock_value",
+        "type": "float",
+        "description": "Initial value of the stock"
+      },
+      {
+        "name": "shock",
+        "type": "float",
+        "description": "Magnitude of the external shock (in percentage)"
+      },
+      {
+        "name": "sensitivity",
+        "type": "float",
+        "description": "Sensitivity of the stock price to the external shock"
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact",
+        "formula": "stock_value * (shock / 100) * sensitivity"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "stock_price",
+      "sensitivity",
+      "risk"
+    ]
+  },
+  {
+    "id": "template_multi_asset_portfolio",
+    "name": "Multi-Asset Portfolio Interest Rate Sensitivity",
+    "short_description": "Calculates the change in a multi-asset portfolio's value due to an interest rate factor change, considering individual asset weights and sensitivities.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Initial total value of the portfolio."
+      },
+      {
+        "name": "w1",
+        "type": "float",
+        "description": "Weight of Asset 1 in the portfolio (as a percentage, e.g., 25 for 25%)."
+      },
+      {
+        "name": "w2",
+        "type": "float",
+        "description": "Weight of Asset 2 in the portfolio (as a percentage, e.g., 30 for 30%)."
+      },
+      {
+        "name": "w3",
+        "type": "float",
+        "description": "Weight of Asset 3 in the portfolio (as a percentage, e.g., 45 for 45%)."
+      },
+      {
+        "name": "s1",
+        "type": "float",
+        "description": "Sensitivity of Asset 1 to the interest rate factor change."
+      },
+      {
+        "name": "s2",
+        "type": "float",
+        "description": "Sensitivity of Asset 2 to the interest rate factor change."
+      },
+      {
+        "name": "s3",
+        "type": "float",
+        "description": "Sensitivity of Asset 3 to the interest rate factor change."
+      },
+      {
+        "name": "dR",
+        "type": "float",
+        "description": "Percentage change in the interest rate factor (e.g., 1.5 for a 1.5% increase, -2 for a 2% decrease)."
+      }
+    ],
+    "output_var": "total_change",
+    "sympy_formulas": [
+      {
+        "variable": "impact1",
+        "formula": "P * (w1 / 100) * (dR / 100) * s1"
+      },
+      {
+        "variable": "impact2",
+        "formula": "P * (w2 / 100) * (dR / 100) * s2"
+      },
+      {
+        "variable": "impact3",
+        "formula": "P * (w3 / 100) * (dR / 100) * s3"
+      },
+      {
+        "variable": "total_change",
+        "formula": "impact1 + impact2 + impact3"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "portfolio_management",
+      "risk_analysis",
+      "interest_rate_risk",
+      "sensitivity_analysis"
+    ]
+  },
+  {
+    "id": "template_volatility_sensitivity",
+    "name": "Option Vega Sensitivity",
+    "short_description": "Calculates the change in an option's value given its Vega and a change in the underlying asset's volatility.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "vega",
+        "type": "float",
+        "description": "Option's Vega, representing the change in option value per 1% change in volatility."
+      },
+      {
+        "name": "vol_change",
+        "type": "float",
+        "description": "Change in the underlying asset's volatility, in percentage points."
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact",
+        "formula": "vega * vol_change"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "options",
+      "vega",
+      "volatility_sensitivity"
+    ]
+  },
+  {
+    "id": "template_multi_factor_portfolio",
+    "name": "Multi-factor Portfolio Stress Test",
+    "short_description": "Calculates the combined impact on a diversified portfolio from credit and market shocks, considering their respective sensitivities.",
+    "domain": "Risk Management",
+    "topic": "Stress Testing",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Initial value of the diversified portfolio."
+      },
+      {
+        "name": "credit_shock",
+        "type": "float",
+        "description": "Percentage change due to credit shock (e.g., -6 for -6%)."
+      },
+      {
+        "name": "market_shock",
+        "type": "float",
+        "description": "Percentage change due to market shock (e.g., -4 for -4%)."
+      },
+      {
+        "name": "credit_sensitivity",
+        "type": "float",
+        "description": "Portfolio's sensitivity to credit shocks."
+      },
+      {
+        "name": "market_sensitivity",
+        "type": "float",
+        "description": "Portfolio's sensitivity to market shocks."
+      }
+    ],
+    "output_var": "total_impact",
+    "sympy_formulas": [
+      {
+        "variable": "credit_impact",
+        "formula": "portfolio_value * (credit_shock / 100) * credit_sensitivity"
+      },
+      {
+        "variable": "market_impact",
+        "formula": "portfolio_value * (market_shock / 100) * market_sensitivity"
+      },
+      {
+        "variable": "total_impact",
+        "formula": "credit_impact + market_impact"
+      }
+    ],
+    "tags": [
+      "stress_testing",
+      "portfolio_management",
+      "risk_management",
+      "multi_factor"
+    ]
+  }
+]

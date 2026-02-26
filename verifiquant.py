@@ -50,6 +50,13 @@ def solve_question(
     print(selection)
     print("=======")
 
+    # Check if LLM chose not to select any card
+    if not selection.chosen_id or selection.chosen_id.strip() == "":
+        return {
+            "status": "refused",
+            "reason": f"No suitable card found in database. {selection.reason}",
+        }
+
     chosen_card = next(
         (candidate.card for candidate in candidates if candidate.card.id == selection.chosen_id),
         None,

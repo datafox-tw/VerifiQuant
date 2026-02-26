@@ -1,0 +1,358 @@
+[
+  {
+    "id": "_pct",
+    "name": "Random Two-Decimal Percentage",
+    "short_description": "Generates a random percentage value between 10% and 50%, rounded to two decimal places, to be used as a float.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [],
+    "output_var": "percentage",
+    "sympy_formulas": [],
+    "tags": [
+      "budgeting",
+      "helper",
+      "random"
+    ]
+  },
+  {
+    "id": "_fmt_money",
+    "name": "Format Money",
+    "short_description": "Formats a numerical value as a currency string with two decimal places (USD).",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted."
+      }
+    ],
+    "output_var": "formatted_amount",
+    "sympy_formulas": [
+      {
+        "variable": "formatted_amount",
+        "formula": "x"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "formatting",
+      "utility",
+      "money"
+    ]
+  },
+  {
+    "id": "_fmt_pct",
+    "name": "Format Decimal as Percentage",
+    "short_description": "Converts a decimal value into its percentage equivalent. For instance, 0.05 becomes the numerical value 5, which is then typically displayed as '5.00%'.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The decimal number to be converted to a percentage (e.g., 0.05 for 5%)."
+      }
+    ],
+    "output_var": "percentage_value",
+    "sympy_formulas": [
+      {
+        "variable": "percentage_value",
+        "formula": "x * 100"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "formatting",
+      "percentage"
+    ]
+  },
+  {
+    "id": "template_budget_allocation_simple",
+    "name": "Simple Budget Allocation",
+    "short_description": "Splits a quarterly budget between Marketing (given percentage) and Operations (remainder).",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "total_budget",
+        "type": "float",
+        "description": "The total quarterly budget available in currency units."
+      },
+      {
+        "name": "marketing_percentage",
+        "type": "float",
+        "description": "The percentage of the total budget to allocate to Marketing (e.g., enter 25 for 25%)."
+      }
+    ],
+    "output_var": "operations_allocation",
+    "sympy_formulas": [
+      {
+        "variable": "marketing_allocation",
+        "formula": "total_budget * (marketing_percentage / 100)"
+      },
+      {
+        "variable": "operations_allocation",
+        "formula": "total_budget - marketing_allocation"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "allocation",
+      "personal finance",
+      "percentage"
+    ]
+  },
+  {
+    "id": "template_budget_reallocation_due_to_costs",
+    "name": "Budget Reallocation: Marketing to Operations",
+    "short_description": "Calculates new Marketing and Operations budgets after a specified percentage of the Marketing budget is reallocated to Operations.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "marketing_budget",
+        "type": "float",
+        "description": "The initial budget allocated to Marketing."
+      },
+      {
+        "name": "operations_budget",
+        "type": "float",
+        "description": "The initial budget allocated to Operations."
+      },
+      {
+        "name": "reallocation_percentage",
+        "type": "float",
+        "description": "The percentage of the Marketing budget to be reallocated to Operations (e.g., 15 for 15%)."
+      }
+    ],
+    "output_var": "new_budgets",
+    "sympy_formulas": [
+      {
+        "variable": "reallocated_amount",
+        "formula": "marketing_budget * (reallocation_percentage / 100)"
+      },
+      {
+        "variable": "new_marketing_budget",
+        "formula": "marketing_budget - reallocated_amount"
+      },
+      {
+        "variable": "new_operations_budget",
+        "formula": "operations_budget + reallocated_amount"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "reallocation",
+      "marketing",
+      "operations",
+      "expenses"
+    ]
+  },
+  {
+    "id": "template_budget_adjustment_new_project",
+    "name": "Budget Adjustment for New Project",
+    "short_description": "Allocates a total budget to R&D, Marketing, and Operations based on initial percentages, then adjusts R&D and Operations budgets by reallocating an additional amount to R&D.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "total_budget",
+        "type": "float",
+        "description": "The total budget available for allocation (e.g., quarterly budget)."
+      },
+      {
+        "name": "r_and_d_percentage",
+        "type": "float",
+        "description": "The initial percentage of the total budget allocated to Research & Development."
+      },
+      {
+        "name": "marketing_percentage",
+        "type": "float",
+        "description": "The initial percentage of the total budget allocated to Marketing."
+      },
+      {
+        "name": "additional_r_and_d",
+        "type": "float",
+        "description": "The additional amount to be allocated to R&D, which will be funded by reducing the Operations budget."
+      }
+    ],
+    "output_var": "new_r_and_d_budget",
+    "sympy_formulas": [
+      {
+        "variable": "r_and_d_base_budget",
+        "formula": "total_budget * (r_and_d_percentage / 100)"
+      },
+      {
+        "variable": "marketing_base_budget",
+        "formula": "total_budget * (marketing_percentage / 100)"
+      },
+      {
+        "variable": "operations_base_budget",
+        "formula": "total_budget - r_and_d_base_budget - marketing_base_budget"
+      },
+      {
+        "variable": "new_r_and_d_budget",
+        "formula": "r_and_d_base_budget + additional_r_and_d"
+      },
+      {
+        "variable": "new_operations_budget",
+        "formula": "operations_base_budget - additional_r_and_d"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "personal_finance",
+      "expense_allocation",
+      "project_funding",
+      "budget_adjustment",
+      "financial_planning"
+    ]
+  },
+  {
+    "id": "template_budget_cut_reforecast",
+    "name": "Budget Cut Reforecast",
+    "short_description": "Calculates new budget allocations for R&D, Marketing, and Operations after a percentage cut to the total quarterly budget, maintaining original allocation percentages.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "total_budget",
+        "type": "float",
+        "description": "Initial total quarterly budget."
+      },
+      {
+        "name": "r_and_d_pct",
+        "type": "float",
+        "description": "Initial percentage of total budget allocated to R&D."
+      },
+      {
+        "name": "marketing_pct",
+        "type": "float",
+        "description": "Initial percentage of total budget allocated to Marketing."
+      },
+      {
+        "name": "cut_pct",
+        "type": "float",
+        "description": "Percentage reduction applied to the total budget."
+      }
+    ],
+    "output_var": "new_r_and_d",
+    "sympy_formulas": [
+      {
+        "variable": "operations_pct",
+        "formula": "100 - r_and_d_pct - marketing_pct"
+      },
+      {
+        "variable": "new_total_budget",
+        "formula": "total_budget * (1 - cut_pct / 100)"
+      },
+      {
+        "variable": "new_r_and_d",
+        "formula": "new_total_budget * (r_and_d_pct / 100)"
+      },
+      {
+        "variable": "new_marketing",
+        "formula": "new_total_budget * (marketing_pct / 100)"
+      },
+      {
+        "variable": "new_operations",
+        "formula": "new_total_budget * (operations_pct / 100)"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "reforecast",
+      "expense management",
+      "cost reduction",
+      "allocation"
+    ]
+  },
+  {
+    "id": "template_budget_long_term_growth",
+    "name": "Long-Term Quarterly Budget Allocation",
+    "short_description": "Projects a quarterly budget's growth over several years with an annual compound rate and allocates it into R&D, Marketing, and Operations categories.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "current_quarterly_budget",
+        "type": "float",
+        "description": "The current total quarterly budget."
+      },
+      {
+        "name": "annual_growth_rate",
+        "type": "float",
+        "description": "The annual compound growth rate of the budget (as a percentage, e.g., 5 for 5%)."
+      },
+      {
+        "name": "r_and_d_percentage",
+        "type": "float",
+        "description": "The percentage of the future quarterly budget allocated to R&D (e.g., 15 for 15%)."
+      },
+      {
+        "name": "marketing_percentage",
+        "type": "float",
+        "description": "The percentage of the future quarterly budget allocated to Marketing (e.g., 20 for 20%)."
+      },
+      {
+        "name": "number_of_years",
+        "type": "integer",
+        "description": "The number of years for the long-term projection horizon."
+      }
+    ],
+    "output_var": "future_category_budgets",
+    "sympy_formulas": [
+      {
+        "variable": "future_quarterly_budget",
+        "formula": "current_quarterly_budget * (1 + annual_growth_rate / 100)**number_of_years"
+      },
+      {
+        "variable": "future_r_and_d_budget",
+        "formula": "future_quarterly_budget * (r_and_d_percentage / 100)"
+      },
+      {
+        "variable": "future_marketing_budget",
+        "formula": "future_quarterly_budget * (marketing_percentage / 100)"
+      },
+      {
+        "variable": "future_operations_budget",
+        "formula": "future_quarterly_budget - future_r_and_d_budget - future_marketing_budget"
+      }
+    ],
+    "tags": [
+      "budgeting",
+      "growth",
+      "allocation",
+      "compound_interest",
+      "long-term"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Financial Template Problem Generator",
+    "short_description": "A utility function that generates multiple instances of various financial problem templates with different random seeds and saves them to a specified JSON file.",
+    "domain": "Personal Finance",
+    "topic": "Budgeting",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The file path where the generated financial problems (questions and solutions) will be saved in JSON format."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of problem instances to generate for each financial template function listed within the script."
+      }
+    ],
+    "output_var": "output_file_path",
+    "sympy_formulas": [],
+    "tags": [
+      "budgeting",
+      "template_generation",
+      "utility",
+      "data_generation"
+    ]
+  }
+]

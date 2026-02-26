@@ -1,0 +1,339 @@
+[
+  {
+    "id": "template_green_bond_basic_yield_calculation",
+    "name": "Green Bond Basic Yield Calculation",
+    "short_description": "Calculates the total interest earned on a green bond investment over a specified period, compounded annually.",
+    "domain": "Sustainable Finance",
+    "topic": "Green Bonds",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "The initial investment amount in the green bond."
+      },
+      {
+        "name": "yield_rate",
+        "type": "float",
+        "description": "The annual yield rate of the bond, expressed as a percentage."
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "The time period of the investment in years."
+      }
+    ],
+    "output_var": "interest_earned",
+    "sympy_formulas": [
+      {
+        "variable": "future_value",
+        "formula": "principal * (1 + yield_rate / 100) ** time"
+      },
+      {
+        "variable": "interest_earned",
+        "formula": "future_value - principal"
+      }
+    ],
+    "tags": [
+      "green_bonds",
+      "sustainable_finance",
+      "yield",
+      "interest_earned",
+      "compound_interest",
+      "future_value"
+    ]
+  },
+  {
+    "id": "template_green_bond_basic_tax_incentive",
+    "name": "Green Bond Tax Incentive Calculation (Basic)",
+    "short_description": "Calculates the net benefit from a green bond investment, including compounded interest and a tax credit on the interest earned.",
+    "domain": "Sustainable Finance",
+    "topic": "Green Bonds",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "integer",
+        "description": "The initial investment amount in the green bond."
+      },
+      {
+        "name": "coupon_rate",
+        "type": "float",
+        "description": "The annual coupon rate of the green bond in percent (e.g., 5 for 5%)."
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "The number of years the green bond is held."
+      },
+      {
+        "name": "tax_credit_rate",
+        "type": "float",
+        "description": "The tax credit rate applied to the interest earned, in percent (e.g., 10 for 10%)."
+      }
+    ],
+    "output_var": "net_benefit",
+    "sympy_formulas": [
+      {
+        "variable": "future_value",
+        "formula": "principal * (1 + coupon_rate / 100)**time"
+      },
+      {
+        "variable": "interest_earned",
+        "formula": "future_value - principal"
+      },
+      {
+        "variable": "tax_credit",
+        "formula": "interest_earned * (tax_credit_rate / 100)"
+      },
+      {
+        "variable": "net_benefit",
+        "formula": "interest_earned + tax_credit"
+      }
+    ],
+    "tags": [
+      "green_bonds",
+      "tax_incentive",
+      "compound_interest",
+      "sustainable_finance"
+    ]
+  },
+  {
+    "id": "template_green_bond_intermediate_synergy_benefit",
+    "name": "Green Bond Synergy Benefit Calculation",
+    "short_description": "Calculates the total net benefit to an investor from a green bond, including compound interest and a synergy bonus based on cost savings.",
+    "domain": "Sustainable Finance",
+    "topic": "Green Bonds",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial investment in the green bond"
+      },
+      {
+        "name": "coupon_rate",
+        "type": "float",
+        "description": "Annual coupon rate as a percentage"
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "Number of years the bond is held"
+      },
+      {
+        "name": "annual_savings",
+        "type": "float",
+        "description": "Annual cost savings due to energy efficiency measures"
+      },
+      {
+        "name": "bonus_rate",
+        "type": "float",
+        "description": "Synergy bonus amount per $500 saved annually"
+      }
+    ],
+    "output_var": "total_net_benefit",
+    "sympy_formulas": [
+      {
+        "variable": "future_value",
+        "formula": "principal * (1 + coupon_rate / 100)**time"
+      },
+      {
+        "variable": "interest_earned",
+        "formula": "future_value - principal"
+      },
+      {
+        "variable": "bonus_per_year",
+        "formula": "(annual_savings / 500) * bonus_rate"
+      },
+      {
+        "variable": "total_bonus",
+        "formula": "bonus_per_year * time"
+      },
+      {
+        "variable": "total_net_benefit",
+        "formula": "interest_earned + total_bonus"
+      }
+    ],
+    "tags": [
+      "green_bonds",
+      "synergy_benefit",
+      "compound_interest",
+      "sustainable_finance",
+      "intermediate"
+    ]
+  },
+  {
+    "id": "template_green_bond_intermediate_financing_cost_reduction",
+    "name": "Green Bond Financing Cost Reduction",
+    "short_description": "Calculates the reduction in financing cost for a green bond due to a discounted interest rate, by comparing compound interest with original and adjusted rates.",
+    "domain": "Sustainable Finance",
+    "topic": "Green Bonds",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Principal amount of the bond"
+      },
+      {
+        "name": "coupon_rate",
+        "type": "float",
+        "description": "Annual coupon rate of the bond, in percentage (e.g., 5 for 5%)"
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "Maturity period of the bond in years"
+      },
+      {
+        "name": "discount",
+        "type": "float",
+        "description": "Reduction in the effective interest rate, in percentage points (e.g., 0.5 for a 0.5% reduction)"
+      }
+    ],
+    "output_var": "cost_reduction",
+    "sympy_formulas": [
+      {
+        "variable": "original_FV",
+        "formula": "principal * (1 + coupon_rate / 100) ** time"
+      },
+      {
+        "variable": "original_interest",
+        "formula": "original_FV - principal"
+      },
+      {
+        "variable": "adjusted_rate",
+        "formula": "coupon_rate - discount"
+      },
+      {
+        "variable": "adjusted_FV",
+        "formula": "principal * (1 + adjusted_rate / 100) ** time"
+      },
+      {
+        "variable": "adjusted_interest",
+        "formula": "adjusted_FV - principal"
+      },
+      {
+        "variable": "cost_reduction",
+        "formula": "original_interest - adjusted_interest"
+      }
+    ],
+    "tags": [
+      "green_bonds",
+      "financing_cost",
+      "interest_reduction",
+      "sustainable_finance",
+      "compound_interest"
+    ]
+  },
+  {
+    "id": "template_green_bond_advanced_comprehensive_analysis",
+    "name": "Green Bond Comprehensive Benefit Analysis",
+    "short_description": "Analyzes the comprehensive benefits of a green bond investment, including compound interest, tax credits on interest, synergy bonuses from energy savings, and gains from reinvested interest.",
+    "domain": "Sustainable Finance",
+    "topic": "Green Bonds",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial investment principal for the green bond"
+      },
+      {
+        "name": "coupon_rate",
+        "type": "float",
+        "description": "Annual coupon rate of the bond as a percentage"
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "Investment duration in years"
+      },
+      {
+        "name": "tax_credit_rate",
+        "type": "float",
+        "description": "Tax credit rate on interest earned as a percentage"
+      },
+      {
+        "name": "annual_savings",
+        "type": "integer",
+        "description": "Annual energy cost savings achieved by the company"
+      },
+      {
+        "name": "synergy_bonus_rate",
+        "type": "float",
+        "description": "Bonus amount received per $500 of annual energy savings"
+      },
+      {
+        "name": "reinvestment_percentage",
+        "type": "float",
+        "description": "Percentage of annual interest that is reinvested"
+      },
+      {
+        "name": "reinvestment_rate",
+        "type": "float",
+        "description": "Additional annual growth rate for reinvested amounts as a percentage"
+      }
+    ],
+    "output_var": "total_net_benefit",
+    "sympy_formulas": [
+      {
+        "variable": "r_coupon_dec",
+        "formula": "coupon_rate / 100"
+      },
+      {
+        "variable": "r_tax_credit_dec",
+        "formula": "tax_credit_rate / 100"
+      },
+      {
+        "variable": "p_reinvest_dec",
+        "formula": "reinvestment_percentage / 100"
+      },
+      {
+        "variable": "r_reinvest_dec",
+        "formula": "reinvestment_rate / 100"
+      },
+      {
+        "variable": "future_value",
+        "formula": "principal * (1 + r_coupon_dec)**time"
+      },
+      {
+        "variable": "interest_earned",
+        "formula": "future_value - principal"
+      },
+      {
+        "variable": "tax_credit",
+        "formula": "interest_earned * r_tax_credit_dec"
+      },
+      {
+        "variable": "bonus_per_year",
+        "formula": "(annual_savings / 500) * synergy_bonus_rate"
+      },
+      {
+        "variable": "total_bonus",
+        "formula": "bonus_per_year * time"
+      },
+      {
+        "variable": "annual_interest",
+        "formula": "interest_earned / time"
+      },
+      {
+        "variable": "reinvest_amount_per_year",
+        "formula": "p_reinvest_dec * annual_interest"
+      },
+      {
+        "variable": "reinvestment_benefit",
+        "formula": "Sum(reinvest_amount_per_year * (1 + r_reinvest_dec)**(time - i), (i, 1, time))"
+      },
+      {
+        "variable": "total_net_benefit",
+        "formula": "interest_earned + tax_credit + total_bonus + reinvestment_benefit"
+      }
+    ],
+    "tags": [
+      "green_bonds",
+      "sustainable_finance",
+      "bond_analysis",
+      "investment_benefits",
+      "tax_credit",
+      "reinvestment",
+      "comprehensive_analysis"
+    ]
+  }
+]

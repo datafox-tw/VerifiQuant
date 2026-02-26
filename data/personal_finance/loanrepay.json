@@ -1,0 +1,439 @@
+[
+  {
+    "id": "fmt_usd",
+    "name": "Format Number to USD",
+    "short_description": "Formats a numerical value as a USD currency string with two decimal places and comma separators.",
+    "domain": "Personal Finance",
+    "topic": "Loanrepay",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to format."
+      }
+    ],
+    "output_var": "formatted_usd",
+    "sympy_formulas": [
+      {
+        "variable": "formatted_usd",
+        "formula": "str(x)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "formatting",
+      "utility",
+      "usd",
+      "string_conversion"
+    ]
+  },
+  {
+    "id": "fmt_pct",
+    "name": "Format as Percentage",
+    "short_description": "Formats a float number as a percentage string with two decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Loan Repayment",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The number to be formatted as a percentage (e.g., 7.5 becomes '7.50%')."
+      }
+    ],
+    "output_var": "formatted_percentage_string",
+    "sympy_formulas": [],
+    "tags": [
+      "loanrepay",
+      "formatting",
+      "percentage"
+    ]
+  },
+  {
+    "id": "fmt_rate_dec",
+    "name": "Format Decimal Rate",
+    "short_description": "Formats a decimal rate to a string with 6 decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Loanrepay",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "A decimal monthly rate (e.g., 0.00625)."
+      }
+    ],
+    "output_var": "formatted_rate",
+    "sympy_formulas": [
+      {
+        "variable": "formatted_rate",
+        "formula": "round(x, 6)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "formatting",
+      "rate"
+    ]
+  },
+  {
+    "id": "ensure_bounds_years_paid",
+    "name": "Generate Valid Years Paid",
+    "short_description": "Generates a random integer for years paid, ensuring it is strictly less than the total number of years for the loan and at least 1.",
+    "domain": "Personal Finance",
+    "topic": "Loan Repayment",
+    "inputs": [
+      {
+        "name": "total_years",
+        "type": "integer",
+        "description": "The total duration of the loan or payment schedule in years."
+      },
+      {
+        "name": "max_paid",
+        "type": "integer",
+        "description": "An optional upper limit for the randomly generated years paid. If not provided or if it's greater than or equal to total_years, the effective limit defaults to max(1, total_years - 1)."
+      }
+    ],
+    "output_var": "years_paid",
+    "sympy_formulas": [
+      {
+        "variable": "years_paid_default_upper_limit",
+        "formula": "Max(1, total_years - 1)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "validation",
+      "bounds",
+      "random_generation"
+    ]
+  },
+  {
+    "id": "template_loan_repayment_simple",
+    "name": "Simple Interest Loan Repayment",
+    "short_description": "Calculates the total amount to be repaid for a loan with simple interest, settled as a single payment at the end of the term.",
+    "domain": "Personal Finance",
+    "topic": "Loan Repayment",
+    "inputs": [
+      {
+        "name": "loan_amount",
+        "type": "float",
+        "description": "The initial principal amount of the loan."
+      },
+      {
+        "name": "interest_rate_pct",
+        "type": "float",
+        "description": "The annual simple interest rate as a percentage (e.g., 5 for 5%)."
+      },
+      {
+        "name": "loan_term_years",
+        "type": "integer",
+        "description": "The duration of the loan in years."
+      }
+    ],
+    "output_var": "total_repayment",
+    "sympy_formulas": [
+      {
+        "variable": "total_repayment",
+        "formula": "loan_amount * (1 + (interest_rate_pct / 100) * loan_term_years)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "simple interest",
+      "single repayment",
+      "maturity",
+      "debt"
+    ]
+  },
+  {
+    "id": "template_loan_repayment_monthly_installments",
+    "name": "Standard Loan Amortization Monthly Payment",
+    "short_description": "Calculates the standard monthly payment for a fully amortizing loan with fixed interest rate.",
+    "domain": "Personal Finance",
+    "topic": "Loanrepay",
+    "inputs": [
+      {
+        "name": "loan_amount",
+        "type": "float",
+        "description": "Total principal amount of the loan"
+      },
+      {
+        "name": "annual_rate_pct",
+        "type": "float",
+        "description": "Annual interest rate as a percentage (e.g., 5.0 for 5%)"
+      },
+      {
+        "name": "term_years",
+        "type": "integer",
+        "description": "Total duration of the loan in years"
+      }
+    ],
+    "output_var": "monthly_payment",
+    "sympy_formulas": [
+      {
+        "variable": "r",
+        "formula": "annual_rate_pct / 100 / 12"
+      },
+      {
+        "variable": "n",
+        "formula": "term_years * 12"
+      },
+      {
+        "variable": "monthly_payment",
+        "formula": "loan_amount * (r * (1 + r)**n) / ((1 + r)**n - 1)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "amortization",
+      "monthly payment",
+      "loan"
+    ]
+  },
+  {
+    "id": "template_loan_repayment_with_extra_payments",
+    "name": "Loan Repayment with Annual Extra Principal Payments",
+    "short_description": "Calculates the new payoff time and early repayment duration for a loan with fixed monthly payments and an additional annual principal payment towards the principal.",
+    "domain": "Personal Finance",
+    "topic": "Loan Repayment",
+    "inputs": [
+      {
+        "name": "loan_amount",
+        "type": "float",
+        "description": "Initial loan principal amount."
+      },
+      {
+        "name": "annual_rate_pct",
+        "type": "float",
+        "description": "Annual interest rate as a percentage (e.g., 5.0 for 5%)."
+      },
+      {
+        "name": "term_years",
+        "type": "integer",
+        "description": "Original loan term in years."
+      },
+      {
+        "name": "extra_annual",
+        "type": "float",
+        "description": "Fixed additional payment made towards the principal at the end of each year."
+      }
+    ],
+    "output_var": "new_payoff_months",
+    "sympy_formulas": [
+      {
+        "variable": "r_m",
+        "formula": "annual_rate_pct / (100 * 12)"
+      },
+      {
+        "variable": "n",
+        "formula": "term_years * 12"
+      },
+      {
+        "variable": "M",
+        "formula": "loan_amount * (r_m * (1 + r_m)**n) / ((1 + r_m)**n - 1)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "amortization",
+      "extra_payments",
+      "personal_finance"
+    ]
+  },
+  {
+    "id": "template_loan_repayment_with_refinancing",
+    "name": "Loan Refinancing: New Monthly Payment",
+    "short_description": "Compute remaining balance after a period of payments on the original loan, then calculate the new monthly payment for a refinanced loan with a new rate and term.",
+    "domain": "Personal Finance",
+    "topic": "Loanrepay",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Original principal amount of the loan"
+      },
+      {
+        "name": "orig_rate_pct",
+        "type": "float",
+        "description": "Original annual interest rate of the loan (as a percentage, e.g., 5.0 for 5%)"
+      },
+      {
+        "name": "orig_term_years",
+        "type": "integer",
+        "description": "Original total term of the loan in years"
+      },
+      {
+        "name": "years_paid",
+        "type": "integer",
+        "description": "Number of years payments have been made on the original loan"
+      },
+      {
+        "name": "new_rate_pct",
+        "type": "float",
+        "description": "New annual interest rate for the refinanced loan (as a percentage, e.g., 3.0 for 3%)"
+      },
+      {
+        "name": "new_term_years",
+        "type": "integer",
+        "description": "New total term of the refinanced loan in years"
+      }
+    ],
+    "output_var": "M_new_monthly_payment",
+    "sympy_formulas": [
+      {
+        "variable": "r_m",
+        "formula": "(orig_rate_pct / 100) / 12"
+      },
+      {
+        "variable": "n_orig",
+        "formula": "orig_term_years * 12"
+      },
+      {
+        "variable": "p_payments",
+        "formula": "years_paid * 12"
+      },
+      {
+        "variable": "M_original_monthly_payment",
+        "formula": "P * (r_m * (1 + r_m)**n_orig) / ((1 + r_m)**n_orig - 1)"
+      },
+      {
+        "variable": "Bp_remaining_balance",
+        "formula": "P * (1 + r_m)**p_payments - M_original_monthly_payment * ((1 + r_m)**p_payments - 1) / r_m"
+      },
+      {
+        "variable": "r_new_monthly",
+        "formula": "(new_rate_pct / 100) / 12"
+      },
+      {
+        "variable": "n_new_term",
+        "formula": "new_term_years * 12"
+      },
+      {
+        "variable": "M_new_monthly_payment",
+        "formula": "Bp_remaining_balance * (r_new_monthly * (1 + r_new_monthly)**n_new_term) / ((1 + r_new_monthly)**n_new_term - 1)"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "refinancing",
+      "monthly_payment",
+      "remaining_balance",
+      "amortization"
+    ]
+  },
+  {
+    "id": "template_loan_repayment_early_payoff",
+    "name": "Loan Repayment: Early Payoff (Lump Sum, Same Payment)",
+    "short_description": "After a lump-sum payment at time t, continue paying the SAME monthly payment (no recast).",
+    "domain": "Personal Finance",
+    "topic": "Loan Repayment",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Original principal amount of the loan."
+      },
+      {
+        "name": "rate_pct",
+        "type": "float",
+        "description": "Annual nominal interest rate as a percentage (e.g., 4.5 for 4.5%)."
+      },
+      {
+        "name": "term_years",
+        "type": "integer",
+        "description": "Original term of the loan in years."
+      },
+      {
+        "name": "years_paid",
+        "type": "integer",
+        "description": "Number of full years for which regular payments have been made."
+      },
+      {
+        "name": "lump_sum",
+        "type": "float",
+        "description": "The amount of the lump-sum payment made after 'years_paid'."
+      }
+    ],
+    "output_var": "interest_saved",
+    "sympy_formulas": [
+      {
+        "variable": "r_m",
+        "formula": "rate_pct / (100 * 12)"
+      },
+      {
+        "variable": "n",
+        "formula": "term_years * 12"
+      },
+      {
+        "variable": "p",
+        "formula": "years_paid * 12"
+      },
+      {
+        "variable": "M",
+        "formula": "P * (r_m * (1 + r_m)**n) / ((1 + r_m)**n - 1)"
+      },
+      {
+        "variable": "Bp",
+        "formula": "P * (1 + r_m)**p - M * ((1 + r_m)**p - 1) / r_m"
+      },
+      {
+        "variable": "interest_without",
+        "formula": "M * (n - p) - Bp"
+      },
+      {
+        "variable": "B_after",
+        "formula": "Bp - lump_sum"
+      },
+      {
+        "variable": "months_b",
+        "formula": "-log(1 - (B_after * r_m / M)) / log(1 + r_m)"
+      },
+      {
+        "variable": "interest_with",
+        "formula": "M * months_b - B_after"
+      },
+      {
+        "variable": "months_saved",
+        "formula": "(n - p) - months_b"
+      },
+      {
+        "variable": "interest_saved",
+        "formula": "interest_without - interest_with"
+      }
+    ],
+    "tags": [
+      "loanrepay",
+      "earlypayoff",
+      "lumpsum",
+      "amortization",
+      "interest_savings",
+      "time_saved"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Generate Financial Templates",
+    "short_description": "A utility function that iterates through various financial calculation templates, generates multiple problem instances with different random seeds, and compiles them into a structured JSON output file.",
+    "domain": "Personal Finance",
+    "topic": "Loanrepay",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The file path where the generated financial problems will be saved in JSON format."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of problem instances to generate for each financial template function."
+      }
+    ],
+    "output_var": "generated_problems_count",
+    "sympy_formulas": [],
+    "tags": [
+      "loanrepay",
+      "utility",
+      "template-generation",
+      "problem-generation"
+    ]
+  }
+]

@@ -1,0 +1,176 @@
+[
+  {
+    "id": "template_crypto_price_drop",
+    "name": "Crypto Price Drop from Global Event",
+    "short_description": "Calculates the new price of a crypto asset after a global event causes a percentage drop.",
+    "domain": "Crypto Finance",
+    "topic": "Global Events Impact",
+    "inputs": [
+      {
+        "name": "initial_price",
+        "type": "float",
+        "description": "The original price of the crypto asset in USD."
+      },
+      {
+        "name": "drop_percentage",
+        "type": "float",
+        "description": "The percentage by which the price drops."
+      }
+    ],
+    "output_var": "final_price",
+    "sympy_formulas": [
+      {
+        "variable": "final_price",
+        "formula": "initial_price * (1 - drop_percentage / 100)"
+      }
+    ],
+    "tags": [
+      "global_events_impact",
+      "crypto_price",
+      "price_drop",
+      "percentage_change"
+    ]
+  },
+  {
+    "id": "template_crypto_volume_increase",
+    "name": "Crypto Volume Increase Due to Global Event",
+    "short_description": "Calculates the new trading volume of a crypto asset after an increase due to a global event.",
+    "domain": "Crypto Finance",
+    "topic": "Global Events Impact",
+    "inputs": [
+      {
+        "name": "initial_volume",
+        "type": "float",
+        "description": "Original trading volume of the crypto asset in USD"
+      },
+      {
+        "name": "increase_percentage",
+        "type": "float",
+        "description": "Percentage increase in trading volume (e.g., 5 for 5%)"
+      }
+    ],
+    "output_var": "final_volume",
+    "sympy_formulas": [
+      {
+        "variable": "final_volume",
+        "formula": "initial_volume * (1 + increase_percentage / 100)"
+      }
+    ],
+    "tags": [
+      "global_events_impact",
+      "crypto_volume",
+      "percentage_increase",
+      "basic"
+    ]
+  },
+  {
+    "id": "template_regulatory_event",
+    "name": "Regulatory Impact on Crypto Price",
+    "short_description": "Calculates the new price of a crypto asset after a regulatory event causes a percentage price change.",
+    "domain": "Crypto Finance",
+    "topic": "Global Events Impact",
+    "inputs": [
+      {
+        "name": "initial_price",
+        "type": "float",
+        "description": "The original price of the crypto asset in USD."
+      },
+      {
+        "name": "impact_percentage",
+        "type": "float",
+        "description": "The percentage change in price (e.g., -5 for a 5% decrease, 5 for a 5% increase)."
+      }
+    ],
+    "output_var": "final_price",
+    "sympy_formulas": [
+      {
+        "variable": "final_price",
+        "formula": "initial_price * (1 + impact_percentage / 100)"
+      }
+    ],
+    "tags": [
+      "global_events_impact",
+      "crypto",
+      "regulatory_impact",
+      "price_change"
+    ]
+  },
+  {
+    "id": "template_market_sentiment_shift",
+    "name": "Market Sentiment Shift Impact on Crypto Market Cap",
+    "short_description": "Calculates the new market capitalization of a crypto asset after a percentage shift in market sentiment.",
+    "domain": "Crypto Finance",
+    "topic": "Global Events Impact",
+    "inputs": [
+      {
+        "name": "initial_market_cap",
+        "type": "float",
+        "description": "The initial market capitalization of the crypto asset in USD."
+      },
+      {
+        "name": "sentiment_change",
+        "type": "float",
+        "description": "The percentage change in market sentiment (e.g., 8 for an 8% increase, -5 for a 5% decrease)."
+      }
+    ],
+    "output_var": "final_market_cap",
+    "sympy_formulas": [
+      {
+        "variable": "final_market_cap",
+        "formula": "initial_market_cap * (1 + sentiment_change / 100)"
+      }
+    ],
+    "tags": [
+      "global_events_impact",
+      "market_cap",
+      "sentiment",
+      "crypto_asset"
+    ]
+  },
+  {
+    "id": "template_global_macro_crypto_strategy",
+    "name": "Multi-Factor Crypto Price Impact from Global Events",
+    "short_description": "Calculates the final price of a crypto asset by summing the percentage impacts from various global factors like liquidity, geopolitical events, and regulatory decisions.",
+    "domain": "Crypto Finance",
+    "topic": "Global Events Impact",
+    "inputs": [
+      {
+        "name": "initial_price",
+        "type": "float",
+        "description": "The starting price of the crypto asset in USD."
+      },
+      {
+        "name": "liquidity_impact",
+        "type": "float",
+        "description": "The percentage change in price due to liquidity changes (e.g., 3 for 3%, -2 for -2%)."
+      },
+      {
+        "name": "geopolitical_impact",
+        "type": "float",
+        "description": "The percentage change in price due to geopolitical events (e.g., 4 for 4%, -1 for -1%)."
+      },
+      {
+        "name": "regulatory_impact",
+        "type": "float",
+        "description": "The percentage change in price due to regulatory decisions (e.g., 5 for 5%, -3 for -3%)."
+      }
+    ],
+    "output_var": "final_price",
+    "sympy_formulas": [
+      {
+        "variable": "total_impact",
+        "formula": "liquidity_impact + geopolitical_impact + regulatory_impact"
+      },
+      {
+        "variable": "final_price",
+        "formula": "initial_price * (1 + total_impact / 100)"
+      }
+    ],
+    "tags": [
+      "global_events_impact",
+      "crypto",
+      "macroeconomics",
+      "price_prediction"
+    ]
+  }
+]

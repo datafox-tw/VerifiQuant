@@ -1,0 +1,268 @@
+[
+  {
+    "id": "template_property_roi",
+    "name": "Property Flip ROI",
+    "short_description": "Calculates the Return on Investment for a property flip, considering purchase cost, renovation cost, and final sale price.",
+    "domain": "Investment Analysis",
+    "topic": "Return on Investment",
+    "inputs": [
+      {
+        "name": "purchase_cost",
+        "type": "float",
+        "description": "The initial cost to purchase the property."
+      },
+      {
+        "name": "renovation_cost",
+        "type": "float",
+        "description": "The cost incurred for renovating the property."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "The final price at which the property was sold."
+      }
+    ],
+    "output_var": "ROI",
+    "sympy_formulas": [
+      {
+        "variable": "total_investment",
+        "formula": "purchase_cost + renovation_cost"
+      },
+      {
+        "variable": "ROI",
+        "formula": "((sale_price - total_investment) / total_investment) * 100"
+      }
+    ],
+    "tags": [
+      "roi",
+      "property",
+      "real estate",
+      "investment",
+      "flip"
+    ]
+  },
+  {
+    "id": "template_after_tax_roi",
+    "name": "After-Tax ROI",
+    "short_description": "Calculates the after-tax Return on Investment for a project, considering an initial investment, gross profit, and a tax rate.",
+    "domain": "Investment Analysis",
+    "topic": "Roi",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "Initial investment amount"
+      },
+      {
+        "name": "gross_profit",
+        "type": "float",
+        "description": "Gross profit earned before taxes"
+      },
+      {
+        "name": "tax_rate",
+        "type": "float",
+        "description": "Tax rate as a percentage (e.g., 25 for 25%)"
+      }
+    ],
+    "output_var": "roi_pct",
+    "sympy_formulas": [
+      {
+        "variable": "net_profit",
+        "formula": "gross_profit * (1 - tax_rate/100)"
+      },
+      {
+        "variable": "roi_pct",
+        "formula": "(net_profit / investment) * 100"
+      }
+    ],
+    "tags": [
+      "roi",
+      "after-tax",
+      "profit",
+      "investment"
+    ]
+  },
+  {
+    "id": "template_compound_roi",
+    "name": "Compound-Growth Investment ROI",
+    "short_description": "Calculates the Return on Investment (ROI) for an investment earning compound interest over a specified number of years.",
+    "domain": "Investment Analysis",
+    "topic": "Roi",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial investment amount"
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "Annual compound interest rate (as a percentage, e.g., 5 for 5%)"
+      },
+      {
+        "name": "years",
+        "type": "integer",
+        "description": "Number of years the investment is held"
+      }
+    ],
+    "output_var": "ROI",
+    "sympy_formulas": [
+      {
+        "variable": "FV",
+        "formula": "principal * (1 + rate/100)**years"
+      },
+      {
+        "variable": "NetProfit",
+        "formula": "FV - principal"
+      },
+      {
+        "variable": "ROI",
+        "formula": "(NetProfit / principal) * 100"
+      }
+    ],
+    "tags": [
+      "roi",
+      "compound interest",
+      "investment",
+      "future value"
+    ]
+  },
+  {
+    "id": "template_conversion_campaign_roi",
+    "name": "ROI: Online Marketing Campaign",
+    "short_description": "Calculates the Return on Investment (ROI) for an online marketing campaign based on impressions, click-through rate, conversion rate, average sale value, and ad spend.",
+    "domain": "Investment Analysis",
+    "topic": "Roi",
+    "inputs": [
+      {
+        "name": "impressions",
+        "type": "integer",
+        "description": "Total number of times an ad was displayed."
+      },
+      {
+        "name": "ctr",
+        "type": "float",
+        "description": "Click-through rate (as a decimal, e.g., 0.01 for 1%)."
+      },
+      {
+        "name": "conv_rate",
+        "type": "float",
+        "description": "Conversion rate (as a decimal, e.g., 0.02 for 2%)."
+      },
+      {
+        "name": "avg_sale",
+        "type": "integer",
+        "description": "Average revenue generated per sale."
+      },
+      {
+        "name": "ad_spend",
+        "type": "integer",
+        "description": "Total cost of the advertising campaign."
+      }
+    ],
+    "output_var": "ROI",
+    "sympy_formulas": [
+      {
+        "variable": "clicks",
+        "formula": "impressions * ctr"
+      },
+      {
+        "variable": "sales",
+        "formula": "clicks * conv_rate"
+      },
+      {
+        "variable": "revenue",
+        "formula": "sales * avg_sale"
+      },
+      {
+        "variable": "net_profit",
+        "formula": "revenue - ad_spend"
+      },
+      {
+        "variable": "ROI",
+        "formula": "net_profit / ad_spend"
+      }
+    ],
+    "tags": [
+      "roi",
+      "marketing",
+      "campaign",
+      "online marketing",
+      "digital marketing"
+    ]
+  },
+  {
+    "id": "template_mutual_fund_roi",
+    "name": "Mutual Fund ROI: Dividends, Fees, and Price Gain",
+    "short_description": "Calculates the Return on Investment (ROI) for a mutual fund, considering the initial investment, total dividends received, total management fees paid, and capital gain or loss from selling shares.",
+    "domain": "Investment Analysis",
+    "topic": "ROI",
+    "inputs": [
+      {
+        "name": "shares",
+        "type": "integer",
+        "description": "Number of shares purchased."
+      },
+      {
+        "name": "buy_price",
+        "type": "float",
+        "description": "Purchase price per share."
+      },
+      {
+        "name": "sell_price",
+        "type": "float",
+        "description": "Selling price per share."
+      },
+      {
+        "name": "dividend_ps",
+        "type": "float",
+        "description": "Annual dividend per share."
+      },
+      {
+        "name": "years",
+        "type": "integer",
+        "description": "Total holding period in years."
+      },
+      {
+        "name": "fee_rate",
+        "type": "float",
+        "description": "Annual management fee rate (as a percentage, e.g., 0.8 for 0.8%)."
+      }
+    ],
+    "output_var": "roi_pct",
+    "sympy_formulas": [
+      {
+        "variable": "invest_cost",
+        "formula": "shares * buy_price"
+      },
+      {
+        "variable": "dividends",
+        "formula": "shares * dividend_ps * years"
+      },
+      {
+        "variable": "mgmt_fees",
+        "formula": "invest_cost * fee_rate/100 * years"
+      },
+      {
+        "variable": "price_gain",
+        "formula": "shares * (sell_price - buy_price)"
+      },
+      {
+        "variable": "net_profit",
+        "formula": "price_gain + dividends - mgmt_fees"
+      },
+      {
+        "variable": "roi_pct",
+        "formula": "(net_profit / invest_cost) * 100"
+      }
+    ],
+    "tags": [
+      "roi",
+      "mutual fund",
+      "investment",
+      "dividends",
+      "fees",
+      "capital gain"
+    ]
+  }
+]

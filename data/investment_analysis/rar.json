@@ -1,0 +1,313 @@
+[
+  {
+    "id": "template_portfolio_sd",
+    "name": "Portfolio Standard Deviation (Two Assets)",
+    "short_description": "Calculates the standard deviation of a two-asset portfolio given the weights and standard deviations of each asset, and their correlation.",
+    "domain": "Investment Analysis",
+    "topic": "Risk and Return",
+    "inputs": [
+      {
+        "name": "w_a",
+        "type": "float",
+        "description": "Weight of asset A in the portfolio."
+      },
+      {
+        "name": "sd_a",
+        "type": "float",
+        "description": "Standard deviation of asset A (as percentage, e.g., 15 for 15%)."
+      },
+      {
+        "name": "sd_b",
+        "type": "float",
+        "description": "Standard deviation of asset B (as percentage, e.g., 10 for 10%)."
+      },
+      {
+        "name": "rho",
+        "type": "float",
+        "description": "Correlation coefficient between asset A and asset B."
+      }
+    ],
+    "output_var": "sd_p",
+    "sympy_formulas": [
+      {
+        "variable": "w_b",
+        "formula": "1 - w_a"
+      },
+      {
+        "variable": "sd_a_decimal",
+        "formula": "sd_a / 100"
+      },
+      {
+        "variable": "sd_b_decimal",
+        "formula": "sd_b / 100"
+      },
+      {
+        "variable": "cov",
+        "formula": "rho * sd_a_decimal * sd_b_decimal"
+      },
+      {
+        "variable": "var_p",
+        "formula": "(w_a**2)*(sd_a_decimal**2) + (w_b**2)*(sd_b_decimal**2) + 2*w_a*w_b*cov"
+      },
+      {
+        "variable": "sd_p",
+        "formula": "var_p**0.5"
+      }
+    ],
+    "tags": [
+      "rar",
+      "risk",
+      "portfolio",
+      "standard deviation",
+      "two assets",
+      "covariance",
+      "correlation"
+    ]
+  },
+  {
+    "id": "template_sharpe_ratio",
+    "name": "Sharpe Ratio",
+    "short_description": "Calculates the Sharpe ratio, a measure of risk-adjusted return, by dividing the excess return over the risk-free rate by the standard deviation of returns.",
+    "domain": "Investment Analysis",
+    "topic": "Return and Risk",
+    "inputs": [
+      {
+        "name": "exp_ret",
+        "type": "float",
+        "description": "Expected return of the investment (in percentage)"
+      },
+      {
+        "name": "rf_rate",
+        "type": "float",
+        "description": "Risk-free rate (in percentage)"
+      },
+      {
+        "name": "stdev",
+        "type": "float",
+        "description": "Standard deviation of the investment's returns (in percentage)"
+      }
+    ],
+    "output_var": "sharpe",
+    "sympy_formulas": [
+      {
+        "variable": "excess",
+        "formula": "exp_ret - rf_rate"
+      },
+      {
+        "variable": "sharpe",
+        "formula": "excess / stdev"
+      }
+    ],
+    "tags": [
+      "rar",
+      "sharpe ratio",
+      "risk adjusted return",
+      "investment analysis",
+      "risk"
+    ]
+  },
+  {
+    "id": "template_jensen_alpha",
+    "name": "Jensen's Alpha (α)",
+    "short_description": "Calculates Jensen's Alpha, a measure of a portfolio's excess return compared to its expected return as predicted by the Capital Asset Pricing Model (CAPM).",
+    "domain": "Investment Analysis",
+    "topic": "RAR",
+    "inputs": [
+      {
+        "name": "r_p",
+        "type": "float",
+        "description": "Actual portfolio return (in percentage)"
+      },
+      {
+        "name": "r_f",
+        "type": "float",
+        "description": "Risk-free rate (in percentage)"
+      },
+      {
+        "name": "r_m",
+        "type": "float",
+        "description": "Market return (in percentage)"
+      },
+      {
+        "name": "beta_p",
+        "type": "float",
+        "description": "Portfolio beta"
+      }
+    ],
+    "output_var": "alpha",
+    "sympy_formulas": [
+      {
+        "variable": "mkt_prem",
+        "formula": "r_m - r_f"
+      },
+      {
+        "variable": "capm_req",
+        "formula": "r_f + beta_p * mkt_prem"
+      },
+      {
+        "variable": "alpha",
+        "formula": "r_p - capm_req"
+      }
+    ],
+    "tags": [
+      "rar",
+      "jensen-alpha",
+      "risk-adjusted-return",
+      "capm",
+      "performance-measurement"
+    ]
+  },
+  {
+    "id": "template_m2_measure",
+    "name": "M-squared (M²) Measure",
+    "short_description": "Calculates the M-squared (M²) measure for a portfolio, comparing its risk-adjusted return to a benchmark.",
+    "domain": "Investment Analysis",
+    "topic": "Rar",
+    "inputs": [
+      {
+        "name": "r_p",
+        "type": "float",
+        "description": "Portfolio expected return (as a decimal)"
+      },
+      {
+        "name": "sigma_p",
+        "type": "float",
+        "description": "Portfolio standard deviation (as a decimal)"
+      },
+      {
+        "name": "sigma_b",
+        "type": "float",
+        "description": "Benchmark standard deviation (as a decimal)"
+      },
+      {
+        "name": "r_f",
+        "type": "float",
+        "description": "Risk-free rate (as a decimal)"
+      }
+    ],
+    "output_var": "m2",
+    "sympy_formulas": [
+      {
+        "variable": "sharpe",
+        "formula": "(r_p - r_f) / sigma_p"
+      },
+      {
+        "variable": "adj_er",
+        "formula": "sharpe * sigma_b"
+      },
+      {
+        "variable": "m2",
+        "formula": "r_f + adj_er"
+      }
+    ],
+    "tags": [
+      "rar",
+      "m2_measure",
+      "risk_adjusted_return",
+      "sharpe_ratio"
+    ]
+  },
+  {
+    "id": "template_capm_portfolio",
+    "name": "CAPM: Portfolio Required Return",
+    "short_description": "Calculates the required return for a portfolio using the Capital Asset Pricing Model (CAPM), based on individual asset allocations, betas, risk-free rate, and market return.",
+    "domain": "Investment Analysis",
+    "topic": "RAR",
+    "inputs": [
+      {
+        "name": "inv1",
+        "type": "float",
+        "description": "Investment amount in asset 1"
+      },
+      {
+        "name": "inv2",
+        "type": "float",
+        "description": "Investment amount in asset 2"
+      },
+      {
+        "name": "inv3",
+        "type": "float",
+        "description": "Investment amount in asset 3"
+      },
+      {
+        "name": "beta_1",
+        "type": "float",
+        "description": "Beta of asset 1"
+      },
+      {
+        "name": "beta_2",
+        "type": "float",
+        "description": "Beta of asset 2"
+      },
+      {
+        "name": "beta_3",
+        "type": "float",
+        "description": "Beta of asset 3"
+      },
+      {
+        "name": "rf_percent",
+        "type": "float",
+        "description": "Risk-free rate (as a percentage)"
+      },
+      {
+        "name": "rm_percent",
+        "type": "float",
+        "description": "Expected market return (as a percentage)"
+      }
+    ],
+    "output_var": "req_r",
+    "sympy_formulas": [
+      {
+        "variable": "tot",
+        "formula": "inv1 + inv2 + inv3"
+      },
+      {
+        "variable": "w1",
+        "formula": "inv1 / tot"
+      },
+      {
+        "variable": "w2",
+        "formula": "inv2 / tot"
+      },
+      {
+        "variable": "w3",
+        "formula": "1 - w1 - w2"
+      },
+      {
+        "variable": "beta_portfolio",
+        "formula": "w1*beta_1 + w2*beta_2 + w3*beta_3"
+      },
+      {
+        "variable": "r_f",
+        "formula": "rf_percent / 100"
+      },
+      {
+        "variable": "r_m",
+        "formula": "rm_percent / 100"
+      },
+      {
+        "variable": "market_risk_premium",
+        "formula": "r_m - r_f"
+      },
+      {
+        "variable": "portfolio_risk_premium",
+        "formula": "beta_portfolio * market_risk_premium"
+      },
+      {
+        "variable": "req_r_decimal",
+        "formula": "r_f + portfolio_risk_premium"
+      },
+      {
+        "variable": "req_r",
+        "formula": "req_r_decimal * 100"
+      }
+    ],
+    "tags": [
+      "rar",
+      "capm",
+      "portfolio",
+      "beta",
+      "required return"
+    ]
+  }
+]

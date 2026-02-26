@@ -1,0 +1,222 @@
+[
+  {
+    "id": "template_db_easy1",
+    "name": "Simple-Interest Ending Balance (Single Value)",
+    "short_description": "Calculates the ending balance of a simple-interest savings account given the principal, annual interest rate, and time in years.",
+    "domain": "Fintech",
+    "topic": "Digital Banking",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Initial principal amount."
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Annual simple interest rate as a decimal."
+      },
+      {
+        "name": "t",
+        "type": "integer",
+        "description": "Time in years."
+      }
+    ],
+    "output_var": "ending_balance",
+    "sympy_formulas": [
+      {
+        "variable": "interest",
+        "formula": "P * r * t"
+      },
+      {
+        "variable": "ending_balance",
+        "formula": "P + interest"
+      }
+    ],
+    "tags": [
+      "digital_banking",
+      "simple_interest",
+      "ending_balance",
+      "savings"
+    ]
+  },
+  {
+    "id": "template_db_easy2",
+    "name": "Mobile Transfer Total Deduction",
+    "short_description": "Calculates the total amount deducted from an account for a mobile transfer, including the transfer amount and a percentage-based fee.",
+    "domain": "Fintech",
+    "topic": "Digital Banking",
+    "inputs": [
+      {
+        "name": "A",
+        "type": "float",
+        "description": "The amount of money to be transferred."
+      },
+      {
+        "name": "f",
+        "type": "float",
+        "description": "The fee rate as a decimal (e.g., 0.01 for 1%)."
+      }
+    ],
+    "output_var": "total",
+    "sympy_formulas": [
+      {
+        "variable": "fee",
+        "formula": "A * f"
+      },
+      {
+        "variable": "total",
+        "formula": "A + fee"
+      }
+    ],
+    "tags": [
+      "digital_banking",
+      "mobile_transfer",
+      "fee_calculation",
+      "total_deduction"
+    ]
+  },
+  {
+    "id": "template_db_medium1",
+    "name": "Future Value of Monthly Deposits",
+    "short_description": "Calculates the future value of a series of equal monthly deposits (an ordinary annuity) given an annual nominal interest rate and the total number of months.",
+    "domain": "Fintech",
+    "topic": "Digital Banking",
+    "inputs": [
+      {
+        "name": "monthly_deposit",
+        "type": "float",
+        "description": "The amount deposited each month"
+      },
+      {
+        "name": "annual_rate",
+        "type": "float",
+        "description": "The annual nominal interest rate as a decimal"
+      },
+      {
+        "name": "months",
+        "type": "integer",
+        "description": "The total number of months for deposits"
+      }
+    ],
+    "output_var": "fv",
+    "sympy_formulas": [
+      {
+        "variable": "monthly_rate",
+        "formula": "annual_rate / 12"
+      },
+      {
+        "variable": "fv",
+        "formula": "monthly_deposit * (((1 + monthly_rate) ** months - 1) / monthly_rate)"
+      }
+    ],
+    "tags": [
+      "digital_banking",
+      "future_value",
+      "annuity",
+      "monthly_deposits"
+    ]
+  },
+  {
+    "id": "template_db_medium2",
+    "name": "Highest-Spend Dollar Amount",
+    "short_description": "Calculates the total spending for each category from a list of transactions and identifies the highest total spend amount.",
+    "domain": "Fintech",
+    "topic": "Digital Banking",
+    "inputs": [
+      {
+        "name": "transactions_list",
+        "type": "string",
+        "description": "A list of financial transactions, each containing a category (string) and an amount (float), e.g., '[(\"Food Delivery\", 25.50), (\"Streaming\", 15.00)]'"
+      }
+    ],
+    "output_var": "top_amt",
+    "sympy_formulas": [
+      {
+        "variable": "category_total_spends",
+        "formula": "Function('AggregateSpending')(transactions_list)"
+      },
+      {
+        "variable": "top_amt",
+        "formula": "Function('MaxOfValues')(category_total_spends)"
+      }
+    ],
+    "tags": [
+      "digital_banking",
+      "spending_analysis",
+      "highest_amount",
+      "financial_transaction",
+      "category_spend"
+    ]
+  },
+  {
+    "id": "template_db_hard1",
+    "name": "Loan Payoff Months After Extra Payment",
+    "short_description": "Calculates the number of remaining months on a loan after an extra lump sum payment is made at a specified point in the loan term, considering the original principal, annual rate, and loan years.",
+    "domain": "Fintech",
+    "topic": "Digital Banking",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial loan principal amount."
+      },
+      {
+        "name": "annual_rate",
+        "type": "float",
+        "description": "Annual interest rate (APR) as a decimal (e.g., 0.05 for 5%)."
+      },
+      {
+        "name": "years",
+        "type": "integer",
+        "description": "Original total loan term in years."
+      },
+      {
+        "name": "extra_month",
+        "type": "integer",
+        "description": "The month number (from the start of the loan) when the extra payment is made."
+      },
+      {
+        "name": "extra_payment",
+        "type": "float",
+        "description": "Amount of the extra lump sum payment made."
+      }
+    ],
+    "output_var": "rem_months",
+    "sympy_formulas": [
+      {
+        "variable": "i",
+        "formula": "annual_rate / 12"
+      },
+      {
+        "variable": "months_total",
+        "formula": "years * 12"
+      },
+      {
+        "variable": "payment",
+        "formula": "principal * i / (1 - (1 + i)**(-months_total))"
+      },
+      {
+        "variable": "bal_before_extra",
+        "formula": "principal * (1 + i)**extra_month - payment * (((1 + i)**extra_month - 1) / i)"
+      },
+      {
+        "variable": "bal_after_extra",
+        "formula": "bal_before_extra - extra_payment"
+      },
+      {
+        "variable": "rem_months",
+        "formula": "Max(0, ceiling(log(payment / (payment - bal_after_extra * i), 1 + i)))"
+      }
+    ],
+    "tags": [
+      "digital_banking",
+      "loan",
+      "amortization",
+      "payment",
+      "extra_payment",
+      "remaining_term",
+      "personal_finance"
+    ]
+  }
+]

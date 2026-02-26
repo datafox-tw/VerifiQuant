@@ -1,0 +1,281 @@
+[
+  {
+    "id": "template_carbon_credit_purchase",
+    "name": "Carbon Credit Purchase Calculation",
+    "short_description": "Calculates the total number of carbon credits that can be purchased with a given investment, considering the price per credit and truncating the result to a whole number.",
+    "domain": "Sustainable Finance",
+    "topic": "Carbon Credits",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "Total amount invested in purchasing carbon credits."
+      },
+      {
+        "name": "price_per_credit",
+        "type": "float",
+        "description": "Cost of a single carbon credit."
+      }
+    ],
+    "output_var": "int_credits",
+    "sympy_formulas": [
+      {
+        "variable": "credits",
+        "formula": "investment / price_per_credit"
+      },
+      {
+        "variable": "int_credits",
+        "formula": "floor(credits)"
+      }
+    ],
+    "tags": [
+      "carbon_credits",
+      "purchase",
+      "sustainable_finance",
+      "environmental"
+    ]
+  },
+  {
+    "id": "template_carbon_credit_rebate",
+    "name": "Carbon Credit Rebate",
+    "short_description": "Calculates the total rebate received on carbon credit purchases, contingent on meeting a minimum quantity threshold.",
+    "domain": "Sustainable Finance",
+    "topic": "Carbon Credits",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "Total amount invested in carbon credits."
+      },
+      {
+        "name": "price_per_credit",
+        "type": "float",
+        "description": "Price per single carbon credit."
+      },
+      {
+        "name": "rebate_per_credit",
+        "type": "float",
+        "description": "Rebate amount received for each carbon credit if the purchase qualifies."
+      },
+      {
+        "name": "threshold",
+        "type": "integer",
+        "description": "Minimum number of carbon credits required to qualify for the rebate."
+      }
+    ],
+    "output_var": "total_rebate",
+    "sympy_formulas": [
+      {
+        "variable": "credits",
+        "formula": "investment / price_per_credit"
+      },
+      {
+        "variable": "total_rebate",
+        "formula": "credits * rebate_per_credit"
+      }
+    ],
+    "tags": [
+      "carbon_credits",
+      "rebate",
+      "sustainable_finance",
+      "conditional"
+    ]
+  },
+  {
+    "id": "template_offset_cost_savings",
+    "name": "Emissions Offset Cost Savings Calculation",
+    "short_description": "Calculates the net cost of purchasing carbon credits after applying a discount.",
+    "domain": "Sustainable Finance",
+    "topic": "Carbon Credits",
+    "inputs": [
+      {
+        "name": "emissions_offset",
+        "type": "integer",
+        "description": "CO2 emissions required to offset, in metric tons (equivalent to the number of credits needed)."
+      },
+      {
+        "name": "base_price",
+        "type": "float",
+        "description": "The cost per carbon credit before any discount."
+      },
+      {
+        "name": "discount_percentage",
+        "type": "float",
+        "description": "The percentage discount applied to the gross cost of carbon credits."
+      }
+    ],
+    "output_var": "net_cost",
+    "sympy_formulas": [
+      {
+        "variable": "credits_required",
+        "formula": "emissions_offset"
+      },
+      {
+        "variable": "gross_cost",
+        "formula": "credits_required * base_price"
+      },
+      {
+        "variable": "discount_amount",
+        "formula": "gross_cost * (discount_percentage / 100)"
+      },
+      {
+        "variable": "net_cost",
+        "formula": "gross_cost - discount_amount"
+      }
+    ],
+    "tags": [
+      "carbon_credits",
+      "cost_savings",
+      "discount",
+      "emissions",
+      "sustainable_finance"
+    ]
+  },
+  {
+    "id": "template_multi_company_synergy",
+    "name": "Multi-Company Synergy Savings for Carbon Credits",
+    "short_description": "Calculates the combined net cost for multiple companies purchasing carbon credits, applying a synergy discount if total credits exceed a specified threshold.",
+    "domain": "Sustainable Finance",
+    "topic": "Carbon Credits",
+    "inputs": [
+      {
+        "name": "emissions_company1",
+        "type": "integer",
+        "description": "Metric tons of CO2 emissions for company 1, requiring an equivalent number of carbon credits."
+      },
+      {
+        "name": "emissions_company2",
+        "type": "integer",
+        "description": "Metric tons of CO2 emissions for company 2, requiring an equivalent number of carbon credits."
+      },
+      {
+        "name": "base_price",
+        "type": "float",
+        "description": "The base cost of a single carbon credit."
+      },
+      {
+        "name": "synergy_discount",
+        "type": "float",
+        "description": "The percentage discount (e.g., 5 for 5%) applied to the gross cost if total credits exceed the threshold."
+      },
+      {
+        "name": "threshold_total_credits",
+        "type": "integer",
+        "description": "The total carbon credit volume threshold above which the synergy discount is applied."
+      }
+    ],
+    "output_var": "net_cost",
+    "sympy_formulas": [
+      {
+        "variable": "credits_company1",
+        "formula": "emissions_company1"
+      },
+      {
+        "variable": "credits_company2",
+        "formula": "emissions_company2"
+      },
+      {
+        "variable": "total_credits",
+        "formula": "credits_company1 + credits_company2"
+      },
+      {
+        "variable": "gross_cost",
+        "formula": "total_credits * base_price"
+      },
+      {
+        "variable": "synergy_discount_decimal",
+        "formula": "synergy_discount / 100"
+      },
+      {
+        "variable": "net_cost",
+        "formula": "Piecewise((gross_cost * (1 - synergy_discount_decimal), total_credits > threshold_total_credits), (gross_cost, True))"
+      }
+    ],
+    "tags": [
+      "carbon_credits",
+      "synergy",
+      "cost_reduction",
+      "emissions_offset",
+      "sustainable_finance"
+    ]
+  },
+  {
+    "id": "template_comprehensive_carbon_credit_strategy",
+    "name": "Comprehensive Carbon Credit Strategy",
+    "short_description": "A strategy involving initial investment, discounted credit purchase, emissions offset, selling surplus credits at a premium, and receiving a rebate to determine the net financial impact.",
+    "domain": "Sustainable Finance",
+    "topic": "Carbon Credits",
+    "inputs": [
+      {
+        "name": "initial_investment",
+        "type": "float",
+        "description": "Initial capital available for purchasing carbon credits."
+      },
+      {
+        "name": "base_price",
+        "type": "float",
+        "description": "Base price per carbon credit before any discounts."
+      },
+      {
+        "name": "volume_discount",
+        "type": "float",
+        "description": "Percentage discount applied to the base price for volume purchases (e.g., 5 for 5%)."
+      },
+      {
+        "name": "credits_required_for_offset",
+        "type": "integer",
+        "description": "Number of carbon credits required to offset emissions."
+      },
+      {
+        "name": "selling_premium",
+        "type": "float",
+        "description": "Percentage premium added to the discounted price when selling surplus credits (e.g., 10 for 10%)."
+      },
+      {
+        "name": "rebate_amount",
+        "type": "float",
+        "description": "Additional fixed rebate received in dollars."
+      }
+    ],
+    "output_var": "net_impact",
+    "sympy_formulas": [
+      {
+        "variable": "discounted_price",
+        "formula": "base_price * (1 - volume_discount / 100)"
+      },
+      {
+        "variable": "credits_purchased",
+        "formula": "initial_investment / discounted_price"
+      },
+      {
+        "variable": "surplus_credits",
+        "formula": "Max(0, credits_purchased - credits_required_for_offset)"
+      },
+      {
+        "variable": "selling_price",
+        "formula": "discounted_price * (1 + selling_premium / 100)"
+      },
+      {
+        "variable": "revenue",
+        "formula": "surplus_credits * selling_price"
+      },
+      {
+        "variable": "total_gain",
+        "formula": "revenue + rebate_amount"
+      },
+      {
+        "variable": "net_impact",
+        "formula": "total_gain - initial_investment"
+      }
+    ],
+    "tags": [
+      "carbon_credits",
+      "sustainable_finance",
+      "strategy",
+      "investment",
+      "offset",
+      "rebate",
+      "premium"
+    ]
+  }
+]

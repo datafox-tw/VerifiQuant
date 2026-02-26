@@ -1,0 +1,266 @@
+[
+  {
+    "id": "template_calculate_closing_cash_balance",
+    "name": "Closing Cash Balance Calculation",
+    "short_description": "Calculates the closing cash balance at the end of a period by summing the opening balance with net cash flows from operating, investing, and financing activities.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Cash Flow Statements",
+    "inputs": [
+      {
+        "name": "company_name",
+        "type": "string",
+        "description": "Name of the company for which the balance is calculated."
+      },
+      {
+        "name": "opening_balance",
+        "type": "integer",
+        "description": "The cash balance at the beginning of the period."
+      },
+      {
+        "name": "net_operating_cash",
+        "type": "integer",
+        "description": "Net cash flow from operating activities."
+      },
+      {
+        "name": "net_investing_cash",
+        "type": "integer",
+        "description": "Net cash flow from investing activities (can be an inflow or outflow)."
+      },
+      {
+        "name": "net_financing_cash",
+        "type": "integer",
+        "description": "Net cash flow from financing activities (can be an inflow or outflow)."
+      }
+    ],
+    "output_var": "closing_balance",
+    "sympy_formulas": [
+      {
+        "variable": "total_net_cash_flow",
+        "formula": "net_operating_cash + net_investing_cash + net_financing_cash"
+      },
+      {
+        "variable": "closing_balance",
+        "formula": "opening_balance + total_net_cash_flow"
+      }
+    ],
+    "tags": [
+      "cash_flow_statements",
+      "cash_balance",
+      "accounting",
+      "financial_reporting"
+    ]
+  },
+  {
+    "id": "template_calculate_tax_cash_outflow",
+    "name": "Tax Cash Outflow",
+    "short_description": "Calculates the actual cash outflow for taxes based on income tax expense and the changes in taxes payable throughout the year.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Cash Flow Statements",
+    "inputs": [
+      {
+        "name": "tax_expense",
+        "type": "float",
+        "description": "Income tax expense for the period."
+      },
+      {
+        "name": "opening_taxes_payable",
+        "type": "float",
+        "description": "Taxes payable at the beginning of the period."
+      },
+      {
+        "name": "closing_taxes_payable",
+        "type": "float",
+        "description": "Taxes payable at the end of the period."
+      }
+    ],
+    "output_var": "tax_cash_outflow",
+    "sympy_formulas": [
+      {
+        "variable": "change_in_taxes_payable",
+        "formula": "closing_taxes_payable - opening_taxes_payable"
+      },
+      {
+        "variable": "tax_cash_outflow",
+        "formula": "tax_expense - change_in_taxes_payable"
+      }
+    ],
+    "tags": [
+      "cash_flow_statements",
+      "taxes",
+      "accounting",
+      "financial_reporting"
+    ]
+  },
+  {
+    "id": "template_indirect_cash_flow_operations_advanced",
+    "name": "Indirect Method: Cash Flow from Operations (Advanced with Amortization)",
+    "short_description": "Calculates cash flow from operating activities using the indirect method, starting with net income and adjusting for depreciation, amortization, and changes in various working capital accounts.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Cash Flow Statements",
+    "inputs": [
+      {
+        "name": "net_income",
+        "type": "float",
+        "description": "Net income for the period"
+      },
+      {
+        "name": "depreciation",
+        "type": "float",
+        "description": "Depreciation expense for the period"
+      },
+      {
+        "name": "amortization",
+        "type": "float",
+        "description": "Amortization expense for the period"
+      },
+      {
+        "name": "increase_receivable",
+        "type": "float",
+        "description": "Increase in accounts receivable"
+      },
+      {
+        "name": "increase_inventory",
+        "type": "float",
+        "description": "Increase in inventory"
+      },
+      {
+        "name": "decrease_payable",
+        "type": "float",
+        "description": "Decrease in accounts payable"
+      },
+      {
+        "name": "increase_accrued_expenses",
+        "type": "float",
+        "description": "Increase in accrued expenses"
+      }
+    ],
+    "output_var": "cash_flow_operations",
+    "sympy_formulas": [
+      {
+        "variable": "adjusted_net_income",
+        "formula": "net_income + depreciation + amortization"
+      },
+      {
+        "variable": "net_wc_change",
+        "formula": "-increase_receivable - increase_inventory - decrease_payable + increase_accrued_expenses"
+      },
+      {
+        "variable": "cash_flow_operations",
+        "formula": "adjusted_net_income + net_wc_change"
+      }
+    ],
+    "tags": [
+      "cash_flow_statements",
+      "indirect_method",
+      "operating_activities",
+      "amortization",
+      "working_capital"
+    ]
+  },
+  {
+    "id": "template_calculate_cash_flow_from_financing_activities",
+    "name": "Cash Flow from Financing Activities",
+    "short_description": "A company calculates its net cash flow from financing activities by summing up the inflows from issuing equity and debt and subtracting the outflows from debt repayments and dividend payments.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Cash Flow Statements",
+    "inputs": [
+      {
+        "name": "equity_issuance",
+        "type": "integer",
+        "description": "Cash received from issuing new equity."
+      },
+      {
+        "name": "debt_issuance",
+        "type": "integer",
+        "description": "Cash received from issuing new debt."
+      },
+      {
+        "name": "debt_repayment",
+        "type": "integer",
+        "description": "Cash paid for repaying existing debt."
+      },
+      {
+        "name": "dividends_paid",
+        "type": "integer",
+        "description": "Cash paid out as dividends to shareholders."
+      }
+    ],
+    "output_var": "net_cash_flow_financing",
+    "sympy_formulas": [
+      {
+        "variable": "net_cash_flow_financing",
+        "formula": "(equity_issuance + debt_issuance) - (debt_repayment + dividends_paid)"
+      }
+    ],
+    "tags": [
+      "cash_flow_statements",
+      "financing_activities",
+      "cash_flow"
+    ]
+  },
+  {
+    "id": "template_calculate_cash_flow_impact_of_acquisition",
+    "name": "Cash Flow Impact of Acquisition",
+    "short_description": "Evaluates the net cash flow impact of an acquisition over a four-year period, considering acquisition cost, annual synergies, and integration costs.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Cash Flow Statements",
+    "inputs": [
+      {
+        "name": "acquisition_cost",
+        "type": "float",
+        "description": "The initial cost of the acquisition"
+      },
+      {
+        "name": "synergies1",
+        "type": "float",
+        "description": "Expected synergy benefit in year 1"
+      },
+      {
+        "name": "synergies2",
+        "type": "float",
+        "description": "Expected synergy benefit in year 2"
+      },
+      {
+        "name": "synergies3",
+        "type": "float",
+        "description": "Expected synergy benefit in year 3"
+      },
+      {
+        "name": "synergies4",
+        "type": "float",
+        "description": "Expected synergy benefit in year 4"
+      },
+      {
+        "name": "integration_cost1",
+        "type": "float",
+        "description": "Integration cost in year 1"
+      },
+      {
+        "name": "integration_cost2",
+        "type": "float",
+        "description": "Integration cost in year 2"
+      }
+    ],
+    "output_var": "net_cash_flow_impact",
+    "sympy_formulas": [
+      {
+        "variable": "total_synergies",
+        "formula": "synergies1 + synergies2 + synergies3 + synergies4"
+      },
+      {
+        "variable": "total_integration_costs",
+        "formula": "integration_cost1 + integration_cost2"
+      },
+      {
+        "variable": "net_cash_flow_impact",
+        "formula": "total_synergies - acquisition_cost - total_integration_costs"
+      }
+    ],
+    "tags": [
+      "cash_flow_statements",
+      "mergers_and_acquisitions",
+      "synergies",
+      "integration_costs"
+    ]
+  }
+]

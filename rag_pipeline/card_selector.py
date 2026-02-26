@@ -12,8 +12,14 @@ from rag_pipeline.retrieval import RetrievalCandidate
 SELECTION_SCHEMA = genai_types.Schema(
     type=genai_types.Type.OBJECT,
     properties={
-        "chosen_id": genai_types.Schema(type=genai_types.Type.STRING),
-        "reason": genai_types.Schema(type=genai_types.Type.STRING),
+        "chosen_id": genai_types.Schema(
+            type=genai_types.Type.STRING,
+            description="The ID of the chosen card, or empty string '' if no card matches the question."
+        ),
+        "reason": genai_types.Schema(
+            type=genai_types.Type.STRING,
+            description="Explanation for the choice, or why no card matches if chosen_id is empty."
+        ),
     },
     required=["chosen_id", "reason"],
 )
@@ -48,7 +54,10 @@ User Question:
 Candidate Cards:
 {formatted_candidates}
 
-Please choose exactly one card that best fits the question.
+Instructions:
+- If one of the candidate cards matches the question well, choose it and set chosen_id to that card's ID.
+- If NONE of the candidate cards are suitable for answering this question (e.g., the question is about a topic not covered by any card, or the required calculation type is different), set chosen_id to an empty string '' and explain why in the reason field.
+
 Return JSON only.
 """
     config = genai_types.GenerateContentConfig(

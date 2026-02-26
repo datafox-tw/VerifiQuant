@@ -1,0 +1,327 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Float Value",
+    "short_description": "Generates a random floating-point number within a specified range, rounded to two decimal places.",
+    "domain": "Risk Management",
+    "topic": "VaR",
+    "inputs": [
+      {
+        "name": "min_val",
+        "type": "float",
+        "description": "The minimum value (inclusive) for the random number generation."
+      },
+      {
+        "name": "max_val",
+        "type": "float",
+        "description": "The maximum value (inclusive) for the random number generation."
+      }
+    ],
+    "output_var": "value",
+    "sympy_formulas": [
+      {
+        "variable": "value",
+        "formula": "Uniform(min_val, max_val)"
+      }
+    ],
+    "tags": [
+      "var",
+      "random",
+      "utility",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_single_asset_var",
+    "name": "Value at Risk (VaR) for a Single Asset",
+    "short_description": "Basic: Single asset portfolio VaR calculation.",
+    "domain": "Risk Management",
+    "topic": "Value at Risk",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Current value of the portfolio"
+      },
+      {
+        "name": "volatility",
+        "type": "float",
+        "description": "Daily volatility as a percentage"
+      },
+      {
+        "name": "time_horizon",
+        "type": "integer",
+        "description": "Time horizon in days"
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "description": "Confidence level as a percentage"
+      }
+    ],
+    "output_var": "VaR",
+    "sympy_formulas": [
+      {
+        "variable": "risk_multiplier",
+        "formula": "1 + (100 - confidence) / 100"
+      },
+      {
+        "variable": "sqrt_time",
+        "formula": "time_horizon**0.5"
+      },
+      {
+        "variable": "VaR",
+        "formula": "portfolio_value * (volatility / 100) * sqrt_time * risk_multiplier"
+      }
+    ],
+    "tags": [
+      "var",
+      "risk management",
+      "single asset"
+    ]
+  },
+  {
+    "id": "template_stock_return_var",
+    "name": "Stock Return Value at Risk (VaR)",
+    "short_description": "Calculates the Value at Risk (VaR) for a stock's return under market risk, based on an expected loss percentage and a specified confidence level.",
+    "domain": "Risk Management",
+    "topic": "Value at Risk",
+    "inputs": [
+      {
+        "name": "asset_value",
+        "type": "float",
+        "description": "The current market value of the stock or asset."
+      },
+      {
+        "name": "loss_percent",
+        "type": "float",
+        "description": "The expected percentage loss of the asset's value under adverse market conditions (e.g., enter 2.5 for 2.5%)."
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "description": "The confidence level for the VaR calculation (e.g., enter 95 for 95%)."
+      }
+    ],
+    "output_var": "VaR",
+    "sympy_formulas": [
+      {
+        "variable": "probability_level",
+        "formula": "confidence / 100"
+      },
+      {
+        "variable": "z_score",
+        "formula": "sympy.stats.Normal('X', 0, 1).quantile(probability_level)"
+      },
+      {
+        "variable": "VaR",
+        "formula": "asset_value * (loss_percent / 100) * z_score"
+      }
+    ],
+    "tags": [
+      "var",
+      "risk management",
+      "market risk",
+      "stock return"
+    ]
+  },
+  {
+    "id": "template_multi_asset_var",
+    "name": "Multi-asset Portfolio VaR with Diversification",
+    "short_description": "Calculates the Value at Risk (VaR) for a multi-asset portfolio, considering asset weights, volatilities, time horizon, and confidence level with diversification.",
+    "domain": "Risk Management",
+    "topic": "VaR",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Current total value of the portfolio."
+      },
+      {
+        "name": "w1",
+        "type": "integer",
+        "description": "Weight of asset 1 in the portfolio (as a percentage, e.g., 20 for 20%)."
+      },
+      {
+        "name": "w2",
+        "type": "integer",
+        "description": "Weight of asset 2 in the portfolio (as a percentage, e.g., 30 for 30%)."
+      },
+      {
+        "name": "volatility1",
+        "type": "float",
+        "description": "Volatility of asset 1 (as a percentage, e.g., 1.5 for 1.5%)."
+      },
+      {
+        "name": "volatility2",
+        "type": "float",
+        "description": "Volatility of asset 2 (as a percentage, e.g., 2.0 for 2.0%)."
+      },
+      {
+        "name": "volatility3",
+        "type": "float",
+        "description": "Volatility of asset 3 (as a percentage, e.g., 2.5 for 2.5%)."
+      },
+      {
+        "name": "time_horizon",
+        "type": "integer",
+        "description": "Time horizon for VaR calculation (e.g., in days)."
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "description": "Confidence level for VaR calculation (as a percentage, e.g., 99.0 for 99%)."
+      }
+    ],
+    "output_var": "VaR",
+    "sympy_formulas": [
+      {
+        "variable": "w3",
+        "formula": "100 - (w1 + w2)"
+      },
+      {
+        "variable": "weighted_vol_pct",
+        "formula": "(w1/100)*volatility1 + (w2/100)*volatility2 + (w3/100)*volatility3"
+      },
+      {
+        "variable": "risk_multiplier",
+        "formula": "1 + ((100 - confidence) / 100)"
+      },
+      {
+        "variable": "sqrt_time",
+        "formula": "time_horizon**0.5"
+      },
+      {
+        "variable": "VaR",
+        "formula": "portfolio_value * (weighted_vol_pct / 100) * sqrt_time * risk_multiplier"
+      }
+    ],
+    "tags": [
+      "var",
+      "risk management",
+      "portfolio",
+      "diversification",
+      "multi-asset"
+    ]
+  },
+  {
+    "id": "template_time_horizon_var",
+    "name": "Time-Horizon Adjusted Value at Risk (VaR)",
+    "short_description": "Calculates Value at Risk (VaR) for a portfolio given its value, daily volatility, confidence level, and time horizon, using the standard normal z-score.",
+    "domain": "Risk Management",
+    "topic": "VaR",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Current value of the portfolio."
+      },
+      {
+        "name": "volatility",
+        "type": "float",
+        "description": "Daily volatility of the portfolio in percentage (e.g., 2.5 for 2.5%)."
+      },
+      {
+        "name": "time_horizon",
+        "type": "integer",
+        "description": "Time horizon in days for which VaR is calculated."
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "description": "Confidence level for the VaR calculation in percentage (e.g., 95 for 95%)."
+      }
+    ],
+    "output_var": "VaR",
+    "sympy_formulas": [
+      {
+        "variable": "sigma_daily",
+        "formula": "volatility / 100"
+      },
+      {
+        "variable": "z_score",
+        "formula": "quantile(Normal('X', 0, 1), confidence / 100)"
+      },
+      {
+        "variable": "sqrt_time",
+        "formula": "time_horizon**0.5"
+      },
+      {
+        "variable": "VaR",
+        "formula": "portfolio_value * sigma_daily * sqrt_time * z_score"
+      }
+    ],
+    "tags": [
+      "var",
+      "risk_management",
+      "time-horizon",
+      "z-score",
+      "volatility",
+      "portfolio"
+    ]
+  },
+  {
+    "id": "template_multi_factor_var",
+    "name": "Multi-factor Portfolio VaR",
+    "short_description": "Calculates Value at Risk (VaR) for a portfolio considering market, credit, and liquidity risks over a specified time horizon and confidence level.",
+    "domain": "Risk Management",
+    "topic": "VaR",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Current value of the investment portfolio"
+      },
+      {
+        "name": "market_vol",
+        "type": "float",
+        "description": "Market volatility (as a percentage)"
+      },
+      {
+        "name": "credit_risk",
+        "type": "float",
+        "description": "Credit risk (as a percentage)"
+      },
+      {
+        "name": "liquidity_risk",
+        "type": "float",
+        "description": "Liquidity risk (as a percentage)"
+      },
+      {
+        "name": "time_horizon",
+        "type": "integer",
+        "description": "Time horizon for VaR calculation (in days)"
+      },
+      {
+        "name": "confidence",
+        "type": "float",
+        "description": "Confidence level for VaR calculation (as a percentage)"
+      }
+    ],
+    "output_var": "VaR",
+    "sympy_formulas": [
+      {
+        "variable": "risk_multiplier",
+        "formula": "1 + (100 - confidence) / 100"
+      },
+      {
+        "variable": "sqrt_time",
+        "formula": "time_horizon**0.5"
+      },
+      {
+        "variable": "combined_factor",
+        "formula": "(market_vol + credit_risk + liquidity_risk) / 3"
+      },
+      {
+        "variable": "VaR",
+        "formula": "portfolio_value * (combined_factor / 100) * sqrt_time * risk_multiplier"
+      }
+    ],
+    "tags": [
+      "var",
+      "risk management",
+      "multi-factor",
+      "portfolio"
+    ]
+  }
+]

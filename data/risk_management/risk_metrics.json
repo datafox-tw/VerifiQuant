@@ -1,0 +1,254 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Value",
+    "short_description": "Generates a random floating-point number within a specified range, rounded to two decimal places.",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "min_val",
+        "type": "float",
+        "description": "Minimum value for the random number generation."
+      },
+      {
+        "name": "max_val",
+        "type": "float",
+        "description": "Maximum value for the random number generation."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "round(random_uniform(min_val, max_val), 2)"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "random",
+      "utility",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_portfolio_var",
+    "name": "Portfolio Value at Risk (VaR)",
+    "short_description": "Calculates the Value at Risk (VaR) for a portfolio given its current value, daily volatility, and a specified confidence level (represented by its z-score).",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "The current market value of the portfolio."
+      },
+      {
+        "name": "volatility",
+        "type": "float",
+        "description": "The daily volatility of the portfolio, expressed as a percentage."
+      },
+      {
+        "name": "z_score",
+        "type": "float",
+        "description": "The z-score corresponding to the desired confidence level (e.g., 1.65 for 95% confidence, 2.33 for 99% confidence)."
+      }
+    ],
+    "output_var": "var",
+    "sympy_formulas": [
+      {
+        "variable": "var",
+        "formula": "portfolio_value * (volatility / 100) * z_score"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "VaR",
+      "value_at_risk",
+      "portfolio",
+      "volatility"
+    ]
+  },
+  {
+    "id": "template_stock_sensitivity",
+    "name": "Stock Downside Sensitivity",
+    "short_description": "Calculates the absolute loss in USD for a stock given its initial price and a percentage decline.",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "stock_price",
+        "type": "float",
+        "description": "The current price of the stock."
+      },
+      {
+        "name": "drop_percentage",
+        "type": "float",
+        "description": "The percentage decline in the stock price (e.g., 5 for 5%)."
+      }
+    ],
+    "output_var": "loss",
+    "sympy_formulas": [
+      {
+        "variable": "loss",
+        "formula": "stock_price * (drop_percentage / 100)"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "stock",
+      "sensitivity",
+      "loss"
+    ]
+  },
+  {
+    "id": "template_liquidity_risk",
+    "name": "Liquidity Risk Impact: Bid-Ask Spread",
+    "short_description": "Measures the additional cost incurred due to liquidity risk, calculated from a portfolio's value and its associated bid-ask spread.",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "The current market value of the portfolio."
+      },
+      {
+        "name": "bid_ask_spread",
+        "type": "float",
+        "description": "The bid-ask spread expressed as a percentage."
+      }
+    ],
+    "output_var": "additional_cost",
+    "sympy_formulas": [
+      {
+        "variable": "additional_cost",
+        "formula": "portfolio_value * (bid_ask_spread / 100)"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "liquidity_risk",
+      "bid-ask_spread",
+      "cost_analysis"
+    ]
+  },
+  {
+    "id": "template_volatility_sensitivity",
+    "name": "Option Vega Volatility Sensitivity",
+    "short_description": "Calculates the expected change in an option's value due to a change in the underlying asset's volatility, using the option's vega.",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "vega",
+        "type": "float",
+        "description": "Option's vega, representing the change in option value per 1% change in volatility."
+      },
+      {
+        "name": "vol_change",
+        "type": "float",
+        "description": "Change in the underlying asset's volatility, expressed in percentage points."
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact",
+        "formula": "vega * vol_change"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "options",
+      "vega",
+      "volatility",
+      "sensitivity",
+      "derivatives"
+    ]
+  },
+  {
+    "id": "template_multi_factor_portfolio",
+    "name": "Multi-Factor Portfolio Risk Impact",
+    "short_description": "Calculates the total risk impact on a portfolio considering multiple risk factors, their weights, sensitivities, and changes.",
+    "domain": "Risk Management",
+    "topic": "Risk Metrics",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Total value of the portfolio"
+      },
+      {
+        "name": "w1",
+        "type": "float",
+        "description": "Weight of factor 1 in the portfolio (in %)"
+      },
+      {
+        "name": "w2",
+        "type": "float",
+        "description": "Weight of factor 2 in the portfolio (in %)"
+      },
+      {
+        "name": "w3",
+        "type": "float",
+        "description": "Weight of factor 3 in the portfolio (in %)"
+      },
+      {
+        "name": "s1",
+        "type": "float",
+        "description": "Sensitivity of portfolio to factor 1"
+      },
+      {
+        "name": "s2",
+        "type": "float",
+        "description": "Sensitivity of portfolio to factor 2"
+      },
+      {
+        "name": "s3",
+        "type": "float",
+        "description": "Sensitivity of portfolio to factor 3"
+      },
+      {
+        "name": "fc1",
+        "type": "float",
+        "description": "Change in factor 1 (in %)"
+      },
+      {
+        "name": "fc2",
+        "type": "float",
+        "description": "Change in factor 2 (in %)"
+      },
+      {
+        "name": "fc3",
+        "type": "float",
+        "description": "Change in factor 3 (in %)"
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact1",
+        "formula": "portfolio_value * (w1/100) * (fc1/100) * s1"
+      },
+      {
+        "variable": "impact2",
+        "formula": "portfolio_value * (w2/100) * (fc2/100) * s2"
+      },
+      {
+        "variable": "impact3",
+        "formula": "portfolio_value * (w3/100) * (fc3/100) * s3"
+      },
+      {
+        "variable": "impact",
+        "formula": "impact1 + impact2 + impact3"
+      }
+    ],
+    "tags": [
+      "risk_metrics",
+      "portfolio_risk",
+      "factor_model",
+      "advanced"
+    ]
+  }
+]

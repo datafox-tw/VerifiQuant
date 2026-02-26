@@ -1,0 +1,264 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Float Value",
+    "short_description": "Generates a pseudo-random floating-point number within a specified inclusive range, rounded to two decimal places.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The lower bound (inclusive) for the random number generation."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The upper bound (inclusive) for the random number generation."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "random.uniform(low, high)"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "random_number",
+      "utility",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_transaction_fee_calculation",
+    "name": "Transaction Fee Calculation",
+    "short_description": "Calculates the net amount received after applying a percentage fee to a crypto transaction.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "transaction_value",
+        "type": "float",
+        "description": "The initial value of the crypto transaction."
+      },
+      {
+        "name": "fee_percent",
+        "type": "float",
+        "description": "The fee percentage applied to the transaction (e.g., 2.5 for 2.5%)."
+      }
+    ],
+    "output_var": "net_amount",
+    "sympy_formulas": [
+      {
+        "variable": "net_amount",
+        "formula": "transaction_value * (1 - fee_percent/100)"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "crypto",
+      "fees",
+      "percentage"
+    ]
+  },
+  {
+    "id": "template_fixed_fee_transaction",
+    "name": "Fixed Fee Crypto Transaction",
+    "short_description": "Calculates the net amount received after a fixed fee is subtracted from a crypto transaction.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "transaction_value",
+        "type": "float",
+        "description": "The initial value of the crypto transaction."
+      },
+      {
+        "name": "fixed_fee",
+        "type": "float",
+        "description": "The fixed fee applied to the transaction."
+      }
+    ],
+    "output_var": "net_amount",
+    "sympy_formulas": [
+      {
+        "variable": "net_amount",
+        "formula": "transaction_value - fixed_fee"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "fixed_fee",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_bulk_transaction_fees",
+    "name": "Net Amount from Bulk Transactions with Varying Fees",
+    "short_description": "Calculates the total net amount received from a batch of transactions, each with a different amount and fee rate.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "t1",
+        "type": "float",
+        "description": "Amount of the first transaction"
+      },
+      {
+        "name": "t2",
+        "type": "float",
+        "description": "Amount of the second transaction"
+      },
+      {
+        "name": "t3",
+        "type": "float",
+        "description": "Amount of the third transaction"
+      },
+      {
+        "name": "fee1",
+        "type": "float",
+        "description": "Fee rate (in percentage) for the first transaction"
+      },
+      {
+        "name": "fee2",
+        "type": "float",
+        "description": "Fee rate (in percentage) for the second transaction"
+      },
+      {
+        "name": "fee3",
+        "type": "float",
+        "description": "Fee rate (in percentage) for the third transaction"
+      }
+    ],
+    "output_var": "total_net",
+    "sympy_formulas": [
+      {
+        "variable": "net1",
+        "formula": "t1 * (1 - fee1/100)"
+      },
+      {
+        "variable": "net2",
+        "formula": "t2 * (1 - fee2/100)"
+      },
+      {
+        "variable": "net3",
+        "formula": "t3 * (1 - fee3/100)"
+      },
+      {
+        "variable": "total_net",
+        "formula": "net1 + net2 + net3"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "fees",
+      "crypto",
+      "bulk_transactions",
+      "net_amount"
+    ]
+  },
+  {
+    "id": "template_cross_chain_transfer",
+    "name": "Cross-Chain Transfer with Fee and Bonus",
+    "short_description": "Calculates the net amount received from a cross-chain transfer after deducting a percentage fee and adding a fixed bonus.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "initial_value",
+        "type": "float",
+        "description": "The initial value of the cross-chain transaction."
+      },
+      {
+        "name": "fee_percent",
+        "type": "float",
+        "description": "The percentage fee applied to the initial value (e.g., 2.5 for 2.5%)."
+      },
+      {
+        "name": "bonus",
+        "type": "float",
+        "description": "The fixed bonus amount credited after the fee deduction."
+      }
+    ],
+    "output_var": "net_final",
+    "sympy_formulas": [
+      {
+        "variable": "net_after_fee",
+        "formula": "initial_value * (1 - fee_percent/100)"
+      },
+      {
+        "variable": "net_final",
+        "formula": "net_after_fee + bonus"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "cross-chain",
+      "fee",
+      "bonus",
+      "crypto"
+    ]
+  },
+  {
+    "id": "template_multi_factor_transaction",
+    "name": "Multi-Factor Crypto Transaction Analysis",
+    "short_description": "Calculates the total net amount from a crypto transaction split between two networks, each with different fee and bonus structures.",
+    "domain": "Crypto Finance",
+    "topic": "Transaction Analysis",
+    "inputs": [
+      {
+        "name": "transaction_value",
+        "type": "float",
+        "description": "The initial total value of the crypto transaction."
+      },
+      {
+        "name": "fee_percent_net1",
+        "type": "float",
+        "description": "The percentage fee charged by Network 1 (e.g., 2.5 for 2.5%)."
+      },
+      {
+        "name": "fixed_fee_net2",
+        "type": "float",
+        "description": "The fixed fee amount charged by Network 2."
+      },
+      {
+        "name": "bonus_percent_net2",
+        "type": "float",
+        "description": "The percentage bonus added by Network 2 (e.g., 5.0 for 5.0%)."
+      }
+    ],
+    "output_var": "total_net",
+    "sympy_formulas": [
+      {
+        "variable": "part1",
+        "formula": "transaction_value * 0.60"
+      },
+      {
+        "variable": "part2",
+        "formula": "transaction_value * 0.40"
+      },
+      {
+        "variable": "net1",
+        "formula": "part1 * (1 - fee_percent_net1/100)"
+      },
+      {
+        "variable": "net2",
+        "formula": "(part2 - fixed_fee_net2) * (1 + bonus_percent_net2/100)"
+      },
+      {
+        "variable": "total_net",
+        "formula": "net1 + net2"
+      }
+    ],
+    "tags": [
+      "transaction_analysis",
+      "crypto",
+      "fees",
+      "bonus",
+      "split_transaction",
+      "advanced"
+    ]
+  }
+]

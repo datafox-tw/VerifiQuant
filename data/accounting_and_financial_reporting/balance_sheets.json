@@ -1,0 +1,248 @@
+[
+  {
+    "id": "template_cash_accounts_payable",
+    "name": "Cash and Accounts Payable",
+    "short_description": "Calculates a company's net cash position by subtracting accounts payable from available cash.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Balance Sheets",
+    "inputs": [
+      {
+        "name": "cash",
+        "type": "integer",
+        "description": "The company's available cash."
+      },
+      {
+        "name": "accounts_payable",
+        "type": "integer",
+        "description": "The company's outstanding accounts payable."
+      }
+    ],
+    "output_var": "net_cash",
+    "sympy_formulas": [
+      {
+        "variable": "net_cash",
+        "formula": "cash - accounts_payable"
+      }
+    ],
+    "tags": [
+      "balance_sheets",
+      "cash",
+      "accounts payable",
+      "net cash position",
+      "basic"
+    ]
+  },
+  {
+    "id": "template_balance_sheet_equation",
+    "name": "Balance Sheet Equation",
+    "short_description": "Calculates a company's equity given its total assets and total liabilities, based on the fundamental accounting equation.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Balance Sheets",
+    "inputs": [
+      {
+        "name": "assets",
+        "type": "integer",
+        "description": "Total value of the company's assets."
+      },
+      {
+        "name": "liabilities",
+        "type": "integer",
+        "description": "Total value of the company's liabilities."
+      }
+    ],
+    "output_var": "equity",
+    "sympy_formulas": [
+      {
+        "variable": "equity",
+        "formula": "assets - liabilities"
+      }
+    ],
+    "tags": [
+      "balance_sheets",
+      "accounting",
+      "equity",
+      "assets",
+      "liabilities",
+      "fundamental_equation"
+    ]
+  },
+  {
+    "id": "template_inventory_turnover_days",
+    "name": "Inventory Turnover Days",
+    "short_description": "Measures how quickly a company sells and replaces its inventory over a period, indicating the average number of days items remain in stock.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Balance Sheets",
+    "inputs": [
+      {
+        "name": "opening_inventory",
+        "type": "float",
+        "description": "Value of inventory at the beginning of the accounting period."
+      },
+      {
+        "name": "purchases",
+        "type": "float",
+        "description": "Total value of inventory purchased during the accounting period."
+      },
+      {
+        "name": "closing_inventory",
+        "type": "float",
+        "description": "Value of inventory at the end of the accounting period."
+      }
+    ],
+    "output_var": "turnover_days",
+    "sympy_formulas": [
+      {
+        "variable": "average_inventory",
+        "formula": "(opening_inventory + closing_inventory) / 2"
+      },
+      {
+        "variable": "cogs",
+        "formula": "opening_inventory + purchases - closing_inventory"
+      },
+      {
+        "variable": "turnover_ratio",
+        "formula": "cogs / average_inventory"
+      },
+      {
+        "variable": "turnover_days",
+        "formula": "365 / turnover_ratio"
+      }
+    ],
+    "tags": [
+      "balance_sheets",
+      "inventory",
+      "turnover",
+      "efficiency_ratio",
+      "working_capital"
+    ]
+  },
+  {
+    "id": "template_current_ratio_with_adjustment",
+    "name": "Adjusted Current Ratio Calculation",
+    "short_description": "Calculates the change in a company's current ratio after reclassifying a portion of long-term liability as a current liability.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Balance Sheets",
+    "inputs": [
+      {
+        "name": "current_assets",
+        "type": "float",
+        "description": "The total value of a company's current assets."
+      },
+      {
+        "name": "current_liabilities",
+        "type": "float",
+        "description": "The total value of a company's current liabilities."
+      },
+      {
+        "name": "reclassified_amount",
+        "type": "float",
+        "description": "The portion of a long-term liability that becomes due within the next 12 months and is reclassified as current."
+      }
+    ],
+    "output_var": "ratio_change",
+    "sympy_formulas": [
+      {
+        "variable": "initial_ratio",
+        "formula": "current_assets / current_liabilities"
+      },
+      {
+        "variable": "adjusted_liabilities",
+        "formula": "current_liabilities + reclassified_amount"
+      },
+      {
+        "variable": "adjusted_ratio",
+        "formula": "current_assets / adjusted_liabilities"
+      },
+      {
+        "variable": "ratio_change",
+        "formula": "initial_ratio - adjusted_ratio"
+      }
+    ],
+    "tags": [
+      "balance_sheets",
+      "liquidity",
+      "current_ratio",
+      "financial_ratios",
+      "reclassification"
+    ]
+  },
+  {
+    "id": "template_business_combination",
+    "name": "Goodwill Computation in Business Combination",
+    "short_description": "Models a business combination where Company A acquires Company B, paying cash and issuing shares. Company B's identifiable assets and liabilities are valued at fair values. Calculates the goodwill arising from the acquisition.",
+    "domain": "Accounting And Financial Reporting",
+    "topic": "Balance Sheets",
+    "inputs": [
+      {
+        "name": "cash_paid",
+        "type": "float",
+        "description": "Cash paid as part of the acquisition consideration"
+      },
+      {
+        "name": "shares_issued",
+        "type": "integer",
+        "description": "Number of shares issued as part of the acquisition consideration"
+      },
+      {
+        "name": "share_price",
+        "type": "float",
+        "description": "Fair value per share issued"
+      },
+      {
+        "name": "land",
+        "type": "float",
+        "description": "Fair value of land acquired from Company B"
+      },
+      {
+        "name": "inventory",
+        "type": "float",
+        "description": "Fair value of inventory acquired from Company B"
+      },
+      {
+        "name": "patents",
+        "type": "float",
+        "description": "Fair value of patents acquired from Company B"
+      },
+      {
+        "name": "borrowings",
+        "type": "float",
+        "description": "Fair value of borrowings assumed from Company B"
+      },
+      {
+        "name": "payables",
+        "type": "float",
+        "description": "Fair value of trade payables assumed from Company B"
+      }
+    ],
+    "output_var": "goodwill",
+    "sympy_formulas": [
+      {
+        "variable": "total_consideration",
+        "formula": "cash_paid + (shares_issued * share_price)"
+      },
+      {
+        "variable": "total_assets",
+        "formula": "land + inventory + patents"
+      },
+      {
+        "variable": "total_liabilities",
+        "formula": "borrowings + payables"
+      },
+      {
+        "variable": "net_assets",
+        "formula": "total_assets - total_liabilities"
+      },
+      {
+        "variable": "goodwill",
+        "formula": "total_consideration - net_assets"
+      }
+    ],
+    "tags": [
+      "balance_sheets",
+      "business_combination",
+      "goodwill",
+      "acquisition",
+      "fair_value"
+    ]
+  }
+]

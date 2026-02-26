@@ -1,0 +1,241 @@
+[
+  {
+    "id": "template_op_easy1",
+    "name": "Intrinsic Value of a Call Option",
+    "short_description": "Calculates the intrinsic value of a call option by comparing the underlying asset's spot price (S) with the strike price (K).",
+    "domain": "Financial Markets",
+    "topic": "Option Pricing",
+    "inputs": [
+      {
+        "name": "S",
+        "type": "float",
+        "description": "Spot price of the underlying asset"
+      },
+      {
+        "name": "K",
+        "type": "float",
+        "description": "Strike price of the call option"
+      }
+    ],
+    "output_var": "intrinsic",
+    "sympy_formulas": [
+      {
+        "variable": "intrinsic",
+        "formula": "Max(S - K, 0)"
+      }
+    ],
+    "tags": [
+      "option_pricing",
+      "intrinsic_value",
+      "call_option",
+      "basic_option_pricing"
+    ]
+  },
+  {
+    "id": "template_op_easy2",
+    "name": "Intrinsic Value of a Put Option",
+    "short_description": "Calculates the intrinsic value of a put option by comparing the strike price (K) and the spot price (S), taking the maximum of (K-S) and zero.",
+    "domain": "Financial Markets",
+    "topic": "Option Pricing",
+    "inputs": [
+      {
+        "name": "S",
+        "type": "float",
+        "description": "Spot price of the underlying asset"
+      },
+      {
+        "name": "K",
+        "type": "float",
+        "description": "Strike price of the put option"
+      }
+    ],
+    "output_var": "intrinsic",
+    "sympy_formulas": [
+      {
+        "variable": "intrinsic",
+        "formula": "Max(K - S, 0)"
+      }
+    ],
+    "tags": [
+      "option_pricing",
+      "put option",
+      "intrinsic value",
+      "options"
+    ]
+  },
+  {
+    "id": "template_op_medium1",
+    "name": "1-Period Binomial Call Price",
+    "short_description": "Calculates the price of a call option using a 1-period binomial model, involving payoffs in up/down states, risk-neutral probability, and present value of the expected payoff.",
+    "domain": "Financial Markets",
+    "topic": "Option Pricing",
+    "inputs": [
+      {
+        "name": "S0",
+        "type": "float",
+        "description": "Initial asset price"
+      },
+      {
+        "name": "K",
+        "type": "float",
+        "description": "Strike price of the option"
+      },
+      {
+        "name": "u",
+        "type": "float",
+        "description": "Up-factor for the asset price"
+      },
+      {
+        "name": "d",
+        "type": "float",
+        "description": "Down-factor for the asset price"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Risk-free interest rate as a decimal"
+      }
+    ],
+    "output_var": "PV",
+    "sympy_formulas": [
+      {
+        "variable": "Su",
+        "formula": "S0 * u"
+      },
+      {
+        "variable": "Sd",
+        "formula": "S0 * d"
+      },
+      {
+        "variable": "Cu",
+        "formula": "Max(Su - K, 0)"
+      },
+      {
+        "variable": "Cd",
+        "formula": "Max(Sd - K, 0)"
+      },
+      {
+        "variable": "p",
+        "formula": "(1 + r - d) / (u - d)"
+      },
+      {
+        "variable": "PV",
+        "formula": "(p * Cu + (1 - p) * Cd) / (1 + r)"
+      }
+    ],
+    "tags": [
+      "option_pricing",
+      "binomial_model",
+      "call_option",
+      "single_period"
+    ]
+  },
+  {
+    "id": "template_op_medium2",
+    "name": "ROI on a Long Call Position",
+    "short_description": "Calculates the Return on Investment (ROI) for a long call option position, considering the strike price, premium, and underlying asset price at expiration.",
+    "domain": "Financial Markets",
+    "topic": "Option Pricing",
+    "inputs": [
+      {
+        "name": "K",
+        "type": "float",
+        "description": "Strike price of the call option"
+      },
+      {
+        "name": "premium",
+        "type": "float",
+        "description": "Upfront cost (premium) paid for the call option"
+      },
+      {
+        "name": "S_T",
+        "type": "float",
+        "description": "Price of the underlying asset at expiration"
+      }
+    ],
+    "output_var": "roi_pct",
+    "sympy_formulas": [
+      {
+        "variable": "payoff",
+        "formula": "Max(S_T - K, 0)"
+      },
+      {
+        "variable": "net_pl",
+        "formula": "payoff - premium"
+      },
+      {
+        "variable": "roi_pct",
+        "formula": "(net_pl / premium) * 100"
+      }
+    ],
+    "tags": [
+      "option_pricing",
+      "ROI",
+      "call_option",
+      "return_on_investment"
+    ]
+  },
+  {
+    "id": "template_op_hard1",
+    "name": "Black-Scholes Call Option Price",
+    "short_description": "Calculates the theoretical price of a European call option using the Black-Scholes model, considering the underlying asset's current price, strike price, risk-free interest rate, volatility, and time to expiration.",
+    "domain": "Financial Markets",
+    "topic": "Option Pricing",
+    "inputs": [
+      {
+        "name": "S0",
+        "type": "float",
+        "description": "Current underlying asset price"
+      },
+      {
+        "name": "K",
+        "type": "float",
+        "description": "Option strike price"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Risk-free interest rate (annualized, as a decimal)"
+      },
+      {
+        "name": "sigma",
+        "type": "float",
+        "description": "Annualized volatility of the underlying asset (as a decimal)"
+      },
+      {
+        "name": "T",
+        "type": "float",
+        "description": "Time to option expiration (in years)"
+      }
+    ],
+    "output_var": "C",
+    "sympy_formulas": [
+      {
+        "variable": "d1",
+        "formula": "(log(S0/K) + (r + 0.5*sigma**2)*T) / (sigma*sqrt(T))"
+      },
+      {
+        "variable": "d2",
+        "formula": "d1 - sigma*sqrt(T)"
+      },
+      {
+        "variable": "Nd1",
+        "formula": "phi(d1)"
+      },
+      {
+        "variable": "Nd2",
+        "formula": "phi(d2)"
+      },
+      {
+        "variable": "C",
+        "formula": "S0*Nd1 - K*exp(-r*T)*Nd2"
+      }
+    ],
+    "tags": [
+      "option_pricing",
+      "black_scholes",
+      "call_option",
+      "derivatives"
+    ]
+  }
+]

@@ -1,0 +1,210 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Number within Range",
+    "short_description": "Generates a uniformly distributed random floating-point number between a specified lower and upper bound, rounded to two decimal places. This function is typically used as a utility for generating random inputs in financial models or simulations.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The lower bound (inclusive) for the generated random number."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The upper bound (inclusive) for the generated random number."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "Round(random_uniform(low, high), 2)"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "randomness",
+      "simulation",
+      "utility",
+      "data generation"
+    ]
+  },
+  {
+    "id": "template_crypto_tax_penalty",
+    "name": "Crypto Tax Penalty Calculation",
+    "short_description": "Calculates the tax penalty imposed on a crypto exchange due to non-compliance, based on its transaction volume and a specified penalty rate.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "transaction_volume",
+        "type": "float",
+        "description": "Total transaction volume processed by the crypto exchange in USD."
+      },
+      {
+        "name": "penalty_rate",
+        "type": "float",
+        "description": "The penalty rate imposed due to non-compliance, expressed as a percentage (e.g., 5 for 5%)."
+      }
+    ],
+    "output_var": "penalty_amount",
+    "sympy_formulas": [
+      {
+        "variable": "penalty_amount",
+        "formula": "transaction_volume * (penalty_rate / 100)"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "crypto",
+      "tax",
+      "penalty"
+    ]
+  },
+  {
+    "id": "template_compliance_fee_adjustment",
+    "name": "Crypto Compliance Fee Adjustment",
+    "short_description": "Calculates an adjusted crypto compliance fee based on a base fee and an adjustment factor.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "base_fee",
+        "type": "float",
+        "description": "The initial compliance fee before adjustment."
+      },
+      {
+        "name": "adjustment_factor",
+        "type": "float",
+        "description": "The factor by which the base fee is adjusted due to new regulations."
+      }
+    ],
+    "output_var": "adjusted_fee",
+    "sympy_formulas": [
+      {
+        "variable": "adjusted_fee",
+        "formula": "base_fee * adjustment_factor"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "crypto",
+      "fees",
+      "compliance"
+    ]
+  },
+  {
+    "id": "template_regulatory_impact",
+    "name": "Regulatory Impact on Listing Fee",
+    "short_description": "Intermediate: Regulatory impact on listing fee.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "current_fee",
+        "type": "float",
+        "description": "The current listing fee in USD."
+      },
+      {
+        "name": "impact_percentage",
+        "type": "float",
+        "description": "The percentage increase in the fee due to regulations."
+      }
+    ],
+    "output_var": "increase_amount",
+    "sympy_formulas": [
+      {
+        "variable": "increase_amount",
+        "formula": "current_fee * (impact_percentage / 100)"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "fees",
+      "crypto",
+      "exchange"
+    ]
+  },
+  {
+    "id": "template_trade_cost_adjustment",
+    "name": "Regulatory-imposed trade cost adjustment",
+    "short_description": "Intermediate: Regulatory-imposed trade cost adjustment for crypto trade costs.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "original_cost",
+        "type": "float",
+        "description": "Original trade cost per transaction in USD."
+      },
+      {
+        "name": "regulation_multiplier",
+        "type": "float",
+        "description": "Multiplier applied due to enhanced regulatory requirements."
+      }
+    ],
+    "output_var": "additional_cost",
+    "sympy_formulas": [
+      {
+        "variable": "additional_cost",
+        "formula": "original_cost * (regulation_multiplier - 1)"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "crypto",
+      "trade_cost",
+      "adjustment"
+    ]
+  },
+  {
+    "id": "template_multi_factor_regulatory_risk",
+    "name": "Multi-Factor Regulatory Compliance Cost",
+    "short_description": "Advanced: Multi-factor regulatory compliance cost evaluation for a crypto firm, summing various regulatory cost factors.",
+    "domain": "Crypto Finance",
+    "topic": "Regulations",
+    "inputs": [
+      {
+        "name": "baseline_cost",
+        "type": "float",
+        "description": "The baseline compliance cost of the firm."
+      },
+      {
+        "name": "factor_a",
+        "type": "float",
+        "description": "Additional cost factor from audit frequency (as a decimal)."
+      },
+      {
+        "name": "factor_b",
+        "type": "float",
+        "description": "Additional cost factor from regulatory fines (as a decimal)."
+      },
+      {
+        "name": "factor_c",
+        "type": "float",
+        "description": "Additional cost factor from compliance surcharge (as a decimal)."
+      }
+    ],
+    "output_var": "additional_cost",
+    "sympy_formulas": [
+      {
+        "variable": "total_factor",
+        "formula": "factor_a + factor_b + factor_c"
+      },
+      {
+        "variable": "additional_cost",
+        "formula": "baseline_cost * total_factor"
+      }
+    ],
+    "tags": [
+      "regulations",
+      "compliance",
+      "cost",
+      "risk",
+      "crypto"
+    ]
+  }
+]

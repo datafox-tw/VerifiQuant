@@ -1,0 +1,244 @@
+[
+  {
+    "id": "template_sma_easy1",
+    "name": "Simple Capital Gain",
+    "short_description": "Calculates the capital gain from buying shares at one price and selling them at a higher price.",
+    "domain": "Financial Markets",
+    "topic": "Stock Market Analysis",
+    "inputs": [
+      {
+        "name": "num_shares",
+        "type": "integer",
+        "description": "Number of shares bought and sold"
+      },
+      {
+        "name": "purchase_price",
+        "type": "float",
+        "description": "Price per share at purchase"
+      },
+      {
+        "name": "selling_price",
+        "type": "float",
+        "description": "Price per share at selling"
+      }
+    ],
+    "output_var": "capital_gain",
+    "sympy_formulas": [
+      {
+        "variable": "total_cost",
+        "formula": "num_shares * purchase_price"
+      },
+      {
+        "variable": "total_selling",
+        "formula": "num_shares * selling_price"
+      },
+      {
+        "variable": "capital_gain",
+        "formula": "total_selling - total_cost"
+      }
+    ],
+    "tags": [
+      "stock_market_analysis",
+      "capital_gain",
+      "shares",
+      "equity"
+    ]
+  },
+  {
+    "id": "template_sma_easy2",
+    "name": "Dividend Yield Calculation",
+    "short_description": "Calculate the dividend yield by dividing the annual dividend by the share price, then convert to a percentage.",
+    "domain": "Financial Markets",
+    "topic": "Stock Market Analysis",
+    "inputs": [
+      {
+        "name": "annual_div",
+        "type": "float",
+        "description": "The annual dividend per share."
+      },
+      {
+        "name": "share_price",
+        "type": "float",
+        "description": "The current share price."
+      }
+    ],
+    "output_var": "yield_pct",
+    "sympy_formulas": [
+      {
+        "variable": "yield_decimal",
+        "formula": "annual_div / share_price"
+      },
+      {
+        "variable": "yield_pct",
+        "formula": "yield_decimal * 100"
+      }
+    ],
+    "tags": [
+      "stock_market_analysis",
+      "dividend",
+      "yield",
+      "valuation"
+    ]
+  },
+  {
+    "id": "template_sma_medium1",
+    "name": "Total Return on Stock (Purchase, Dividend, Sale)",
+    "short_description": "This template calculates the total dollar return from buying shares, receiving a dividend, and then selling the shares.",
+    "domain": "Financial Markets",
+    "topic": "Stock Market Analysis",
+    "inputs": [
+      {
+        "name": "num_shares",
+        "type": "integer",
+        "description": "Number of shares bought"
+      },
+      {
+        "name": "purchase_price",
+        "type": "float",
+        "description": "Purchase price per share"
+      },
+      {
+        "name": "selling_price",
+        "type": "float",
+        "description": "Selling price per share"
+      },
+      {
+        "name": "dividend_per_share",
+        "type": "float",
+        "description": "Dividend received per share"
+      }
+    ],
+    "output_var": "total_return",
+    "sympy_formulas": [
+      {
+        "variable": "total_cost",
+        "formula": "num_shares * purchase_price"
+      },
+      {
+        "variable": "total_dividend",
+        "formula": "num_shares * dividend_per_share"
+      },
+      {
+        "variable": "total_selling",
+        "formula": "num_shares * selling_price"
+      },
+      {
+        "variable": "total_return",
+        "formula": "total_selling + total_dividend - total_cost"
+      }
+    ],
+    "tags": [
+      "stock_market_analysis",
+      "total_return",
+      "dividends",
+      "stock_investment"
+    ]
+  },
+  {
+    "id": "template_sma_medium2",
+    "name": "Calculating Share Price from P/E Ratio",
+    "short_description": "This template estimates the share price using the P/E ratio and the company's total earnings.",
+    "domain": "Financial Markets",
+    "topic": "Stock Market Analysis",
+    "inputs": [
+      {
+        "name": "pe_ratio",
+        "type": "float",
+        "description": "Price-to-Earnings Ratio of the company"
+      },
+      {
+        "name": "total_earnings",
+        "type": "float",
+        "description": "Company's total earnings"
+      },
+      {
+        "name": "shares_outstanding",
+        "type": "integer",
+        "description": "Number of shares outstanding for the company"
+      }
+    ],
+    "output_var": "share_price",
+    "sympy_formulas": [
+      {
+        "variable": "eps",
+        "formula": "total_earnings / shares_outstanding"
+      },
+      {
+        "variable": "share_price",
+        "formula": "pe_ratio * eps"
+      }
+    ],
+    "tags": [
+      "stock_market_analysis",
+      "share_price",
+      "pe_ratio",
+      "earnings_per_share",
+      "valuation"
+    ]
+  },
+  {
+    "id": "template_sma_hard1",
+    "name": "Multiple Purchases + Sale (Cost Basis and Net Profit)",
+    "short_description": "Calculates the average cost basis, total cost, and net profit for an investor who makes two separate share purchases and then sells all shares.",
+    "domain": "Financial Markets",
+    "topic": "Stock Market Analysis",
+    "inputs": [
+      {
+        "name": "shares_p1",
+        "type": "integer",
+        "description": "Number of shares purchased in the first transaction."
+      },
+      {
+        "name": "price_p1",
+        "type": "float",
+        "description": "Price per share paid in the first transaction."
+      },
+      {
+        "name": "shares_p2",
+        "type": "integer",
+        "description": "Number of shares purchased in the second transaction."
+      },
+      {
+        "name": "price_p2",
+        "type": "float",
+        "description": "Price per share paid in the second transaction."
+      },
+      {
+        "name": "selling_price",
+        "type": "float",
+        "description": "Price per share at which all shares were sold."
+      }
+    ],
+    "output_var": "net_profit",
+    "sympy_formulas": [
+      {
+        "variable": "total_shares",
+        "formula": "shares_p1 + shares_p2"
+      },
+      {
+        "variable": "total_cost",
+        "formula": "(shares_p1 * price_p1) + (shares_p2 * price_p2)"
+      },
+      {
+        "variable": "avg_cost_basis",
+        "formula": "total_cost / total_shares"
+      },
+      {
+        "variable": "total_proceeds",
+        "formula": "total_shares * selling_price"
+      },
+      {
+        "variable": "net_profit",
+        "formula": "total_proceeds - total_cost"
+      }
+    ],
+    "tags": [
+      "stock_market_analysis",
+      "cost_basis",
+      "net_profit",
+      "shares",
+      "investing",
+      "trading"
+    ]
+  }
+]

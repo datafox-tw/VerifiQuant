@@ -1,0 +1,213 @@
+[
+  {
+    "id": "template_price_sentiment",
+    "name": "Price Sentiment Score",
+    "short_description": "Calculates a sentiment score by multiplying a crypto asset's price change by a sentiment multiplier.",
+    "domain": "Crypto Finance",
+    "topic": "Sentiments",
+    "inputs": [
+      {
+        "name": "price_change",
+        "type": "float",
+        "description": "The change in price of the crypto asset."
+      },
+      {
+        "name": "multiplier",
+        "type": "float",
+        "description": "The sentiment multiplier factor."
+      }
+    ],
+    "output_var": "sentiment_score",
+    "sympy_formulas": [
+      {
+        "variable": "sentiment_score",
+        "formula": "price_change * multiplier"
+      }
+    ],
+    "tags": [
+      "sentiments",
+      "crypto",
+      "price_analysis"
+    ]
+  },
+  {
+    "id": "template_volume_sentiment",
+    "name": "Volume Sentiment Score Determination",
+    "short_description": "Calculates a sentiment score for a crypto asset based on its trading volume increase and a given sensitivity factor.",
+    "domain": "Crypto Finance",
+    "topic": "Sentiments",
+    "inputs": [
+      {
+        "name": "volume_increase",
+        "type": "float",
+        "description": "Trading volume increase in USD."
+      },
+      {
+        "name": "sensitivity",
+        "type": "float",
+        "description": "Sensitivity factor used to weight the volume increase."
+      }
+    ],
+    "output_var": "sentiment_score",
+    "sympy_formulas": [
+      {
+        "variable": "sentiment_score",
+        "formula": "volume_increase * sensitivity"
+      }
+    ],
+    "tags": [
+      "sentiments",
+      "crypto",
+      "trading_volume"
+    ]
+  },
+  {
+    "id": "template_tweet_influence_sentiment",
+    "name": "Tweet Influence on Sentiment Score",
+    "short_description": "Calculates an overall tweet-based sentiment score for a crypto asset, considering the number of influential tweets, their average polarity, and an engagement factor.",
+    "domain": "Crypto Finance",
+    "topic": "Sentiments",
+    "inputs": [
+      {
+        "name": "tweet_count",
+        "type": "integer",
+        "description": "The number of influential tweets received in a day."
+      },
+      {
+        "name": "tweet_polarity",
+        "type": "float",
+        "description": "The average polarity score contributed by each tweet."
+      },
+      {
+        "name": "engagement_factor",
+        "type": "float",
+        "description": "The overall impact adjustment factor for tweet engagement."
+      }
+    ],
+    "output_var": "sentiment_score",
+    "sympy_formulas": [
+      {
+        "variable": "sentiment_score",
+        "formula": "tweet_count * tweet_polarity * engagement_factor"
+      }
+    ],
+    "tags": [
+      "sentiments",
+      "social media",
+      "crypto",
+      "metrics"
+    ]
+  },
+  {
+    "id": "template_news_impact_sentiment",
+    "name": "News Impact on Sentiment Score",
+    "short_description": "Measures the news-based sentiment score considering the number of articles, their average sentiment, and an influence factor.",
+    "domain": "Crypto Finance",
+    "topic": "Sentiments",
+    "inputs": [
+      {
+        "name": "news_count",
+        "type": "integer",
+        "description": "Number of news articles in a period."
+      },
+      {
+        "name": "news_score",
+        "type": "float",
+        "description": "Average sentiment multiplier per news article."
+      },
+      {
+        "name": "influence_factor",
+        "type": "float",
+        "description": "Overall influence factor weighting the news impact."
+      }
+    ],
+    "output_var": "sentiment_score",
+    "sympy_formulas": [
+      {
+        "variable": "sentiment_score",
+        "formula": "news_count * news_score * influence_factor"
+      }
+    ],
+    "tags": [
+      "sentiments",
+      "news",
+      "crypto",
+      "impact"
+    ]
+  },
+  {
+    "id": "template_multi_factor_sentiment",
+    "name": "Multi-Factor Crypto Sentiment Analysis",
+    "short_description": "Calculates an overall sentiment score for a crypto asset by combining tweet-based, news-based, and price-based factors.",
+    "domain": "Crypto Finance",
+    "topic": "Sentiments",
+    "inputs": [
+      {
+        "name": "tweet_count",
+        "type": "integer",
+        "description": "Number of tweets related to the crypto asset"
+      },
+      {
+        "name": "tweet_polarity",
+        "type": "float",
+        "description": "Average sentiment polarity of tweets (e.g., 1.0 for neutral, >1.0 for positive, <1.0 for negative)"
+      },
+      {
+        "name": "tweet_engagement",
+        "type": "float",
+        "description": "Engagement factor derived from tweet interactions (e.g., retweets, likes)"
+      },
+      {
+        "name": "news_count",
+        "type": "integer",
+        "description": "Number of news articles related to the crypto asset"
+      },
+      {
+        "name": "news_score",
+        "type": "float",
+        "description": "Average sentiment score of news articles"
+      },
+      {
+        "name": "news_influence",
+        "type": "float",
+        "description": "Influence factor of news articles"
+      },
+      {
+        "name": "price_change",
+        "type": "float",
+        "description": "Recent price change of the crypto asset in USD"
+      },
+      {
+        "name": "price_factor",
+        "type": "float",
+        "description": "Adjustment factor for the price change component"
+      }
+    ],
+    "output_var": "overall_sentiment",
+    "sympy_formulas": [
+      {
+        "variable": "tweet_component",
+        "formula": "tweet_count * tweet_polarity * tweet_engagement"
+      },
+      {
+        "variable": "news_component",
+        "formula": "news_count * news_score * news_influence"
+      },
+      {
+        "variable": "price_component",
+        "formula": "price_change * price_factor"
+      },
+      {
+        "variable": "overall_sentiment",
+        "formula": "tweet_component + news_component + price_component"
+      }
+    ],
+    "tags": [
+      "sentiments",
+      "crypto",
+      "multi-factor",
+      "social media",
+      "news"
+    ]
+  }
+]

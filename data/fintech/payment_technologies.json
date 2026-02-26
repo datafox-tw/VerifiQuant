@@ -1,0 +1,289 @@
+[
+  {
+    "id": "template_pt_easy1",
+    "name": "Card Processing Net Amount",
+    "short_description": "Calculates the net amount a merchant receives after a card processing fee, based on the sale amount and merchant discount rate.",
+    "domain": "Fintech",
+    "topic": "Payment Technologies",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "float",
+        "description": "The total sale amount of the card payment."
+      },
+      {
+        "name": "mdr",
+        "type": "float",
+        "description": "The merchant discount rate charged by the payment platform (as a decimal)."
+      }
+    ],
+    "output_var": "Net_amount",
+    "sympy_formulas": [
+      {
+        "variable": "Fee",
+        "formula": "amount * mdr"
+      },
+      {
+        "variable": "Net_amount",
+        "formula": "amount - Fee"
+      }
+    ],
+    "tags": [
+      "payment_technologies",
+      "card_processing",
+      "fees",
+      "net_amount",
+      "fintech"
+    ]
+  },
+  {
+    "id": "template_pt_easy2",
+    "name": "Buy-Now-Pay-Later Equal Installments",
+    "short_description": "Calculates the equal installment amount for a Buy-Now-Pay-Later purchase, factoring in a service fee.",
+    "domain": "Fintech",
+    "topic": "Payment Technologies",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Purchase price"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of installments"
+      },
+      {
+        "name": "f",
+        "type": "float",
+        "description": "Service fee rate as a decimal"
+      }
+    ],
+    "output_var": "installment",
+    "sympy_formulas": [
+      {
+        "variable": "total_due",
+        "formula": "P * (1 + f)"
+      },
+      {
+        "variable": "installment",
+        "formula": "total_due / n"
+      }
+    ],
+    "tags": [
+      "payment_technologies",
+      "bnpl",
+      "installments",
+      "fee"
+    ]
+  },
+  {
+    "id": "template_pt_medium1",
+    "name": "Effective Fee Rate on Batch Transactions",
+    "short_description": "Calculates the effective fee rate for a batch of transactions, considering a fixed fee and a percentage fee per transaction across multiple transaction amounts.",
+    "domain": "Fintech",
+    "topic": "Payment Technologies",
+    "inputs": [
+      {
+        "name": "per_tx_fee",
+        "type": "float",
+        "description": "Fixed fee charged per transaction"
+      },
+      {
+        "name": "pct_fee",
+        "type": "float",
+        "description": "Percentage fee charged per transaction (as a decimal)"
+      },
+      {
+        "name": "Tx_Amount_1",
+        "type": "float",
+        "description": "Amount of transaction 1"
+      },
+      {
+        "name": "Tx_Amount_2",
+        "type": "float",
+        "description": "Amount of transaction 2"
+      },
+      {
+        "name": "Tx_Amount_3",
+        "type": "float",
+        "description": "Amount of transaction 3"
+      },
+      {
+        "name": "Tx_Amount_4",
+        "type": "float",
+        "description": "Amount of transaction 4"
+      }
+    ],
+    "output_var": "eff_rate",
+    "sympy_formulas": [
+      {
+        "variable": "Fee_1",
+        "formula": "per_tx_fee + Tx_Amount_1 * pct_fee"
+      },
+      {
+        "variable": "Fee_2",
+        "formula": "per_tx_fee + Tx_Amount_2 * pct_fee"
+      },
+      {
+        "variable": "Fee_3",
+        "formula": "per_tx_fee + Tx_Amount_3 * pct_fee"
+      },
+      {
+        "variable": "Fee_4",
+        "formula": "per_tx_fee + Tx_Amount_4 * pct_fee"
+      },
+      {
+        "variable": "total_fees",
+        "formula": "Fee_1 + Fee_2 + Fee_3 + Fee_4"
+      },
+      {
+        "variable": "total_sales",
+        "formula": "Tx_Amount_1 + Tx_Amount_2 + Tx_Amount_3 + Tx_Amount_4"
+      },
+      {
+        "variable": "eff_rate",
+        "formula": "total_fees / total_sales"
+      }
+    ],
+    "tags": [
+      "payment_technologies",
+      "fees",
+      "effective_rate",
+      "transaction"
+    ]
+  },
+  {
+    "id": "template_pt_medium2",
+    "name": "Cross-Border Payment Conversion and Fees",
+    "short_description": "Calculates the net USD received after converting a EUR payment, applying a platform spread, and deducting a fixed processing fee.",
+    "domain": "Fintech",
+    "topic": "Payment Technologies",
+    "inputs": [
+      {
+        "name": "amount_eur",
+        "type": "float",
+        "description": "Sale amount in EUR (E)"
+      },
+      {
+        "name": "mid_rate",
+        "type": "float",
+        "description": "Mid-market EUR/USD rate (R)"
+      },
+      {
+        "name": "spread",
+        "type": "float",
+        "description": "Platform spread (s) as a decimal"
+      },
+      {
+        "name": "fixed_fee",
+        "type": "float",
+        "description": "Fixed processing fee (f) in USD"
+      }
+    ],
+    "output_var": "net_usd",
+    "sympy_formulas": [
+      {
+        "variable": "conv_rate",
+        "formula": "mid_rate * (1 - spread)"
+      },
+      {
+        "variable": "usd_before_fee",
+        "formula": "amount_eur * conv_rate"
+      },
+      {
+        "variable": "net_usd",
+        "formula": "usd_before_fee - fixed_fee"
+      }
+    ],
+    "tags": [
+      "payment_technologies",
+      "cross-border",
+      "currency conversion",
+      "fees",
+      "fx"
+    ]
+  },
+  {
+    "id": "template_pt_hard1",
+    "name": "Effective Monthly Fee Rate",
+    "short_description": "Calculates the effective monthly fee rate for a payment platform with a fixed subscription fee, a flat fee per transaction, and tiered percentage-based fees on total sales volume.",
+    "domain": "Fintech",
+    "topic": "Payment Technologies",
+    "inputs": [
+      {
+        "name": "n_tx",
+        "type": "integer",
+        "description": "Number of transactions in the month"
+      },
+      {
+        "name": "avg_tx",
+        "type": "float",
+        "description": "Average amount per transaction"
+      },
+      {
+        "name": "sub_fee",
+        "type": "float",
+        "description": "Monthly subscription fee"
+      },
+      {
+        "name": "flat_fee",
+        "type": "float",
+        "description": "Flat fee charged per transaction"
+      },
+      {
+        "name": "tier_cap",
+        "type": "float",
+        "description": "Sales volume threshold for applying tiered percentage rates"
+      },
+      {
+        "name": "tier1_rate",
+        "type": "float",
+        "description": "Percentage fee rate for sales up to the tier_cap (as a decimal)"
+      },
+      {
+        "name": "tier2_rate",
+        "type": "float",
+        "description": "Percentage fee rate for sales exceeding the tier_cap (as a decimal)"
+      }
+    ],
+    "output_var": "eff_rate",
+    "sympy_formulas": [
+      {
+        "variable": "total_sales",
+        "formula": "n_tx * avg_tx"
+      },
+      {
+        "variable": "tier1_sales",
+        "formula": "Min(total_sales, tier_cap)"
+      },
+      {
+        "variable": "tier2_sales",
+        "formula": "Max(0, total_sales - tier_cap)"
+      },
+      {
+        "variable": "var_fee",
+        "formula": "tier1_sales * tier1_rate + tier2_sales * tier2_rate"
+      },
+      {
+        "variable": "flat_total",
+        "formula": "n_tx * flat_fee"
+      },
+      {
+        "variable": "total_fees",
+        "formula": "sub_fee + var_fee + flat_total"
+      },
+      {
+        "variable": "eff_rate",
+        "formula": "total_fees / total_sales"
+      }
+    ],
+    "tags": [
+      "payment_technologies",
+      "fees",
+      "e-commerce",
+      "effective_rate",
+      "tiered_pricing"
+    ]
+  }
+]

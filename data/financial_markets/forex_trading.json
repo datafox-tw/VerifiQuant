@@ -1,0 +1,219 @@
+[
+  {
+    "id": "template_fx_easy1",
+    "name": "Simple Currency Conversion",
+    "short_description": "Convert a given amount from one currency to another using a direct exchange rate. The calculation involves deciding whether to multiply or divide by the quoted rate based on the currency pair.",
+    "domain": "Financial Markets",
+    "topic": "Forex Trading",
+    "inputs": [
+      {
+        "name": "pair",
+        "type": "string",
+        "description": "The currency pair (e.g., EUR/USD, GBP/USD, USD/JPY)."
+      },
+      {
+        "name": "amount",
+        "type": "float",
+        "description": "The initial amount in the base currency to be converted."
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "The exchange rate for the specified currency pair."
+      }
+    ],
+    "output_var": "converted",
+    "sympy_formulas": [
+      {
+        "variable": "converted",
+        "formula": "amount * rate"
+      }
+    ],
+    "tags": [
+      "forex_trading",
+      "currency_conversion",
+      "exchange_rate"
+    ]
+  },
+  {
+    "id": "template_fx_easy2",
+    "name": "Pip Value Calculation",
+    "short_description": "Calculates the monetary value of a one-pip movement for a given position size in a Forex pair.",
+    "domain": "Financial Markets",
+    "topic": "Forex Trading",
+    "inputs": [
+      {
+        "name": "lot",
+        "type": "integer",
+        "description": "The position size or number of units traded in the currency pair."
+      },
+      {
+        "name": "pip_size",
+        "type": "float",
+        "description": "The size of one pip for the specific currency pair (e.g., 0.0001 for EUR/USD, 0.01 for USD/JPY)."
+      }
+    ],
+    "output_var": "Pip_Value",
+    "sympy_formulas": [
+      {
+        "variable": "Pip_Value",
+        "formula": "pip_size * lot"
+      }
+    ],
+    "tags": [
+      "forex_trading",
+      "pip_value",
+      "currency",
+      "trading"
+    ]
+  },
+  {
+    "id": "template_fx_medium1",
+    "name": "Profit/Loss on a Forex Trade",
+    "short_description": "Calculates the profit or loss on a forex trade by determining the pip difference, pip value, and then multiplying them.",
+    "domain": "Financial Markets",
+    "topic": "Forex Trading",
+    "inputs": [
+      {
+        "name": "pair",
+        "type": "string",
+        "description": "The currency pair traded (e.g., EUR/USD, USD/JPY). Important for determining the base currency of the P/L."
+      },
+      {
+        "name": "open_",
+        "type": "float",
+        "description": "The opening price of the currency pair."
+      },
+      {
+        "name": "close",
+        "type": "float",
+        "description": "The closing price of the currency pair."
+      },
+      {
+        "name": "lot",
+        "type": "integer",
+        "description": "The size of the trade in units (e.g., 10,000 or 100,000 units)."
+      },
+      {
+        "name": "pip",
+        "type": "float",
+        "description": "The value of one pip for the specific currency pair (e.g., 0.0001 for major USD pairs, 0.01 for JPY pairs)."
+      }
+    ],
+    "output_var": "pl",
+    "sympy_formulas": [
+      {
+        "variable": "pip_diff",
+        "formula": "(close - open_) / pip"
+      },
+      {
+        "variable": "pip_val",
+        "formula": "pip * lot"
+      },
+      {
+        "variable": "pl",
+        "formula": "pip_diff * pip_val"
+      }
+    ],
+    "tags": [
+      "forex_trading",
+      "profit_loss",
+      "pips",
+      "currency_trade"
+    ]
+  },
+  {
+    "id": "template_fx_medium2",
+    "name": "Cross-Currency Conversion",
+    "short_description": "Convert an amount from one currency to another using two different currency pairs to calculate the implied cross rate.",
+    "domain": "Financial Markets",
+    "topic": "Forex Trading",
+    "inputs": [
+      {
+        "name": "eur_usd",
+        "type": "float",
+        "description": "The exchange rate of EUR to USD"
+      },
+      {
+        "name": "gbp_usd",
+        "type": "float",
+        "description": "The exchange rate of GBP to USD"
+      },
+      {
+        "name": "amt_eur",
+        "type": "float",
+        "description": "The amount in Euros to be converted"
+      }
+    ],
+    "output_var": "gbp",
+    "sympy_formulas": [
+      {
+        "variable": "cross",
+        "formula": "eur_usd / gbp_usd"
+      },
+      {
+        "variable": "gbp",
+        "formula": "amt_eur * cross"
+      }
+    ],
+    "tags": [
+      "forex_trading",
+      "currency_conversion",
+      "cross_rate"
+    ]
+  },
+  {
+    "id": "template_fx_hard1",
+    "name": "Triangular Arbitrage Profit/Loss",
+    "short_description": "Calculates the net profit or loss from a triangular arbitrage strategy by converting an initial USD amount through EUR and GBP, and back to USD.",
+    "domain": "Financial Markets",
+    "topic": "Forex Trading",
+    "inputs": [
+      {
+        "name": "usd_eur",
+        "type": "float",
+        "description": "The exchange rate for converting USD to EUR (EUR per USD)."
+      },
+      {
+        "name": "eur_gbp",
+        "type": "float",
+        "description": "The exchange rate for converting EUR to GBP (GBP per EUR)."
+      },
+      {
+        "name": "gbp_usd",
+        "type": "float",
+        "description": "The exchange rate for converting GBP to USD (USD per GBP)."
+      },
+      {
+        "name": "start_usd",
+        "type": "float",
+        "description": "The initial amount of USD to begin the arbitrage."
+      }
+    ],
+    "output_var": "pnl",
+    "sympy_formulas": [
+      {
+        "variable": "eur",
+        "formula": "start_usd * usd_eur"
+      },
+      {
+        "variable": "gbp",
+        "formula": "eur * eur_gbp"
+      },
+      {
+        "variable": "final_usd",
+        "formula": "gbp * gbp_usd"
+      },
+      {
+        "variable": "pnl",
+        "formula": "final_usd - start_usd"
+      }
+    ],
+    "tags": [
+      "forex_trading",
+      "triangular_arbitrage",
+      "arbitrage",
+      "currency_exchange"
+    ]
+  }
+]

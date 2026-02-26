@@ -1,0 +1,233 @@
+[
+  {
+    "id": "template_ra_easy1",
+    "name": "Net Portfolio Value After Advisory Fee",
+    "short_description": "Calculates the net portfolio value after an annual advisory fee is deducted from the initial portfolio value.",
+    "domain": "Fintech",
+    "topic": "Robo Advisors",
+    "inputs": [
+      {
+        "name": "value",
+        "type": "float",
+        "description": "Initial portfolio value"
+      },
+      {
+        "name": "fee_rate",
+        "type": "float",
+        "description": "Annual advisory fee rate as a decimal"
+      }
+    ],
+    "output_var": "net_value",
+    "sympy_formulas": [
+      {
+        "variable": "Fee",
+        "formula": "value * fee_rate"
+      },
+      {
+        "variable": "net_value",
+        "formula": "value - Fee"
+      }
+    ],
+    "tags": [
+      "robo_advisors",
+      "portfolio_management",
+      "fees",
+      "fintech"
+    ]
+  },
+  {
+    "id": "template_ra_easy2",
+    "name": "One-Year Ending Value After Fee",
+    "short_description": "Calculates the portfolio's ending value after one year, considering a gross return and an advisory fee.",
+    "domain": "Fintech",
+    "topic": "Robo Advisors",
+    "inputs": [
+      {
+        "name": "V",
+        "type": "float",
+        "description": "initial portfolio value"
+      },
+      {
+        "name": "g",
+        "type": "float",
+        "description": "gross return rate as decimal"
+      },
+      {
+        "name": "f",
+        "type": "float",
+        "description": "advisory fee rate as decimal"
+      }
+    ],
+    "output_var": "end_after_fee",
+    "sympy_formulas": [
+      {
+        "variable": "end_before_fee",
+        "formula": "V * (1 + g)"
+      },
+      {
+        "variable": "end_after_fee",
+        "formula": "end_before_fee * (1 - f)"
+      }
+    ],
+    "tags": [
+      "robo_advisors",
+      "portfolio_value",
+      "fees",
+      "return",
+      "one_year"
+    ]
+  },
+  {
+    "id": "template_ra_medium1",
+    "name": "Equity Trade for Rebalancing a Two-Asset Portfolio",
+    "short_description": "Calculates the necessary equity buy or sell amount to rebalance a two-asset (equities/bonds) portfolio to a target equity percentage, given current asset values.",
+    "domain": "Fintech",
+    "topic": "Robo Advisors",
+    "inputs": [
+      {
+        "name": "equities_val",
+        "type": "float",
+        "description": "Current market value of equities in the portfolio"
+      },
+      {
+        "name": "bonds_val",
+        "type": "float",
+        "description": "Current market value of bonds in the portfolio"
+      },
+      {
+        "name": "target_equity_pct",
+        "type": "float",
+        "description": "Target percentage allocation for equities (as a decimal, e.g., 0.6 for 60%)"
+      }
+    ],
+    "output_var": "equity_trade",
+    "sympy_formulas": [
+      {
+        "variable": "total_val",
+        "formula": "equities_val + bonds_val"
+      },
+      {
+        "variable": "target_equity_val",
+        "formula": "total_val * target_equity_pct"
+      },
+      {
+        "variable": "equity_trade",
+        "formula": "target_equity_val - equities_val"
+      }
+    ],
+    "tags": [
+      "robo_advisors",
+      "portfolio_rebalance",
+      "asset_allocation",
+      "equities",
+      "bonds"
+    ]
+  },
+  {
+    "id": "template_ra_medium2",
+    "name": "Projected Value with Monthly Contributions (Net of Fees)",
+    "short_description": "Calculates the future value of a series of monthly contributions, compounded monthly, and then deducts an advisory fee to determine the net projected portfolio value.",
+    "domain": "Fintech",
+    "topic": "Robo Advisors",
+    "inputs": [
+      {
+        "name": "C",
+        "type": "float",
+        "description": "Monthly contribution amount"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Annual expected return (as a decimal)"
+      },
+      {
+        "name": "t",
+        "type": "integer",
+        "description": "Number of years for contributions"
+      },
+      {
+        "name": "f",
+        "type": "float",
+        "description": "Annual advisory fee rate (as a decimal)"
+      }
+    ],
+    "output_var": "Net_Projected_Value",
+    "sympy_formulas": [
+      {
+        "variable": "m",
+        "formula": "t * 12"
+      },
+      {
+        "variable": "monthly_r",
+        "formula": "r / 12"
+      },
+      {
+        "variable": "FV_before_fee",
+        "formula": "C * (((1 + monthly_r)**m - 1) / monthly_r)"
+      },
+      {
+        "variable": "Fee_amount",
+        "formula": "FV_before_fee * f"
+      },
+      {
+        "variable": "Net_Projected_Value",
+        "formula": "FV_before_fee - Fee_amount"
+      }
+    ],
+    "tags": [
+      "robo_advisors",
+      "future_value",
+      "annuity",
+      "fees",
+      "monthly_contributions",
+      "intermediate"
+    ]
+  },
+  {
+    "id": "template_ra_hard1",
+    "name": "Tax Savings from Tax-Loss Harvesting",
+    "short_description": "Calculates the tax savings realized by selling an investment at a loss and using that loss to offset ordinary income at the investor's marginal tax rate.",
+    "domain": "Fintech",
+    "topic": "Robo Advisors",
+    "inputs": [
+      {
+        "name": "shares",
+        "type": "integer",
+        "description": "Number of shares of the ETF."
+      },
+      {
+        "name": "cost_basis",
+        "type": "float",
+        "description": "Original purchase price per share of the ETF."
+      },
+      {
+        "name": "current_price",
+        "type": "float",
+        "description": "Current market price per share of the ETF."
+      },
+      {
+        "name": "marginal_rate",
+        "type": "float",
+        "description": "Investor's marginal income tax rate as a decimal (e.g., 0.22 for 22%)."
+      }
+    ],
+    "output_var": "tax_savings",
+    "sympy_formulas": [
+      {
+        "variable": "realised_loss",
+        "formula": "(current_price - cost_basis) * shares"
+      },
+      {
+        "variable": "tax_savings",
+        "formula": "-realised_loss * marginal_rate"
+      }
+    ],
+    "tags": [
+      "robo_advisors",
+      "tax_loss_harvesting",
+      "tax_savings",
+      "investing",
+      "advanced"
+    ]
+  }
+]

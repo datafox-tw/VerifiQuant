@@ -1,0 +1,199 @@
+[
+  {
+    "id": "template_market_downturn_revenue",
+    "name": "Market Downturn Revenue Impact",
+    "short_description": "Calculates the new revenue after a market downturn reduces the initial revenue by a specified percentage.",
+    "domain": "Risk Management",
+    "topic": "Scenario Planning",
+    "inputs": [
+      {
+        "name": "initial_revenue",
+        "type": "float",
+        "description": "The company's revenue before the market downturn."
+      },
+      {
+        "name": "downturn",
+        "type": "float",
+        "description": "The percentage decrease in revenue due to the market downturn."
+      }
+    ],
+    "output_var": "new_revenue",
+    "sympy_formulas": [
+      {
+        "variable": "new_revenue",
+        "formula": "initial_revenue * (1 - downturn / 100)"
+      }
+    ],
+    "tags": [
+      "scenario_planning",
+      "revenue",
+      "risk",
+      "market_downturn"
+    ]
+  },
+  {
+    "id": "template_operating_cost_increase",
+    "name": "Operating Cost Increase Scenario",
+    "short_description": "Calculates the new operating cost after a percentage increase.",
+    "domain": "Risk Management",
+    "topic": "Scenario Planning",
+    "inputs": [
+      {
+        "name": "initial_cost",
+        "type": "float",
+        "description": "The initial operating cost"
+      },
+      {
+        "name": "increase",
+        "type": "float",
+        "description": "The percentage increase in operating costs (e.g., 10 for 10%)"
+      }
+    ],
+    "output_var": "new_cost",
+    "sympy_formulas": [
+      {
+        "variable": "new_cost",
+        "formula": "initial_cost * (1 + increase / 100)"
+      }
+    ],
+    "tags": [
+      "scenario_planning",
+      "operating_cost",
+      "increase",
+      "basic"
+    ]
+  },
+  {
+    "id": "template_revenue_recovery_effect",
+    "name": "Revenue Recovery Effect",
+    "short_description": "Calculates the new revenue after an initial revenue experiences a downturn followed by a recovery.",
+    "domain": "Risk Management",
+    "topic": "Scenario Planning",
+    "inputs": [
+      {
+        "name": "initial_revenue",
+        "type": "float",
+        "description": "The revenue before the downturn."
+      },
+      {
+        "name": "downturn",
+        "type": "float",
+        "description": "The percentage decrease in revenue during the downturn."
+      },
+      {
+        "name": "recovery",
+        "type": "float",
+        "description": "The percentage increase in revenue during the recovery."
+      }
+    ],
+    "output_var": "new_revenue",
+    "sympy_formulas": [
+      {
+        "variable": "new_revenue",
+        "formula": "initial_revenue * (1 - downturn / 100) * (1 + recovery / 100)"
+      }
+    ],
+    "tags": [
+      "scenario_planning",
+      "revenue",
+      "recovery",
+      "downturn",
+      "risk"
+    ]
+  },
+  {
+    "id": "template_interest_rate_impact",
+    "name": "Interest Rate Impact on Financing Cost",
+    "short_description": "Calculates the additional financing cost incurred when interest rates increase, accounting for a specific sensitivity factor.",
+    "domain": "Risk Management",
+    "topic": "Scenario Planning",
+    "inputs": [
+      {
+        "name": "loan_amount",
+        "type": "float",
+        "description": "The principal amount of the outstanding loan."
+      },
+      {
+        "name": "rate_change",
+        "type": "float",
+        "description": "The percentage increase in interest rates (e.g., 0.5 for a 0.5% increase)."
+      },
+      {
+        "name": "sensitivity",
+        "type": "float",
+        "description": "A factor indicating how sensitive the financing cost is to interest rate changes."
+      }
+    ],
+    "output_var": "additional_cost",
+    "sympy_formulas": [
+      {
+        "variable": "additional_cost",
+        "formula": "loan_amount * (rate_change / 100) * sensitivity"
+      }
+    ],
+    "tags": [
+      "scenario_planning",
+      "interest_rate",
+      "financing_cost",
+      "risk_management"
+    ]
+  },
+  {
+    "id": "template_investment_scenario_planning",
+    "name": "Multi-factor Investment Scenario Planning",
+    "short_description": "Calculates the change in investment value based on multiple factor changes (market, interest, inflation) and their respective sensitivities.",
+    "domain": "Risk Management",
+    "topic": "Scenario Planning",
+    "inputs": [
+      {
+        "name": "initial_investment",
+        "type": "float",
+        "description": "The initial value of the investment."
+      },
+      {
+        "name": "market_change",
+        "type": "float",
+        "description": "Percentage change in market conditions."
+      },
+      {
+        "name": "interest_change",
+        "type": "float",
+        "description": "Percentage change in interest rates."
+      },
+      {
+        "name": "inflation_change",
+        "type": "float",
+        "description": "Percentage change in inflation."
+      },
+      {
+        "name": "market_sens",
+        "type": "float",
+        "description": "Sensitivity of the investment to market changes."
+      },
+      {
+        "name": "interest_sens",
+        "type": "float",
+        "description": "Sensitivity of the investment to interest rate changes."
+      },
+      {
+        "name": "inflation_sens",
+        "type": "float",
+        "description": "Sensitivity of the investment to inflation changes."
+      }
+    ],
+    "output_var": "delta_value",
+    "sympy_formulas": [
+      {
+        "variable": "delta_value",
+        "formula": "initial_investment * (market_sens * (market_change / 100) + interest_sens * (interest_change / 100) + inflation_sens * (inflation_change / 100))"
+      }
+    ],
+    "tags": [
+      "scenario_planning",
+      "risk_management",
+      "investment",
+      "sensitivity_analysis",
+      "multi-factor"
+    ]
+  }
+]

@@ -1,0 +1,484 @@
+[
+  {
+    "id": "_rand_money",
+    "name": "Random Monetary Amount Generator",
+    "short_description": "Generates a random floating-point number representing a monetary amount, following a uniform distribution within a specified range and rounded to two decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Personal Investing",
+    "inputs": [
+      {
+        "name": "lo",
+        "type": "float",
+        "description": "Lower bound of the random monetary amount"
+      },
+      {
+        "name": "hi",
+        "type": "float",
+        "description": "Upper bound of the random monetary amount"
+      }
+    ],
+    "output_var": "random_amount",
+    "sympy_formulas": [
+      {
+        "variable": "random_amount",
+        "formula": "Uniform(lo, hi)"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "random",
+      "utility",
+      "amount_generator"
+    ]
+  },
+  {
+    "id": "_rand_pct",
+    "name": "Random Percentage Value",
+    "short_description": "Generates a random percentage value between specified lower and upper bounds, rounded to two decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "lo",
+        "type": "float",
+        "description": "Lower bound of the percentage range (inclusive)."
+      },
+      {
+        "name": "hi",
+        "type": "float",
+        "description": "Upper bound of the percentage range (inclusive)."
+      }
+    ],
+    "output_var": "percentage_value",
+    "sympy_formulas": [
+      {
+        "variable": "percentage_value",
+        "formula": "round(random.uniform(lo, hi), 2)"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "random_number",
+      "percentage_generator"
+    ]
+  },
+  {
+    "id": "_fmt_money",
+    "name": "Format Money",
+    "short_description": "Formats a numerical value into a currency string with two decimal places and comma separators.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted as currency."
+      }
+    ],
+    "output_var": "formatted_money_string",
+    "sympy_formulas": [],
+    "tags": [
+      "personalinvest",
+      "utility",
+      "formatting",
+      "money"
+    ]
+  },
+  {
+    "id": "_fmt_pct",
+    "name": "Format Percentage Value",
+    "short_description": "Formats a given float as a percentage string with two decimal places. For example, 5.25 becomes '5.25%'.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "p",
+        "type": "float",
+        "description": "Numerical value to be formatted as a percentage (e.g., 5 for 5%, 10.25 for 10.25%)"
+      }
+    ],
+    "output_var": "formatted_percentage_string",
+    "sympy_formulas": [
+      {
+        "variable": "p_value_for_display",
+        "formula": "round(p, 2)"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "formatting",
+      "percentage",
+      "utility"
+    ]
+  },
+  {
+    "id": "template_compound_growth_easy",
+    "name": "Future Value of a Single Sum (Annual Compounding)",
+    "short_description": "Calculates the future value of a single principal amount given an annual interest rate and number of years, compounded annually.",
+    "domain": "Personal Finance",
+    "topic": "Personal Invest",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Initial principal amount"
+      },
+      {
+        "name": "r_pct",
+        "type": "float",
+        "description": "Annual interest rate as a percentage (e.g., 5 for 5%)"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of years"
+      }
+    ],
+    "output_var": "FV",
+    "sympy_formulas": [
+      {
+        "variable": "r",
+        "formula": "r_pct / 100"
+      },
+      {
+        "variable": "FV",
+        "formula": "P * (1 + r)**n"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "future value",
+      "compound interest",
+      "single sum",
+      "annual compounding"
+    ]
+  },
+  {
+    "id": "template_portfolio_allocation_easy",
+    "name": "Portfolio Allocation by Percentage Weights",
+    "short_description": "Allocate a lump sum across stocks, bonds, and real estate based on percentage weights for each asset class.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "total",
+        "type": "float",
+        "description": "Total amount of money to invest."
+      },
+      {
+        "name": "w_stock",
+        "type": "float",
+        "description": "Percentage of total investment allocated to stocks."
+      },
+      {
+        "name": "w_bond",
+        "type": "float",
+        "description": "Percentage of total investment allocated to bonds."
+      }
+    ],
+    "output_var": "Allocated Amounts",
+    "sympy_formulas": [
+      {
+        "variable": "w_real",
+        "formula": "100 - w_stock - w_bond"
+      },
+      {
+        "variable": "a_stock",
+        "formula": "total * (w_stock / 100)"
+      },
+      {
+        "variable": "a_bond",
+        "formula": "total * (w_bond / 100)"
+      },
+      {
+        "variable": "a_real",
+        "formula": "total * (w_real / 100)"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "portfolio",
+      "allocation",
+      "weights",
+      "stocks",
+      "bonds",
+      "real estate"
+    ]
+  },
+  {
+    "id": "template_withdrawals_intermediate",
+    "name": "Remaining Balance After End-of-Year Withdrawals",
+    "short_description": "Calculates the remaining balance in an investment account after 'n' years, considering an initial principal, a fixed annual interest rate, and regular end-of-year withdrawals.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Initial principal amount invested"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Annual interest rate as a decimal"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of years for withdrawals and investment growth"
+      },
+      {
+        "name": "W",
+        "type": "float",
+        "description": "Amount withdrawn at the end of each year"
+      }
+    ],
+    "output_var": "balance",
+    "sympy_formulas": [
+      {
+        "variable": "factor",
+        "formula": "(1 + r) ** n"
+      },
+      {
+        "variable": "annuity_factor",
+        "formula": "(factor - 1) / r"
+      },
+      {
+        "variable": "balance",
+        "formula": "P * factor - W * annuity_factor"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "withdrawals",
+      "remaining balance",
+      "annuity",
+      "compound interest",
+      "retirement planning"
+    ]
+  },
+  {
+    "id": "template_volatility_band_intermediate",
+    "name": "Volatility Band Calculation",
+    "short_description": "Calculates the plausible range of an equity value after one year, considering a baseline growth rate and an expected volatility band.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Initial equity value"
+      },
+      {
+        "name": "g_pct",
+        "type": "float",
+        "description": "Baseline growth rate for the next year (as a percentage, e.g., 10 for 10%)"
+      },
+      {
+        "name": "v_pct",
+        "type": "float",
+        "description": "Expected market volatility band (as a percentage, e.g., 5 for \b±5%)"
+      }
+    ],
+    "output_var": "volatility_band_range",
+    "sympy_formulas": [
+      {
+        "variable": "g",
+        "formula": "g_pct / 100"
+      },
+      {
+        "variable": "v",
+        "formula": "v_pct / 100"
+      },
+      {
+        "variable": "base",
+        "formula": "P * (1 + g)"
+      },
+      {
+        "variable": "upper",
+        "formula": "base * (1 + v)"
+      },
+      {
+        "variable": "lower",
+        "formula": "base * (1 - v)"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "volatility",
+      "growth",
+      "equity",
+      "investment_range"
+    ]
+  },
+  {
+    "id": "template_diversification_risk_advanced",
+    "name": "Diversification Risk: Adding New Asset",
+    "short_description": "Calculates the change in portfolio risk (volatility) when adding a new asset, considering existing asset allocations, individual volatilities, and pairwise correlations.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "A_s",
+        "type": "float",
+        "description": "Existing dollar amount in stocks"
+      },
+      {
+        "name": "A_b",
+        "type": "float",
+        "description": "Existing dollar amount in bonds"
+      },
+      {
+        "name": "A_re",
+        "type": "float",
+        "description": "Existing dollar amount in real estate"
+      },
+      {
+        "name": "A_new",
+        "type": "float",
+        "description": "Dollar amount of the new asset to be added"
+      },
+      {
+        "name": "vol_s_pct",
+        "type": "float",
+        "description": "Annualized volatility of stocks (in percent)"
+      },
+      {
+        "name": "vol_b_pct",
+        "type": "float",
+        "description": "Annualized volatility of bonds (in percent)"
+      },
+      {
+        "name": "vol_re_pct",
+        "type": "float",
+        "description": "Annualized volatility of real estate (in percent)"
+      },
+      {
+        "name": "vol_new_pct",
+        "type": "float",
+        "description": "Annualized volatility of the new asset (in percent)"
+      },
+      {
+        "name": "rho_sb",
+        "type": "float",
+        "description": "Correlation between stocks and bonds"
+      },
+      {
+        "name": "rho_sre",
+        "type": "float",
+        "description": "Correlation between stocks and real estate"
+      },
+      {
+        "name": "rho_bre",
+        "type": "float",
+        "description": "Correlation between bonds and real estate"
+      },
+      {
+        "name": "rho_port_new",
+        "type": "float",
+        "description": "Correlation of the new asset with the existing portfolio as a whole"
+      }
+    ],
+    "output_var": "delta_pct",
+    "sympy_formulas": [
+      {
+        "variable": "A_total_existing",
+        "formula": "A_s + A_b + A_re"
+      },
+      {
+        "variable": "ws",
+        "formula": "A_s / A_total_existing"
+      },
+      {
+        "variable": "wb",
+        "formula": "A_b / A_total_existing"
+      },
+      {
+        "variable": "wre",
+        "formula": "A_re / A_total_existing"
+      },
+      {
+        "variable": "sig_s",
+        "formula": "vol_s_pct / 100.0"
+      },
+      {
+        "variable": "sig_b",
+        "formula": "vol_b_pct / 100.0"
+      },
+      {
+        "variable": "sig_re",
+        "formula": "vol_re_pct / 100.0"
+      },
+      {
+        "variable": "sig_new",
+        "formula": "vol_new_pct / 100.0"
+      },
+      {
+        "variable": "var_port",
+        "formula": "ws**2 * sig_s**2 + wb**2 * sig_b**2 + wre**2 * sig_re**2 + 2*ws*wb * rho_sb * sig_s * sig_b + 2*ws*wre * rho_sre * sig_s * sig_re + 2*wb*wre * rho_bre * sig_b * sig_re"
+      },
+      {
+        "variable": "sig_port",
+        "formula": "var_port**0.5"
+      },
+      {
+        "variable": "A_total_all",
+        "formula": "A_total_existing + A_new"
+      },
+      {
+        "variable": "w_port",
+        "formula": "A_total_existing / A_total_all"
+      },
+      {
+        "variable": "w_new",
+        "formula": "A_new / A_total_all"
+      },
+      {
+        "variable": "var_total",
+        "formula": "w_port**2 * sig_port**2 + w_new**2 * sig_new**2 + 2*w_port*w_new*rho_port_new*sig_port*sig_new"
+      },
+      {
+        "variable": "sig_total",
+        "formula": "var_total**0.5"
+      },
+      {
+        "variable": "delta_pct",
+        "formula": "(sig_total / sig_port - 1.0) * 100.0"
+      }
+    ],
+    "tags": [
+      "personalinvest",
+      "risk",
+      "diversification",
+      "portfolio volatility",
+      "correlation",
+      "asset allocation"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Template Problem Generator",
+    "short_description": "Generates a specified number of problem instances for various financial templates, each with a unique random seed, and saves them to a JSON file.",
+    "domain": "Personal Finance",
+    "topic": "Personalinvest",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The path to the JSON file where generated problems will be saved."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of problem instances to generate for each financial template."
+      }
+    ],
+    "output_var": "generated_problem_count",
+    "sympy_formulas": [],
+    "tags": [
+      "personalinvest",
+      "utility",
+      "template_generation"
+    ]
+  }
+]

@@ -1,0 +1,291 @@
+[
+  {
+    "id": "template_irr_net_sale_proceeds",
+    "name": "IRR: Net Sale Proceeds (1-Year)",
+    "short_description": "Calculates the Internal Rate of Return (IRR) for a 1-year investment where the year-1 inflow is derived from a sale price minus selling costs.",
+    "domain": "Investment Analysis",
+    "topic": "Internal Rate of Return",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "The initial investment amount."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "The selling price of the asset at the end of Year 1."
+      },
+      {
+        "name": "sell_cost",
+        "type": "float",
+        "description": "The costs associated with selling the asset at the end of Year 1."
+      }
+    ],
+    "output_var": "IRR",
+    "sympy_formulas": [
+      {
+        "variable": "net_proceeds",
+        "formula": "sale_price - sell_cost"
+      },
+      {
+        "variable": "IRR",
+        "formula": "net_proceeds / investment - 1"
+      }
+    ],
+    "tags": [
+      "irr",
+      "one-year",
+      "sale proceeds",
+      "net proceeds"
+    ]
+  },
+  {
+    "id": "template_irr_after_tax",
+    "name": "IRR: After-Tax Exit Gain (1-Year)",
+    "short_description": "Calculates the Internal Rate of Return (IRR) for a 1-year investment, considering tax on the gain from the sale price minus the initial investment (tax basis).",
+    "domain": "Investment Analysis",
+    "topic": "Irr",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "Initial investment amount, also serving as the tax basis."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "Sale price of the investment after one year."
+      },
+      {
+        "name": "tax_rate_bp",
+        "type": "float",
+        "description": "Tax rate on the gain, expressed as a percentage (e.g., 20 for 20%)."
+      }
+    ],
+    "output_var": "IRR",
+    "sympy_formulas": [
+      {
+        "variable": "tax_rate",
+        "formula": "tax_rate_bp / 100"
+      },
+      {
+        "variable": "gain",
+        "formula": "sale_price - investment"
+      },
+      {
+        "variable": "tax",
+        "formula": "gain * tax_rate"
+      },
+      {
+        "variable": "after_tax",
+        "formula": "sale_price - tax"
+      },
+      {
+        "variable": "IRR",
+        "formula": "after_tax / investment - 1"
+      }
+    ],
+    "tags": [
+      "irr",
+      "after-tax",
+      "one-period",
+      "investment",
+      "taxable-gain"
+    ]
+  },
+  {
+    "id": "template_irr_after_tax_net_sale_cost",
+    "name": "IRR: After-Tax Net Sale with Selling Costs (1-year)",
+    "short_description": "Calculates the 1-year Internal Rate of Return (IRR) after accounting for selling costs and capital gains tax on a single investment sale.",
+    "domain": "Investment Analysis",
+    "topic": "Internal Rate of Return",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "The initial amount invested."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "The price at which the asset is sold."
+      },
+      {
+        "name": "sell_cost",
+        "type": "float",
+        "description": "Costs incurred during the sale of the asset."
+      },
+      {
+        "name": "tax_rate",
+        "type": "float",
+        "description": "The capital gains tax rate as a decimal (e.g., 0.20 for 20%)."
+      }
+    ],
+    "output_var": "irr_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "net_sale",
+        "formula": "sale_price - sell_cost"
+      },
+      {
+        "variable": "gain",
+        "formula": "net_sale - investment"
+      },
+      {
+        "variable": "tax",
+        "formula": "gain * tax_rate"
+      },
+      {
+        "variable": "after_tax",
+        "formula": "net_sale - tax"
+      },
+      {
+        "variable": "irr_ratio",
+        "formula": "after_tax / investment - 1"
+      }
+    ],
+    "tags": [
+      "irr",
+      "after-tax",
+      "selling costs",
+      "capital gain",
+      "single period"
+    ]
+  },
+  {
+    "id": "template_irr_bond_coupon_reinvest",
+    "name": "IRR: Semiannual Coupon Bond with Reinvestment",
+    "short_description": "Calculates the Internal Rate of Return (IRR) for a 1-year bond with semiannual coupons, where the first coupon is reinvested until maturity.",
+    "domain": "Investment Analysis",
+    "topic": "Irr",
+    "inputs": [
+      {
+        "name": "face",
+        "type": "float",
+        "description": "Bond par value."
+      },
+      {
+        "name": "coupon_rate_bp",
+        "type": "float",
+        "description": "Annual coupon rate in basis points (e.g., 5 for 5%)."
+      },
+      {
+        "name": "reinv_rate_bp",
+        "type": "float",
+        "description": "Simple annual reinvestment rate for the coupon in basis points (e.g., 3 for 3%)."
+      },
+      {
+        "name": "price",
+        "type": "float",
+        "description": "Purchase price of the bond."
+      }
+    ],
+    "output_var": "irr_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "coupon_rate",
+        "formula": "coupon_rate_bp / 100"
+      },
+      {
+        "variable": "reinv_rate",
+        "formula": "reinv_rate_bp / 100"
+      },
+      {
+        "variable": "coupon_6mo",
+        "formula": "face * coupon_rate / 2"
+      },
+      {
+        "variable": "coupon_fv",
+        "formula": "coupon_6mo * (1 + reinv_rate * 0.5)"
+      },
+      {
+        "variable": "total_cash",
+        "formula": "face + coupon_fv"
+      },
+      {
+        "variable": "irr_ratio",
+        "formula": "total_cash / price - 1"
+      }
+    ],
+    "tags": [
+      "irr",
+      "bond",
+      "coupon",
+      "reinvestment",
+      "semiannual"
+    ]
+  },
+  {
+    "id": "template_irr_fractional_net_tax",
+    "name": "Annualized IRR with Fractional Holding, Selling Costs, and Tax",
+    "short_description": "Calculates the annualized Internal Rate of Return (IRR) for an investment with a partial-year holding period, including selling costs and capital gains tax on the profit.",
+    "domain": "Investment Analysis",
+    "topic": "Internal Rate of Return",
+    "inputs": [
+      {
+        "name": "investment",
+        "type": "float",
+        "description": "The initial investment amount."
+      },
+      {
+        "name": "months",
+        "type": "integer",
+        "description": "The holding period of the investment in months."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "The gross sale price of the investment."
+      },
+      {
+        "name": "sell_cost",
+        "type": "float",
+        "description": "Total selling costs incurred at the time of sale."
+      },
+      {
+        "name": "tax_rate_bp",
+        "type": "float",
+        "description": "The capital gains tax rate in basis points (e.g., 25 for 25%)."
+      }
+    ],
+    "output_var": "irr_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "years",
+        "formula": "months / 12"
+      },
+      {
+        "variable": "tax_rate",
+        "formula": "tax_rate_bp / 100"
+      },
+      {
+        "variable": "net_sale",
+        "formula": "sale_price - sell_cost"
+      },
+      {
+        "variable": "gain",
+        "formula": "net_sale - investment"
+      },
+      {
+        "variable": "tax",
+        "formula": "gain * tax_rate"
+      },
+      {
+        "variable": "after_tax",
+        "formula": "net_sale - tax"
+      },
+      {
+        "variable": "irr_ratio",
+        "formula": "(after_tax / investment) ** (1 / years) - 1"
+      }
+    ],
+    "tags": [
+      "irr",
+      "internal rate of return",
+      "fractional holding",
+      "capital gains tax",
+      "after-tax"
+    ]
+  }
+]

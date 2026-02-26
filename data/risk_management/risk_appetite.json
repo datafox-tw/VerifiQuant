@@ -1,0 +1,202 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Value",
+    "short_description": "Generates a random floating-point number within a specified lower and upper bound.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The minimum possible value for the random number."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The maximum possible value for the random number."
+      }
+    ],
+    "output_var": "random_value",
+    "sympy_formulas": [
+      {
+        "variable": "random_value",
+        "formula": "uniform(low, high)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "utility",
+      "random_number",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_capital_allocation_risk_appetite",
+    "name": "Capital Allocation based on Risk Appetite",
+    "short_description": "Calculates the maximum dollar value allocated for high-risk investments based on a company's risk appetite score and total capital.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "risk_score",
+        "type": "float",
+        "description": "Risk appetite score in percentage (e.g., 20 for 20%)."
+      },
+      {
+        "name": "capital",
+        "type": "float",
+        "description": "Total capital in USD."
+      }
+    ],
+    "output_var": "allocated",
+    "sympy_formulas": [
+      {
+        "variable": "allocated",
+        "formula": "capital * (risk_score / 100)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "capital_allocation",
+      "risk_management"
+    ]
+  },
+  {
+    "id": "template_risk_threshold_measurement",
+    "name": "Risk Threshold Measurement",
+    "short_description": "Calculates the absolute risk threshold by applying a percentage risk appetite to a firm's baseline capital.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "risk_appetite",
+        "type": "float",
+        "description": "Risk appetite expressed as a percentage."
+      },
+      {
+        "name": "baseline_capital",
+        "type": "float",
+        "description": "The firm's baseline capital in USD."
+      }
+    ],
+    "output_var": "threshold",
+    "sympy_formulas": [
+      {
+        "variable": "threshold",
+        "formula": "baseline_capital * (risk_appetite / 100)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "risk_threshold",
+      "risk_management",
+      "financial_risk"
+    ]
+  },
+  {
+    "id": "template_risk_adjusted_return",
+    "name": "Risk-Adjusted Capital Allocation",
+    "short_description": "Calculates the additional capital allocated for high-risk opportunities based on total capital, a risk factor, and an additional risk premium.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "capital",
+        "type": "float",
+        "description": "Total capital in USD."
+      },
+      {
+        "name": "risk_factor",
+        "type": "float",
+        "description": "Risk factor as a percentage."
+      },
+      {
+        "name": "risk_premium",
+        "type": "float",
+        "description": "Additional risk premium as a percentage."
+      }
+    ],
+    "output_var": "allocation",
+    "sympy_formulas": [
+      {
+        "variable": "allocation",
+        "formula": "capital * (risk_factor / 100) * (risk_premium / 100)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "capital_allocation",
+      "risk_management"
+    ]
+  },
+  {
+    "id": "template_risk_exposure_limit",
+    "name": "Maximum Risk Exposure",
+    "short_description": "Calculates the maximum risk exposure in USD based on total assets and a defined risk appetite percentage.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "assets",
+        "type": "float",
+        "description": "Total assets of the entity in USD."
+      },
+      {
+        "name": "risk_appetite",
+        "type": "float",
+        "description": "Risk appetite as a percentage."
+      }
+    ],
+    "output_var": "exposure",
+    "sympy_formulas": [
+      {
+        "variable": "exposure",
+        "formula": "assets * (risk_appetite / 100)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "risk_management",
+      "exposure_limit",
+      "financial_risk"
+    ]
+  },
+  {
+    "id": "template_multi_factor_risk_appetite_assessment",
+    "name": "Multi-factor Risk Appetite Assessment",
+    "short_description": "Multi-factor risk appetite assessment.",
+    "domain": "Risk Management",
+    "topic": "Risk Appetite",
+    "inputs": [
+      {
+        "name": "capital",
+        "type": "float",
+        "description": "Base capital in USD"
+      },
+      {
+        "name": "risk_score",
+        "type": "float",
+        "description": "Risk appetite score as a percentage"
+      },
+      {
+        "name": "volatility",
+        "type": "float",
+        "description": "Market volatility as a percentage"
+      }
+    ],
+    "output_var": "adjusted_threshold",
+    "sympy_formulas": [
+      {
+        "variable": "adjusted_threshold",
+        "formula": "capital * (risk_score / 100) * (1 + volatility / 100)"
+      }
+    ],
+    "tags": [
+      "risk_appetite",
+      "risk_management",
+      "multi-factor",
+      "assessment"
+    ]
+  }
+]

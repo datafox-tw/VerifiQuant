@@ -1,0 +1,347 @@
+[
+  {
+    "id": "q2",
+    "name": "Quantize to 2 decimal places (banker's rounding)",
+    "short_description": "Rounds a number to two decimal places using banker's rounding (half up).",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The number to be quantized or rounded."
+      }
+    ],
+    "output_var": "quantized_value",
+    "sympy_formulas": [
+      {
+        "variable": "quantized_value",
+        "formula": "Round(x, 2)"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "rounding",
+      "quantization",
+      "bankers_rounding"
+    ]
+  },
+  {
+    "id": "money",
+    "name": "Currency Formatting",
+    "short_description": "Formats a numerical value as currency with thousands separators and two decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted."
+      }
+    ],
+    "output_var": "formatted_output",
+    "sympy_formulas": [
+      {
+        "variable": "formatted_output",
+        "formula": "x"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "formatting",
+      "currency",
+      "presentation"
+    ]
+  },
+  {
+    "id": "pct",
+    "name": "Round and Format Percentage",
+    "short_description": "Rounds a numeric value to two decimal places and formats it as a percentage string (e.g., 0.05 becomes \"5.00%\").",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numeric value (e.g., a decimal percentage like 0.05) to be rounded and formatted."
+      }
+    ],
+    "output_var": "rounded_value",
+    "sympy_formulas": [
+      {
+        "variable": "rounded_value",
+        "formula": "round(x, 2)"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "formatting",
+      "percentage",
+      "rounding"
+    ]
+  },
+  {
+    "id": "rand_rate",
+    "name": "Random Percentage Rate Generator",
+    "short_description": "Generates a random percentage rate within a specified range, expressed as a decimal with two decimal places.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "min_pct",
+        "type": "float",
+        "description": "The minimum percentage value (e.g., 5 for 5%) for the random rate generation."
+      },
+      {
+        "name": "max_pct",
+        "type": "float",
+        "description": "The maximum percentage value (e.g., 15 for 15%) for the random rate generation."
+      }
+    ],
+    "output_var": "rate",
+    "sympy_formulas": [
+      {
+        "variable": "rate",
+        "formula": "bps / 100"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "random",
+      "percentage",
+      "rate",
+      "utility"
+    ]
+  },
+  {
+    "id": "template_income_tax_flat_easy",
+    "name": "Single-Rate Income Tax on Annual Income",
+    "short_description": "Calculates the income tax due based on a flat tax rate applied to annual income.",
+    "domain": "Personal Finance",
+    "topic": "Tax Calculation",
+    "inputs": [
+      {
+        "name": "annual_income",
+        "type": "float",
+        "description": "Annual income subject to tax"
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "Flat income tax rate in percentage (e.g., 20 for 20%)"
+      }
+    ],
+    "output_var": "tax_due",
+    "sympy_formulas": [
+      {
+        "variable": "tax_due",
+        "formula": "annual_income * (rate / 100)"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "income tax",
+      "flat tax",
+      "personal finance"
+    ]
+  },
+  {
+    "id": "template_income_tax_with_standard_deduction_easy",
+    "name": "Income Tax with Standard Deduction (Easy)",
+    "short_description": "Calculates income tax owed after applying a standard deduction to annual income, using a single flat tax rate.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "annual_income",
+        "type": "float",
+        "description": "The individual's annual gross income."
+      },
+      {
+        "name": "standard_deduction",
+        "type": "float",
+        "description": "The amount of standard deduction claimed."
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "The flat tax rate as a percentage (e.g., 25 for 25%)."
+      }
+    ],
+    "output_var": "tax_due",
+    "sympy_formulas": [
+      {
+        "variable": "taxable_income",
+        "formula": "Max(0, annual_income - standard_deduction)"
+      },
+      {
+        "variable": "tax_due",
+        "formula": "taxable_income * rate / 100"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "income tax",
+      "standard deduction",
+      "flat tax"
+    ]
+  },
+  {
+    "id": "template_tax_with_itemized_deductions_intermediate",
+    "name": "Income Tax with Itemized Deductions",
+    "short_description": "Compute taxable income after itemized deductions and apply a single rate.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "annual_income",
+        "type": "float",
+        "description": "Annual gross income"
+      },
+      {
+        "name": "deductions",
+        "type": "float",
+        "description": "Total eligible itemized deductions"
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "Tax rate as a percentage (e.g., 25 for 25%)"
+      }
+    ],
+    "output_var": "tax_due",
+    "sympy_formulas": [
+      {
+        "variable": "taxable_income",
+        "formula": "Max(0, annual_income - deductions)"
+      },
+      {
+        "variable": "tax_due",
+        "formula": "taxable_income * rate / 100"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "income tax",
+      "deductions",
+      "personal finance"
+    ]
+  },
+  {
+    "id": "template_capital_gains_tax_intermediate",
+    "name": "Capital Gains Tax: Shares Sale (Intermediate)",
+    "short_description": "Calculates capital gains tax on the sale of shares, ensuring the sale price is greater than the purchase price.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "purchase_price",
+        "type": "float",
+        "description": "Original price paid for the shares."
+      },
+      {
+        "name": "sale_price",
+        "type": "float",
+        "description": "Price at which the shares were sold."
+      },
+      {
+        "name": "cap_gains_rate",
+        "type": "float",
+        "description": "Capital gains tax rate as a percentage (e.g., 15 for 15%)."
+      }
+    ],
+    "output_var": "tax_due",
+    "sympy_formulas": [
+      {
+        "variable": "capital_gain",
+        "formula": "sale_price - purchase_price"
+      },
+      {
+        "variable": "tax_due",
+        "formula": "capital_gain * cap_gains_rate / 100"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "capital_gains",
+      "shares",
+      "personal_finance"
+    ]
+  },
+  {
+    "id": "template_double_taxation_relief_advanced",
+    "name": "Double Taxation Relief (Advanced)",
+    "short_description": "Compute home-country tax on foreign income, foreign tax paid, the eligible relief (minimum rule), and the net home-country tax liability after relief.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "foreign_income",
+        "type": "float",
+        "description": "Total income earned from a foreign country."
+      },
+      {
+        "name": "home_rate",
+        "type": "float",
+        "description": "Home-country tax rate on foreign income (as a percentage)."
+      },
+      {
+        "name": "foreign_rate",
+        "type": "float",
+        "description": "Foreign tax rate applicable to the foreign income (as a percentage)."
+      }
+    ],
+    "output_var": "net_liability",
+    "sympy_formulas": [
+      {
+        "variable": "home_tax_due",
+        "formula": "foreign_income * home_rate / 100"
+      },
+      {
+        "variable": "foreign_tax_paid",
+        "formula": "foreign_income * foreign_rate / 100"
+      },
+      {
+        "variable": "relief",
+        "formula": "Min(home_tax_due, foreign_tax_paid)"
+      },
+      {
+        "variable": "net_liability",
+        "formula": "home_tax_due - relief"
+      }
+    ],
+    "tags": [
+      "taxcalc",
+      "double taxation",
+      "international tax",
+      "tax relief"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Generate Financial Templates",
+    "short_description": "A utility to generate problem instances for various financial calculation templates with different random seeds and save them to a specified JSON file.",
+    "domain": "Personal Finance",
+    "topic": "Taxcalc",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The path to the JSON file where the generated problem instances will be saved."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of problem instances to generate for each financial template listed internally."
+      }
+    ],
+    "output_var": "num_generated_problems",
+    "sympy_formulas": [],
+    "tags": [
+      "taxcalc",
+      "utility",
+      "generator",
+      "template_generation"
+    ]
+  }
+]

@@ -1,0 +1,276 @@
+[
+  {
+    "id": "template_bp_easy1",
+    "name": "Zero-Coupon Bond Price",
+    "short_description": "Calculates the present value of a zero-coupon bond given its face value, time to maturity, and required annual yield.",
+    "domain": "Financial Markets",
+    "topic": "Bond Pricing",
+    "inputs": [
+      {
+        "name": "F",
+        "type": "integer",
+        "description": "Face value of the bond"
+      },
+      {
+        "name": "t",
+        "type": "integer",
+        "description": "Years to maturity"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Required annual yield as a decimal"
+      }
+    ],
+    "output_var": "price",
+    "sympy_formulas": [
+      {
+        "variable": "discount_factor",
+        "formula": "1 / (1 + r)**t"
+      },
+      {
+        "variable": "price",
+        "formula": "F * discount_factor"
+      }
+    ],
+    "tags": [
+      "bond_pricing",
+      "zero-coupon bond",
+      "present value",
+      "discount factor"
+    ]
+  },
+  {
+    "id": "template_bp_easy2",
+    "name": "One-Year Coupon Bond Price",
+    "short_description": "Calculates the fair price of a one-year coupon bond given its face value, coupon rate, and market yield.",
+    "domain": "Financial Markets",
+    "topic": "Bond Pricing",
+    "inputs": [
+      {
+        "name": "F",
+        "type": "integer",
+        "description": "Face value (par value) of the bond"
+      },
+      {
+        "name": "c",
+        "type": "float",
+        "description": "Annual coupon rate as a decimal"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Market yield (discount rate) as a decimal"
+      }
+    ],
+    "output_var": "price",
+    "sympy_formulas": [
+      {
+        "variable": "C",
+        "formula": "F * c"
+      },
+      {
+        "variable": "CF",
+        "formula": "C + F"
+      },
+      {
+        "variable": "price",
+        "formula": "CF / (1 + r)"
+      }
+    ],
+    "tags": [
+      "bond_pricing",
+      "one_year",
+      "coupon_bond",
+      "basic"
+    ]
+  },
+  {
+    "id": "template_bp_medium1",
+    "name": "Multi-Year Coupon Bond Price",
+    "short_description": "Calculates the fair price of a coupon bond by discounting future coupon payments and the face value to the present.",
+    "domain": "Financial Markets",
+    "topic": "Bond Pricing",
+    "inputs": [
+      {
+        "name": "F",
+        "type": "float",
+        "description": "Face value (par value) of the bond"
+      },
+      {
+        "name": "c",
+        "type": "float",
+        "description": "Annual coupon rate (as a decimal)"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Years to maturity"
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "Required yield or discount rate (as a decimal)"
+      }
+    ],
+    "output_var": "price",
+    "sympy_formulas": [
+      {
+        "variable": "C",
+        "formula": "F * c"
+      },
+      {
+        "variable": "pv_cpn",
+        "formula": "C * (1 - (1 + r)**(-n)) / r"
+      },
+      {
+        "variable": "pv_F",
+        "formula": "F / (1 + r)**n"
+      },
+      {
+        "variable": "price",
+        "formula": "pv_cpn + pv_F"
+      }
+    ],
+    "tags": [
+      "bond_pricing",
+      "coupon_bond",
+      "present_value",
+      "valuation",
+      "fixed_income"
+    ]
+  },
+  {
+    "id": "template_bp_medium2",
+    "name": "Yield to Maturity of a 2-Year Bond",
+    "short_description": "Calculates the Yield to Maturity (YTM) for a 2-year bond given its face value, coupon rate, and current market price by solving a quadratic equation.",
+    "domain": "Financial Markets",
+    "topic": "Bond Pricing",
+    "inputs": [
+      {
+        "name": "F",
+        "type": "float",
+        "description": "Face value or par value of the bond."
+      },
+      {
+        "name": "c",
+        "type": "float",
+        "description": "Annual coupon rate of the bond (as a decimal)."
+      },
+      {
+        "name": "P",
+        "type": "float",
+        "description": "Current market price of the bond."
+      }
+    ],
+    "output_var": "ytm",
+    "sympy_formulas": [
+      {
+        "variable": "C",
+        "formula": "F * c"
+      },
+      {
+        "variable": "A",
+        "formula": "P"
+      },
+      {
+        "variable": "B",
+        "formula": "-(C + F)"
+      },
+      {
+        "variable": "C_coef",
+        "formula": "-C"
+      },
+      {
+        "variable": "discr",
+        "formula": "B**2 - 4 * A * C_coef"
+      },
+      {
+        "variable": "x_root",
+        "formula": "(-B - sympy.sqrt(discr)) / (2 * A)"
+      },
+      {
+        "variable": "ytm",
+        "formula": "x_root - 1"
+      }
+    ],
+    "tags": [
+      "bond_pricing",
+      "yield_to_maturity",
+      "2_year_bond",
+      "quadratic"
+    ]
+  },
+  {
+    "id": "template_bp_hard1",
+    "name": "Dirty Price of a Semi-Annual Coupon Bond",
+    "short_description": "Calculates the dirty (invoice) price of a semi-annual coupon bond, including accrued interest.",
+    "domain": "Financial Markets",
+    "topic": "Bond Pricing",
+    "inputs": [
+      {
+        "name": "F",
+        "type": "float",
+        "description": "Face value of the bond."
+      },
+      {
+        "name": "q",
+        "type": "float",
+        "description": "Annual coupon rate as a decimal."
+      },
+      {
+        "name": "years",
+        "type": "integer",
+        "description": "Number of years until the bond matures."
+      },
+      {
+        "name": "r_sa",
+        "type": "float",
+        "description": "Semi-annual yield to maturity as a decimal."
+      },
+      {
+        "name": "months_since",
+        "type": "integer",
+        "description": "Number of months since the last coupon payment."
+      }
+    ],
+    "output_var": "dirty",
+    "sympy_formulas": [
+      {
+        "variable": "C_sa",
+        "formula": "F * q / 2"
+      },
+      {
+        "variable": "periods",
+        "formula": "years * 2"
+      },
+      {
+        "variable": "pv_cpn",
+        "formula": "C_sa * (1 - (1 + r_sa)**(-periods)) / r_sa"
+      },
+      {
+        "variable": "pv_F",
+        "formula": "F / (1 + r_sa)**periods"
+      },
+      {
+        "variable": "clean",
+        "formula": "pv_cpn + pv_F"
+      },
+      {
+        "variable": "accrued",
+        "formula": "C_sa * months_since / 6"
+      },
+      {
+        "variable": "dirty",
+        "formula": "clean + accrued"
+      }
+    ],
+    "tags": [
+      "bond_pricing",
+      "dirty_price",
+      "semi_annual",
+      "fixed_income",
+      "accrued_interest"
+    ]
+  }
+]

@@ -1,0 +1,266 @@
+[
+  {
+    "id": "template_basel_basic_leverage_ratio_test",
+    "name": "Leverage Ratio Computation",
+    "short_description": "Calculates the basic leverage ratio and checks if it meets the Basel III minimum requirement of 3%.",
+    "domain": "Finance Regulation",
+    "topic": "Basel",
+    "inputs": [
+      {
+        "name": "tier1",
+        "type": "float",
+        "description": "Tier 1 Capital in millions."
+      },
+      {
+        "name": "total_exposure",
+        "type": "float",
+        "description": "Total Exposure in millions."
+      }
+    ],
+    "output_var": "ratio",
+    "sympy_formulas": [
+      {
+        "variable": "ratio",
+        "formula": "(tier1 / total_exposure) * 100"
+      }
+    ],
+    "tags": [
+      "basel",
+      "leverage ratio",
+      "capital requirements",
+      "basel iii"
+    ]
+  },
+  {
+    "id": "template_basel_basic_tier_composition_analysis",
+    "name": "Basel Capital Ratio Decomposition",
+    "short_description": "Calculates a bank's Tier 1 capital ratio and Total capital ratio based on its Tier 1 capital, Tier 2 capital, and Risk-Weighted Assets.",
+    "domain": "Finance Regulation",
+    "topic": "Basel",
+    "inputs": [
+      {
+        "name": "tier1",
+        "type": "float",
+        "description": "Amount of Tier 1 capital (in millions)."
+      },
+      {
+        "name": "tier2",
+        "type": "float",
+        "description": "Amount of Tier 2 capital (in millions)."
+      },
+      {
+        "name": "rwa",
+        "type": "float",
+        "description": "Total Risk-Weighted Assets (in millions)."
+      }
+    ],
+    "output_var": "total_capital_ratio",
+    "sympy_formulas": [
+      {
+        "variable": "tier1_capital_ratio",
+        "formula": "(tier1 / rwa) * 100"
+      },
+      {
+        "variable": "total_capital_ratio",
+        "formula": "((tier1 + tier2) / rwa) * 100"
+      }
+    ],
+    "tags": [
+      "basel",
+      "capital_ratio",
+      "tier1",
+      "tier2",
+      "rwa",
+      "regulatory_capital"
+    ]
+  },
+  {
+    "id": "template_basel_intermediate_capital_buffer_requirement",
+    "name": "Basel III Capital Buffer Requirement Check",
+    "short_description": "Evaluates if a bank's capital adequacy ratio meets the Basel III minimum capital plus buffer requirements.",
+    "domain": "Finance Regulation",
+    "topic": "Basel",
+    "inputs": [
+      {
+        "name": "min_ratio",
+        "type": "float",
+        "description": "The minimum capital ratio required under Basel III (as a percentage)."
+      },
+      {
+        "name": "buffer_required",
+        "type": "float",
+        "description": "The capital conservation buffer required under Basel III (as a percentage)."
+      },
+      {
+        "name": "total_ratio",
+        "type": "float",
+        "description": "The bank's total capital adequacy ratio (as a percentage)."
+      }
+    ],
+    "output_var": "MeetsRequirement",
+    "sympy_formulas": [
+      {
+        "variable": "required_total",
+        "formula": "min_ratio + buffer_required"
+      },
+      {
+        "variable": "MeetsRequirement",
+        "formula": "total_ratio >= required_total"
+      }
+    ],
+    "tags": [
+      "basel",
+      "capital adequacy",
+      "regulation",
+      "financial ratios"
+    ]
+  },
+  {
+    "id": "template_basel_intermediate_rwa_increase_effect",
+    "name": "Basel: Capital Adequacy Ratio Change Analysis",
+    "short_description": "Analyzes the impact of changes in capital and risk-weighted assets (RWA) on a bank's capital adequacy ratio, interpreting the direction and cause of the change.",
+    "domain": "Finance Regulation",
+    "topic": "Basel",
+    "inputs": [
+      {
+        "name": "capital_initial",
+        "type": "float",
+        "description": "Initial amount of capital (e.g., in millions of USD)."
+      },
+      {
+        "name": "rwa_initial",
+        "type": "float",
+        "description": "Initial amount of Risk-Weighted Assets (RWA) (e.g., in millions of USD)."
+      },
+      {
+        "name": "capital_new",
+        "type": "float",
+        "description": "New amount of capital after changes (e.g., in millions of USD)."
+      },
+      {
+        "name": "rwa_new",
+        "type": "float",
+        "description": "New amount of Risk-Weighted Assets (RWA) after changes (e.g., in millions of USD)."
+      }
+    ],
+    "output_var": "ratio_new",
+    "sympy_formulas": [
+      {
+        "variable": "ratio_initial",
+        "formula": "capital_initial / rwa_initial * 100"
+      },
+      {
+        "variable": "ratio_new",
+        "formula": "capital_new / rwa_new * 100"
+      }
+    ],
+    "tags": [
+      "basel",
+      "capital adequacy",
+      "rwa",
+      "ratio analysis",
+      "regulatory capital"
+    ]
+  },
+  {
+    "id": "template_basel_advanced_multiple_requirements_check",
+    "name": "Basel III Advanced Compliance Check",
+    "short_description": "Assesses a bank's compliance with key Basel III capital, leverage, and liquidity requirements by calculating relevant ratios and comparing them to regulatory minimums.",
+    "domain": "Finance Regulation",
+    "topic": "Basel",
+    "inputs": [
+      {
+        "name": "tier1",
+        "type": "float",
+        "description": "Tier 1 Capital (in millions)"
+      },
+      {
+        "name": "tier2",
+        "type": "float",
+        "description": "Tier 2 Capital (in millions)"
+      },
+      {
+        "name": "rwa_credit",
+        "type": "float",
+        "description": "Risk-Weighted Assets for Credit Risk (in millions)"
+      },
+      {
+        "name": "rwa_market",
+        "type": "float",
+        "description": "Risk-Weighted Assets for Market Risk (in millions)"
+      },
+      {
+        "name": "rwa_operational",
+        "type": "float",
+        "description": "Risk-Weighted Assets for Operational Risk (in millions)"
+      },
+      {
+        "name": "exposure",
+        "type": "float",
+        "description": "Total Exposure for Leverage Ratio calculation (in millions)"
+      },
+      {
+        "name": "hqla",
+        "type": "float",
+        "description": "High-Quality Liquid Assets (HQLA) (in millions)"
+      },
+      {
+        "name": "outflows_operational",
+        "type": "float",
+        "description": "Operational Net Cash Outflows (in millions)"
+      },
+      {
+        "name": "outflows_contingent",
+        "type": "float",
+        "description": "Contingent Net Cash Outflows (in millions)"
+      },
+      {
+        "name": "capital_required",
+        "type": "float",
+        "description": "Minimum total capital ratio required (as a percentage)"
+      },
+      {
+        "name": "leverage_required",
+        "type": "float",
+        "description": "Minimum leverage ratio required (as a percentage)"
+      },
+      {
+        "name": "lcr_required",
+        "type": "float",
+        "description": "Minimum liquidity coverage ratio (LCR) required (as a percentage)"
+      }
+    ],
+    "output_var": "overall_compliance_status",
+    "sympy_formulas": [
+      {
+        "variable": "rwa_total",
+        "formula": "rwa_credit + rwa_market + rwa_operational"
+      },
+      {
+        "variable": "total_outflows",
+        "formula": "outflows_operational + outflows_contingent"
+      },
+      {
+        "variable": "capital_ratio",
+        "formula": "(tier1 + tier2) / rwa_total * 100"
+      },
+      {
+        "variable": "leverage_ratio",
+        "formula": "tier1 / exposure * 100"
+      },
+      {
+        "variable": "lcr",
+        "formula": "hqla / total_outflows * 100"
+      }
+    ],
+    "tags": [
+      "basel",
+      "regulation",
+      "compliance",
+      "banking",
+      "capital_adequacy",
+      "leverage_ratio",
+      "lcr"
+    ]
+  }
+]

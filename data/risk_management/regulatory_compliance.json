@@ -1,0 +1,241 @@
+[
+  {
+    "id": "generate_random_value",
+    "name": "Generate Random Value",
+    "short_description": "Generates a random float value uniformly distributed between a specified lower and upper bound, rounded to two decimal places. This function is typically used to create randomized inputs for other financial models.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "low",
+        "type": "float",
+        "description": "The inclusive lower bound of the random value range."
+      },
+      {
+        "name": "high",
+        "type": "float",
+        "description": "The inclusive upper bound of the random value range."
+      }
+    ],
+    "output_var": "generated_value",
+    "sympy_formulas": [
+      {
+        "variable": "generated_value",
+        "formula": "Uniform(low, high)"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "utility",
+      "random_number_generation",
+      "simulation"
+    ]
+  },
+  {
+    "id": "template_compliance_penalty",
+    "name": "Compliance Penalty for Over-Limit Exposure",
+    "short_description": "Calculates the financial penalty incurred when a company's risk exposure exceeds a predefined regulatory threshold.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "exposure",
+        "type": "float",
+        "description": "Company's total risk exposure"
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "Regulatory limit for risk exposure"
+      },
+      {
+        "name": "penalty_rate",
+        "type": "float",
+        "description": "Percentage rate applied to the excess exposure (e.g., 5 for 5%)"
+      }
+    ],
+    "output_var": "penalty",
+    "sympy_formulas": [
+      {
+        "variable": "excess",
+        "formula": "exposure - threshold"
+      },
+      {
+        "variable": "penalty",
+        "formula": "excess * penalty_rate / 100"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "penalty",
+      "risk_exposure",
+      "compliance"
+    ]
+  },
+  {
+    "id": "template_capital_shortfall",
+    "name": "Regulatory Capital Shortfall",
+    "short_description": "Calculates the capital shortfall for a firm against a regulatory minimum requirement.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "current_capital",
+        "type": "float",
+        "description": "The current capital held by the firm."
+      },
+      {
+        "name": "min_requirement",
+        "type": "float",
+        "description": "The minimum capital required by regulators."
+      }
+    ],
+    "output_var": "shortfall",
+    "sympy_formulas": [
+      {
+        "variable": "shortfall",
+        "formula": "min_requirement - current_capital"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "capital",
+      "shortfall",
+      "risk"
+    ]
+  },
+  {
+    "id": "template_capital_requirement",
+    "name": "Capital Requirement Evaluation",
+    "short_description": "Calculates the capital deficiency by comparing an entity's current capital against the minimum regulatory requirement.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "current_capital",
+        "type": "float",
+        "description": "The entity's current reported capital."
+      },
+      {
+        "name": "min_requirement",
+        "type": "float",
+        "description": "The minimum capital required by the regulator."
+      }
+    ],
+    "output_var": "deficiency",
+    "sympy_formulas": [
+      {
+        "variable": "deficiency",
+        "formula": "min_requirement - current_capital"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "capital",
+      "deficiency"
+    ]
+  },
+  {
+    "id": "template_liquidity_gap",
+    "name": "Liquidity Gap Calculation",
+    "short_description": "Calculates the liquidity gap by comparing liquid assets to the liquidity requirement for regulatory compliance.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "liquid_assets",
+        "type": "float",
+        "description": "Value of liquid assets held by the financial institution."
+      },
+      {
+        "name": "liquidity_requirement",
+        "type": "float",
+        "description": "Total liquidity required by regulations or internal policy."
+      }
+    ],
+    "output_var": "gap",
+    "sympy_formulas": [
+      {
+        "variable": "gap",
+        "formula": "liquidity_requirement - liquid_assets"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "liquidity",
+      "risk_management",
+      "financial_institution"
+    ]
+  },
+  {
+    "id": "template_multi_factor_regulatory_compliance",
+    "name": "Multi-Factor Regulatory Compliance Assessment",
+    "short_description": "Advanced: Multi-factor Regulatory Compliance Assessment. Calculates total regulatory penalty based on compliance, capital, and liquidity factors.",
+    "domain": "Risk Management",
+    "topic": "Regulatory Compliance",
+    "inputs": [
+      {
+        "name": "exposure",
+        "type": "float",
+        "description": "The institution's risk exposure"
+      },
+      {
+        "name": "threshold",
+        "type": "float",
+        "description": "The regulatory threshold for risk exposure"
+      },
+      {
+        "name": "penalty_rate",
+        "type": "float",
+        "description": "The penalty rate as a percentage for exceeding the compliance threshold"
+      },
+      {
+        "name": "current_capital",
+        "type": "float",
+        "description": "The institution's current capital"
+      },
+      {
+        "name": "min_capital",
+        "type": "float",
+        "description": "The minimum capital required by regulators"
+      },
+      {
+        "name": "liquid_assets",
+        "type": "float",
+        "description": "The institution's current liquid assets"
+      },
+      {
+        "name": "liquidity_requirement",
+        "type": "float",
+        "description": "The minimum liquid assets required by regulators"
+      }
+    ],
+    "output_var": "total_penalty",
+    "sympy_formulas": [
+      {
+        "variable": "compliance_penalty",
+        "formula": "(exposure - threshold) * penalty_rate / 100"
+      },
+      {
+        "variable": "capital_shortfall",
+        "formula": "min_capital - current_capital"
+      },
+      {
+        "variable": "liquidity_gap",
+        "formula": "liquidity_requirement - liquid_assets"
+      },
+      {
+        "variable": "total_penalty",
+        "formula": "compliance_penalty + capital_shortfall + liquidity_gap"
+      }
+    ],
+    "tags": [
+      "regulatory_compliance",
+      "risk_management",
+      "compliance",
+      "penalty",
+      "capital",
+      "liquidity"
+    ]
+  }
+]

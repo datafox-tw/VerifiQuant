@@ -154,13 +154,18 @@ Context:
 - Source path: {source_path}
 
 Use the docstring and code block below to infer:
-1. A concise user-facing `name`.
-2. A `short_description` explaining the scenario and goal.
-3. Inputs (variable type, role, and timing if relevant). If type is unclear, choose float.
-4. **VERY IMPORTANT**: all of the deterministic and random inputs should be included. for example, if the code uses `year=4`, include `year` as an input, and don't set the variable to be 4. Make it be the same as random variable do.
-5. Output variable (usually the final value calculated).
-6. Symbolic expressions in SymPy-compatible strings. Use lower-case `r` for decimal rates unless the code clearly uses percentages.
-7. Tags: include at least `{topic_slug}`, `npv`, `financial-template`.
+Please provide the following seven fields for the financial template:
+
+1. A concise user-facing name (string): (e.g., "Future Value of a Single Sum")
+2. A short_description (string): Briefly explain the financial scenario and the calculation goal.
+3. Inputs (list of objects):List all required input variables. Include variable name, type (float or int), role/description, and timing if relevant (e.g., 'beginning', 'end'). Default to float if the type is ambiguous.
+4. Input Variable Inclusion Rule (Strict):
+- Include as Input Variables: All deterministic parameters used in the code that represent key financial magnitudes (e.g., years $N$, rate $r$, principal $PV$, amount $A$). Even if the code sets them to a specific initial value (e.g., year=4, rate=0.05), they must be listed as user-adjustable Input Variables.
+- Exclude (Treat as Constant): Parameters that define the calculation structure or format and are conventionally fixed. Examples include: quarter = 4 (for four quarters in a year), month = 12 (for 12 months), or payment_timing = 'end'.
+5. Output variable (string):Specify the final value calculated (usually the target variable like $FV$, $PV$, etc.).
+6.  Symbolic expression (SymPy-compatible string):- Provide the final formula using standard mathematical notation in a SymPy-compatible string. Use lower-case r for decimal rates (e.g., 0.05) unless the code explicitly uses percentages.
+7. Tags (list of strings): Include at least {topic_slug}, and other tags you would luke to add.
+
 
 Return ONLY JSON that conforms to the provided schema.
 
@@ -302,6 +307,7 @@ def main() -> None:
 
     cards = []
     count = 1
+    failed_snippets = []
     for snippet in snippets:
         # 初始化重試參數
         max_retries = 5 # 增加最大重試次數
@@ -329,17 +335,29 @@ def main() -> None:
                     else:
                         # 最後一次嘗試失敗，跳過
                         print(f"Failed to process {snippet.name} after {max_retries} attempts, skipping: {e}")
+                        failed_snippets.append(snippet.name)
                         # 使用 continue 進入下一個 snippet 的處理
                         break 
                 else:
                     # 處理其他 ServerError (例如 500)
                     print(f"Other ServerError: {e}, skipping.")
+                    failed_snippets.append(snippet.name)
                     break 
             
             except Exception as e:
                 # 處理其他非服務器錯誤 (如 JSONDecodeError)
                 print(f"General Error: {e}, skipping.")
+                failed_snippets.append(snippet.name)
                 break
+
+    if failed_snippets:
+        log_file = Path("failed_definitions.log")
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(log_file, "a", encoding="utf-8") as f:
+            for name in failed_snippets:
+                f.write(f"[{timestamp}] File: {py_path}, Def: {name}\n")
+        print(f"Logged {len(failed_snippets)} failed definitions to {log_file}")
+
     output_path = Path("data") / context["domain_slug"] / f"{context['topic_slug']}.json"
     ensure_output_path(output_path)
     output_path.write_text(json.dumps(cards, ensure_ascii=False, indent=2), encoding="utf-8")

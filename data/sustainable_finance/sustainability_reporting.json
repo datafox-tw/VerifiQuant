@@ -1,0 +1,239 @@
+[
+  {
+    "id": "template_energy_cost_savings",
+    "name": "Energy Cost Savings Calculation",
+    "short_description": "Calculates the annual energy cost savings based on initial energy expenditure and a percentage reduction from sustainability initiatives.",
+    "domain": "Sustainable Finance",
+    "topic": "Sustainability Reporting",
+    "inputs": [
+      {
+        "name": "energy_cost",
+        "type": "float",
+        "description": "Annual energy expenditure in dollars."
+      },
+      {
+        "name": "reduction_percent",
+        "type": "float",
+        "description": "Percentage reduction in energy cost."
+      }
+    ],
+    "output_var": "saving_amount",
+    "sympy_formulas": [
+      {
+        "variable": "saving_amount",
+        "formula": "energy_cost * (reduction_percent / 100)"
+      }
+    ],
+    "tags": [
+      "sustainability_reporting",
+      "energy_efficiency",
+      "cost_savings"
+    ]
+  },
+  {
+    "id": "template_waste_management_savings",
+    "name": "Waste Management Cost Savings",
+    "short_description": "Calculates the annual cost savings achieved through improved waste management, based on initial waste costs and a percentage reduction.",
+    "domain": "Sustainable Finance",
+    "topic": "Sustainability Reporting",
+    "inputs": [
+      {
+        "name": "waste_cost",
+        "type": "float",
+        "description": "Annual cost of waste disposal."
+      },
+      {
+        "name": "reduction_percent",
+        "type": "float",
+        "description": "Percentage reduction in waste management costs due to improved practices."
+      }
+    ],
+    "output_var": "saving_amount",
+    "sympy_formulas": [
+      {
+        "variable": "r_reduction",
+        "formula": "reduction_percent / 100"
+      },
+      {
+        "variable": "saving_amount",
+        "formula": "waste_cost * r_reduction"
+      }
+    ],
+    "tags": [
+      "sustainability_reporting",
+      "waste_management",
+      "cost_savings",
+      "environmental_impact",
+      "circular_economy"
+    ]
+  },
+  {
+    "id": "template_dual_operational_savings",
+    "name": "Dual Operational Savings from Energy and Waste Management",
+    "short_description": "Calculates the total annual cost savings by combining reductions in energy and waste management expenses due to sustainability initiatives.",
+    "domain": "Sustainable Finance",
+    "topic": "Sustainability Reporting",
+    "inputs": [
+      {
+        "name": "energy_cost",
+        "type": "float",
+        "description": "Annual energy cost before reduction."
+      },
+      {
+        "name": "waste_cost",
+        "type": "float",
+        "description": "Annual waste management cost before reduction."
+      },
+      {
+        "name": "energy_reduction",
+        "type": "float",
+        "description": "Percentage reduction in energy cost (e.g., 10 for 10%)."
+      },
+      {
+        "name": "waste_reduction",
+        "type": "float",
+        "description": "Percentage reduction in waste management cost (e.g., 15 for 15%)."
+      }
+    ],
+    "output_var": "total_saving",
+    "sympy_formulas": [
+      {
+        "variable": "energy_saving",
+        "formula": "energy_cost * (energy_reduction / 100)"
+      },
+      {
+        "variable": "waste_saving",
+        "formula": "waste_cost * (waste_reduction / 100)"
+      },
+      {
+        "variable": "total_saving",
+        "formula": "energy_saving + waste_saving"
+      }
+    ],
+    "tags": [
+      "sustainability_reporting",
+      "cost_savings",
+      "operational_efficiency",
+      "environmental_performance"
+    ]
+  },
+  {
+    "id": "template_supply_chain_savings",
+    "name": "Supply Chain Cost Savings from Sustainable Logistics",
+    "short_description": "Calculates the total annual supply chain cost savings achieved through sustainable logistics, combining a fixed saving amount and a percentage saving on the remaining costs.",
+    "domain": "Sustainable Finance",
+    "topic": "Sustainability Reporting",
+    "inputs": [
+      {
+        "name": "supply_chain_cost",
+        "type": "float",
+        "description": "The initial annual operational supply chain cost."
+      },
+      {
+        "name": "fixed_saving",
+        "type": "float",
+        "description": "The fixed cost saving amount achieved from process improvements."
+      },
+      {
+        "name": "extra_saving_percent",
+        "type": "float",
+        "description": "The additional percentage saving on the remaining costs, expressed as a whole number (e.g., 5 for 5%)."
+      }
+    ],
+    "output_var": "total_saving",
+    "sympy_formulas": [
+      {
+        "variable": "remaining_cost",
+        "formula": "supply_chain_cost - fixed_saving"
+      },
+      {
+        "variable": "additional_saving",
+        "formula": "remaining_cost * (extra_saving_percent / 100)"
+      },
+      {
+        "variable": "total_saving",
+        "formula": "fixed_saving + additional_saving"
+      }
+    ],
+    "tags": [
+      "sustainability_reporting",
+      "supply_chain",
+      "cost_savings",
+      "sustainable_logistics",
+      "environmental_impact"
+    ]
+  },
+  {
+    "id": "template_sustainability_roi_analysis",
+    "name": "ROI Analysis for Sustainability Reporting",
+    "short_description": "Calculates the Return on Investment (ROI) for a sustainability reporting initiative, considering initial investment, annual energy and waste savings, tax credits, and extra operational reductions over a specified period.",
+    "domain": "Sustainable Finance",
+    "topic": "Sustainability Reporting",
+    "inputs": [
+      {
+        "name": "initial_investment",
+        "type": "float",
+        "description": "Initial cost of implementing the sustainability reporting system."
+      },
+      {
+        "name": "annual_energy_saving",
+        "type": "float",
+        "description": "Annual energy cost saving from the initiative."
+      },
+      {
+        "name": "annual_waste_saving",
+        "type": "float",
+        "description": "Annual waste management saving from the initiative."
+      },
+      {
+        "name": "tax_credit_percent",
+        "type": "float",
+        "description": "Tax credit percentage on combined annual savings."
+      },
+      {
+        "name": "extra_operational_reduction_percent",
+        "type": "float",
+        "description": "Extra operational cost reduction percentage on base savings."
+      },
+      {
+        "name": "time_years",
+        "type": "integer",
+        "description": "Analysis period in years."
+      }
+    ],
+    "output_var": "roi_percentage",
+    "sympy_formulas": [
+      {
+        "variable": "base_savings",
+        "formula": "annual_energy_saving + annual_waste_saving"
+      },
+      {
+        "variable": "tax_credit",
+        "formula": "base_savings * (tax_credit_percent / 100)"
+      },
+      {
+        "variable": "extra_savings",
+        "formula": "base_savings * (extra_operational_reduction_percent / 100)"
+      },
+      {
+        "variable": "total_annual_saving",
+        "formula": "base_savings + tax_credit + extra_savings"
+      },
+      {
+        "variable": "total_savings_over_time",
+        "formula": "total_annual_saving * time_years"
+      },
+      {
+        "variable": "roi_percentage",
+        "formula": "((total_savings_over_time - initial_investment) / initial_investment) * 100"
+      }
+    ],
+    "tags": [
+      "sustainability_reporting",
+      "ROI",
+      "sustainable_finance",
+      "cost_savings",
+      "investment_analysis"
+    ]
+  }
+]

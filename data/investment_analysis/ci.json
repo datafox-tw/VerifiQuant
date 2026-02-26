@@ -1,0 +1,268 @@
+[
+  {
+    "id": "template_ci_simple_calculation",
+    "name": "Compound Interest: Simple Annual",
+    "short_description": "Calculates the compound interest earned on an initial principal amount over a given number of years with annual compounding.",
+    "domain": "Investment Analysis",
+    "topic": "Compound Interest",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "The initial principal amount."
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "The annual interest rate as a decimal (e.g., 0.05 for 5%)."
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "The number of years the principal is invested."
+      }
+    ],
+    "output_var": "CI",
+    "sympy_formulas": [
+      {
+        "variable": "compound_amount",
+        "formula": "principal * (1 + r)**time"
+      },
+      {
+        "variable": "CI",
+        "formula": "compound_amount - principal"
+      }
+    ],
+    "tags": [
+      "ci",
+      "compound interest",
+      "annual compounding",
+      "basic finance"
+    ]
+  },
+  {
+    "id": "template_ci_quarterly_compounding",
+    "name": "Compound Interest: Quarterly Compounding",
+    "short_description": "Calculates the total compound interest earned on an initial principal, given an annual interest rate compounded quarterly over a specified number of years.",
+    "domain": "Investment Analysis",
+    "topic": "Compound Interest",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial investment amount"
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "Annual interest rate as a percentage (e.g., 5 for 5%)"
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "Number of years the investment is held"
+      }
+    ],
+    "output_var": "ci",
+    "sympy_formulas": [
+      {
+        "variable": "future_value",
+        "formula": "principal * (1 + rate / (100 * 4))**(4 * time)"
+      },
+      {
+        "variable": "ci",
+        "formula": "future_value - principal"
+      }
+    ],
+    "tags": [
+      "ci",
+      "compound interest",
+      "quarterly",
+      "compounding",
+      "basic"
+    ]
+  },
+  {
+    "id": "template_ci_rate_and_total_known",
+    "name": "Compound Interest: Rate, Time, and Frequency Known",
+    "short_description": "Calculates the compound interest earned when the total accumulated amount, nominal annual interest rate, investment time, and compounding frequency are known.",
+    "domain": "Investment Analysis",
+    "topic": "Ci",
+    "inputs": [
+      {
+        "name": "total_amount",
+        "type": "float",
+        "description": "The final total amount received from the investment (A)."
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "The nominal annual interest rate (as a percentage, e.g., 5 for 5%)."
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "The total number of years the investment was held."
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "The number of compounding periods per year (e.g., 2 for semi-annually, 4 for quarterly, 12 for monthly)."
+      }
+    ],
+    "output_var": "ci",
+    "sympy_formulas": [
+      {
+        "variable": "r_periodic",
+        "formula": "(rate / 100) / n"
+      },
+      {
+        "variable": "growth_factor",
+        "formula": "(1 + r_periodic) ** (n * time)"
+      },
+      {
+        "variable": "principal",
+        "formula": "total_amount / growth_factor"
+      },
+      {
+        "variable": "ci",
+        "formula": "total_amount - principal"
+      }
+    ],
+    "tags": [
+      "ci",
+      "compound interest",
+      "nominal rate",
+      "present value",
+      "investment"
+    ]
+  },
+  {
+    "id": "template_ci_half_yearly_variable_rate",
+    "name": "Compound Interest: Semi-Annual, Variable Rate",
+    "short_description": "Calculates compound interest for an investment with semi-annual compounding where the annual interest rate changes mid-way through the investment period.",
+    "domain": "Investment Analysis",
+    "topic": "Ci",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "The initial principal amount invested."
+      },
+      {
+        "name": "first_years",
+        "type": "integer",
+        "description": "The number of years for which the first interest rate applies."
+      },
+      {
+        "name": "second_years",
+        "type": "integer",
+        "description": "The number of years for which the second interest rate applies."
+      },
+      {
+        "name": "rate1",
+        "type": "float",
+        "description": "The annual interest rate (as a percentage) for the first period."
+      },
+      {
+        "name": "rate2",
+        "type": "float",
+        "description": "The annual interest rate (as a percentage) for the second period."
+      }
+    ],
+    "output_var": "ci",
+    "sympy_formulas": [
+      {
+        "variable": "amount_after_phase1",
+        "formula": "principal * (1 + (rate1/100)/2)**(2 * first_years)"
+      },
+      {
+        "variable": "amount_final",
+        "formula": "amount_after_phase1 * (1 + (rate2/100)/2)**(2 * second_years)"
+      },
+      {
+        "variable": "ci",
+        "formula": "amount_final - principal"
+      }
+    ],
+    "tags": [
+      "ci",
+      "compound interest",
+      "semi-annual",
+      "variable rate",
+      "multi-period"
+    ]
+  },
+  {
+    "id": "template_ci_with_additional_deposit",
+    "name": "Compound Interest with Mid-Term Additional Deposit",
+    "short_description": "Calculates the total compound interest earned on an initial principal with an additional mid-term deposit, considering periodic compounding.",
+    "domain": "Investment Analysis",
+    "topic": "Compound Interest",
+    "inputs": [
+      {
+        "name": "principal",
+        "type": "float",
+        "description": "Initial investment amount"
+      },
+      {
+        "name": "rate",
+        "type": "float",
+        "description": "Annual interest rate as a percentage"
+      },
+      {
+        "name": "time",
+        "type": "integer",
+        "description": "Total investment period in years"
+      },
+      {
+        "name": "n",
+        "type": "integer",
+        "description": "Number of compounding periods per year"
+      },
+      {
+        "name": "deposit",
+        "type": "float",
+        "description": "Additional amount deposited mid-term"
+      },
+      {
+        "name": "deposit_time",
+        "type": "integer",
+        "description": "Year when the additional deposit is made"
+      }
+    ],
+    "output_var": "compound_interest",
+    "sympy_formulas": [
+      {
+        "variable": "periodic_rate",
+        "formula": "rate / (100 * n)"
+      },
+      {
+        "variable": "fv_principal",
+        "formula": "principal * (1 + periodic_rate) ** (n * time)"
+      },
+      {
+        "variable": "fv_deposit",
+        "formula": "deposit * (1 + periodic_rate) ** (n * (time - deposit_time))"
+      },
+      {
+        "variable": "total_future_value",
+        "formula": "fv_principal + fv_deposit"
+      },
+      {
+        "variable": "total_contributions",
+        "formula": "principal + deposit"
+      },
+      {
+        "variable": "compound_interest",
+        "formula": "total_future_value - total_contributions"
+      }
+    ],
+    "tags": [
+      "ci",
+      "compound interest",
+      "additional deposit",
+      "future value"
+    ]
+  }
+]

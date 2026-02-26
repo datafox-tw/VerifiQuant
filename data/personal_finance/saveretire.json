@@ -1,0 +1,425 @@
+[
+  {
+    "id": "_fmt_money",
+    "name": "Format Money Value",
+    "short_description": "Formats a numerical value as a currency string with two decimal places and a dollar sign prefix.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "float",
+        "description": "The numerical value to be formatted as currency."
+      }
+    ],
+    "output_var": "formatted_money_string",
+    "sympy_formulas": [],
+    "tags": [
+      "saveretire",
+      "formatting",
+      "utility",
+      "money",
+      "currency"
+    ]
+  },
+  {
+    "id": "_fmt_pct",
+    "name": "Format Decimal as Percentage String",
+    "short_description": "Formats a decimal number (e.g., 0.05) into a percentage string with two decimal places (e.g., '5.00%').",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "p",
+        "type": "float",
+        "description": "The decimal value to be formatted as a percentage (e.g., 0.05 for 5%)."
+      }
+    ],
+    "output_var": "formatted_percentage_string",
+    "sympy_formulas": [
+      {
+        "variable": "percentage_value_for_display",
+        "formula": "p * 100"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "formatting",
+      "percentage",
+      "utility"
+    ]
+  },
+  {
+    "id": "_years_left",
+    "name": "Years Left Until Retirement",
+    "short_description": "Calculates the number of years remaining until a specified retirement age, ensuring the result is at least 1.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "current_age",
+        "type": "integer",
+        "description": "The individual's current age."
+      },
+      {
+        "name": "retirement_age",
+        "type": "integer",
+        "description": "The target age for retirement."
+      }
+    ],
+    "output_var": "years_left",
+    "sympy_formulas": [
+      {
+        "variable": "years_left",
+        "formula": "Max(1, retirement_age - current_age)"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "retirement",
+      "age",
+      "time horizon"
+    ]
+  },
+  {
+    "id": "template_retirement_savings_simple",
+    "name": "Additional Annual Savings for Retirement (No Returns)",
+    "short_description": "Calculates the additional annual savings required to reach a retirement target, assuming no investment returns on any savings.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "age",
+        "type": "integer",
+        "description": "The person's current age."
+      },
+      {
+        "name": "retirement_age",
+        "type": "integer",
+        "description": "The target age for retirement."
+      },
+      {
+        "name": "target_savings",
+        "type": "float",
+        "description": "The total desired savings amount at retirement."
+      },
+      {
+        "name": "current_savings",
+        "type": "float",
+        "description": "The amount of savings accumulated to date."
+      },
+      {
+        "name": "annual_savings",
+        "type": "float",
+        "description": "The amount already being saved annually."
+      }
+    ],
+    "output_var": "extra_annual_needed",
+    "sympy_formulas": [
+      {
+        "variable": "years_left",
+        "formula": "retirement_age - age"
+      },
+      {
+        "variable": "shortfall",
+        "formula": "Max(0, target_savings - current_savings - annual_savings * years_left)"
+      },
+      {
+        "variable": "extra_annual_needed",
+        "formula": "shortfall / years_left"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "retirement",
+      "savings",
+      "no-returns",
+      "arithmetic"
+    ]
+  },
+  {
+    "id": "template_retirement_years_to_target_simple",
+    "name": "Years to Target Savings (No Returns)",
+    "short_description": "Calculates the number of years required to reach a target savings amount, given current savings and constant annual contributions, assuming no investment returns.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "target_savings",
+        "type": "float",
+        "description": "The desired total savings amount to be reached."
+      },
+      {
+        "name": "current_savings",
+        "type": "float",
+        "description": "The amount currently saved."
+      },
+      {
+        "name": "annual_savings",
+        "type": "float",
+        "description": "The amount saved annually."
+      }
+    ],
+    "output_var": "years_needed",
+    "sympy_formulas": [
+      {
+        "variable": "remaining",
+        "formula": "Max(0, target_savings - current_savings)"
+      },
+      {
+        "variable": "years_needed",
+        "formula": "Ceiling(remaining / annual_savings)"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "retirement",
+      "savings",
+      "years",
+      "no-return",
+      "simple"
+    ]
+  },
+  {
+    "id": "template_retirement_investment_returns",
+    "name": "Retirement Savings: Current Balance + Annuity",
+    "short_description": "Calculates the future value of retirement savings, combining the growth of current savings with end-of-year contributions (ordinary annuity) at an annual return rate.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "current_savings",
+        "type": "float",
+        "description": "The current amount of money saved."
+      },
+      {
+        "name": "annual_savings",
+        "type": "float",
+        "description": "The amount contributed at the end of each year (ordinary annuity)."
+      },
+      {
+        "name": "r",
+        "type": "float",
+        "description": "The annual investment return rate as a decimal (e.g., 0.05 for 5%)."
+      },
+      {
+        "name": "current_age",
+        "type": "integer",
+        "description": "The person's current age."
+      },
+      {
+        "name": "retirement_age",
+        "type": "integer",
+        "description": "The age at which the person plans to retire."
+      }
+    ],
+    "output_var": "total_fv",
+    "sympy_formulas": [
+      {
+        "variable": "years_left",
+        "formula": "retirement_age - current_age"
+      },
+      {
+        "variable": "fv_current",
+        "formula": "current_savings * (1 + r) ** years_left"
+      },
+      {
+        "variable": "annuity_factor",
+        "formula": "((1 + r) ** years_left - 1) / r"
+      },
+      {
+        "variable": "fv_contribs",
+        "formula": "annual_savings * annuity_factor"
+      },
+      {
+        "variable": "total_fv",
+        "formula": "fv_current + fv_contribs"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "retirement",
+      "future value",
+      "annuity",
+      "personal finance"
+    ]
+  },
+  {
+    "id": "template_retirement_inflation_adjustment",
+    "name": "Nominal Retirement Target with Inflation",
+    "short_description": "Convert a target expressed in today's dollars into the nominal amount needed at retirement using inflation g.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "current_age",
+        "type": "integer",
+        "description": "Current age of the individual."
+      },
+      {
+        "name": "retirement_age",
+        "type": "integer",
+        "description": "Desired age of retirement."
+      },
+      {
+        "name": "target_today",
+        "type": "float",
+        "description": "Desired amount in today's purchasing power at retirement."
+      },
+      {
+        "name": "g_pct",
+        "type": "float",
+        "description": "Annual inflation rate as a percentage (e.g., 3.5 for 3.5%)."
+      }
+    ],
+    "output_var": "nominal_needed",
+    "sympy_formulas": [
+      {
+        "variable": "years_left",
+        "formula": "retirement_age - current_age"
+      },
+      {
+        "variable": "g",
+        "formula": "g_pct / 100"
+      },
+      {
+        "variable": "nominal_needed",
+        "formula": "target_today * (1 + g) ** years_left"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "inflation",
+      "retirement",
+      "financial planning"
+    ]
+  },
+  {
+    "id": "template_retirement_early",
+    "name": "Early Retirement Feasibility",
+    "short_description": "Calculates if current savings and future contributions are sufficient to fund desired withdrawals for a specified retirement period, considering pre- and post-retirement investment returns.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "current_age",
+        "type": "integer",
+        "description": "The individual's current age."
+      },
+      {
+        "name": "early_retire_age",
+        "type": "integer",
+        "description": "The target age for early retirement."
+      },
+      {
+        "name": "current_savings",
+        "type": "float",
+        "description": "The current amount of money saved for retirement."
+      },
+      {
+        "name": "annual_savings",
+        "type": "float",
+        "description": "The amount saved at the end of each year before retirement (ordinary annuity)."
+      },
+      {
+        "name": "r_pre_pct",
+        "type": "float",
+        "description": "The annual investment return rate (as a percentage) before retirement."
+      },
+      {
+        "name": "r_post_pct",
+        "type": "float",
+        "description": "The annual investment return rate (as a percentage) during retirement."
+      },
+      {
+        "name": "annual_withdrawal",
+        "type": "float",
+        "description": "The annual amount withdrawn at the end of each year during retirement (ordinary annuity)."
+      },
+      {
+        "name": "life_expectancy",
+        "type": "integer",
+        "description": "The projected life expectancy, determining the total years of withdrawal."
+      }
+    ],
+    "output_var": "surplus",
+    "sympy_formulas": [
+      {
+        "variable": "years_until_ret",
+        "formula": "early_retire_age - current_age"
+      },
+      {
+        "variable": "retirement_years",
+        "formula": "life_expectancy - early_retire_age"
+      },
+      {
+        "variable": "r_pre",
+        "formula": "r_pre_pct / 100"
+      },
+      {
+        "variable": "r_post",
+        "formula": "r_post_pct / 100"
+      },
+      {
+        "variable": "fv_current",
+        "formula": "current_savings * (1 + r_pre) ** years_until_ret"
+      },
+      {
+        "variable": "af_pre",
+        "formula": "((1 + r_pre) ** years_until_ret - 1) / r_pre"
+      },
+      {
+        "variable": "fv_contribs",
+        "formula": "annual_savings * af_pre"
+      },
+      {
+        "variable": "total_at_retirement",
+        "formula": "fv_current + fv_contribs"
+      },
+      {
+        "variable": "required_capital",
+        "formula": "annual_withdrawal * (1 - (1 + r_post) ** (-retirement_years)) / r_post"
+      },
+      {
+        "variable": "surplus",
+        "formula": "total_at_retirement - required_capital"
+      }
+    ],
+    "tags": [
+      "saveretire",
+      "early retirement",
+      "retirement planning",
+      "financial planning",
+      "annuity",
+      "future value",
+      "present value"
+    ]
+  },
+  {
+    "id": "generate_templates",
+    "name": "Generate Financial Templates",
+    "short_description": "A utility function to generate multiple instances of various financial templates with random seeds and save them to a JSON file.",
+    "domain": "Personal Finance",
+    "topic": "Saveretire",
+    "inputs": [
+      {
+        "name": "output_file",
+        "type": "string",
+        "description": "The file path where the generated problems will be saved."
+      },
+      {
+        "name": "num_instances",
+        "type": "integer",
+        "description": "The number of problem instances to generate for each template."
+      }
+    ],
+    "output_var": "problems_generated_count",
+    "sympy_formulas": [],
+    "tags": [
+      "saveretire",
+      "utility",
+      "template_generation",
+      "problem_generation"
+    ]
+  }
+]

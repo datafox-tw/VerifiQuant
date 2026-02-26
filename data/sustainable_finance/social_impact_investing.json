@@ -1,0 +1,243 @@
+[
+  {
+    "id": "template_energy_efficiency_savings",
+    "name": "Annual Energy Cost Savings",
+    "short_description": "Calculate Annual Energy Cost Savings from an Energy Efficiency Upgrade",
+    "domain": "Sustainable Finance",
+    "topic": "Social Impact Investing",
+    "inputs": [
+      {
+        "name": "original_cost",
+        "type": "float",
+        "description": "Original annual energy cost in dollars"
+      },
+      {
+        "name": "saving_percentage",
+        "type": "float",
+        "description": "Expected percentage saving from the upgrade"
+      }
+    ],
+    "output_var": "new_cost",
+    "sympy_formulas": [
+      {
+        "variable": "savings",
+        "formula": "original_cost * (saving_percentage / 100)"
+      },
+      {
+        "variable": "new_cost",
+        "formula": "original_cost - savings"
+      }
+    ],
+    "tags": [
+      "social_impact_investing",
+      "energy_efficiency",
+      "cost_savings",
+      "sustainable_finance"
+    ]
+  },
+  {
+    "id": "template_financing_cost_reduction",
+    "name": "New Financing Rate after Basis Point Reduction",
+    "short_description": "Calculate the new annual financing rate after a reduction in basis points from an initial rate.",
+    "domain": "Sustainable Finance",
+    "topic": "Social Impact Investing",
+    "inputs": [
+      {
+        "name": "initial_rate",
+        "type": "float",
+        "description": "The initial annual financing rate, as a percentage (e.g., 5 for 5%)."
+      },
+      {
+        "name": "reduction_bp",
+        "type": "integer",
+        "description": "The reduction in financing cost given in basis points (1 bp = 0.01%)."
+      }
+    ],
+    "output_var": "new_rate",
+    "sympy_formulas": [
+      {
+        "variable": "reduction_percent",
+        "formula": "reduction_bp * 0.01"
+      },
+      {
+        "variable": "new_rate",
+        "formula": "initial_rate - reduction_percent"
+      }
+    ],
+    "tags": [
+      "social_impact_investing",
+      "financing_cost",
+      "interest_rate",
+      "basis_points",
+      "sustainable_finance"
+    ]
+  },
+  {
+    "id": "template_supply_chain_integration",
+    "name": "Annual Savings from Sustainable Supply Chain Integration",
+    "short_description": "Calculates the total annual cost savings resulting from integrating sustainable practices into a supply chain, considering both percentage cost reduction and fixed synergy benefits per unit, multiplied by annual production volume.",
+    "domain": "Sustainable Finance",
+    "topic": "Social Impact Investing",
+    "inputs": [
+      {
+        "name": "original_cost_per_unit",
+        "type": "float",
+        "description": "Original cost of a single unit."
+      },
+      {
+        "name": "reduction_percentage",
+        "type": "float",
+        "description": "Percentage reduction in unit cost from process re-engineering (e.g., enter 10 for 10%)."
+      },
+      {
+        "name": "fixed_savings",
+        "type": "float",
+        "description": "Additional fixed savings per unit from synergy benefits."
+      },
+      {
+        "name": "annual_units",
+        "type": "integer",
+        "description": "Annual production volume in units."
+      }
+    ],
+    "output_var": "total_annual_savings",
+    "sympy_formulas": [
+      {
+        "variable": "percentage_saving",
+        "formula": "original_cost_per_unit * (reduction_percentage / 100)"
+      },
+      {
+        "variable": "saving_per_unit",
+        "formula": "percentage_saving + fixed_savings"
+      },
+      {
+        "variable": "total_annual_savings",
+        "formula": "saving_per_unit * annual_units"
+      }
+    ],
+    "tags": [
+      "social_impact_investing",
+      "supply_chain",
+      "sustainability",
+      "cost_savings",
+      "efficiency"
+    ]
+  },
+  {
+    "id": "template_combined_cost_tax_savings",
+    "name": "Net Savings from Cost Reduction and Tax Incentives",
+    "short_description": "Calculates the total net annual savings from both operational cost reductions and government tax credits on project expenses.",
+    "domain": "Sustainable Finance",
+    "topic": "Social Impact Investing",
+    "inputs": [
+      {
+        "name": "annual_op_cost",
+        "type": "float",
+        "description": "The annual operational cost of the company or project."
+      },
+      {
+        "name": "op_reduction_percent",
+        "type": "float",
+        "description": "The percentage reduction in annual operational costs."
+      },
+      {
+        "name": "project_expenses",
+        "type": "float",
+        "description": "The total expenses incurred for the sustainable operational improvement project."
+      },
+      {
+        "name": "tax_credit_percent",
+        "type": "float",
+        "description": "The percentage of tax credit received on the total project expenses."
+      }
+    ],
+    "output_var": "net_savings",
+    "sympy_formulas": [
+      {
+        "variable": "op_savings",
+        "formula": "annual_op_cost * (op_reduction_percent / 100)"
+      },
+      {
+        "variable": "tax_credit",
+        "formula": "project_expenses * (tax_credit_percent / 100)"
+      },
+      {
+        "variable": "net_savings",
+        "formula": "op_savings + tax_credit"
+      }
+    ],
+    "tags": [
+      "social_impact_investing",
+      "cost_reduction",
+      "tax_incentives",
+      "net_savings"
+    ]
+  },
+  {
+    "id": "template_multiphase_social_impact_investment",
+    "name": "Overall Net Impact from Multi-Phase Social Impact Investment",
+    "short_description": "Calculates the total net financial impact of a social impact project by summing savings from operating cost reduction, efficiency improvements, and government subsidies across multiple phases.",
+    "domain": "Sustainable Finance",
+    "topic": "Social Impact Investing",
+    "inputs": [
+      {
+        "name": "initial_op_cost",
+        "type": "float",
+        "description": "The initial operating cost that will be reduced in Phase 1."
+      },
+      {
+        "name": "phase1_reduction_percent",
+        "type": "float",
+        "description": "The percentage reduction in initial operating cost for Phase 1 (e.g., 10 for 10%)."
+      },
+      {
+        "name": "fixed_saving_per_unit",
+        "type": "float",
+        "description": "The additional fixed saving per unit due to improved efficiency in Phase 2."
+      },
+      {
+        "name": "annual_production",
+        "type": "integer",
+        "description": "The annual production volume for Phase 2, used to calculate total efficiency savings."
+      },
+      {
+        "name": "total_project_cost",
+        "type": "float",
+        "description": "The total cost of the project, used as the basis for the government subsidy in Phase 3."
+      },
+      {
+        "name": "subsidy_percent",
+        "type": "float",
+        "description": "The government subsidy percentage of the total project cost for Phase 3 (e.g., 5 for 5%)."
+      }
+    ],
+    "output_var": "overall_net_impact",
+    "sympy_formulas": [
+      {
+        "variable": "phase1_savings",
+        "formula": "initial_op_cost * (phase1_reduction_percent / 100)"
+      },
+      {
+        "variable": "phase2_savings",
+        "formula": "fixed_saving_per_unit * annual_production"
+      },
+      {
+        "variable": "phase3_subsidy",
+        "formula": "total_project_cost * (subsidy_percent / 100)"
+      },
+      {
+        "variable": "overall_net_impact",
+        "formula": "phase1_savings + phase2_savings + phase3_subsidy"
+      }
+    ],
+    "tags": [
+      "social_impact_investing",
+      "sustainable_finance",
+      "net_impact",
+      "multi_phase",
+      "subsidy",
+      "cost_reduction",
+      "efficiency_savings"
+    ]
+  }
+]

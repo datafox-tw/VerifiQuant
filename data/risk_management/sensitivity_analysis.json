@@ -1,0 +1,254 @@
+[
+  {
+    "id": "template_portfolio_single_factor",
+    "name": "Single Asset Interest Rate Sensitivity",
+    "short_description": "Calculates the change in a single asset's value due to a specified percentage change in interest rates, given the asset's sensitivity.",
+    "domain": "Risk Management",
+    "topic": "Sensitivity Analysis",
+    "inputs": [
+      {
+        "name": "asset_value",
+        "type": "float",
+        "description": "The initial value of the asset."
+      },
+      {
+        "name": "interest_rate_change_percent",
+        "type": "float",
+        "description": "The percentage change in interest rates (e.g., 5 for a 5% change)."
+      },
+      {
+        "name": "asset_sensitivity",
+        "type": "float",
+        "description": "The asset's sensitivity to changes in interest rates."
+      }
+    ],
+    "output_var": "change_in_asset_value",
+    "sympy_formulas": [
+      {
+        "variable": "change_in_asset_value",
+        "formula": "asset_value * (interest_rate_change_percent / 100) * asset_sensitivity"
+      }
+    ],
+    "tags": [
+      "sensitivity_analysis",
+      "risk",
+      "interest_rate_risk",
+      "asset_valuation",
+      "single_factor"
+    ]
+  },
+  {
+    "id": "template_stock_sensitivity",
+    "name": "Stock Price Sensitivity to Market Index Change",
+    "short_description": "Calculates the expected change in a stock's price based on its sensitivity to a market index change.",
+    "domain": "Risk Management",
+    "topic": "Sensitivity Analysis",
+    "inputs": [
+      {
+        "name": "stock_price",
+        "type": "float",
+        "description": "Current price of the stock."
+      },
+      {
+        "name": "market_change",
+        "type": "float",
+        "description": "Percentage change in the market index (e.g., 2 for 2%)."
+      },
+      {
+        "name": "sensitivity",
+        "type": "float",
+        "description": "The sensitivity (beta-like factor) of the stock price to the market index change."
+      }
+    ],
+    "output_var": "expected_stock_price_change",
+    "sympy_formulas": [
+      {
+        "variable": "expected_stock_price_change",
+        "formula": "stock_price * (market_change / 100) * sensitivity"
+      }
+    ],
+    "tags": [
+      "sensitivity_analysis",
+      "stock",
+      "market_risk",
+      "risk_management"
+    ]
+  },
+  {
+    "id": "template_multi_asset_portfolio",
+    "name": "Multi-asset Portfolio Interest Rate Sensitivity",
+    "short_description": "Calculates the change in a multi-asset portfolio's value due to an interest rate change, considering individual asset weights and sensitivities.",
+    "domain": "Risk Management",
+    "topic": "Sensitivity Analysis",
+    "inputs": [
+      {
+        "name": "pv",
+        "type": "float",
+        "description": "Current total value of the portfolio."
+      },
+      {
+        "name": "aw1",
+        "type": "float",
+        "description": "Weight of asset 1 in the portfolio (as a percentage, e.g., 25 for 25%)."
+      },
+      {
+        "name": "aw2",
+        "type": "float",
+        "description": "Weight of asset 2 in the portfolio (as a percentage, e.g., 25 for 25%)."
+      },
+      {
+        "name": "aw3",
+        "type": "float",
+        "description": "Weight of asset 3 in the portfolio (as a percentage, e.g., 25 for 25%)."
+      },
+      {
+        "name": "s1",
+        "type": "float",
+        "description": "Sensitivity of asset 1 to a 1% change in interest rates."
+      },
+      {
+        "name": "s2",
+        "type": "float",
+        "description": "Sensitivity of asset 2 to a 1% change in interest rates."
+      },
+      {
+        "name": "s3",
+        "type": "float",
+        "description": "Sensitivity of asset 3 to a 1% change in interest rates."
+      },
+      {
+        "name": "ir_change_pct",
+        "type": "float",
+        "description": "Change in interest rates (as a percentage, e.g., 0.5 for a 0.5% increase)."
+      }
+    ],
+    "output_var": "portfolio_value_change",
+    "sympy_formulas": [
+      {
+        "variable": "impact_1",
+        "formula": "pv * (aw1 / 100) * (ir_change_pct / 100) * s1"
+      },
+      {
+        "variable": "impact_2",
+        "formula": "pv * (aw2 / 100) * (ir_change_pct / 100) * s2"
+      },
+      {
+        "variable": "impact_3",
+        "formula": "pv * (aw3 / 100) * (ir_change_pct / 100) * s3"
+      },
+      {
+        "variable": "portfolio_value_change",
+        "formula": "impact_1 + impact_2 + impact_3"
+      }
+    ],
+    "tags": [
+      "sensitivity_analysis",
+      "portfolio_management",
+      "risk_management",
+      "interest_rate_risk",
+      "multi_asset"
+    ]
+  },
+  {
+    "id": "template_volatility_sensitivity",
+    "name": "Option Vega Sensitivity to Volatility Change",
+    "short_description": "Calculates the expected change in an option's value due to a specified change in the underlying asset's volatility, using the option's Vega.",
+    "domain": "Risk Management",
+    "topic": "Sensitivity Analysis",
+    "inputs": [
+      {
+        "name": "vega",
+        "type": "float",
+        "description": "Option's Vega, representing the change in option value for a 1% change in volatility."
+      },
+      {
+        "name": "vol_change",
+        "type": "float",
+        "description": "Change in the underlying asset's volatility (in percentage points, e.g., 5 for 5%)."
+      }
+    ],
+    "output_var": "impact",
+    "sympy_formulas": [
+      {
+        "variable": "impact",
+        "formula": "vega * vol_change"
+      }
+    ],
+    "tags": [
+      "sensitivity_analysis",
+      "options",
+      "vega",
+      "volatility",
+      "derivatives"
+    ]
+  },
+  {
+    "id": "template_multi_factor_portfolio",
+    "name": "Multi-Factor Portfolio Sensitivity",
+    "short_description": "Calculates the total change in a portfolio's value due to simultaneous changes in multiple risk factors (interest rates, market index, credit spreads), considering its sensitivities to each.",
+    "domain": "Risk Management",
+    "topic": "Sensitivity Analysis",
+    "inputs": [
+      {
+        "name": "portfolio_value",
+        "type": "float",
+        "description": "Current market value of the portfolio."
+      },
+      {
+        "name": "interest_rate_change",
+        "type": "float",
+        "description": "Percentage change in interest rates (e.g., 1 for 1% change)."
+      },
+      {
+        "name": "market_change",
+        "type": "float",
+        "description": "Percentage change in the market index (e.g., 2 for 2% change)."
+      },
+      {
+        "name": "credit_spread_change",
+        "type": "float",
+        "description": "Percentage change in credit spreads (e.g., -0.5 for -0.5% change)."
+      },
+      {
+        "name": "sensitivity_interest",
+        "type": "float",
+        "description": "Portfolio's sensitivity (beta) to interest rate changes."
+      },
+      {
+        "name": "sensitivity_market",
+        "type": "float",
+        "description": "Portfolio's sensitivity (beta) to market index changes."
+      },
+      {
+        "name": "sensitivity_credit",
+        "type": "float",
+        "description": "Portfolio's sensitivity (beta) to credit spread changes."
+      }
+    ],
+    "output_var": "solv",
+    "sympy_formulas": [
+      {
+        "variable": "contrib_interest",
+        "formula": "portfolio_value * (interest_rate_change / 100) * sensitivity_interest"
+      },
+      {
+        "variable": "contrib_market",
+        "formula": "portfolio_value * (market_change / 100) * sensitivity_market"
+      },
+      {
+        "variable": "contrib_credit",
+        "formula": "portfolio_value * (credit_spread_change / 100) * sensitivity_credit"
+      },
+      {
+        "variable": "solv",
+        "formula": "contrib_interest + contrib_market + contrib_credit"
+      }
+    ],
+    "tags": [
+      "sensitivity_analysis",
+      "portfolio",
+      "risk_management",
+      "multi-factor"
+    ]
+  }
+]
