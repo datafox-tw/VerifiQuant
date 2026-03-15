@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+ROOT = Path(__file__).resolve().parent.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 try:
     from google import genai
     from google.genai import types as genai_types
@@ -131,11 +135,33 @@ if genai_types is not None:
                 type=genai_types.Type.OBJECT,
                 properties={
                     "self_description": genai_types.Schema(type=genai_types.Type.STRING),
-                    "applicable_when": genai_types.Schema(type=genai_types.Type.ARRAY),
-                    "not_applicable_when": genai_types.Schema(type=genai_types.Type.ARRAY),
-                    "common_confusions": genai_types.Schema(type=genai_types.Type.ARRAY),
-                    "required_input_summary": genai_types.Schema(type=genai_types.Type.ARRAY),
-                    "disambiguation_prompts": genai_types.Schema(type=genai_types.Type.ARRAY),
+                    "applicable_when": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
+                    "not_applicable_when": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
+                    "common_confusions": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(
+                            type=genai_types.Type.OBJECT,
+                            properties={
+                                "label": genai_types.Schema(type=genai_types.Type.STRING),
+                                "difference": genai_types.Schema(type=genai_types.Type.STRING),
+                            },
+                            required=["label", "difference"],
+                        ),
+                    ),
+                    "required_input_summary": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
+                    "disambiguation_prompts": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
                 },
                 required=[
                     "self_description",
@@ -152,8 +178,14 @@ if genai_types is not None:
                     "m_refusal_message": genai_types.Schema(type=genai_types.Type.STRING),
                     "f_error_message": genai_types.Schema(type=genai_types.Type.STRING),
                     "e_alert_message": genai_types.Schema(type=genai_types.Type.STRING),
-                    "clarification_prompts": genai_types.Schema(type=genai_types.Type.ARRAY),
-                    "user_repair_options": genai_types.Schema(type=genai_types.Type.ARRAY),
+                    "clarification_prompts": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
+                    "user_repair_options": genai_types.Schema(
+                        type=genai_types.Type.ARRAY,
+                        items=genai_types.Schema(type=genai_types.Type.STRING),
+                    ),
                 },
                 required=[
                     "m_refusal_message",
