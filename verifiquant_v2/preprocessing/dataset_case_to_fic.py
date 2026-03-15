@@ -21,6 +21,7 @@ except ImportError:  # pragma: no cover - runtime dependency guard
     genai_types = None
 
 from verifiquant_v2.contracts import REFUSAL_CATEGORY_DESCRIPTIONS, USER_REPAIR_OPTIONS
+from verifiquant_v2.card_store import build_store_from_cards
 from verifiquant_v2.taxonomy import is_valid_domain_topic, taxonomy_json
 
 
@@ -586,6 +587,16 @@ def main() -> None:
             "If omitted, core output is not persisted."
         ),
     )
+    parser.add_argument(
+        "--store-output",
+        type=Path,
+        help="Optional path to write persistent FICStore pickle (.pkl).",
+    )
+    parser.add_argument(
+        "--embedding-model",
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        help="Embedding model for store building when --store-output is provided.",
+    )
     args = parser.parse_args()
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -631,6 +642,14 @@ def main() -> None:
             encoding="utf-8",
         )
         print(f"Wrote {len(core_fics)} stage1 core FIC cards to {args.dump_stage1_core}")
+
+    if args.store_output:
+        build_store_from_cards(
+            final_fics,
+            output_path=args.store_output,
+            source_path=output_path,
+            embedding_model=args.embedding_model,
+        )
 
 
 if __name__ == "__main__":
