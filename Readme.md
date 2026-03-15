@@ -95,3 +95,10 @@ NSFCA — Neuro-Symbolic Financial Computation Agent
 python verifiquant.py \
     --question """John Doe can invest $107641 in Amazon Web Services Expansion. The project will save $24450 per year for 4 years, after which it can be sold for $54788 but will incur an environmental cleanup cost of $28699. Given a discount rate of 7.58%, what is the NPV?""" \
     --domain "Investment Analysis" --topic "Net Present Value"
+
+以上是１２月的
+現在以下是3月的資料處理測試
+python verifiquant_v2/preprocessing/dataset_case_to_fic_v2.py \
+  --input verifiquant_v2/data/unique_investment_backup_10npv.jsonl \
+  --output verifiquant_v2/data/unique_investment_backup_10npv.fic_v2.json \
+  --dump-stage1-core verifiquant_v2/data/unique_investment_backup_10npv.stage1_core.json
