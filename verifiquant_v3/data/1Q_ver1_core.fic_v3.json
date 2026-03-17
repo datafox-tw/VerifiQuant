@@ -1,0 +1,124 @@
+[
+  {
+    "fic_id": "fic_article_2942",
+    "name": "Net Present Value of Growth Opportunities (NPVGO)",
+    "short_description": "Calculate the Net Present Value of Growth Opportunities (NPVGO). This function computes the net present value of future cash flows from growth opportunities, such as new projects or acquisitions. The NPVGO helps assess the intrinsic value per share from these growth opportunities.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-2942",
+      "article_title": "Net Present Value of Growth Opportunities (NPVGO)",
+      "source": "FinanceReasoning-test-981",
+      "question_id": "test-1045",
+      "difficulty": 2.4849066497880004,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "projected_cash_inflows",
+        "type": "number",
+        "required": true,
+        "description": "The projected future cash inflows from growth opportunities.",
+        "unit": null,
+        "aliases": []
+      },
+      {
+        "name": "cost_of_capital",
+        "type": "number",
+        "required": true,
+        "description": "The firm's cost of capital used for discounting, expressed as a decimal.",
+        "unit": null,
+        "aliases": []
+      },
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": true,
+        "description": "The initial investment cost or purchase price of the project or asset.",
+        "unit": null,
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "npvgo",
+      "type": "number",
+      "unit": null,
+      "description": "The net present value of the growth opportunities."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    projected_cash_inflows = inputs['projected_cash_inflows']\n    cost_of_capital = inputs['cost_of_capital']\n    initial_investment = inputs['initial_investment']\n\n    discounted_cash_flows = projected_cash_inflows / (1 + cost_of_capital)\n    npvgo = discounted_cash_flows - initial_investment\n    \n    return npvgo",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "npvgo_001",
+        "name": "Positive Cost of Capital",
+        "check_type": "deterministic",
+        "diagnostic_type": "M",
+        "severity": "error",
+        "expression": "inputs['cost_of_capital'] > 0",
+        "semantic_key": "",
+        "applies_to": [
+          "cost_of_capital"
+        ],
+        "description": "The cost of capital must be a positive value for valid discounting."
+      },
+      {
+        "rule_id": "npvgo_002",
+        "name": "Cost of Capital Range (0 to 1)",
+        "check_type": "deterministic",
+        "diagnostic_type": "M",
+        "severity": "error",
+        "expression": "inputs['cost_of_capital'] < 1",
+        "semantic_key": "",
+        "applies_to": [
+          "cost_of_capital"
+        ],
+        "description": "The cost of capital, when expressed as a decimal, should be less than 1."
+      },
+      {
+        "rule_id": "npvgo_003",
+        "name": "Positive Projected Cash Inflows",
+        "check_type": "deterministic",
+        "diagnostic_type": "M",
+        "severity": "error",
+        "expression": "inputs['projected_cash_inflows'] > 0",
+        "semantic_key": "",
+        "applies_to": [
+          "projected_cash_inflows"
+        ],
+        "description": "Projected cash inflows must be positive for a growth opportunity to potentially add value."
+      },
+      {
+        "rule_id": "npvgo_004",
+        "name": "Positive Initial Investment",
+        "check_type": "deterministic",
+        "diagnostic_type": "M",
+        "severity": "error",
+        "expression": "inputs['initial_investment'] > 0",
+        "semantic_key": "",
+        "applies_to": [
+          "initial_investment"
+        ],
+        "description": "The initial investment must be a positive value."
+      },
+      {
+        "rule_id": "npvgo_005",
+        "name": "NPVGO Interpretation",
+        "check_type": "semantic",
+        "diagnostic_type": "F",
+        "severity": "alert",
+        "expression": "",
+        "semantic_key": "a_positive_npvgo_indicates_that_the_growth_opportunities_are_expected_to_add_value_to_the_firm_while_a_negative_npvgo_suggests_value_destruction_this_metric_is_crucial_for_evaluating_investment_decisions",
+        "applies_to": [
+          "npvgo"
+        ],
+        "description": "Evaluate the calculated NPVGO to understand its implications for the investment decision."
+      }
+    ]
+  }
+]
