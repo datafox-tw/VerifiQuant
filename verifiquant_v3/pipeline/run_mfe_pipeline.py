@@ -8,7 +8,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 if str(ROOT) not in sys.path:
@@ -21,14 +21,15 @@ except ImportError:  # pragma: no cover
     genai = None
     genai_types = None
 
-from verifiquant_v2.card_store import FICStore
+from verifiquant_v3.preprocessing.validate_relations import validate_artifact_relations
+from verifiquant_v3.card_store import SQLAlchemyArtifactStore
 
 
 def _tokenize(text: str) -> List[str]:
-    return re.findall(r"[a-z0-9_]+", text.lower())
+    return re.findall(r"[a-z0-9_]+", str(text or "").lower())
 
 
-def _parse_number(value: str) -> Optional[float]:
+def _parse_number(value: Any) -> Optional[float]:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -36,10 +37,9 @@ def _parse_number(value: str) -> Optional[float]:
     s = str(value).strip().replace(",", "").replace("_", "")
     if not s:
         return None
-    s_lower = s.lower()
 
-    # Unit multipliers (handles patterns like "150 million", "1.5b", "200k")
     multiplier = 1.0
+    s_lower = s.lower()
     if re.search(r"\btrillion\b|\bt\b", s_lower):
         multiplier = 1e12
     elif re.search(r"\bbillion\b|\bbn\b|\bb\b", s_lower):
@@ -48,14 +48,6 @@ def _parse_number(value: str) -> Optional[float]:
         multiplier = 1e6
     elif re.search(r"\bthousand\b|\bk\b", s_lower):
         multiplier = 1e3
-    elif "百萬" in s_lower:
-        multiplier = 1e6
-    elif "千萬" in s_lower:
-        multiplier = 1e7
-    elif "億" in s_lower:
-        multiplier = 1e8
-    elif "萬" in s_lower:
-        multiplier = 1e4
 
     is_pct = "%" in s
     s = s.replace("%", "")
@@ -64,10 +56,8 @@ def _parse_number(value: str) -> Optional[float]:
         return None
     n = float(m.group())
     if is_pct:
-        n = n / 100.0
-    else:
-        n = n * multiplier
-    return n
+        return n / 100.0
+    return n * multiplier
 
 
 def _extract_numeric_list(value: Any) -> List[float]:
@@ -85,7 +75,6 @@ def _extract_numeric_list(value: Any) -> List[float]:
     if not s:
         return []
 
-    # Try JSON list first
     try:
         parsed = json.loads(s)
         if isinstance(parsed, list):
@@ -99,7 +88,6 @@ def _extract_numeric_list(value: Any) -> List[float]:
     except Exception:
         pass
 
-    # Fallback: extract repeated number tokens, preserving list-like structure.
     tokens = re.findall(r"-?\d[\d,]*(?:\.\d+)?%?", s)
     out = []
     for tok in tokens:
@@ -110,8 +98,8 @@ def _extract_numeric_list(value: Any) -> List[float]:
 
 
 def _parse_typed_value(raw_value: Any, declared_type: str) -> Optional[Any]:
-    dt = (declared_type or "").lower()
-    if "list" in dt or "array" in dt:
+    dt = str(declared_type or "").lower()
+    if "array" in dt or "list" in dt:
         vals = _extract_numeric_list(raw_value)
         return vals if vals else None
     if "int" in dt:
@@ -119,7 +107,13 @@ def _parse_typed_value(raw_value: Any, declared_type: str) -> Optional[Any]:
         if n is None:
             return None
         return int(round(n))
-    # default numeric scalar
+    if "bool" in dt:
+        s = str(raw_value or "").strip().lower()
+        if s in {"true", "1", "yes"}:
+            return True
+        if s in {"false", "0", "no"}:
+            return False
+        return None
     return _parse_number(raw_value)
 
 
@@ -136,62 +130,73 @@ def _answer_match(question: str, output_value: Optional[float], gold_num: Option
     return abs_err, math.isclose(output_value, gold_num, rel_tol=1e-6, abs_tol=1e-2)
 
 
-def _safe_eval_rule(rule: str, env: Dict[str, Any]) -> Optional[bool]:
+def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Optional[bool]:
     if not rule:
         return None
-    local_env = dict(env)
-    local_env.update({"abs": abs, "min": min, "max": max, "len": len, "sum": sum, "math": math})
+    env = {
+        "inputs": inputs,
+        "abs": abs,
+        "min": min,
+        "max": max,
+        "len": len,
+        "sum": sum,
+        "all": all,
+        "any": any,
+        "isinstance": isinstance,
+        "float": float,
+        "int": int,
+        "bool": bool,
+        "str": str,
+        "math": math,
+    }
+    env.update(inputs)
     try:
-        return bool(eval(rule, {"__builtins__": {}}, local_env))
+        return bool(eval(rule, {"__builtins__": {}}, env))
     except Exception:
         return None
 
 
-@dataclass
-class RetrievalCandidate:
-    card: Dict[str, Any]
-    score: float
+def _infer_predicate_mode(chk: Dict[str, Any]) -> str:
+    """
+    Infer whether expression means:
+    - violation: True => trigger
+    - validity:  True => pass
+    """
+    explicit = str(chk.get("predicate_mode", chk.get("expression_mode", ""))).strip().lower()
+    if explicit in {"violation", "validity"}:
+        return explicit
+
+    expr = str(chk.get("expression", "")).strip()
+    e = re.sub(r"\s+", "", expr.lower())
+
+    # Strong violation-pattern signals.
+    if e.startswith("not(") or e.startswith("not"):
+        return "violation"
+    if re.search(r"(<0|<=0|<=-1|==0|!=|isnone)", e):
+        return "violation"
+
+    # Strong validity-pattern signals.
+    if re.search(r"(len\(.+\)>0|all\(|any\(|isinstance\()", e):
+        return "validity"
+    if re.search(r"(>=0|>0|>-1|<=1|<=10)", e):
+        return "validity"
+    if re.search(r"<(0?\.\d+|[1-9]\d*(?:\.\d+)?)", e) and "<0" not in e:
+        return "validity"
+    if ("<=" in e or ">=" in e) and "not" not in e:
+        return "validity"
+
+    # Fallback to violation semantics.
+    return "violation"
 
 
-def _card_search_text(card: Dict[str, Any]) -> str:
-    parts: List[str] = []
-    for k in ("id", "name", "short_description", "domain", "topic"):
-        v = card.get(k)
-        if isinstance(v, str):
-            parts.append(v)
-    for inp in card.get("inputs", []):
-        parts.append(str(inp.get("name", "")))
-        parts.append(str(inp.get("description", "")))
-    hints = card.get("selection_hints", {}) or {}
-    for k in ("self_description",):
-        v = hints.get(k)
-        if isinstance(v, str):
-            parts.append(v)
-    for k in ("applicable_when", "common_confusions", "required_input_summary"):
-        v = hints.get(k, [])
-        if isinstance(v, list):
-            for item in v:
-                parts.append(json.dumps(item, ensure_ascii=False) if isinstance(item, dict) else str(item))
-    return " ".join(parts)
-
-
-def retrieve_candidates(cards: List[Dict[str, Any]], query: str, top_k: int) -> List[RetrievalCandidate]:
-    q_tokens = set(_tokenize(query))
-    scored: List[RetrievalCandidate] = []
-    for card in cards:
-        text = _card_search_text(card)
-        c_tokens = set(_tokenize(text))
-        overlap = len(q_tokens & c_tokens)
-        denom = max(len(q_tokens), 1)
-        score = overlap / denom
-        scored.append(RetrievalCandidate(card=card, score=score))
-    scored.sort(key=lambda x: x.score, reverse=True)
-    return scored[:top_k]
-
-
-def retrieve_candidates_from_store(store: FICStore, query: str, top_k: int, alpha: float = 0.4) -> List[RetrievalCandidate]:
-    results = store.retrieve_top_k(query=query, top_k=top_k, alpha=alpha)
-    return [RetrievalCandidate(card=record.data, score=score) for record, score in results]
+def _is_check_triggered(chk: Dict[str, Any], inputs: Dict[str, Any]) -> bool:
+    result = _safe_eval_rule(str(chk.get("expression", "")), inputs)
+    if result is None:
+        return False
+    mode = _infer_predicate_mode(chk)
+    if mode == "validity":
+        return result is False
+    return result is True
 
 
 def _load_records(path: Path) -> List[Dict[str, Any]]:
@@ -216,25 +221,95 @@ def _dump_records(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _load_cards(path: Path) -> List[Dict[str, Any]]:
-    cards = _load_records(path)
-    out = []
-    for c in cards:
-        if isinstance(c, dict) and "id" in c and "inputs" in c and "execution" in c:
-            out.append(c)
+def _load_core(path: Path) -> Dict[str, Dict[str, Any]]:
+    rows = _load_records(path)
+    out: Dict[str, Dict[str, Any]] = {}
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        fic_id = str(r.get("fic_id", "")).strip()
+        if fic_id:
+            out[fic_id] = r
     if not out:
-        raise ValueError("No valid FIC cards found.")
+        raise ValueError("No valid core cards loaded")
     return out
+
+
+def _load_retrieval(path: Path) -> List[Dict[str, Any]]:
+    rows = _load_records(path)
+    out = [r for r in rows if isinstance(r, dict) and str(r.get("fic_id", "")).strip()]
+    if not out:
+        raise ValueError("No valid retrieval cards loaded")
+    return out
+
+
+def _load_repair(path: Path) -> List[Dict[str, Any]]:
+    rows = _load_records(path)
+    out = [r for r in rows if isinstance(r, dict) and str(r.get("rule_id", "")).strip()]
+    if not out:
+        raise ValueError("No valid repair rules loaded")
+    return out
+
+
+@dataclass
+class RetrievalCandidate:
+    retrieval: Dict[str, Any]
+    score: float
+
+
+def _retrieval_text(card: Dict[str, Any]) -> str:
+    pieces: List[str] = []
+    for k in ("title", "summary", "domain", "topic", "embedding_text"):
+        v = card.get(k)
+        if isinstance(v, str):
+            pieces.append(v)
+    for k in ("applicable_when", "not_applicable_when", "keywords"):
+        vals = card.get(k, [])
+        if isinstance(vals, list):
+            pieces.extend(str(x) for x in vals)
+    for c in card.get("common_confusions", []):
+        if isinstance(c, dict):
+            pieces.append(str(c.get("label", "")))
+            pieces.append(str(c.get("difference", "")))
+    return " ".join(pieces)
+
+
+def retrieve_candidates(cards: List[Dict[str, Any]], query: str, top_k: int) -> List[RetrievalCandidate]:
+    q_tokens = set(_tokenize(query))
+    scored: List[RetrievalCandidate] = []
+    for card in cards:
+        c_tokens = set(_tokenize(_retrieval_text(card)))
+        overlap = len(q_tokens & c_tokens)
+        denom = max(len(q_tokens), 1)
+        score = overlap / denom
+        scored.append(RetrievalCandidate(retrieval=card, score=score))
+    scored.sort(key=lambda x: x.score, reverse=True)
+    return scored[:top_k]
+
+
+def retrieve_candidates_from_store(
+    store: SQLAlchemyArtifactStore,
+    *,
+    query: str,
+    top_k: int,
+) -> List[RetrievalCandidate]:
+    rows = store.retrieve_candidates(query=query, top_k=top_k)
+    return [RetrievalCandidate(retrieval=row, score=float(row.get("score", 0.0))) for row in rows]
 
 
 def _schema_selection() -> Any:
     return genai_types.Schema(
         type=genai_types.Type.OBJECT,
         properties={
-            "chosen_id": genai_types.Schema(type=genai_types.Type.STRING),
+            "decision": genai_types.Schema(type=genai_types.Type.STRING, enum=["select_card", "abstain_m"]),
+            "chosen_fic_id": genai_types.Schema(type=genai_types.Type.STRING),
             "reason": genai_types.Schema(type=genai_types.Type.STRING),
+            "clarification_questions": genai_types.Schema(
+                type=genai_types.Type.ARRAY,
+                items=genai_types.Schema(type=genai_types.Type.STRING),
+            ),
         },
-        required=["chosen_id", "reason"],
+        required=["decision", "chosen_fic_id", "reason", "clarification_questions"],
     )
 
 
@@ -260,18 +335,17 @@ def _schema_extraction() -> Any:
     )
 
 
-def _schema_echeck() -> Any:
+def _schema_semantic_echeck() -> Any:
     return genai_types.Schema(
         type=genai_types.Type.OBJECT,
         properties={
-            "is_e_alert": genai_types.Schema(type=genai_types.Type.BOOLEAN),
-            "reason": genai_types.Schema(type=genai_types.Type.STRING),
             "triggered_rule_ids": genai_types.Schema(
                 type=genai_types.Type.ARRAY,
                 items=genai_types.Schema(type=genai_types.Type.STRING),
             ),
+            "reason": genai_types.Schema(type=genai_types.Type.STRING),
         },
-        required=["is_e_alert", "reason", "triggered_rule_ids"],
+        required=["triggered_rule_ids", "reason"],
     )
 
 
@@ -287,16 +361,21 @@ def _llm_json(client: Any, *, model: str, prompt: str, schema: Any) -> Dict[str,
 def _select_card_with_llm(client: Any, model: str, question: str, context: str, cands: List[RetrievalCandidate]) -> Dict[str, Any]:
     block = []
     for i, c in enumerate(cands, 1):
+        r = c.retrieval
         block.append(
-            f"Candidate {i} | id={c.card.get('id')} | score={c.score:.3f}\n"
-            f"name={c.card.get('name')}\n"
-            f"topic={c.card.get('topic')}\n"
-            f"summary={c.card.get('short_description','')}\n"
-            f"required_inputs={[inp.get('name') for inp in c.card.get('inputs', [])]}"
+            f"Candidate {i} | fic_id={r.get('fic_id')} | score={c.score:.3f}\n"
+            f"title={r.get('title')}\n"
+            f"topic={r.get('topic')}\n"
+            f"summary={r.get('summary','')}\n"
+            f"applicable_when={r.get('applicable_when', [])}"
         )
     prompt = f"""
-You are selecting a financial formula card.
-If the query is ambiguous or none match, choose empty chosen_id "" (M-type refusal).
+You are selecting a financial formula card from candidates.
+
+Decision policy:
+1) If one candidate clearly matches user intent, return decision="select_card" and chosen_fic_id.
+2) If intent is ambiguous (e.g., could be NPV vs IRR vs payback) or no candidate fits, return decision="abstain_m".
+3) For abstain_m, provide 1-3 clarification_questions.
 
 Question:
 {question}
@@ -312,21 +391,13 @@ Return JSON only.
     return _llm_json(client, model=model, prompt=prompt, schema=_schema_selection())
 
 
-def _extract_inputs_with_llm(client: Any, model: str, question: str, context: str, card: Dict[str, Any]) -> Dict[str, Any]:
-    required = card.get("inputs", [])
+def _extract_inputs_with_llm(client: Any, model: str, question: str, context: str, core: Dict[str, Any]) -> Dict[str, Any]:
+    required = core.get("inputs", [])
     prompt = f"""
-Extract required input values from question/context.
+Extract input values from question/context for this core card.
 If missing, set status="missing" and value="".
-Keep list-like values as JSON array strings when input type is list/array.
-Percent values should preserve unit signal (e.g. "8%" or "0.08"), do not concatenate numbers.
-If text includes magnitude words (million/billion/thousand), keep that unit in the value text
-or convert explicitly to absolute number (e.g., "150 million" -> "150000000") unless input description says values are in millions.
-For share counts and currency amounts, prefer absolute numeric values in `value` (no words), e.g.:
-- "1.5 million shares" -> "1500000"
-- "$2.3 billion" -> "2300000000"
-- "150 million" -> "150000000"
-For rates/probabilities, keep clear rate format (e.g., "8%" or "0.08").
-Also return `normalization_note` describing any unit normalization you applied.
+Keep list-like values as JSON array strings when input type is array.
+Keep rates with explicit signal (e.g., 8% or 0.08) and summarize normalization decisions in normalization_note.
 
 Required inputs:
 {json.dumps(required, ensure_ascii=False, indent=2)}
@@ -342,18 +413,16 @@ Return JSON only.
     return _llm_json(client, model=model, prompt=prompt, schema=_schema_extraction())
 
 
-def _echeck_with_llm(
+def _semantic_echeck_with_llm(
     client: Any,
     model: str,
     question: str,
     context: str,
-    card: Dict[str, Any],
+    semantic_checks: List[Dict[str, Any]],
     provided_inputs: Dict[str, Any],
 ) -> Dict[str, Any]:
     prompt = f"""
-Determine whether this case should trigger E-type alert (input binding/scale/logical inconsistency).
-Use the card diagnostics and provided inputs.
-Return is_e_alert=true only when likely inconsistent.
+Assess only semantic E-type checks. Trigger a rule_id only if likely inconsistent.
 
 Question:
 {question}
@@ -361,23 +430,25 @@ Question:
 Context:
 {context}
 
-Card diagnostics:
-{json.dumps(card.get('diagnostics', {}), ensure_ascii=False, indent=2)}
+Semantic checks:
+{json.dumps(semantic_checks, ensure_ascii=False, indent=2)}
 
 Provided inputs:
 {json.dumps(provided_inputs, ensure_ascii=False, indent=2)}
 
 Return JSON only.
 """
-    return _llm_json(client, model=model, prompt=prompt, schema=_schema_echeck())
+    return _llm_json(client, model=model, prompt=prompt, schema=_schema_semantic_echeck())
 
 
-def _evaluate_execution(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -> Tuple[Optional[float], Optional[str]]:
-    execution = card.get("execution", {})
+def _evaluate_execution(core: Dict[str, Any], provided_inputs: Dict[str, Any]) -> Tuple[Optional[float], Optional[str]]:
+    execution = core.get("execution", {})
     code = str(execution.get("code", ""))
-    output_var = str(card.get("output_var", ""))
+    output_name = str((core.get("output") or {}).get("name", ""))
     if "def compute(inputs)" not in code:
         return None, "execution code missing compute(inputs)"
+    if not output_name:
+        return None, "output.name missing in core"
 
     safe_builtins = {
         "abs": abs,
@@ -385,6 +456,11 @@ def _evaluate_execution(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -
         "max": max,
         "sum": sum,
         "len": len,
+        "all": all,
+        "any": any,
+        "isinstance": isinstance,
+        "bool": bool,
+        "str": str,
         "float": float,
         "int": int,
         "pow": pow,
@@ -392,7 +468,13 @@ def _evaluate_execution(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -
         "range": range,
         "list": list,
         "dict": dict,
+        "tuple": tuple,
+        "set": set,
+        "zip": zip,
         "enumerate": enumerate,
+        "ValueError": ValueError,
+        "TypeError": TypeError,
+        "Exception": Exception,
     }
     local_env: Dict[str, Any] = {}
     try:
@@ -401,11 +483,14 @@ def _evaluate_execution(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -
         if not callable(fn):
             return None, "compute function missing after exec"
         result = fn(provided_inputs)
-        if not isinstance(result, dict):
-            return None, "compute did not return dict"
-        if output_var not in result:
-            return None, f"output_var '{output_var}' missing from compute result"
-        val = _parse_number(result.get(output_var))
+        if isinstance(result, dict):
+            if output_name not in result:
+                return None, f"output '{output_name}' missing from compute result"
+            raw_output = result.get(output_name)
+        else:
+            # Backward compatibility: some generated cards return scalar directly.
+            raw_output = result
+        val = _parse_number(raw_output)
         if val is None:
             return None, "output value not numeric"
         return val, None
@@ -413,35 +498,61 @@ def _evaluate_execution(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -
         return None, str(exc)
 
 
-def _auto_rule_check(card: Dict[str, Any], provided_inputs: Dict[str, Any]) -> List[str]:
-    triggered: List[str] = []
-    for inv in (card.get("diagnostics", {}) or {}).get("invariants", []):
-        rule = str(inv.get("rule", ""))
-        rid = str(inv.get("id", ""))
-        ok = _safe_eval_rule(rule, provided_inputs)
-        if ok is False:
-            triggered.append(rid or "invariant")
-    return triggered
+def _build_repair_index(repair_rows: List[Dict[str, Any]]) -> Dict[Tuple[str, str], Dict[str, Any]]:
+    out: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    for row in repair_rows:
+        fic_id = str(row.get("fic_id", "")).strip()
+        rid = str(row.get("rule_id", "")).strip()
+        if fic_id and rid:
+            out[(fic_id, rid)] = row
+    return out
+
+
+def _summarize_repairs(fic_id: str, rule_ids: List[str], repair_index: Dict[Tuple[str, str], Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out = []
+    for rid in rule_ids:
+        rule = repair_index.get((fic_id, rid))
+        if not rule:
+            continue
+        out.append(
+            {
+                "rule_id": rid,
+                "title": rule.get("title", ""),
+                "user_message": rule.get("user_message", ""),
+                "repair_action": rule.get("repair_action", {}),
+                "allowed_next_steps": rule.get("allowed_next_steps", []),
+                "ask_user_for": rule.get("ask_user_for", []),
+            }
+        )
+    return out
 
 
 def run_case(
     *,
     row: Dict[str, Any],
-    cards: List[Dict[str, Any]],
-    store: Optional[FICStore],
+    core_by_id: Dict[str, Dict[str, Any]],
+    retrieval_cards: List[Dict[str, Any]],
+    store: Optional[SQLAlchemyArtifactStore],
+    repair_index: Dict[Tuple[str, str], Dict[str, Any]],
     client: Any,
     selector_model: str,
     extractor_model: str,
     judge_model: str,
     top_k: int,
+    m_min_top_score: float,
 ) -> Dict[str, Any]:
     q = str(row.get("question", "") or "")
     c = str(row.get("context", "") or "")
     case_id = str(row.get("case_id") or row.get("question_id") or "")
+
     if store is not None:
-        candidates = retrieve_candidates_from_store(store, f"{q}\n{c}", top_k=top_k)
+        candidates = retrieve_candidates_from_store(
+            store,
+            query=f"{q}\n{c}",
+            top_k=top_k,
+        )
     else:
-        candidates = retrieve_candidates(cards, f"{q}\n{c}", top_k=top_k)
+        candidates = retrieve_candidates(retrieval_cards, f"{q}\n{c}", top_k=top_k)
     if not candidates:
         return {
             "case_id": case_id,
@@ -449,35 +560,71 @@ def run_case(
             "diagnostic_type": "M",
             "reason": "No candidate cards retrieved",
             "candidate_ids": [],
+            "clarification_questions": [
+                "Do you want NPV, IRR, payback period, or another metric?"
+            ],
         }
 
     selection = _select_card_with_llm(client, selector_model, q, c, candidates)
-    chosen_id = str(selection.get("chosen_id", "") or "").strip()
-    if not chosen_id:
+    decision = str(selection.get("decision", "")).strip()
+    chosen_fic_id = str(selection.get("chosen_fic_id", "")).strip()
+    candidate_ids = [cand.retrieval.get("fic_id") for cand in candidates]
+
+    if decision == "abstain_m":
         return {
             "case_id": case_id,
             "status": "refusal",
             "diagnostic_type": "M",
-            "reason": selection.get("reason", "Ambiguous task or no suitable card"),
-            "candidate_ids": [cand.card.get("id") for cand in candidates],
+            "reason": selection.get("reason", "Ambiguous task intent before card commitment"),
+            "candidate_ids": candidate_ids,
+            "clarification_questions": selection.get("clarification_questions", []),
         }
 
-    card = next((cand.card for cand in candidates if str(cand.card.get("id")) == chosen_id), None)
-    if card is None:
+    if decision != "select_card" or not chosen_fic_id:
         return {
             "case_id": case_id,
             "status": "refusal",
             "diagnostic_type": "M",
-            "reason": f"Selected card '{chosen_id}' not in retrieved top-k",
-            "candidate_ids": [cand.card.get("id") for cand in candidates],
+            "reason": "Selector did not commit a valid card decision",
+            "candidate_ids": candidate_ids,
+            "clarification_questions": [
+                "Please specify the target metric explicitly (e.g., NPV, IRR, Payback)."
+            ],
         }
 
-    extraction = _extract_inputs_with_llm(client, extractor_model, q, c, card)
+    top_score = candidates[0].score if candidates else 0.0
+    if top_score < m_min_top_score:
+        return {
+            "case_id": case_id,
+            "status": "refusal",
+            "diagnostic_type": "M",
+            "reason": f"Low retrieval confidence before card commitment (top score={top_score:.3f})",
+            "candidate_ids": candidate_ids,
+            "clarification_questions": [
+                "Can you clarify the financial objective and preferred formula family?"
+            ],
+        }
+
+    core = core_by_id.get(chosen_fic_id)
+    if core is None:
+        return {
+            "case_id": case_id,
+            "status": "refusal",
+            "diagnostic_type": "M",
+            "reason": f"Chosen fic_id '{chosen_fic_id}' has no matching core card",
+            "candidate_ids": candidate_ids,
+            "clarification_questions": [
+                "Please rephrase the task with explicit formula intent."
+            ],
+        }
+
+    # card_committed=True beyond this point; only F/E/C/success should appear.
+    extraction = _extract_inputs_with_llm(client, extractor_model, q, c, core)
     normalization_note = str(extraction.get("normalization_note", "") or "")
-    card_inputs = card.get("inputs", [])
-    type_map = {str(inp.get("name")): str(inp.get("type", "float")) for inp in card_inputs}
-    required_inputs = [inp for inp in card_inputs if bool(inp.get("required", True))]
-    required_names = [str(inp.get("name")) for inp in required_inputs]
+
+    core_inputs = core.get("inputs", [])
+    type_map = {str(inp.get("name")): str(inp.get("type", "number")) for inp in core_inputs}
+    required_names = [str(inp.get("name")) for inp in core_inputs if bool(inp.get("required", True))]
     extracted = {str(x.get("name")): x for x in extraction.get("inputs", []) if x.get("name")}
 
     missing = []
@@ -487,17 +634,16 @@ def run_case(
         if not item or item.get("status") != "provided":
             missing.append(name)
             continue
-        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "float"))
+        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "number"))
         if parsed is None:
             missing.append(name)
         else:
             provided_inputs[name] = parsed
 
-    # keep optional values if parseable
     for name, item in extracted.items():
         if name in provided_inputs:
             continue
-        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "float"))
+        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "number"))
         if parsed is not None:
             provided_inputs[name] = parsed
 
@@ -506,42 +652,76 @@ def run_case(
             "case_id": case_id,
             "status": "error",
             "diagnostic_type": "F",
-            "reason": card.get("refusal_hints", {}).get("f_error_message", "Missing required input"),
-            "card_id": card.get("id"),
-            "candidate_ids": [cand.card.get("id") for cand in candidates],
+            "reason": "Missing or unparsable required inputs",
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
             "requested_fields": missing,
             "provided_inputs": provided_inputs,
             "normalization_note": normalization_note,
+            "repair_hints": [
+                {
+                    "repair_action": {"type": "request_missing_fields", "target": ",".join(missing)},
+                    "ask_user_for": [{"slot": m, "label": m, "type": "text", "required": True, "options": []} for m in missing],
+                    "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
+                }
+            ],
         }
 
-    # E-check: first deterministic rule eval, then LLM judge as supplement.
-    auto_triggered = _auto_rule_check(card, provided_inputs)
-    e_judge = _echeck_with_llm(client, judge_model, q, c, card, provided_inputs)
-    e_flag = bool(e_judge.get("is_e_alert")) or bool(auto_triggered)
-    triggered = list(dict.fromkeys(auto_triggered + list(e_judge.get("triggered_rule_ids", []))))
-    if e_flag:
+    checks = core.get("diagnostic_checks", [])
+    e_checks = [chk for chk in checks if str(chk.get("diagnostic_type", "")).upper() == "E"]
+    auto_triggered: List[str] = []
+    semantic_checks: List[Dict[str, Any]] = []
+
+    for chk in e_checks:
+        rule_id = str(chk.get("rule_id", "")).strip()
+        ctype = str(chk.get("check_type", "")).strip().lower()
+        if ctype in {"deterministic", "normalization"}:
+            if _is_check_triggered(chk, provided_inputs) and rule_id:
+                auto_triggered.append(rule_id)
+        elif ctype == "semantic":
+            semantic_checks.append(chk)
+
+    llm_triggered: List[str] = []
+    llm_reason = ""
+    if semantic_checks:
+        sem = _semantic_echeck_with_llm(
+            client,
+            judge_model,
+            q,
+            c,
+            semantic_checks,
+            provided_inputs,
+        )
+        llm_triggered = [str(x).strip() for x in sem.get("triggered_rule_ids", []) if str(x).strip()]
+        llm_reason = str(sem.get("reason", "")).strip()
+
+    triggered = list(dict.fromkeys(auto_triggered + llm_triggered))
+    if triggered:
+        reason = llm_reason
+        if auto_triggered and (not reason or reason.lower().startswith("no ")):
+            reason = "Deterministic E-type checks detected potential inconsistencies."
         return {
             "case_id": case_id,
             "status": "alert",
             "diagnostic_type": "E",
-            "reason": e_judge.get("reason")
-            or card.get("refusal_hints", {}).get("e_alert_message", "Potential inconsistency detected"),
-            "card_id": card.get("id"),
-            "candidate_ids": [cand.card.get("id") for cand in candidates],
+            "reason": reason or "Potential E-type inconsistency detected",
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
             "provided_inputs": provided_inputs,
             "triggered_rule_ids": triggered,
             "normalization_note": normalization_note,
+            "repair_hints": _summarize_repairs(chosen_fic_id, triggered, repair_index),
         }
 
-    output_value, exec_err = _evaluate_execution(card, provided_inputs)
+    output_value, exec_err = _evaluate_execution(core, provided_inputs)
     if exec_err:
         return {
             "case_id": case_id,
             "status": "error",
             "diagnostic_type": "C",
             "reason": exec_err,
-            "card_id": card.get("id"),
-            "candidate_ids": [cand.card.get("id") for cand in candidates],
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
             "provided_inputs": provided_inputs,
             "normalization_note": normalization_note,
         }
@@ -555,10 +735,10 @@ def run_case(
         "status": "success",
         "diagnostic_type": None,
         "reason": "Execution completed",
-        "card_id": card.get("id"),
-        "candidate_ids": [cand.card.get("id") for cand in candidates],
+        "fic_id": chosen_fic_id,
+        "candidate_ids": candidate_ids,
         "provided_inputs": provided_inputs,
-        "output_var": card.get("output_var"),
+        "output_var": (core.get("output") or {}).get("name"),
         "output_value": output_value,
         "gold_answer": gold_num if gold_num is not None else gold,
         "abs_error": abs_error,
@@ -569,17 +749,20 @@ def run_case(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run v2 M/F/E pipeline on question JSONL using FIC cards."
+        description="Run v3 M/F/E pipeline with separated core/retrieval/repair artifacts."
     )
-    parser.add_argument("--input", required=True, type=Path, help="Input JSON/JSONL questions.")
-    parser.add_argument("--fic-cards", required=True, type=Path, help="FIC v2 JSON/JSONL.")
-    parser.add_argument("--store", type=Path, help="Optional FICStore .pkl for hybrid retrieval.")
-    parser.add_argument("--output", required=True, type=Path, help="Output JSON/JSONL results.")
+    parser.add_argument("--input", required=True, type=Path, help="Input JSON/JSONL questions")
+    parser.add_argument("--core", type=Path, help="fic_core JSON/JSONL")
+    parser.add_argument("--retrieval", type=Path, help="fic_retrieval JSON/JSONL")
+    parser.add_argument("--repair", type=Path, help="repair_rule JSON/JSONL")
+    parser.add_argument("--db-url", help="Optional SQLAlchemy DB URL. If set, retrieval/core/repair are loaded from DB.")
+    parser.add_argument("--output", required=True, type=Path, help="Output JSON/JSONL results")
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--max-records", type=int, default=0)
     parser.add_argument("--selector-model", default="gemini-2.5-flash")
     parser.add_argument("--extractor-model", default="gemini-2.5-flash")
     parser.add_argument("--judge-model", default="gemini-2.5-flash")
+    parser.add_argument("--m-min-top-score", type=float, default=0.05)
     args = parser.parse_args()
 
     if genai is None or genai_types is None:
@@ -593,29 +776,51 @@ def main() -> None:
     rows = _load_records(args.input)
     if args.max_records > 0:
         rows = rows[: args.max_records]
-    cards = _load_cards(args.fic_cards)
-    store: Optional[FICStore] = None
-    if args.store:
-        if not args.store.exists():
-            raise FileNotFoundError(args.store)
-        store = FICStore.load(args.store)
+
+    store: Optional[SQLAlchemyArtifactStore] = None
+    if args.db_url:
+        store = SQLAlchemyArtifactStore(args.db_url)
+        stats = store.validate_integrity()
+        print(
+            "[run_mfe_pipeline_v3] db relation check passed: "
+            f"core={stats['core_count']}, retrieval={stats['retrieval_count']}, "
+            f"repair={stats['repair_count']}, diagnostic_rules={stats['diagnostic_rule_count']}"
+        )
+        core_by_id = store.load_core_by_id()
+        retrieval_cards: List[Dict[str, Any]] = []
+        repair_index = store.build_repair_index()
+    else:
+        if not (args.core and args.retrieval and args.repair):
+            raise ValueError("When --db-url is not provided, --core --retrieval --repair are all required.")
+        core_by_id = _load_core(args.core)
+        retrieval_cards = _load_retrieval(args.retrieval)
+        repair_rows = _load_repair(args.repair)
+        validate_artifact_relations(
+            core_cards=list(core_by_id.values()),
+            retrieval_cards=retrieval_cards,
+            repair_rules=repair_rows,
+        )
+        repair_index = _build_repair_index(repair_rows)
     client = genai.Client(api_key=api_key)
 
     out: List[Dict[str, Any]] = []
     for idx, row in enumerate(rows, 1):
         cid = row.get("case_id", row.get("question_id", idx))
-        print(f"[run_mfe_pipeline] processing {cid}")
+        print(f"[run_mfe_pipeline_v3] processing {cid}")
         result = run_case(
             row=row,
-            cards=cards,
+            core_by_id=core_by_id,
+            retrieval_cards=retrieval_cards,
             store=store,
+            repair_index=repair_index,
             client=client,
             selector_model=args.selector_model,
             extractor_model=args.extractor_model,
             judge_model=args.judge_model,
             top_k=args.top_k,
+            m_min_top_score=args.m_min_top_score,
         )
-        # keep expected fields for easy eval if present in input
+
         for k in ("variant_type", "expected_status", "expected_diagnostic_type", "source_sample_id", "reason"):
             if k in row and k not in result:
                 result[f"expected_{k}" if k == "reason" else k] = row[k]

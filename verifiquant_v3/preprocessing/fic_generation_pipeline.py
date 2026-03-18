@@ -13,6 +13,8 @@ from verifiquant_v3.preprocessing.common import (
 from verifiquant_v3.preprocessing.stage_core import generate_core
 from verifiquant_v3.preprocessing.stage_repair import generate_repair_rules
 from verifiquant_v3.preprocessing.stage_retrieval import generate_retrieval
+from verifiquant_v3.preprocessing.validate_relations import validate_artifact_relations
+from verifiquant_v3.card_store import SQLAlchemyArtifactStore
 
 
 def _default_output_paths(input_path: Path) -> Dict[str, Path]:
@@ -84,6 +86,7 @@ def main() -> None:
     parser.add_argument("--stage2-model", help="Stage 2 override model")
     parser.add_argument("--stage3-model", help="Stage 3 override model")
     parser.add_argument("--max-records", type=int, default=0)
+    parser.add_argument("--db-url", help="Optional SQLAlchemy DB URL for direct ingestion after generation")
     parser.add_argument(
         "--disallow-new-topic",
         action="store_true",
@@ -112,6 +115,12 @@ def main() -> None:
         allow_new_topic=not args.disallow_new_topic,
     )
 
+    stats = validate_artifact_relations(
+        core_cards=result["core"],
+        retrieval_cards=result["retrieval"],
+        repair_rules=result["repair"],
+    )
+
     default_paths = _default_output_paths(args.input)
     core_output = args.core_output or default_paths["core"]
     retrieval_output = args.retrieval_output or default_paths["retrieval"]
@@ -124,6 +133,25 @@ def main() -> None:
     print(f"Wrote {len(result['core'])} core cards to {core_output}")
     print(f"Wrote {len(result['retrieval'])} retrieval cards to {retrieval_output}")
     print(f"Wrote {len(result['repair'])} repair rules to {repair_output}")
+    print(
+        "[v3-fic-pipeline] relation check passed: "
+        f"core={stats['core_count']}, retrieval={stats['retrieval_count']}, "
+        f"repair={stats['repair_count']}, diagnostic_rules={stats['diagnostic_rule_count']}"
+    )
+
+    if args.db_url:
+        store = SQLAlchemyArtifactStore(args.db_url)
+        db_stats = store.ingest_artifacts(
+            core_cards=result["core"],
+            retrieval_cards=result["retrieval"],
+            repair_rules=result["repair"],
+            validate_relations=True,
+        )
+        print(
+            "[v3-fic-pipeline] db ingest complete: "
+            f"core={db_stats['core_count']}, retrieval={db_stats['retrieval_count']}, "
+            f"repair={db_stats['repair_count']}, diagnostic_rules={db_stats['diagnostic_rule_count']}"
+        )
 
 
 if __name__ == "__main__":

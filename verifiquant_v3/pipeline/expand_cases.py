@@ -3,10 +3,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 if str(ROOT) not in sys.path:
@@ -54,8 +55,18 @@ if genai_types is not None:
         },
         required=["m_variant", "f_variant", "e_variant"],
     )
+    SINGLE_VARIANT_SCHEMA = genai_types.Schema(
+        type=genai_types.Type.OBJECT,
+        properties={
+            "question": genai_types.Schema(type=genai_types.Type.STRING),
+            "context": genai_types.Schema(type=genai_types.Type.STRING),
+            "reason": genai_types.Schema(type=genai_types.Type.STRING),
+        },
+        required=["question", "context", "reason"],
+    )
 else:
     VARIANT_SCHEMA = None
+    SINGLE_VARIANT_SCHEMA = None
 
 
 PROMPT_TEMPLATE = """You are generating controlled benchmark variants for financial reasoning error analysis.
@@ -96,6 +107,59 @@ Base case:
 <BASE_CASE_JSON>
 {base_case_json}
 </BASE_CASE_JSON>
+"""
+
+SEMI_LLM_REFINE_PROMPT_TEMPLATE = """You are refining synthetic benchmark variants for financial error diagnostics.
+
+You are given:
+1) A clean base case.
+2) A seeded synthetic M/F/E variant set.
+
+Task:
+- Keep the seeded defect type intention unchanged.
+- Rewrite question/context to be realistic and naturally phrased.
+- Stay close to the base topic.
+- Do NOT compute the final answer.
+- Keep each variant clearly belonging to M/F/E category.
+
+Return JSON only with the same schema: m_variant/f_variant/e_variant, each containing question/context/reason.
+
+<BASE_CASE_JSON>
+{base_case_json}
+</BASE_CASE_JSON>
+
+<SEEDED_VARIANTS_JSON>
+{seeded_variants_json}
+</SEEDED_VARIANTS_JSON>
+"""
+
+SEMI_LLM_REGEN_ONE_TEMPLATE = """You are regenerating ONE benchmark variant for financial diagnostic testing.
+
+Required target type: {target_type}
+
+Rules:
+- Keep topic close to base case.
+- Keep defect aligned to target type only.
+- Ensure variant is materially different from base question/context.
+- Do NOT compute the final answer.
+
+Target type definitions:
+- M: ambiguous intent (e.g., worth doing? without explicit NPV/IRR/payback metric).
+- F: required spec/input missing.
+- E: intent/spec present but numeric scale/binding/frequency inconsistency.
+
+Return JSON only with:
+- question
+- context
+- reason
+
+<BASE_CASE_JSON>
+{base_case_json}
+</BASE_CASE_JSON>
+
+<CURRENT_VARIANT_JSON>
+{current_variant_json}
+</CURRENT_VARIANT_JSON>
 """
 
 
@@ -147,24 +211,9 @@ def _to_case(record: Dict[str, Any], idx: int) -> CaseRecord:
     return CaseRecord(sample_id=sample_id, question=question, context=context, code=code, answer=answer)
 
 
-def _call_llm_variants(*, client: Any, model: str, case: CaseRecord) -> Dict[str, Any]:
+def _llm_json(client: Any, *, model: str, prompt: str) -> Dict[str, Any]:
     if genai is None or genai_types is None or VARIANT_SCHEMA is None:
-        raise RuntimeError(
-            "google.genai is not available. Please install compatible google-genai package."
-        )
-    prompt = PROMPT_TEMPLATE.format(
-        base_case_json=json.dumps(
-            {
-                "sample_id": case.sample_id,
-                "question": case.question,
-                "context": case.context,
-                "code": case.code,
-                "answer": case.answer,
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
-    )
+        raise RuntimeError("google.genai is not available. Please install compatible google-genai package.")
     config = genai_types.GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=VARIANT_SCHEMA,
@@ -180,6 +229,217 @@ def _call_llm_variants(*, client: Any, model: str, case: CaseRecord) -> Dict[str
         raise ValueError(f"Variant generator returned invalid JSON: {response.text}") from err
 
 
+def _llm_json_single_variant(client: Any, *, model: str, prompt: str) -> Dict[str, Any]:
+    if genai is None or genai_types is None or SINGLE_VARIANT_SCHEMA is None:
+        raise RuntimeError("google.genai is not available. Please install compatible google-genai package.")
+    config = genai_types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_schema=SINGLE_VARIANT_SCHEMA,
+    )
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config=config,
+    )
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as err:
+        raise ValueError(f"Variant generator returned invalid JSON: {response.text}") from err
+
+
+def _call_llm_variants(*, client: Any, model: str, case: CaseRecord) -> Dict[str, Any]:
+    prompt = PROMPT_TEMPLATE.format(
+        base_case_json=json.dumps(
+            {
+                "sample_id": case.sample_id,
+                "question": case.question,
+                "context": case.context,
+                "code": case.code,
+                "answer": case.answer,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+    return _llm_json(client, model=model, prompt=prompt)
+
+
+def _contains_cjk(text: str) -> bool:
+    return bool(re.search(r"[\u3400-\u9FFF]", text or ""))
+
+
+def _remove_rate_mentions(text: str) -> str:
+    out = str(text or "")
+    out = re.sub(r"\b\d+(?:\.\d+)?\s*%\b", "[MISSING_RATE]", out, flags=re.IGNORECASE)
+    out = re.sub(r"\b(?:discount|required|hurdle|cost of capital)\s+rate\b[^,.。\n]*", "discount rate [MISSING_RATE]", out, flags=re.IGNORECASE)
+    return out
+
+
+def _remove_period_mentions(text: str) -> str:
+    out = str(text or "")
+    out = re.sub(r"\b\d+\s*(?:year|years|yr|yrs|period|periods)\b", "[MISSING_PERIOD]", out, flags=re.IGNORECASE)
+    return out
+
+
+def _remove_amount_mentions(text: str) -> str:
+    out = str(text or "")
+    out = re.sub(r"\$\s*\d[\d,]*(?:\.\d+)?", "$[MISSING_AMOUNT]", out)
+    out = re.sub(r"\b\d[\d,]*(?:\.\d+)?\s*(?:usd|dollars?)\b", "[MISSING_AMOUNT]", out, flags=re.IGNORECASE)
+    return out
+
+
+def _pick_f_missing_field(case: CaseRecord) -> str:
+    hay = f"{case.question}\n{case.context}\n{case.code}".lower()
+    if any(w in hay for w in ["discount rate", "cost of capital", "required rate", "hurdle rate", "rate_of_return"]):
+        return "discount_rate"
+    if any(w in hay for w in ["year", "period", "n="]):
+        return "period_count"
+    if any(w in hay for w in ["cash flow", "cash_flows"]):
+        return "cash_flows"
+    if any(w in hay for w in ["initial investment", "initial_investment", "initial outlay"]):
+        return "initial_investment"
+    return "required_input"
+
+
+def _f_drop(question: str, context: str, field: str) -> tuple[str, str]:
+    if field == "discount_rate":
+        return _remove_rate_mentions(question), _remove_rate_mentions(context)
+    if field == "period_count":
+        return _remove_period_mentions(question), _remove_period_mentions(context)
+    if field in {"cash_flows", "initial_investment"}:
+        return _remove_amount_mentions(question), _remove_amount_mentions(context)
+    return question + f" [MISSING_FIELD:{field}]", context
+
+
+def _flip_percent_scale_once(text: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        return match.group(1)
+
+    return re.sub(r"\b(\d+(?:\.\d+)?)\s*%", repl, str(text or ""), count=1)
+
+
+def _build_seeded_variants(case: CaseRecord) -> Dict[str, Dict[str, str]]:
+    is_cjk = _contains_cjk(case.question) or _contains_cjk(case.context)
+
+    if is_cjk:
+        m_question = "這個專案整體來看值不值得做？請幫我評估。"
+    else:
+        m_question = "Can you evaluate whether this project is worth doing overall?"
+
+    f_field = _pick_f_missing_field(case)
+    f_q, f_c = _f_drop(case.question, case.context, f_field)
+
+    e_q = _flip_percent_scale_once(case.question)
+    e_c = _flip_percent_scale_once(case.context)
+    if e_q == case.question and e_c == case.context:
+        if is_cjk:
+            e_c = (e_c + " 現金流以月為單位，但折現率沿用年化數值且未做轉換。").strip()
+        else:
+            e_c = (e_c + " Cash flows are monthly, but the discount rate is annual and left unconverted.").strip()
+
+    return {
+        "m_variant": {
+            "question": m_question,
+            "context": case.context,
+            "reason": "Made target metric intent ambiguous while keeping same finance scenario.",
+        },
+        "f_variant": {
+            "question": f_q,
+            "context": f_c,
+            "reason": f"Removed required specification signal ({f_field}) to force missing-input diagnostic.",
+        },
+        "e_variant": {
+            "question": e_q,
+            "context": e_c,
+            "reason": "Kept task intent but injected plausible scale/frequency inconsistency for binding checks.",
+        },
+    }
+
+
+def _refine_seeded_with_llm(*, client: Any, model: str, case: CaseRecord, seeded: Dict[str, Dict[str, str]]) -> Dict[str, Any]:
+    prompt = SEMI_LLM_REFINE_PROMPT_TEMPLATE.format(
+        base_case_json=json.dumps(
+            {
+                "sample_id": case.sample_id,
+                "question": case.question,
+                "context": case.context,
+                "code": case.code,
+                "answer": case.answer,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        seeded_variants_json=json.dumps(seeded, ensure_ascii=False, indent=2),
+    )
+    return _llm_json(client, model=model, prompt=prompt)
+
+
+def _regen_single_variant_with_llm(
+    *,
+    client: Any,
+    model: str,
+    case: CaseRecord,
+    vtype: str,
+    current_variant: Dict[str, str],
+) -> Dict[str, Any]:
+    prompt = SEMI_LLM_REGEN_ONE_TEMPLATE.format(
+        target_type=vtype,
+        base_case_json=json.dumps(
+            {
+                "sample_id": case.sample_id,
+                "question": case.question,
+                "context": case.context,
+                "code": case.code,
+                "answer": case.answer,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        current_variant_json=json.dumps(current_variant, ensure_ascii=False, indent=2),
+    )
+    return _llm_json_single_variant(client, model=model, prompt=prompt)
+
+
+def _normalize_cmp(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+
+
+def _is_materially_changed(case: CaseRecord, payload: Dict[str, str]) -> bool:
+    q_same = _normalize_cmp(payload.get("question", "")) == _normalize_cmp(case.question)
+    c_same = _normalize_cmp(payload.get("context", "")) == _normalize_cmp(case.context)
+    return not (q_same and c_same)
+
+
+def _has_expected_signal(vtype: str, case: CaseRecord, payload: Dict[str, str]) -> bool:
+    q = str(payload.get("question", "") or "")
+    c = str(payload.get("context", "") or "")
+    comb = f"{q}\n{c}".lower()
+    base = f"{case.question}\n{case.context}".lower()
+
+    if vtype == "M":
+        has_metric = any(tok in comb for tok in ["npv", "irr", "payback", "wacc", "roi"])
+        return not has_metric
+    if vtype == "F":
+        if "[missing_" in comb:
+            return True
+        return comb.count("%") < base.count("%")
+    if vtype == "E":
+        if "monthly" in comb and "annual" in comb:
+            return True
+        if "月" in comb and "年" in comb:
+            return True
+        return comb.count("%") < base.count("%")
+    return True
+
+
+def _needs_single_variant_regen(vtype: str, case: CaseRecord, payload: Dict[str, str]) -> bool:
+    if not _is_materially_changed(case, payload):
+        return True
+    if not _has_expected_signal(vtype, case, payload):
+        return True
+    return False
+
+
 def _mk_clean(case: CaseRecord) -> Dict[str, Any]:
     return {
         "case_id": f"{case.sample_id}__clean",
@@ -192,40 +452,136 @@ def _mk_clean(case: CaseRecord) -> Dict[str, Any]:
         "expected_status": "success",
         "expected_diagnostic_type": None,
         "reason": "Original clean question/context without injected trap.",
+        "update_method": "original_clean",
     }
 
 
-def _mk_variant(case: CaseRecord, vtype: str, payload: Dict[str, Any], expected_status: str, expected_diag: str) -> Dict[str, Any]:
+def _mk_variant(
+    case: CaseRecord,
+    vtype: str,
+    payload: Dict[str, Any],
+    expected_status: str,
+    expected_diag: str,
+    update_method: str,
+) -> Dict[str, Any]:
     return {
         "case_id": f"{case.sample_id}__{vtype}",
         "source_sample_id": case.sample_id,
         "variant_type": vtype,
-        "question": payload["question"],
-        "context": payload["context"],
+        "question": str(payload.get("question", "") or ""),
+        "context": str(payload.get("context", "") or ""),
         "code": case.code,
         "gold_answer": case.answer,
         "expected_status": expected_status,
         "expected_diagnostic_type": expected_diag,
-        "reason": payload["reason"],
+        "reason": str(payload.get("reason", "") or ""),
+        "update_method": update_method,
     }
 
 
-def expand_case(*, case: CaseRecord, client: Any, model: str) -> List[Dict[str, Any]]:
-    payload = _call_llm_variants(client=client, model=model, case=case)
+def expand_case(*, case: CaseRecord, client: Optional[Any], model: str, mode: str) -> List[Dict[str, Any]]:
+    methods = {
+        "m_variant": "unknown",
+        "f_variant": "unknown",
+        "e_variant": "unknown",
+    }
+
+    if mode == "llm":
+        if client is None:
+            raise RuntimeError("mode=llm requires GEMINI_API_KEY and google-genai dependency.")
+        payload = _call_llm_variants(client=client, model=model, case=case)
+        methods = {
+            "m_variant": "llm_full_generation",
+            "f_variant": "llm_full_generation",
+            "e_variant": "llm_full_generation",
+        }
+    elif mode == "semi-llm":
+        seeded = _build_seeded_variants(case)
+        payload = seeded
+        methods = {
+            "m_variant": "seeded_regex",
+            "f_variant": "seeded_regex",
+            "e_variant": "seeded_regex",
+        }
+        if client is not None:
+            try:
+                payload = _refine_seeded_with_llm(client=client, model=model, case=case, seeded=seeded)
+                methods = {
+                    "m_variant": "seeded_regex+llm_refine",
+                    "f_variant": "seeded_regex+llm_refine",
+                    "e_variant": "seeded_regex+llm_refine",
+                }
+            except Exception as exc:
+                print(f"[expand_cases_v3] semi-llm LLM refine failed for {case.sample_id}: {exc}; fallback to seeded.")
+                payload = seeded
+
+        key_to_type = {
+            "m_variant": "M",
+            "f_variant": "F",
+            "e_variant": "E",
+        }
+        for key, vtype in key_to_type.items():
+            cur = payload.get(key, {})
+            if not isinstance(cur, dict):
+                cur = {}
+            if _needs_single_variant_regen(vtype, case, cur):
+                if client is None:
+                    methods[key] = methods[key] + "+regen_unavailable"
+                    continue
+                try:
+                    regen = _regen_single_variant_with_llm(
+                        client=client,
+                        model=model,
+                        case=case,
+                        vtype=vtype,
+                        current_variant=cur,
+                    )
+                    payload[key] = regen
+                    methods[key] = "llm_regen_fallback"
+                except Exception as exc:
+                    print(
+                        f"[expand_cases_v3] fallback regen failed for {case.sample_id}/{vtype}: {exc}; keep current."
+                    )
+                    methods[key] = methods[key] + "+regen_failed"
+    else:
+        raise ValueError(f"Unsupported mode: {mode}")
+
     return [
         _mk_clean(case),
-        _mk_variant(case, "M_trap", payload["m_variant"], "refusal", "M"),
-        _mk_variant(case, "F_trap", payload["f_variant"], "error", "F"),
-        _mk_variant(case, "E_trap", payload["e_variant"], "alert", "E"),
+        _mk_variant(
+            case,
+            "M_trap",
+            payload["m_variant"],
+            "refusal",
+            "M",
+            methods["m_variant"],
+        ),
+        _mk_variant(
+            case,
+            "F_trap",
+            payload["f_variant"],
+            "error",
+            "F",
+            methods["f_variant"],
+        ),
+        _mk_variant(
+            case,
+            "E_trap",
+            payload["e_variant"],
+            "alert",
+            "E",
+            methods["e_variant"],
+        ),
     ]
 
 
 def run_expansion(
     *,
     input_records: Iterable[Dict[str, Any]],
-    client: Any,
+    client: Optional[Any],
     model: str,
     max_records: int,
+    mode: str,
 ) -> List[Dict[str, Any]]:
     records = list(input_records)
     if max_records > 0:
@@ -233,42 +589,48 @@ def run_expansion(
     out: List[Dict[str, Any]] = []
     for idx, raw in enumerate(records, start=1):
         case = _to_case(raw, idx)
-        print(f"[expand_cases_v2] processing {case.sample_id}")
-        out.extend(expand_case(case=case, client=client, model=model))
+        print(f"[expand_cases_v3] processing {case.sample_id} (mode={mode})")
+        out.extend(expand_case(case=case, client=client, model=model, mode=mode))
     return out
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "LLM-based expansion: from clean JSON/JSONL cases to clean+M/F/E variants "
-            "using only question/context/code/answer."
+            "Expand clean JSON/JSONL cases to clean+M/F/E variants. "
+            "mode=llm uses pure LLM generation; mode=semi-llm uses controlled traps with optional LLM refinement."
         )
     )
     parser.add_argument("--input", required=True, type=Path, help="Input JSON or JSONL")
     parser.add_argument("--output", required=True, type=Path, help="Output JSON or JSONL")
     parser.add_argument("--model", default="gemini-2.5-flash")
+    parser.add_argument("--mode", choices=["llm", "semi-llm"], default="llm")
     parser.add_argument("--max-records", type=int, default=0)
     args = parser.parse_args()
 
-    if genai is None:
-        print(
-            "Missing dependency: google.genai import failed. Please install compatible google-genai package.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    client: Optional[Any] = None
     api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Missing GEMINI_API_KEY in environment.", file=sys.stderr)
-        sys.exit(1)
+    if args.mode == "llm":
+        if genai is None:
+            print("Missing dependency: google.genai import failed. Please install compatible google-genai package.", file=sys.stderr)
+            sys.exit(1)
+        if not api_key:
+            print("Missing GEMINI_API_KEY in environment.", file=sys.stderr)
+            sys.exit(1)
+        client = genai.Client(api_key=api_key)
+    else:
+        if genai is not None and api_key:
+            client = genai.Client(api_key=api_key)
+        else:
+            print("[expand_cases_v3] mode=semi-llm running without LLM refinement (seeded deterministic only).")
 
     raw_records = _load_records(args.input)
-    client = genai.Client(api_key=api_key)
     expanded = run_expansion(
         input_records=raw_records,
         client=client,
         model=args.model,
         max_records=args.max_records,
+        mode=args.mode,
     )
     _dump_records(args.output, expanded)
     print(f"Wrote {len(expanded)} expanded cases to {args.output}")

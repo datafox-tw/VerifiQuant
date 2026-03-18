@@ -1,0 +1,511 @@
+[
+  {
+    "fic_id": "fic_npvgo_calculation",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value of Growth Opportunities (NPVGO)",
+    "summary": "Calculates the Net Present Value of Growth Opportunities (NPVGO) by discounting future cash flows from new projects or acquisitions. It assesses the intrinsic value added by a firm's growth initiatives per share.",
+    "applicable_when": [
+      "Evaluating potential new projects or acquisitions",
+      "Assessing the value added by a firm's growth initiatives",
+      "When future cash inflows from growth opportunities are projected",
+      "When an initial investment is made for growth opportunities"
+    ],
+    "not_applicable_when": [
+      "Cost of capital is zero or negative",
+      "Initial investment is negative",
+      "Projected cash inflows are negative",
+      "There are no projected cash inflows despite a positive initial investment"
+    ],
+    "common_confusions": [
+      {
+        "label": "Net Present Value (NPV)",
+        "difference": "NPVGO specifically isolates the value from future growth opportunities, while standard NPV evaluates a standalone project's overall value. Total firm value can be viewed as value of assets-in-place plus NPVGO."
+      },
+      {
+        "label": "Earnings Per Share (EPS)",
+        "difference": "NPVGO is a forward-looking valuation metric based on discounted cash flows from growth initiatives. EPS is an accounting measure of past profitability attributable to each share."
+      },
+      {
+        "label": "Present Value of Future Earnings",
+        "difference": "NPVGO specifically focuses on the additional value created by *growth* opportunities, distinguishing it from the present value of current operations or all future earnings."
+      }
+    ],
+    "keywords": [
+      "net_present_value_of_growth_opportunities",
+      "npvgo",
+      "growth_opportunities",
+      "investment_analysis",
+      "project_valuation",
+      "acquisition_valuation",
+      "cash_flows",
+      "cost_of_capital",
+      "initial_investment",
+      "intrinsic_value",
+      "valuation",
+      "financial_analysis",
+      "capital_budgeting",
+      "equity_valuation"
+    ],
+    "embedding_text": "Net Present Value of Growth Opportunities (NPVGO) Calculates the Net Present Value of Growth Opportunities (NPVGO) by discounting future cash flows from new projects or acquisitions. It assesses the intrinsic value added by a firm's growth initiatives per share. Evaluating potential new projects or acquisitions Assessing the value added by a firm's growth initiatives When future cash inflows from growth opportunities are projected When an initial investment is made for growth opportunities Cost of capital is zero or negative Initial investment is negative Projected cash inflows are negative There are no projected cash inflows despite a positive initial investment net_present_value_of_growth_opportunities npvgo growth_opportunities investment_analysis project_valuation acquisition_valuation cash_flows cost_of_capital initial_investment intrinsic_value valuation financial_analysis capital_budgeting equity_valuation Net Present Value (NPV) NPVGO specifically isolates the value from future growth opportunities, while standard NPV evaluates a standalone project's overall value. Total firm value can be viewed as value of assets-in-place plus NPVGO. Earnings Per Share (EPS) NPVGO is a forward-looking valuation metric based on discounted cash flows from growth initiatives. EPS is an accounting measure of past profitability attributable to each share. Present Value of Future Earnings NPVGO specifically focuses on the additional value created by *growth* opportunities, distinguishing it from the present value of current operations or all future earnings."
+  },
+  {
+    "fic_id": "fic_fic187_net_present_value",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV)",
+    "summary": "Evaluates the profitability of an investment or project by calculating the present value of all expected future cash flows and subtracting the initial investment. A positive result indicates a profitable venture.",
+    "applicable_when": [
+      "Assessing the profitability of potential investment projects.",
+      "Making capital budgeting decisions for new ventures, expansions, or asset acquisitions.",
+      "Comparing multiple investment opportunities to select the most financially beneficial one.",
+      "Valuing a business or asset based on its projected future cash flows.",
+      "When the time value of money is a critical factor in financial decision-making."
+    ],
+    "not_applicable_when": [
+      "When the required discount rate cannot be reliably determined or is highly volatile.",
+      "For projects lacking clear, quantifiable future cash flows.",
+      "When comparing projects with significantly different initial investments and the goal is to rank projects based on efficiency per dollar invested (consider Profitability Index).",
+      "When the primary concern is how quickly the initial investment is recovered, ignoring long-term value (consider Payback Period)."
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "NPV provides a dollar amount representing the value added by a project, while IRR calculates the discount rate at which the NPV equals zero. NPV is generally preferred for mutually exclusive projects."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "NPV accounts for the time value of money and all project cash flows, providing a comprehensive profitability measure. Payback Period only measures the time to recover the initial investment, ignoring cash flows after recovery and time value of money."
+      },
+      {
+        "label": "Profitability Index (PI)",
+        "difference": "NPV gives the absolute monetary value added by an investment. PI is a ratio that measures the value created per unit of investment, useful for ranking projects when capital is constrained."
+      }
+    ],
+    "keywords": [
+      "net_present_value",
+      "npv",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_evaluation",
+      "cash_flow_analysis",
+      "discount_rate",
+      "time_value_of_money",
+      "profitability",
+      "financial_decision_making",
+      "investment_appraisal",
+      "discounted_cash_flow"
+    ],
+    "embedding_text": "Net Present Value (NPV) Evaluates the profitability of an investment or project by calculating the present value of all expected future cash flows and subtracting the initial investment. A positive result indicates a profitable venture. Assessing the profitability of potential investment projects. Making capital budgeting decisions for new ventures, expansions, or asset acquisitions. Comparing multiple investment opportunities to select the most financially beneficial one. Valuing a business or asset based on its projected future cash flows. When the time value of money is a critical factor in financial decision-making. When the required discount rate cannot be reliably determined or is highly volatile. For projects lacking clear, quantifiable future cash flows. When comparing projects with significantly different initial investments and the goal is to rank projects based on efficiency per dollar invested (consider Profitability Index). When the primary concern is how quickly the initial investment is recovered, ignoring long-term value (consider Payback Period). net_present_value npv investment_analysis capital_budgeting project_evaluation cash_flow_analysis discount_rate time_value_of_money profitability financial_decision_making investment_appraisal discounted_cash_flow Internal Rate of Return (IRR) NPV provides a dollar amount representing the value added by a project, while IRR calculates the discount rate at which the NPV equals zero. NPV is generally preferred for mutually exclusive projects. Payback Period NPV accounts for the time value of money and all project cash flows, providing a comprehensive profitability measure. Payback Period only measures the time to recover the initial investment, ignoring cash flows after recovery and time value of money. Profitability Index (PI) NPV gives the absolute monetary value added by an investment. PI is a ratio that measures the value created per unit of investment, useful for ranking projects when capital is constrained."
+  },
+  {
+    "fic_id": "fic_article_1097_npv",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculation",
+    "summary": "Calculates the Net Present Value (NPV) of a series of future cash flows, discounted to their present value, to assess an investment's profitability. A positive NPV suggests a potentially profitable investment, while a negative NPV suggests the opposite.",
+    "applicable_when": [
+      "Evaluating the financial viability and attractiveness of investment projects",
+      "Making capital budgeting decisions for new projects or acquisitions",
+      "Comparing multiple, mutually exclusive investment opportunities",
+      "Assessing project profitability considering the time value of money",
+      "When a discount rate (hurdle rate) can be determined"
+    ],
+    "not_applicable_when": [
+      "When only interested in the time it takes to recover an initial investment (use Payback Period)",
+      "When seeking the project's intrinsic rate of return rather than an absolute value (use Internal Rate of Return - IRR)",
+      "When cash flows are highly uncertain, cannot be reliably estimated, or are non-monetary",
+      "When only considering non-financial or qualitative factors of a project",
+      "When a constant or single discount rate cannot be reasonably applied across all periods"
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "NPV provides an absolute monetary value (in currency units) representing the project's worth in today's dollars, while IRR is a percentage rate (the project's implied rate of return when NPV equals zero). NPV is generally preferred for selecting between mutually exclusive projects or projects of different scales."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "NPV accounts for the time value of money and the total profitability of a project over its entire life. The Payback Period only measures the time it takes to recover the initial investment, ignoring cash flows that occur after the payback point and the cost of capital."
+      },
+      {
+        "label": "Accounting Profit",
+        "difference": "NPV uses actual cash inflows and outflows, discounted to their present value, focusing on cash generation. Accounting profit is based on accrual accounting principles, which may not reflect actual cash movements or the time value of money."
+      },
+      {
+        "label": "Present Value (PV)",
+        "difference": "Present Value (PV) typically refers to discounting a single future cash flow or a series of equal annuities to today's value. Net Present Value (NPV) specifically sums the present values of all individual cash flows (both initial investment and subsequent inflows/outflows) for an entire project or investment."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_evaluation",
+      "cash_flows",
+      "discount_rate",
+      "hurdle_rate",
+      "profitability",
+      "time_value_of_money",
+      "investment_decision",
+      "financial_analysis",
+      "project_worth",
+      "valuation"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculation Calculates the Net Present Value (NPV) of a series of future cash flows, discounted to their present value, to assess an investment's profitability. A positive NPV suggests a potentially profitable investment, while a negative NPV suggests the opposite. Evaluating the financial viability and attractiveness of investment projects Making capital budgeting decisions for new projects or acquisitions Comparing multiple, mutually exclusive investment opportunities Assessing project profitability considering the time value of money When a discount rate (hurdle rate) can be determined When only interested in the time it takes to recover an initial investment (use Payback Period) When seeking the project's intrinsic rate of return rather than an absolute value (use Internal Rate of Return - IRR) When cash flows are highly uncertain, cannot be reliably estimated, or are non-monetary When only considering non-financial or qualitative factors of a project When a constant or single discount rate cannot be reasonably applied across all periods npv net_present_value investment_analysis capital_budgeting project_evaluation cash_flows discount_rate hurdle_rate profitability time_value_of_money investment_decision financial_analysis project_worth valuation Internal Rate of Return (IRR) NPV provides an absolute monetary value (in currency units) representing the project's worth in today's dollars, while IRR is a percentage rate (the project's implied rate of return when NPV equals zero). NPV is generally preferred for selecting between mutually exclusive projects or projects of different scales. Payback Period NPV accounts for the time value of money and the total profitability of a project over its entire life. The Payback Period only measures the time it takes to recover the initial investment, ignoring cash flows that occur after the payback point and the cost of capital. Accounting Profit NPV uses actual cash inflows and outflows, discounted to their present value, focusing on cash generation. Accounting profit is based on accrual accounting principles, which may not reflect actual cash movements or the time value of money. Present Value (PV) Present Value (PV) typically refers to discounting a single future cash flow or a series of equal annuities to today's value. Net Present Value (NPV) specifically sums the present values of all individual cash flows (both initial investment and subsequent inflows/outflows) for an entire project or investment."
+  },
+  {
+    "fic_id": "fic_npv_from_share_price_change",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value from Share Price Change",
+    "summary": "Calculates the Net Present Value (NPV) of a project based on the change in a company's market capitalization, derived from share price change and the number of shares outstanding. This method assumes that an efficient market's reaction reflects the project's NPV.",
+    "applicable_when": [
+      "Evaluating a project's value based on market reaction to its announcement.",
+      "Assuming an efficient market where share price changes accurately reflect project value.",
+      "Quickly estimating a project's impact on shareholder wealth.",
+      "Assessing the market's perception of a project's success or failure."
+    ],
+    "not_applicable_when": [
+      "Markets are inefficient, illiquid, or subject to significant noise.",
+      "Detailed project valuation using discounted cash flows is required.",
+      "Other significant factors are influencing share price changes besides the project.",
+      "A project has not been publicly announced or its impact is not reflected in share price."
+    ],
+    "common_confusions": [
+      {
+        "label": "Traditional NPV (Discounted Cash Flow)",
+        "difference": "This method uses market reaction to share price change, whereas traditional NPV discounts projected future cash flows to present value."
+      },
+      {
+        "label": "Market Capitalization",
+        "difference": "This formula calculates the *change* in market capitalization due to a project, not the total market capitalization of the company."
+      },
+      {
+        "label": "Enterprise Value",
+        "difference": "Enterprise Value includes debt and cash components, while this method focuses specifically on the equity market's valuation of a project's impact."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "share_price_change",
+      "market_capitalization_change",
+      "market_reaction",
+      "project_valuation",
+      "investment_analysis",
+      "efficient_market_hypothesis",
+      "shares_outstanding",
+      "equity_valuation"
+    ],
+    "embedding_text": "Net Present Value from Share Price Change Calculates the Net Present Value (NPV) of a project based on the change in a company's market capitalization, derived from share price change and the number of shares outstanding. This method assumes that an efficient market's reaction reflects the project's NPV. Evaluating a project's value based on market reaction to its announcement. Assuming an efficient market where share price changes accurately reflect project value. Quickly estimating a project's impact on shareholder wealth. Assessing the market's perception of a project's success or failure. Markets are inefficient, illiquid, or subject to significant noise. Detailed project valuation using discounted cash flows is required. Other significant factors are influencing share price changes besides the project. A project has not been publicly announced or its impact is not reflected in share price. npv net_present_value share_price_change market_capitalization_change market_reaction project_valuation investment_analysis efficient_market_hypothesis shares_outstanding equity_valuation Traditional NPV (Discounted Cash Flow) This method uses market reaction to share price change, whereas traditional NPV discounts projected future cash flows to present value. Market Capitalization This formula calculates the *change* in market capitalization due to a project, not the total market capitalization of the company. Enterprise Value Enterprise Value includes debt and cash components, while this method focuses specifically on the equity market's valuation of a project's impact."
+  },
+  {
+    "fic_id": "fic_npv_calculation",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculation",
+    "summary": "Calculates the Net Present Value (NPV) of a series of cash flows, including an initial investment at time t=0. It assesses the profitability and value creation of an investment by discounting future cash flows to their present value.",
+    "applicable_when": [
+      "Evaluating potential investment projects or capital expenditures",
+      "Comparing mutually exclusive investment opportunities",
+      "Determining the present value of a future cash flow stream",
+      "The first cash flow represents an initial investment at time t=0",
+      "A discount rate or required rate of return is available"
+    ],
+    "not_applicable_when": [
+      "Discount rate is equal to or less than -1",
+      "The cash flow series is empty or contains non-numeric values",
+      "Cash flows explicitly begin at time t=1 and initial investment is separate",
+      "Only the internal rate of return (IRR) is needed for decision-making"
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "NPV provides a dollar amount representing the value added to a project, while IRR gives the percentage rate of return where NPV is zero. NPV is preferred for choosing between projects of different scales."
+      },
+      {
+        "label": "NPV with initial cash flow at t=1",
+        "difference": "This calculation assumes the first cash flow in the provided list occurs at time t=0, representing an immediate initial investment. Other NPV formulas might treat the first cash flow at t=1."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "Payback period measures the time it takes to recover the initial investment, ignoring the time value of money and cash flows beyond the payback period. NPV considers all cash flows and their time value."
+      },
+      {
+        "label": "Profitability Index (PI)",
+        "difference": "The Profitability Index is a ratio of the present value of future cash inflows to the initial investment, often used for ranking projects under capital rationing. NPV is an absolute dollar value measure."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_evaluation",
+      "cash_flows",
+      "discount_rate",
+      "present_value",
+      "valuation",
+      "financial_modeling",
+      "initial_investment",
+      "profitability",
+      "time_value_of_money"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculation Calculates the Net Present Value (NPV) of a series of cash flows, including an initial investment at time t=0. It assesses the profitability and value creation of an investment by discounting future cash flows to their present value. Evaluating potential investment projects or capital expenditures Comparing mutually exclusive investment opportunities Determining the present value of a future cash flow stream The first cash flow represents an initial investment at time t=0 A discount rate or required rate of return is available Discount rate is equal to or less than -1 The cash flow series is empty or contains non-numeric values Cash flows explicitly begin at time t=1 and initial investment is separate Only the internal rate of return (IRR) is needed for decision-making npv net_present_value investment_analysis capital_budgeting project_evaluation cash_flows discount_rate present_value valuation financial_modeling initial_investment profitability time_value_of_money Internal Rate of Return (IRR) NPV provides a dollar amount representing the value added to a project, while IRR gives the percentage rate of return where NPV is zero. NPV is preferred for choosing between projects of different scales. NPV with initial cash flow at t=1 This calculation assumes the first cash flow in the provided list occurs at time t=0, representing an immediate initial investment. Other NPV formulas might treat the first cash flow at t=1. Payback Period Payback period measures the time it takes to recover the initial investment, ignoring the time value of money and cash flows beyond the payback period. NPV considers all cash flows and their time value. Profitability Index (PI) The Profitability Index is a ratio of the present value of future cash inflows to the initial investment, often used for ranking projects under capital rationing. NPV is an absolute dollar value measure."
+  },
+  {
+    "fic_id": "fic_npv_calculation_v1",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculation",
+    "summary": "Calculates the net present value of a project or investment by discounting a series of future cash inflows and subtracting the initial investment. This metric helps determine the profitability and attractiveness of a potential investment.",
+    "applicable_when": [
+      "Evaluating potential investment projects or capital budgeting decisions.",
+      "Comparing mutually exclusive investment projects to select the most profitable one.",
+      "Assessing the value of future cash flows at today's value.",
+      "A known discount rate (cost of capital) is available.",
+      "Expected future cash inflows are defined and positive.",
+      "An initial capital investment (outflow) is identified."
+    ],
+    "not_applicable_when": [
+      "Only interested in the time it takes to recover the initial investment (use Payback Period).",
+      "Seeking the specific discount rate that makes an investment's NPV zero (use Internal Rate of Return - IRR).",
+      "Cash flows are highly uncertain or cannot be reliably estimated.",
+      "A discount rate is unknown or cannot be determined.",
+      "Cash flows do not have a consistent period (e.g., annual)."
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "NPV provides a monetary value representing the project's net gain or loss, while IRR gives a percentage rate at which the project breaks even (NPV equals zero). NPV requires an external discount rate, while IRR calculates that rate."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "NPV considers the time value of money and all cash flows over the project's life. Payback Period only measures the time it takes to recover the initial investment, ignoring post-payback cash flows and the time value of money."
+      },
+      {
+        "label": "Future Value",
+        "difference": "NPV discounts future cash flows to their present-day equivalent. Future Value calculates the value of an investment or cash flow at a specified point in the future, compounding it over time."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_evaluation",
+      "discounted_cash_flow",
+      "dcf",
+      "cash_inflows",
+      "initial_investment",
+      "discount_rate",
+      "present_value",
+      "time_value_of_money",
+      "financial_modeling",
+      "investment_decision"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculation Calculates the net present value of a project or investment by discounting a series of future cash inflows and subtracting the initial investment. This metric helps determine the profitability and attractiveness of a potential investment. Evaluating potential investment projects or capital budgeting decisions. Comparing mutually exclusive investment projects to select the most profitable one. Assessing the value of future cash flows at today's value. A known discount rate (cost of capital) is available. Expected future cash inflows are defined and positive. An initial capital investment (outflow) is identified. Only interested in the time it takes to recover the initial investment (use Payback Period). Seeking the specific discount rate that makes an investment's NPV zero (use Internal Rate of Return - IRR). Cash flows are highly uncertain or cannot be reliably estimated. A discount rate is unknown or cannot be determined. Cash flows do not have a consistent period (e.g., annual). npv net_present_value investment_analysis capital_budgeting project_evaluation discounted_cash_flow dcf cash_inflows initial_investment discount_rate present_value time_value_of_money financial_modeling investment_decision Internal Rate of Return (IRR) NPV provides a monetary value representing the project's net gain or loss, while IRR gives a percentage rate at which the project breaks even (NPV equals zero). NPV requires an external discount rate, while IRR calculates that rate. Payback Period NPV considers the time value of money and all cash flows over the project's life. Payback Period only measures the time it takes to recover the initial investment, ignoring post-payback cash flows and the time value of money. Future Value NPV discounts future cash flows to their present-day equivalent. Future Value calculates the value of an investment or cash flow at a specified point in the future, compounding it over time."
+  },
+  {
+    "fic_id": "fic_npv_calculation_project",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value of an Investment Project",
+    "summary": "Calculates the Net Present Value (NPV) of an investment project, given its initial cost, a constant future payoff amount occurring in specified years, and a discount rate.",
+    "applicable_when": [
+      "Evaluating the profitability of a single investment project.",
+      "The initial investment cost is known.",
+      "Future cash inflows (payoffs) are expected to be the same amount in specific, distinct years.",
+      "A discount rate (required rate of return) is available."
+    ],
+    "not_applicable_when": [
+      "Future cash flows vary in amount from year to year.",
+      "Cash flows occur continuously or at irregular, unspecified intervals.",
+      "Comparing mutually exclusive projects with differing project lives without further analysis."
+    ],
+    "common_confusions": [
+      {
+        "label": "NPV with Unequal Cash Flows",
+        "difference": "This card calculates NPV for a project with a single, constant payoff amount recurring in specific years. Use a different card for projects with varying cash flow amounts per period."
+      },
+      {
+        "label": "Discount Rate as Percentage vs. Decimal",
+        "difference": "The discount rate must be entered as a decimal (e.g., 0.10 for 10%), not as a whole number percentage (e.g., 10). This common error leads to significantly incorrect NPVs."
+      },
+      {
+        "label": "NPV vs. Internal Rate of Return (IRR)",
+        "difference": "NPV provides a monetary value representing the project's profitability, while IRR yields a percentage return. Both are capital budgeting tools, but NPV is often preferred for direct wealth maximization."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "investment_project",
+      "capital_budgeting",
+      "project_evaluation",
+      "discount_rate",
+      "initial_cost",
+      "future_payoffs",
+      "constant_cash_flow",
+      "fixed_payoff_amount",
+      "investment_analysis",
+      "time_value_of_money"
+    ],
+    "embedding_text": "Net Present Value of an Investment Project Calculates the Net Present Value (NPV) of an investment project, given its initial cost, a constant future payoff amount occurring in specified years, and a discount rate. Evaluating the profitability of a single investment project. The initial investment cost is known. Future cash inflows (payoffs) are expected to be the same amount in specific, distinct years. A discount rate (required rate of return) is available. Future cash flows vary in amount from year to year. Cash flows occur continuously or at irregular, unspecified intervals. Comparing mutually exclusive projects with differing project lives without further analysis. npv net_present_value investment_project capital_budgeting project_evaluation discount_rate initial_cost future_payoffs constant_cash_flow fixed_payoff_amount investment_analysis time_value_of_money NPV with Unequal Cash Flows This card calculates NPV for a project with a single, constant payoff amount recurring in specific years. Use a different card for projects with varying cash flow amounts per period. Discount Rate as Percentage vs. Decimal The discount rate must be entered as a decimal (e.g., 0.10 for 10%), not as a whole number percentage (e.g., 10). This common error leads to significantly incorrect NPVs. NPV vs. Internal Rate of Return (IRR) NPV provides a monetary value representing the project's profitability, while IRR yields a percentage return. Both are capital budgeting tools, but NPV is often preferred for direct wealth maximization."
+  },
+  {
+    "fic_id": "fic_net_present_value_calculator_v1",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculator",
+    "summary": "Calculates the net present value of a project or investment by discounting a series of future cash flows to their present value using a specified discount rate and subtracting any initial investment. It helps assess the profitability and attractiveness of an investment.",
+    "applicable_when": [
+      "Evaluating potential investment projects",
+      "Making capital budgeting decisions for a firm",
+      "Comparing projects when the goal is to maximize wealth",
+      "Assessing the value created by an investment proposal",
+      "When a reliable discount rate can be determined"
+    ],
+    "not_applicable_when": [
+      "When the primary goal is to determine the project's exact rate of return (use IRR instead)",
+      "When comparing projects of vastly different scales without considering profitability index",
+      "When only the time to recover initial investment is needed (use Payback Period instead)",
+      "For projects with unconventional cash flow patterns where multiple IRRs might exist",
+      "When a discount rate cannot be reliably estimated"
+    ],
+    "common_confusions": [
+      {
+        "label": "Net Present Value (NPV) vs. Internal Rate of Return (IRR)",
+        "difference": "NPV provides an absolute dollar value of wealth creation, while IRR is the discount rate that makes the NPV of an investment zero. NPV is preferred for mutually exclusive projects when choosing between different scales."
+      },
+      {
+        "label": "Net Present Value (NPV) vs. Payback Period",
+        "difference": "NPV considers the time value of money and all cash flows over the project's life, whereas Payback Period only measures the time it takes to recover the initial investment and ignores cash flows beyond that point."
+      },
+      {
+        "label": "Net Present Value (NPV) vs. Profitability Index (PI)",
+        "difference": "NPV is an absolute measure of value, while PI is a relative measure (ratio of present value of future cash flows to initial investment). Both are used in capital rationing, but PI indicates value per dollar invested."
+      }
+    ],
+    "keywords": [
+      "net_present_value",
+      "npv",
+      "cash_flow_discounting",
+      "present_value",
+      "discount_rate",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_valuation",
+      "financial_investment",
+      "wealth_maximization",
+      "future_cash_flows"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculator Calculates the net present value of a project or investment by discounting a series of future cash flows to their present value using a specified discount rate and subtracting any initial investment. It helps assess the profitability and attractiveness of an investment. Evaluating potential investment projects Making capital budgeting decisions for a firm Comparing projects when the goal is to maximize wealth Assessing the value created by an investment proposal When a reliable discount rate can be determined When the primary goal is to determine the project's exact rate of return (use IRR instead) When comparing projects of vastly different scales without considering profitability index When only the time to recover initial investment is needed (use Payback Period instead) For projects with unconventional cash flow patterns where multiple IRRs might exist When a discount rate cannot be reliably estimated net_present_value npv cash_flow_discounting present_value discount_rate investment_analysis capital_budgeting project_valuation financial_investment wealth_maximization future_cash_flows Net Present Value (NPV) vs. Internal Rate of Return (IRR) NPV provides an absolute dollar value of wealth creation, while IRR is the discount rate that makes the NPV of an investment zero. NPV is preferred for mutually exclusive projects when choosing between different scales. Net Present Value (NPV) vs. Payback Period NPV considers the time value of money and all cash flows over the project's life, whereas Payback Period only measures the time it takes to recover the initial investment and ignores cash flows beyond that point. Net Present Value (NPV) vs. Profitability Index (PI) NPV is an absolute measure of value, while PI is a relative measure (ratio of present value of future cash flows to initial investment). Both are used in capital rationing, but PI indicates value per dollar invested."
+  },
+  {
+    "fic_id": "fic_npv_calculation_from_cash_flows",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculation",
+    "summary": "Calculates the Net Present Value (NPV) of an investment using future cash flows, a discount rate, and initial investment. This evaluates project profitability and financial viability.",
+    "applicable_when": [
+      "Evaluating potential investment projects",
+      "Assessing the financial viability of a business project",
+      "Comparing multiple investment opportunities",
+      "Considering the time value of money for future cash flows",
+      "Determining the present value of future earnings and expenses"
+    ],
+    "not_applicable_when": [
+      "When future cash flows are highly uncertain or cannot be estimated",
+      "When only qualitative project factors are being considered",
+      "For projects where the initial investment or cash flows are unknown",
+      "When a quick break-even point is the primary concern (use Payback Period instead)"
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "NPV provides a dollar value of the project's worth, while IRR gives the discount rate that makes the NPV zero. They can lead to different project rankings for mutually exclusive projects with different scales or timing of cash flows."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "NPV considers the time value of money and profitability over the entire project life, whereas Payback Period focuses only on how long it takes to recover the initial investment, without accounting for cash flows beyond that point or their present value."
+      },
+      {
+        "label": "Discounted Cash Flow (DCF)",
+        "difference": "DCF is a broader valuation method that discounts future cash flows to their present value. NPV is a specific metric calculated as part of a DCF analysis, subtracting the initial investment from the sum of discounted future cash flows."
+      }
+    ],
+    "keywords": [
+      "npv",
+      "net_present_value",
+      "investment_analysis",
+      "project_evaluation",
+      "cash_flows",
+      "discount_rate",
+      "initial_investment",
+      "time_value_of_money",
+      "profitability",
+      "financial_viability",
+      "capital_budgeting",
+      "dcf",
+      "discounted_cash_flow",
+      "investment_appraisal"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculation Calculates the Net Present Value (NPV) of an investment using future cash flows, a discount rate, and initial investment. This evaluates project profitability and financial viability. Evaluating potential investment projects Assessing the financial viability of a business project Comparing multiple investment opportunities Considering the time value of money for future cash flows Determining the present value of future earnings and expenses When future cash flows are highly uncertain or cannot be estimated When only qualitative project factors are being considered For projects where the initial investment or cash flows are unknown When a quick break-even point is the primary concern (use Payback Period instead) npv net_present_value investment_analysis project_evaluation cash_flows discount_rate initial_investment time_value_of_money profitability financial_viability capital_budgeting dcf discounted_cash_flow investment_appraisal Internal Rate of Return (IRR) NPV provides a dollar value of the project's worth, while IRR gives the discount rate that makes the NPV zero. They can lead to different project rankings for mutually exclusive projects with different scales or timing of cash flows. Payback Period NPV considers the time value of money and profitability over the entire project life, whereas Payback Period focuses only on how long it takes to recover the initial investment, without accounting for cash flows beyond that point or their present value. Discounted Cash Flow (DCF) DCF is a broader valuation method that discounts future cash flows to their present value. NPV is a specific metric calculated as part of a DCF analysis, subtracting the initial investment from the sum of discounted future cash flows."
+  },
+  {
+    "fic_id": "fic_npv_calculation_financement_1947",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "title": "Net Present Value (NPV) Calculation",
+    "summary": "Calculates the Net Present Value (NPV) of an investment, providing a measure of its profitability by discounting all future cash flows back to the present and subtracting the initial investment. It helps in capital budgeting decisions.",
+    "applicable_when": [
+      "Evaluating potential investment projects or capital expenditures.",
+      "Comparing mutually exclusive investment opportunities.",
+      "Assessing the profitability of an investment considering the time value of money.",
+      "Determining if a project will add value to a company.",
+      "Making capital budgeting decisions."
+    ],
+    "not_applicable_when": [
+      "Only the Internal Rate of Return (IRR) is required.",
+      "Cash flows are highly uncertain or unknown.",
+      "Only a simple payback period is sufficient for decision making.",
+      "The discount rate cannot be determined."
+    ],
+    "common_confusions": [
+      {
+        "label": "Internal Rate of Return (IRR)",
+        "difference": "IRR is the discount rate at which an investment's NPV is zero, expressed as a percentage. NPV is a dollar amount representing the absolute value added by an investment."
+      },
+      {
+        "label": "Payback Period",
+        "difference": "Payback Period measures the time it takes to recover the initial investment, ignoring the time value of money and cash flows beyond the payback point. NPV considers all cash flows and their time value."
+      },
+      {
+        "label": "Present Value (PV)",
+        "difference": "PV typically refers to the present value of future cash flows only. NPV includes the initial investment (as a negative value) in addition to the present value of future cash flows."
+      },
+      {
+        "label": "Accounting Profit",
+        "difference": "Accounting profit is based on historical costs and accrual accounting, without considering the time value of money. NPV is based on cash flows and discounts them to reflect their present value."
+      }
+    ],
+    "keywords": [
+      "net_present_value",
+      "npv",
+      "investment_analysis",
+      "capital_budgeting",
+      "project_evaluation",
+      "cash_flow",
+      "discount_rate",
+      "time_value_of_money",
+      "initial_investment",
+      "future_cash_flows",
+      "profitability",
+      "investment_decision",
+      "discounted_cash_flow"
+    ],
+    "embedding_text": "Net Present Value (NPV) Calculation Calculates the Net Present Value (NPV) of an investment, providing a measure of its profitability by discounting all future cash flows back to the present and subtracting the initial investment. It helps in capital budgeting decisions. Evaluating potential investment projects or capital expenditures. Comparing mutually exclusive investment opportunities. Assessing the profitability of an investment considering the time value of money. Determining if a project will add value to a company. Making capital budgeting decisions. Only the Internal Rate of Return (IRR) is required. Cash flows are highly uncertain or unknown. Only a simple payback period is sufficient for decision making. The discount rate cannot be determined. net_present_value npv investment_analysis capital_budgeting project_evaluation cash_flow discount_rate time_value_of_money initial_investment future_cash_flows profitability investment_decision discounted_cash_flow Internal Rate of Return (IRR) IRR is the discount rate at which an investment's NPV is zero, expressed as a percentage. NPV is a dollar amount representing the absolute value added by an investment. Payback Period Payback Period measures the time it takes to recover the initial investment, ignoring the time value of money and cash flows beyond the payback point. NPV considers all cash flows and their time value. Present Value (PV) PV typically refers to the present value of future cash flows only. NPV includes the initial investment (as a negative value) in addition to the present value of future cash flows. Accounting Profit Accounting profit is based on historical costs and accrual accounting, without considering the time value of money. NPV is based on cash flows and discounts them to reflect their present value."
+  }
+]

@@ -1,0 +1,1293 @@
+[
+  {
+    "fic_id": "fic_npvgo_calculation",
+    "name": "Net Present Value of Growth Opportunities (NPVGO)",
+    "short_description": "Calculates the Net Present Value of Growth Opportunities (NPVGO) for new projects or acquisitions.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-2942",
+      "article_title": "Net Present Value of Growth Opportunities (NPVGO)",
+      "source": "FinanceReasoning-test-981",
+      "question_id": "test-1045",
+      "difficulty": 2.4849066497880004,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "projected_cash_inflows",
+        "type": "number",
+        "required": true,
+        "description": "The projected future cash inflows from growth opportunities.",
+        "unit": "USD",
+        "aliases": []
+      },
+      {
+        "name": "cost_of_capital",
+        "type": "number",
+        "required": true,
+        "description": "The firm's cost of capital used for discounting, expressed as a decimal.",
+        "unit": "percent",
+        "aliases": []
+      },
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": true,
+        "description": "The initial investment cost or purchase price of the project or asset.",
+        "unit": "USD",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "npvgo",
+      "type": "number",
+      "unit": "USD",
+      "description": "The net present value of the growth opportunities."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    projected_cash_inflows = inputs['projected_cash_inflows']\n    cost_of_capital = inputs['cost_of_capital']\n    initial_investment = inputs['initial_investment']\n\n    discounted_cash_flows = projected_cash_inflows / (1 + cost_of_capital)\n    npvgo = discounted_cash_flows - initial_investment\n    \n    return round(npvgo)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "coc_positive",
+        "name": "Cost of Capital must be positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['cost_of_capital'] <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The cost of capital must be a positive value for meaningful economic analysis and discounting."
+      },
+      {
+        "rule_id": "coc_less_than_one",
+        "name": "Cost of Capital should be a decimal (less than 1)",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "cost_of_capital_format",
+        "applies_to": [],
+        "description": "Cost of capital is typically expressed as a decimal (e.g., 0.08 for 8%). A value greater than 1 might indicate it was entered as a whole percentage, which would lead to incorrect calculations."
+      },
+      {
+        "rule_id": "pci_non_negative",
+        "name": "Projected Cash Inflows must be non-negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['projected_cash_inflows'] < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "Projected cash inflows cannot be negative, as they represent expected positive returns from growth opportunities."
+      },
+      {
+        "rule_id": "ii_non_negative",
+        "name": "Initial Investment must be non-negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['initial_investment'] < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "Initial investment cannot be negative, as it represents a cost or outflow."
+      },
+      {
+        "rule_id": "denominator_positive",
+        "name": "Discount Factor Denominator must be positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "(1 + inputs['cost_of_capital']) <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount factor (1 + cost of capital) must be strictly positive to ensure meaningful present value calculation and avoid division by zero or negative discounting."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_article_187",
+    "name": "net_present_value",
+    "short_description": "Calculate the net present value (NPV) of a series of cash flows. The NPV is used to evaluate the profitability of a projected investment or project and considers the time value of money by discounting future cash flows.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-187",
+      "article_title": "Cost-Benefit Analysis",
+      "source": "FinanceReasoning-test-740",
+      "question_id": "test-1492",
+      "difficulty": 2.8903717578961645,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list containing the projected cash flows for each period, with negative values for cash outflows and positive values for inflows. Each item in the array should be a number.",
+        "unit": "currency",
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate to be applied to the future cash flows, expressed as a decimal (e.g., 0.05 for 5%).",
+        "unit": "ratio",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "net_present_value",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value of the projected cash flows. A positive NPV suggests that the investment is likely to be profitable."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs[\"cash_flows\"]\n    discount_rate = inputs[\"discount_rate\"]\n    npv = sum(cf / ((1 + discount_rate) ** i) for i, cf in enumerate(cash_flows))\n    return round(npv)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "dr001",
+        "name": "Discount Rate Lower Bound",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "discount_rate <= -1",
+        "semantic_key": "",
+        "applies_to": [
+          "discount_rate"
+        ],
+        "description": "The discount rate must be strictly greater than -1 to ensure the NPV calculation is mathematically valid and avoids division by zero or negative base for exponentiation in intermediate steps."
+      },
+      {
+        "rule_id": "cf001",
+        "name": "Cash Flows Not Empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "len(cash_flows) == 0",
+        "semantic_key": "",
+        "applies_to": [
+          "cash_flows"
+        ],
+        "description": "The list of cash flows cannot be empty; at least one cash flow (e.g., initial investment) is required for NPV calculation."
+      },
+      {
+        "rule_id": "dr002",
+        "name": "Discount Rate Non-Negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "discount_rate < 0",
+        "semantic_key": "",
+        "applies_to": [
+          "discount_rate"
+        ],
+        "description": "A discount rate less than zero is highly unusual for typical investments and may indicate an error or an unusual deflationary economic environment."
+      },
+      {
+        "rule_id": "cf002",
+        "name": "Initial Investment as Outflow",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "len(cash_flows) > 0 and cash_flows[0] >= 0",
+        "semantic_key": "",
+        "applies_to": [
+          "cash_flows"
+        ],
+        "description": "The first cash flow (initial investment at period 0) is typically a cash outflow and thus expected to be a negative value. A non-negative value might indicate an unusual scenario or data entry error."
+      },
+      {
+        "rule_id": "sem001",
+        "name": "Net Present Value Concept",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "financial_concept_net_present_value",
+        "applies_to": [],
+        "description": "Verifies that the application of Net Present Value (NPV) is contextually appropriate for evaluating investment profitability and financial viability over time."
+      },
+      {
+        "rule_id": "sem002",
+        "name": "Time Value of Money Principle",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "financial_concept_time_value_of_money",
+        "applies_to": [],
+        "description": "Confirms adherence to the fundamental principle that money available today is worth more than the same amount in the future, which is central to discounting future cash flows."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_article_1097",
+    "name": "Net Present Value (NPV) Calculation",
+    "short_description": "Calculate the Net Present Value (NPV) of a series of cash flows by discounting them to their present value using a specified discount rate. A positive NPV indicates a profitable investment opportunity.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-1097",
+      "article_title": "Hurdle Rate",
+      "source": "FinanceReasoning-test-754",
+      "question_id": "test-1494",
+      "difficulty": 2.8903717578961645,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of cash flows, where negative numbers represent outflows and positive numbers represent inflows, ordered chronologically. The first element is typically for time 0.",
+        "unit": null,
+        "aliases": [
+          "flows",
+          "project_cash_flows",
+          "cf_list",
+          "cashflow_series",
+          "investment_cash_flows"
+        ]
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate used to bring future cash flows to present value, representing the cost of capital or hurdle rate.",
+        "unit": "decimal",
+        "aliases": [
+          "rate",
+          "hurdle_rate",
+          "cost_of_capital",
+          "interest_rate"
+        ]
+      }
+    ],
+    "output": {
+      "name": "npv",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value of the series of cash flows, rounded to the nearest integer."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs[\"cash_flows\"]\n    discount_rate = inputs[\"discount_rate\"]\n    npv = sum(cf / ((1 + discount_rate) ** i) for i, cf in enumerate(cash_flows))\n    return round(npv)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "dr_non_negative",
+        "name": "Discount Rate Must Be Non-Negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs[\"discount_rate\"] < 0",
+        "semantic_key": "",
+        "applies_to": [
+          "discount_rate"
+        ],
+        "description": "The discount rate must be non-negative, as a negative rate implies an unusual economic scenario or a subsidy."
+      },
+      {
+        "rule_id": "cf_not_empty",
+        "name": "Cash Flows List Must Not Be Empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "len(inputs[\"cash_flows\"]) == 0",
+        "semantic_key": "",
+        "applies_to": [
+          "cash_flows"
+        ],
+        "description": "The list of cash flows cannot be empty; at least one cash flow is required for NPV calculation."
+      },
+      {
+        "rule_id": "dr_type_numeric",
+        "name": "Discount Rate Must Be Numeric",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs[\"discount_rate\"], (int, float))",
+        "semantic_key": "",
+        "applies_to": [
+          "discount_rate"
+        ],
+        "description": "The discount rate must be a numerical value (integer or float)."
+      },
+      {
+        "rule_id": "cf_elements_numeric",
+        "name": "All Cash Flow Elements Must Be Numeric",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "any(not isinstance(cf, (int, float)) for cf in inputs[\"cash_flows\"])",
+        "semantic_key": "",
+        "applies_to": [
+          "cash_flows"
+        ],
+        "description": "All elements within the cash flows list must be numerical values (integers or floats)."
+      },
+      {
+        "rule_id": "dr_reasonable_range",
+        "name": "Discount Rate in Typical Range",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs[\"discount_rate\"] > 1.0",
+        "semantic_key": "",
+        "applies_to": [
+          "discount_rate"
+        ],
+        "description": "A discount rate greater than 100% (1.0) is highly unusual and may indicate incorrect input or an extremely high-risk scenario."
+      },
+      {
+        "rule_id": "first_cf_initial_outflow",
+        "name": "First Cash Flow Is Initial Investment",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs[\"cash_flows\"][0] > 0",
+        "semantic_key": "initial_investment_expectation",
+        "applies_to": [
+          "cash_flows"
+        ],
+        "description": "The first cash flow (at time 0) is typically an initial investment, represented by an outflow (negative value). An inflow (positive value) for the first cash flow might be unexpected."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_test_1633_npv_from_share_price_change",
+    "name": "NPV from Share Price Change",
+    "short_description": "Calculates the Net Present Value (NPV) of a project based on the change in market capitalization after a project announcement, expressed in millions of dollars.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": null,
+      "article_title": null,
+      "source": "FinCode-test-4",
+      "question_id": "test-1633",
+      "difficulty": 3.044522437723423,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "no_of_shares",
+        "type": "integer",
+        "required": true,
+        "description": "The total number of outstanding shares of the company.",
+        "unit": "shares",
+        "aliases": []
+      },
+      {
+        "name": "old_market_price",
+        "type": "number",
+        "required": true,
+        "description": "The market price per share before the project announcement.",
+        "unit": "dollars_per_share",
+        "aliases": []
+      },
+      {
+        "name": "new_market_price",
+        "type": "number",
+        "required": true,
+        "description": "The market price per share after the project announcement.",
+        "unit": "dollars_per_share",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "npv_in_millions",
+      "type": "number",
+      "unit": "million_dollars",
+      "description": "The Net Present Value (NPV) of the project, expressed in millions of dollars."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    no_of_shares = inputs[\"no_of_shares\"]\n    old_market_price = inputs[\"old_market_price\"]\n    new_market_price = inputs[\"new_market_price\"]\n    npv = (new_market_price - old_market_price) * no_of_shares / 1000000\n    return round(npv)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "shares_positive",
+        "name": "Number of Shares Must Be Positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['no_of_shares'] <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The number of outstanding shares must be a positive value to be economically meaningful."
+      },
+      {
+        "rule_id": "old_price_positive",
+        "name": "Old Market Price Must Be Positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['old_market_price'] <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The initial market price per share must be a positive value."
+      },
+      {
+        "rule_id": "new_price_positive",
+        "name": "New Market Price Must Be Positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['new_market_price'] <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The market price per share after the announcement must be a positive value."
+      },
+      {
+        "rule_id": "price_rise_consistency",
+        "name": "New Market Price Should Not Be Less Than Old Market Price (for implied project value)",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs['new_market_price'] < inputs['old_market_price']",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The problem states the share price 'rises'. If the new market price is less than the old market price, this indicates a negative market reaction, which contradicts the implied scenario for a 'project' typically expected to add value, though a negative NPV is mathematically possible."
+      },
+      {
+        "rule_id": "shares_meaning",
+        "name": "Understanding Number of Outstanding Shares",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "no_of_shares",
+        "applies_to": [],
+        "description": "Ensure 'no_of_shares' refers to the total number of common shares issued and currently held by investors, not authorized or treasury shares."
+      },
+      {
+        "rule_id": "market_price_meaning",
+        "name": "Understanding Market Price Per Share",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "old_market_price_new_market_price",
+        "applies_to": [],
+        "description": "Ensure market prices are the per-share values reflecting current trading prices on an exchange, not book values, par values, or historical averages."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_npv_calculation_from_cash_flows",
+    "name": "Net Present Value (NPV) Calculation",
+    "short_description": "Calculate the net present value (NPV) of a series of cash flows, including an initial investment at time zero and subsequent cash flows.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-249",
+      "article_title": "Valuation",
+      "source": "FinanceReasoning-test-588",
+      "question_id": "test-1752",
+      "difficulty": 3.332204510175204,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of cash flows where the first value typically represents the initial investment (negative for outflow) and subsequent values are future inflows/outflows for periods 1, 2, etc.",
+        "unit": "currency",
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate or required rate of return, expressed as a decimal (e.g., 0.08 for 8%). Must be greater than -1.",
+        "unit": "decimal",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "npv",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value of the cash flows, rounded to the nearest dollar."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs[\"cash_flows\"]\n    discount_rate = inputs[\"discount_rate\"]\n\n    # Calculate the NPV where cash_flows[0] is at time t=0 (not discounted)\n    # and cash_flows[i] for i > 0 is at time t=i, discounted by (1 + discount_rate)**i.\n    npv = sum(cf / ((1 + discount_rate) ** i) for i, cf in enumerate(cash_flows))\n    \n    # Return the NPV rounded to the nearest dollar as per the question.\n    return round(npv)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "dr_gt_neg1",
+        "name": "Discount Rate Greater Than Negative One",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs[\"discount_rate\"] <= -1",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate must be greater than -1 to ensure valid financial calculations and avoid mathematical inconsistencies."
+      },
+      {
+        "rule_id": "cf_is_list",
+        "name": "Cash Flows Is a List",
+        "check_type": "semantic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "cash_flows_must_be_array",
+        "applies_to": [],
+        "description": "The 'cash_flows' input must be provided as a list (array) of numeric values."
+      },
+      {
+        "rule_id": "cf_not_empty",
+        "name": "Cash Flows Not Empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "len(inputs[\"cash_flows\"]) == 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The list of cash flows cannot be empty. At least one cash flow (e.g., initial investment) must be provided."
+      },
+      {
+        "rule_id": "cf_elements_numeric",
+        "name": "Cash Flow Elements Are Numeric",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not all(isinstance(cf, (int, float)) for cf in inputs[\"cash_flows\"])",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "All elements within the 'cash_flows' list must be numeric (integers or floats) to allow for calculation."
+      },
+      {
+        "rule_id": "dr_is_numeric",
+        "name": "Discount Rate Is Numeric",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs[\"discount_rate\"], (int, float))",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'discount_rate' input must be a single numeric value."
+      },
+      {
+        "rule_id": "dr_plausible_range",
+        "name": "Discount Rate Plausible Range",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "not (-0.99 <= inputs[\"discount_rate\"] <= 5.0)",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate is outside the typical range of -99% to 500%. This might indicate an input error or an unusually high/low expected return."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_npv_calculation",
+    "name": "Net Present Value Calculation",
+    "short_description": "Calculates the net present value (NPV) of an investment project given initial investment, cash inflows, and a discount rate.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-2944",
+      "article_title": "Net Present Value Rule",
+      "source": "FinanceReasoning-test-347",
+      "question_id": "test-1870",
+      "difficulty": 3.688879454113936,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_inflows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of expected future cash inflows from the project (positive values).",
+        "unit": "currency",
+        "aliases": [
+          "cash_flows"
+        ]
+      },
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": true,
+        "description": "The initial capital investment required for the project (a positive value representing the cash outflow).",
+        "unit": "currency",
+        "aliases": [
+          "initial_capital"
+        ]
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate (e.g., interest rate) used to discount future cash flows, representing the company's cost of capital. Must be greater than -1 (as a decimal, e.g., 0.08 for 8%).",
+        "unit": "ratio",
+        "aliases": [
+          "cost_of_capital"
+        ]
+      }
+    ],
+    "output": {
+      "name": "npv",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value of the project, representing the estimated net gain or loss."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_inflows = inputs.get(\"cash_inflows\")\n    initial_investment = inputs.get(\"initial_investment\")\n    discount_rate = inputs.get(\"discount_rate\")\n\n    present_value_inflows = sum(cf / ((1 + discount_rate) ** (i + 1)) for i, cf in enumerate(cash_inflows))\n    npv = present_value_inflows - initial_investment\n    \n    return npv",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "dr_validity",
+        "name": "Discount Rate Must Be Greater Than -1",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs.discount_rate <= -1",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate must be greater than -1 to ensure meaningful present value calculations."
+      },
+      {
+        "rule_id": "ii_positive_value",
+        "name": "Initial Investment Must Be Positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs.initial_investment < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "Initial investment represents a capital outflow and should be provided as a positive value."
+      },
+      {
+        "rule_id": "ci_not_empty",
+        "name": "Cash Inflows List Cannot Be Empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not inputs.cash_inflows",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The list of cash inflows cannot be empty for NPV calculation."
+      },
+      {
+        "rule_id": "ci_values_positive",
+        "name": "All Cash Inflow Values Must Be Positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "any(cf < 0 for cf in inputs.cash_inflows)",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "Each cash inflow value in the list must be positive, representing an actual inflow."
+      },
+      {
+        "rule_id": "ci_type_list",
+        "name": "Cash Inflows Must Be a List",
+        "check_type": "semantic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "type_cash_inflows_list",
+        "applies_to": [],
+        "description": "The 'cash_inflows' input must be provided as a list."
+      },
+      {
+        "rule_id": "dr_plausible_range",
+        "name": "Discount Rate Plausibility Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs.discount_rate >= 100 or inputs.discount_rate <= -0.9999",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate is unusually high (>=100) or very close to or below -1, which may indicate an input error. Note: rates between -1 and 0 are permissible but unusual."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_npv_projectinvestment",
+    "name": "Net Present Value of Project Investment",
+    "short_description": "Calculates the Net Present Value (NPV) for a project with an initial investment and future payoffs at specified years, given a discount rate.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": null,
+      "article_title": null,
+      "source": "FinCode-test-26",
+      "question_id": "test-1888",
+      "difficulty": 3.6888794541139367,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": true,
+        "description": "The initial cost or investment required for the project.",
+        "unit": "USD",
+        "aliases": []
+      },
+      {
+        "name": "payoff_amount_per_period",
+        "type": "number",
+        "required": true,
+        "description": "The fixed amount of profit or cash inflow generated in each payoff year.",
+        "unit": "USD",
+        "aliases": []
+      },
+      {
+        "name": "payoff_years",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of discrete years (integers) in which the payoffs occur.",
+        "unit": null,
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The rate used to discount future cash flows to their present value.",
+        "unit": "decimal_percentage",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "net_present_value",
+      "type": "number",
+      "unit": "USD",
+      "description": "The calculated Net Present Value (NPV) of the project, rounded to two decimal places."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    initial_investment = inputs[\"initial_investment\"]\n    payoff_years = inputs[\"payoff_years\"]\n    payoff_amount_per_period = inputs[\"payoff_amount_per_period\"]\n    discount_rate = inputs[\"discount_rate\"]\n\n    # Calculate the present value of future payoffs\n    pv = sum([payoff_amount_per_period / (1 + discount_rate) ** y for y in payoff_years])\n\n    # Calculate Net Present Value\n    npv = pv - initial_investment\n    return round(npv, 2)",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "npv_inv_001",
+        "name": "Initial Investment Non-Negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['initial_investment'] < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The initial investment must be a non-negative value."
+      },
+      {
+        "rule_id": "npv_dr_001",
+        "name": "Discount Rate Non-Negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['discount_rate'] < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate must be a non-negative value."
+      },
+      {
+        "rule_id": "npv_payoff_001",
+        "name": "Payoff Amount Non-Negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['payoff_amount_per_period'] < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The payoff amount per period must be a non-negative value."
+      },
+      {
+        "rule_id": "npv_years_001",
+        "name": "Payoff Years Not Empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not inputs['payoff_years']",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The list of payoff years cannot be empty, as there must be future cash flows."
+      },
+      {
+        "rule_id": "npv_years_002",
+        "name": "Payoff Years Positive Integers",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "any(not isinstance(year, int) or year <= 0 for year in inputs['payoff_years'])",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "Each year in the payoff_years list must be a positive integer representing a future period."
+      },
+      {
+        "rule_id": "npv_years_003",
+        "name": "Payoff Years Unique and Sorted",
+        "check_type": "normalization",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "len(inputs['payoff_years']) != len(set(inputs['payoff_years'])) or sorted(inputs['payoff_years']) != inputs['payoff_years']",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "For clarity and consistency, payoff years should ideally be unique and provided in ascending order."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_article_2940",
+    "name": "Net Present Value (NPV)",
+    "short_description": "Calculate the net present value (NPV) of a series of cash flows. This function computes the net present value of expected future cash flows by discounting them to present value using a specified discount rate and subtracting any initial investment.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-2940",
+      "article_title": "Net Present Value (NPV)",
+      "source": "FinanceReasoning-test-302",
+      "question_id": "test-1925",
+      "difficulty": 3.8712010109078907,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of future cash flows (positive for inflows, negative for outflows).",
+        "unit": "currency",
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate (e.g., required return) to apply to the cash flows.",
+        "unit": "decimal",
+        "aliases": []
+      },
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": false,
+        "description": "The initial cash outlay or cost of investment. Default is 0.0.",
+        "unit": "currency",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "npv",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value of the cash flow series."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs['cash_flows']\n    discount_rate = inputs['discount_rate']\n    initial_investment = inputs.get('initial_investment', 0.0)\n\n    npv = -initial_investment\n    for t, cash_flow in enumerate(cash_flows):\n        npv += cash_flow / ((1 + discount_rate) ** (t + 1))\n    \n    return npv",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "dr001",
+        "name": "Discount rate must be positive",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['discount_rate'] <= 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate must be a positive value to correctly reflect the time value of money and opportunity cost. A non-positive rate will lead to incorrect present value calculations."
+      },
+      {
+        "rule_id": "dr002",
+        "name": "Cash flows list cannot be empty",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "len(inputs['cash_flows']) == 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The list of future cash flows cannot be empty. At least one cash flow is required to calculate Net Present Value."
+      },
+      {
+        "rule_id": "dr003",
+        "name": "Cash flow values must be numeric",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "any(not isinstance(cf, (int, float)) for cf in inputs['cash_flows'])",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "All individual cash flow values in the 'cash_flows' list must be numeric (integers or floats)."
+      },
+      {
+        "rule_id": "dr004",
+        "name": "Initial investment non-negative",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs.get('initial_investment', 0.0) < 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "While not strictly invalid, a negative initial investment typically implies a subsidy or inflow at time zero, which deviates from the standard interpretation of an 'investment outlay'."
+      },
+      {
+        "rule_id": "dr005",
+        "name": "Discount rate is excessively high",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs['discount_rate'] >= 1.0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "A discount rate equal to or greater than 100% (1.0) is unusually high and may indicate an error in input or an extremely high-risk scenario. Review the rate for plausibility."
+      },
+      {
+        "rule_id": "dr006",
+        "name": "NPV for capital budgeting decisions",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "capital_budgeting_decision",
+        "applies_to": [],
+        "description": "NPV is a crucial metric in capital budgeting. A positive NPV suggests the project is expected to add value to the firm, while a negative NPV suggests it will decrease value. This function assumes inputs are for evaluating such projects."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_investment_analysis_npv_calculator_v1",
+    "name": "Net Present Value (NPV) Calculator",
+    "short_description": "Calculates the Net Present Value (NPV) of an investment by subtracting the initial investment from the discounted cash flow (DCF) of a series of future cash flows.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": "article-1732",
+      "article_title": "Discounted Cash Flow (DCF)",
+      "source": "FinanceReasoning-test-321",
+      "question_id": "test-1944",
+      "difficulty": 3.9120230054281464,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of projected cash flows (positive or negative) representing the expected income or expense for each period.",
+        "unit": "currency",
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The discount rate used to calculate the present value of future cash flows. Must be greater than -1.",
+        "unit": "percentage",
+        "aliases": []
+      },
+      {
+        "name": "initial_investment",
+        "type": "number",
+        "required": true,
+        "description": "The initial cost of the investment.",
+        "unit": "currency",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "net_present_value",
+      "type": "number",
+      "unit": "currency",
+      "description": "The net present value, indicating the overall profitability of the investment."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs['cash_flows']\n    discount_rate = inputs['discount_rate']\n    initial_investment = inputs['initial_investment']\n\n    # Calculate the discounted cash flow\n    discounted_value = sum(cf / ((1 + discount_rate) ** (i + 1)) for i, cf in enumerate(cash_flows))\n\n    # Calculate the net present value\n    net_present_value = discounted_value - initial_investment\n\n    return net_present_value",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "npv_101",
+        "name": "Cash Flows List Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs['cash_flows'], list) or not inputs['cash_flows']",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'cash_flows' input must be a non-empty list of cash flow values."
+      },
+      {
+        "rule_id": "npv_102",
+        "name": "Cash Flows Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "any(not isinstance(cf, (int, float)) for cf in inputs['cash_flows'])",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "All elements within the 'cash_flows' list must be numerical values (integers or floats)."
+      },
+      {
+        "rule_id": "npv_103",
+        "name": "Discount Rate Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs['discount_rate'], (int, float))",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'discount_rate' input must be a numerical value (integer or float)."
+      },
+      {
+        "rule_id": "npv_104",
+        "name": "Initial Investment Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs['initial_investment'], (int, float))",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'initial_investment' input must be a numerical value (integer or float)."
+      },
+      {
+        "rule_id": "npv_105",
+        "name": "Valid Discount Rate Range",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "inputs['discount_rate'] <= -1",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The discount rate must be greater than -1 to ensure valid financial calculations."
+      },
+      {
+        "rule_id": "npv_201",
+        "name": "Net Present Value Semantic Check",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "financial_evaluation_net_present_value",
+        "applies_to": [],
+        "description": "Ensures the output 'net_present_value' adheres to the standard definition of Net Present Value in financial analysis."
+      }
+    ]
+  },
+  {
+    "fic_id": "fic_npv_calculator_001",
+    "name": "Net Present Value (NPV) Calculator",
+    "short_description": "Calculates the Net Present Value of a series of cash flows given a discount rate.",
+    "domain": "investment_analysis",
+    "topic": "npv",
+    "topic_extension": false,
+    "version": "v3",
+    "source_meta": {
+      "function_id": null,
+      "article_title": null,
+      "source": "FinanceMath-validation-181",
+      "question_id": "test-1947",
+      "difficulty": 3.9120230054281464,
+      "level": "medium"
+    },
+    "inputs": [
+      {
+        "name": "cash_flows",
+        "type": "array[number]",
+        "required": true,
+        "description": "A list of periodic cash flows. The initial investment should be included as a negative value, followed by subsequent positive or negative cash flows.",
+        "unit": "currency",
+        "aliases": []
+      },
+      {
+        "name": "discount_rate",
+        "type": "number",
+        "required": true,
+        "description": "The required rate of return or discount rate, expressed as a decimal (e.g., 0.20 for 20%).",
+        "unit": "decimal",
+        "aliases": []
+      }
+    ],
+    "output": {
+      "name": "net_present_value",
+      "type": "number",
+      "unit": "currency",
+      "description": "The calculated Net Present Value (NPV) of the investment."
+    },
+    "execution": {
+      "language": "python",
+      "entrypoint": "compute",
+      "code": "def compute(inputs):\n    cash_flows = inputs[\"cash_flows\"]\n    discount_rate = inputs[\"discount_rate\"]\n    npv = 0.0\n    for t in range(len(cash_flows)):\n        npv += cash_flows[t] / ((1 + discount_rate) ** t)\n    return npv",
+      "deterministic": true
+    },
+    "diagnostic_checks": [
+      {
+        "rule_id": "npv_cf_001",
+        "name": "Cash Flows Input Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs.cash_flows, list)",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'cash_flows' input must be provided as a list."
+      },
+      {
+        "rule_id": "npv_dr_001",
+        "name": "Discount Rate Input Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "not isinstance(inputs.discount_rate, (int, float))",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'discount_rate' input must be a number (integer or float)."
+      },
+      {
+        "rule_id": "npv_cf_002",
+        "name": "Cash Flows Non-Empty Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "len(inputs.cash_flows) == 0",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'cash_flows' list must not be empty."
+      },
+      {
+        "rule_id": "npv_dr_002",
+        "name": "Discount Rate Non-Negative Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "E",
+        "severity": "alert",
+        "predicate_mode": "violation",
+        "expression": "inputs.discount_rate < -1",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "The 'discount_rate' should ideally not be less than -1 (or -100%) as it would lead to division by zero or negative discount factors. Rates below 0 are unusual but mathematically possible."
+      },
+      {
+        "rule_id": "npv_cf_003",
+        "name": "Cash Flows Element Type Check",
+        "check_type": "deterministic",
+        "diagnostic_type": "F",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "any(not isinstance(cf, (int, float)) for cf in inputs.cash_flows)",
+        "semantic_key": "",
+        "applies_to": [],
+        "description": "All elements within the 'cash_flows' list must be numbers (integers or floats)."
+      },
+      {
+        "rule_id": "npv_sem_001",
+        "name": "Net Present Value Calculation Standard",
+        "check_type": "semantic",
+        "diagnostic_type": "E",
+        "severity": "error",
+        "predicate_mode": "violation",
+        "expression": "",
+        "semantic_key": "net_present_value_calculation_standard",
+        "applies_to": [],
+        "description": "This check ensures the Net Present Value (NPV) calculation adheres to standard financial principles, discounting future cash flows to their present value using the provided discount rate."
+      }
+    ]
+  }
+]

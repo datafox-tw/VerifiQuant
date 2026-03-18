@@ -46,6 +46,9 @@ Diagnostic rules policy:
 - Provide 3 to 8 checks.
 - check_type must be one of: deterministic, normalization, semantic.
 - deterministic checks must include a valid python boolean `expression` using input names.
+- For deterministic/normalization checks, include `predicate_mode`:
+  - `violation`: expression=True means the rule is triggered (preferred default).
+  - `validity`: expression=True means the input is valid, and expression=False triggers the rule.
 - semantic checks must use `semantic_key` (expression can be empty).
 - In `fic_core.diagnostic_checks`, use ONLY F or E. Do NOT output M.
 - Why: M is handled at retrieval/card-selection stage before card commitment.
@@ -88,6 +91,10 @@ def stage_core_schema() -> Any:
             "severity": genai_types.Schema(
                 type=genai_types.Type.STRING,
                 enum=["error", "alert"],
+            ),
+            "predicate_mode": genai_types.Schema(
+                type=genai_types.Type.STRING,
+                enum=["violation", "validity"],
             ),
             "expression": genai_types.Schema(type=genai_types.Type.STRING),
             "semantic_key": genai_types.Schema(type=genai_types.Type.STRING),
@@ -206,6 +213,23 @@ def _normalize_output(item: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _infer_predicate_mode_from_expression(expression: str) -> str:
+    expr = "".join(str(expression or "").strip().lower().split())
+    if not expr:
+        return "violation"
+    if expr.startswith("not(") or expr.startswith("not"):
+        return "violation"
+    if any(tok in expr for tok in ("<0", "<=0", "<=-1", "==0", "!=", "isnone")):
+        return "violation"
+    if any(tok in expr for tok in (">=0", ">0", ">-1", "<=1", "<=10")):
+        return "validity"
+    if "<=" in expr or ">=" in expr:
+        return "validity"
+    if "<" in expr and "<0" not in expr:
+        return "validity"
+    return "violation"
+
+
 def _normalize_check(check: Dict[str, Any]) -> Dict[str, Any]:
     out = {
         "rule_id": normalize_label(check.get("rule_id", "")),
@@ -213,6 +237,7 @@ def _normalize_check(check: Dict[str, Any]) -> Dict[str, Any]:
         "check_type": str(check.get("check_type", "")).strip().lower(),
         "diagnostic_type": str(check.get("diagnostic_type", "")).strip().upper(),
         "severity": str(check.get("severity", "")).strip().lower(),
+        "predicate_mode": str(check.get("predicate_mode", "")).strip().lower(),
         "expression": str(check.get("expression", "") or "").strip(),
         "semantic_key": normalize_label(check.get("semantic_key", "")),
         "applies_to": [normalize_label(x) for x in (check.get("applies_to") or []) if normalize_label(x)],
@@ -235,6 +260,11 @@ def _normalize_check(check: Dict[str, Any]) -> Dict[str, Any]:
         out["diagnostic_type"] = "E"
     if out["severity"] not in {"error", "alert"}:
         out["severity"] = "alert"
+    if out["check_type"] in {"deterministic", "normalization"}:
+        if out["predicate_mode"] not in {"violation", "validity"}:
+            out["predicate_mode"] = _infer_predicate_mode_from_expression(out["expression"])
+    else:
+        out["predicate_mode"] = "violation"
     if out["check_type"] == "deterministic" and not out["expression"]:
         raise ValueError(f"deterministic check '{out['rule_id']}' missing expression")
     if out["check_type"] == "semantic" and not out["semantic_key"]:
