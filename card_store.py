@@ -1,1 +1,0 @@
-from verifiquant_v1.card_store import *  # noqa: F401,F403
