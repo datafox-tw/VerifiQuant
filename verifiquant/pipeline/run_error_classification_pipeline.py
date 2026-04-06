@@ -364,6 +364,10 @@ def _schema_critic_check() -> Any:
                 type=genai_types.Type.ARRAY,
                 items=genai_types.Schema(type=genai_types.Type.STRING),
             ),
+            "clarification_options": genai_types.Schema(
+                type=genai_types.Type.ARRAY,
+                items=genai_types.Schema(type=genai_types.Type.STRING),
+            ),
             "reason": genai_types.Schema(type=genai_types.Type.STRING),
         },
         required=[
@@ -371,6 +375,7 @@ def _schema_critic_check() -> Any:
             "triggered_hint_ids",
             "ambiguity_tags",
             "clarification_questions",
+            "clarification_options",
             "reason",
         ],
     )
@@ -471,6 +476,16 @@ def _critic_check_with_llm(
     semantic_hints: List[Dict[str, Any]],
     provided_inputs: Dict[str, Any],
 ) -> Dict[str, Any]:
+    has_hints = bool(semantic_hints)
+    mode_desc = "hint_oriented" if has_hints else "open"
+    mode_rules = (
+        "- semantic_hints are available: use them as primary reference and fill triggered_hint_ids when relevant.\n"
+        "- If a hint is not relevant, do not trigger it.\n"
+    ) if has_hints else (
+        "- semantic_hints are empty: perform OPEN semantic ambiguity scan from question/context.\n"
+        "- In open mode, triggered_hint_ids should be empty.\n"
+        "- If clarification is needed, propose concise clarification_options when possible.\n"
+    )
     prompt = f"""
 You are the VerifiQuant I-gate Critic Agent.
 Goal: detect hidden semantic ambiguity before deterministic execution.
@@ -482,8 +497,9 @@ Ambiguity examples:
 
 Rules:
 - If ambiguity materially changes calculation interpretation, set needs_clarification=true.
-- Trigger hint ids only when the ambiguity is plausible from user wording/context.
 - Provide concise clarification questions.
+- Mode: {mode_desc}
+{mode_rules}
 
 Question:
 {question}
@@ -820,46 +836,50 @@ def run_case(
         }
 
     semantic_hints = [h for h in (core.get("semantic_hints") or []) if isinstance(h, dict)]
-    if semantic_hints:
-        critic = _critic_check_with_llm(
-            client=client,
-            model=judge_model,
-            question=q,
-            context=c,
-            semantic_hints=semantic_hints,
-            provided_inputs=provided_inputs,
-        )
-        needs_clarification = bool(critic.get("needs_clarification"))
-        if needs_clarification:
-            triggered_hint_ids = [str(x).strip() for x in critic.get("triggered_hint_ids", []) if str(x).strip()]
-            i_tags = [str(x).strip() for x in critic.get("ambiguity_tags", []) if str(x).strip()]
-            clar_qs = [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
-            i_repairs = _summarize_repairs(chosen_fic_id, ["global_i_semantic_ambiguity"], repair_index)
-            options: List[str] = []
+    critic = _critic_check_with_llm(
+        client=client,
+        model=judge_model,
+        question=q,
+        context=c,
+        semantic_hints=semantic_hints,
+        provided_inputs=provided_inputs,
+    )
+    needs_clarification = bool(critic.get("needs_clarification"))
+    if needs_clarification:
+        triggered_hint_ids = [str(x).strip() for x in critic.get("triggered_hint_ids", []) if str(x).strip()]
+        i_tags = [str(x).strip() for x in critic.get("ambiguity_tags", []) if str(x).strip()]
+        clar_qs = [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
+        model_options = [str(x).strip() for x in critic.get("clarification_options", []) if str(x).strip()]
+        i_repairs = _summarize_repairs(chosen_fic_id, ["global_i_semantic_ambiguity"], repair_index)
+        options: List[str] = []
+        if semantic_hints:
             for hint in semantic_hints:
                 if not triggered_hint_ids or str(hint.get("id", "")) in triggered_hint_ids:
                     options.extend([str(x).strip() for x in hint.get("options", []) if str(x).strip()])
-            options = list(dict.fromkeys(options))
-            return {
-                **base,
-                "status": "needs_clarification",
-                "diagnostic_type": "I",
-                "funnel_layer": "Critic",
-                "gate_action": "critic_intervention",
-                "reason": str(critic.get("reason", "")).strip() or "Hidden semantic ambiguity detected.",
-                "fic_id": chosen_fic_id,
-                "candidate_ids": candidate_ids,
-                "support_gap_reason": None,
-                "ambiguity_tags": i_tags,
-                "clarification_request": {
-                    "questions": clar_qs or ["Please confirm the intended financial interpretation."],
-                    "options": options,
-                    "triggered_hint_ids": triggered_hint_ids,
-                },
-                "provided_inputs": provided_inputs,
-                "normalization_note": normalization_note,
-                "repair_hints": i_repairs,
-            }
+        else:
+            options.extend(model_options)
+        options = list(dict.fromkeys(options))
+        return {
+            **base,
+            "status": "needs_clarification",
+            "diagnostic_type": "I",
+            "funnel_layer": "Critic",
+            "gate_action": "critic_intervention",
+            "reason": str(critic.get("reason", "")).strip() or "Hidden semantic ambiguity detected.",
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
+            "support_gap_reason": None,
+            "ambiguity_tags": i_tags,
+            "clarification_request": {
+                "questions": clar_qs or ["Please confirm the intended financial interpretation."],
+                "options": options,
+                "triggered_hint_ids": triggered_hint_ids,
+                "mode": "hint_oriented" if semantic_hints else "open",
+            },
+            "provided_inputs": provided_inputs,
+            "normalization_note": normalization_note,
+            "repair_hints": i_repairs,
+        }
 
     output_value, exec_err = _evaluate_execution(core, provided_inputs)
     if exec_err:

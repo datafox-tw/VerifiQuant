@@ -54,8 +54,17 @@ Diagnostic rules policy:
 - In diagnostics checks, use ONLY F or E. Do NOT output M/N/I/C.
 - Why: M is handled at retrieval/card-selection stage before card commitment.
 - Mapping guidance:
-  - Missing required field / invalid type / hard formula precondition -> F
-  - Unit/scale/binding/plausibility inconsistency -> E
+  - F is STRICTLY for schema/spec incompleteness only:
+    - required input missing
+    - input cannot be parsed to expected type
+    - malformed structure (for example expected list but got scalar and cannot normalize)
+  - E is for value-level or interpretation-level issues AFTER inputs exist:
+    - unit/scale mismatch (8 vs 0.08, 15 vs 0.15)
+    - bound/plausibility violations (negative rate, impossible ratio)
+    - binding/direction/frequency inconsistencies
+  - Prefer E over F when a value is present but suspicious or needs confirmation.
+  - Do NOT classify percentage-range checks as F when the value exists; classify them as E with deterministic alert.
+  - "Hard formula preconditions" should generally be E unless the variable is truly missing/unparseable.
 - severity must be error or alert.
 - semantic_hints are for I-gate only (hidden ambiguity checks like FX direction/time basis),
   and must include clarification question plus fixed options.
