@@ -130,11 +130,22 @@ def _answer_match(question: str, output_value: Optional[float], gold_num: Option
     return abs_err, math.isclose(output_value, gold_num, rel_tol=1e-6, abs_tol=1e-2)
 
 
-def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Optional[bool]:
+class _AttrDict(dict):
+    """Dict wrapper that also supports attribute access (inputs.foo)."""
+
+    def __getattr__(self, key: str) -> Any:
+        try:
+            return self[key]
+        except KeyError as exc:
+            raise AttributeError(key) from exc
+
+
+def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Tuple[Optional[bool], Optional[str]]:
     if not rule:
-        return None
+        return None, "empty rule expression"
+    inputs_obj = _AttrDict(inputs)
     env = {
-        "inputs": inputs,
+        "inputs": inputs_obj,
         "abs": abs,
         "min": min,
         "max": max,
@@ -149,11 +160,11 @@ def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Optional[bool]:
         "str": str,
         "math": math,
     }
-    env.update(inputs)
+    env.update(inputs_obj)
     try:
-        return bool(eval(rule, {"__builtins__": {}}, env))
-    except Exception:
-        return None
+        return bool(eval(rule, {"__builtins__": {}}, env)), None
+    except Exception as exc:
+        return None, str(exc)
 
 
 def _infer_predicate_mode(chk: Dict[str, Any]) -> str:
@@ -189,14 +200,14 @@ def _infer_predicate_mode(chk: Dict[str, Any]) -> str:
     return "violation"
 
 
-def _is_check_triggered(chk: Dict[str, Any], inputs: Dict[str, Any]) -> bool:
-    result = _safe_eval_rule(str(chk.get("expression", "")), inputs)
+def _is_check_triggered(chk: Dict[str, Any], inputs: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    result, err = _safe_eval_rule(str(chk.get("expression", "")), inputs)
     if result is None:
-        return False
+        return False, err or "evaluation returned no result"
     mode = _infer_predicate_mode(chk)
     if mode == "validity":
-        return result is False
-    return result is True
+        return result is False, None
+    return result is True, None
 
 
 def _load_records(path: Path) -> List[Dict[str, Any]]:
@@ -807,13 +818,44 @@ def run_case(
     checks = core.get("diagnostic_checks", [])
     e_checks = [chk for chk in checks if str(chk.get("diagnostic_type", "")).upper() == "E"]
     auto_triggered: List[str] = []
+    eval_errors: List[Dict[str, str]] = []
 
     for chk in e_checks:
         rule_id = str(chk.get("rule_id", "")).strip()
         ctype = str(chk.get("check_type", "")).strip().lower()
         if ctype in {"deterministic", "normalization"}:
-            if _is_check_triggered(chk, provided_inputs) and rule_id:
+            is_triggered, eval_err = _is_check_triggered(chk, provided_inputs)
+            if eval_err:
+                eval_errors.append(
+                    {
+                        "rule_id": rule_id or "<unknown>",
+                        "expression": str(chk.get("expression", "")),
+                        "error": eval_err,
+                    }
+                )
+                continue
+            if is_triggered and rule_id:
                 auto_triggered.append(rule_id)
+
+    if eval_errors:
+        first = eval_errors[0]
+        return {
+            **base,
+            "status": "error",
+            "diagnostic_type": "C",
+            "funnel_layer": "Logic",
+            "gate_action": "audit_log",
+            "reason": f"E-check evaluation error in rule {first['rule_id']}: {first['error']}",
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
+            "support_gap_reason": None,
+            "ambiguity_tags": [],
+            "clarification_request": None,
+            "provided_inputs": provided_inputs,
+            "normalization_note": normalization_note,
+            "rule_eval_errors": eval_errors,
+        }
+
     triggered = list(dict.fromkeys(auto_triggered))
     if triggered:
         reason = "Deterministic E-type checks detected potential inconsistencies."
