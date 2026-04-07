@@ -37,13 +37,18 @@ set -a
 
 ```bash
 python3 preprocessing/dataset_case_to_fic.py \
-  --input verifiquant/data/testing_10Q.jsonl \
-  --core-output verifiquant/data/runs/demo_10q_0405/core.jsonl \
-  --retrieval-output verifiquant/data/runs/demo_10q_0405/retrieval.jsonl \
-  --repair-output verifiquant/data/runs/demo_10q_0405/repair.jsonl \
+  --input verifiquant/data/testing_5Q.jsonl \
+  --functions-catalog-path verifiquant/data/functions-article-all.json \
+  --financial-docs-path verifiquant/data/financial_documents.json \
+  --core-output verifiquant/data/runs/demo_5q_0407/core.jsonl \
+  --retrieval-output verifiquant/data/runs/demo_5q_0407/retrieval.jsonl \
+  --repair-output verifiquant/data/runs/demo_5q_0407/repair.jsonl \
   --duplicate-fic-policy suffix \
   --on-validation-error save \
-  --validation-report verifiquant/data/runs/demo_10q_0405/validation_report.json
+  --validation-report verifiquant/data/runs/demo_5q_0407/validation_report.json\
+  --seed-report-output verifiquant/data/runs/demo_5q_0407/seed_report.json\
+  --skip-existing-core 
+
 ```
 
 常用可選參數：

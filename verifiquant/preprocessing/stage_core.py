@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from typing import Any, Dict, List, Optional
 
 from verifiquant.preprocessing.common import (
@@ -31,12 +32,13 @@ Convert one dataset case into a reusable `fic_core` object with:
 - execution (deterministic python)
 - selection_hints
 - semantic_hints
-- diagnostics.invariants / diagnostics.scale_checks
+- diagnostic_checks
 
 Critical rules:
 1) `python_solution` is PRIMARY for executable logic.
 2) `function` is SECONDARY for naming and financial semantics.
 3) Do not hardcode case-specific constants into execution; use inputs.
+4) Use `article_content_excerpt` as supporting context to generate higher-quality `semantic_hints`.
 
 Taxonomy policy:
 - Domain MUST be one of taxonomy domains.
@@ -68,6 +70,18 @@ Diagnostic rules policy:
 - severity must be error or alert.
 - semantic_hints are for I-gate only (hidden ambiguity checks like FX direction/time basis),
   and must include clarification question plus fixed options.
+- semantic_hints must be traceable to this case's function/question/context/article excerpt.
+- Do not output generic options like "Option A/Option B".
+- Keep semantic_hints concise and bounded: at most {semantic_hint_max} hints per card.
+- For each semantic_hint include:
+  - id
+  - ambiguity_type
+  - trigger_signal
+  - clarification_question
+  - options
+  - i_level (hard|soft)
+  - assumption_if_not_clarified
+  - impact_scope (input_binding|output_interpretation|directionality)
 
 Input case:
 <DEFINITION_JSON>
@@ -83,6 +97,7 @@ Output:
 Return JSON only.
 """
 
+SEMANTIC_HINT_MAX = 6
 
 def stage_core_schema() -> Any:
     if genai_types is None:
@@ -98,8 +113,26 @@ def stage_core_schema() -> Any:
                 type=genai_types.Type.ARRAY,
                 items=genai_types.Schema(type=genai_types.Type.STRING),
             ),
+            "i_level": genai_types.Schema(
+                type=genai_types.Type.STRING,
+                enum=["hard", "soft"],
+            ),
+            "assumption_if_not_clarified": genai_types.Schema(type=genai_types.Type.STRING),
+            "impact_scope": genai_types.Schema(
+                type=genai_types.Type.STRING,
+                enum=["input_binding", "output_interpretation", "directionality"],
+            ),
         },
-        required=["id", "ambiguity_type", "clarification_question", "options"],
+        required=[
+            "id",
+            "ambiguity_type",
+            "trigger_signal",
+            "clarification_question",
+            "options",
+            "i_level",
+            "assumption_if_not_clarified",
+            "impact_scope",
+        ],
     )
     check = genai_types.Schema(
         type=genai_types.Type.OBJECT,
@@ -186,20 +219,6 @@ def stage_core_schema() -> Any:
                 },
                 required=["language", "entrypoint", "code", "deterministic"],
             ),
-            "diagnostics": genai_types.Schema(
-                type=genai_types.Type.OBJECT,
-                properties={
-                    "invariants": genai_types.Schema(
-                        type=genai_types.Type.ARRAY,
-                        items=check,
-                    ),
-                    "scale_checks": genai_types.Schema(
-                        type=genai_types.Type.ARRAY,
-                        items=check,
-                    ),
-                },
-                required=["invariants", "scale_checks"],
-            ),
             "diagnostic_checks": genai_types.Schema(
                 type=genai_types.Type.ARRAY,
                 items=check,
@@ -216,7 +235,7 @@ def stage_core_schema() -> Any:
             "inputs",
             "output",
             "execution",
-            "diagnostics",
+            "diagnostic_checks",
         ],
     )
 
@@ -225,6 +244,9 @@ def build_stage_core_prompt(defn: ConversionInput) -> str:
     definition_json = json.dumps(
         {
             "source_meta": defn.source_meta,
+            "article_title": defn.article_title,
+            "article_doc_id": defn.article_doc_id,
+            "article_content_excerpt": defn.article_content_excerpt,
             "function": defn.function,
             "python_solution": defn.python_solution,
             "context": defn.context,
@@ -236,6 +258,7 @@ def build_stage_core_prompt(defn: ConversionInput) -> str:
     return STAGE_CORE_PROMPT.format(
         definition_json=definition_json,
         taxonomy_json=taxonomy_json(indent=2),
+        semantic_hint_max=SEMANTIC_HINT_MAX,
     )
 
 
@@ -332,17 +355,89 @@ def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
     trigger_signal = str(item.get("trigger_signal", "") or "").strip()
     clarification_question = str(item.get("clarification_question", "") or "").strip()
     options = _norm_str_list(item.get("options", []))
+    i_level = normalize_label(item.get("i_level", "")) or "soft"
+    if i_level not in {"hard", "soft"}:
+        i_level = "soft"
+    assumption_if_not_clarified = str(item.get("assumption_if_not_clarified", "") or "").strip()
+    impact_scope = normalize_label(item.get("impact_scope", "")) or "output_interpretation"
+    if impact_scope not in {"input_binding", "output_interpretation", "directionality"}:
+        impact_scope = "output_interpretation"
     if not clarification_question:
         clarification_question = "Please clarify the intended financial interpretation."
     if not options:
-        options = ["Option A", "Option B"]
+        options = ["Confirm intended interpretation", "Use default assumption"]
+    if not assumption_if_not_clarified:
+        assumption_if_not_clarified = "Proceed with default interpretation inferred from context."
     return {
         "id": hint_id,
         "ambiguity_type": ambiguity_type,
         "trigger_signal": trigger_signal,
         "clarification_question": clarification_question,
         "options": options,
+        "i_level": i_level,
+        "assumption_if_not_clarified": assumption_if_not_clarified,
+        "impact_scope": impact_scope,
     }
+
+
+def _dummy_input_value(input_type: str) -> Any:
+    t = str(input_type or "").strip().lower()
+    if t == "integer":
+        return 1
+    if t == "boolean":
+        return True
+    if t == "string":
+        return "x"
+    if t == "array[number]":
+        return [1.0, 2.0]
+    return 1.0
+
+
+def _execution_smoke_test(code: str, inputs: List[Dict[str, Any]], output_name: str) -> Dict[str, Any]:
+    safe_builtins = {
+        "abs": abs,
+        "min": min,
+        "max": max,
+        "sum": sum,
+        "len": len,
+        "all": all,
+        "any": any,
+        "isinstance": isinstance,
+        "bool": bool,
+        "str": str,
+        "float": float,
+        "int": int,
+        "pow": pow,
+        "round": round,
+        "range": range,
+        "list": list,
+        "dict": dict,
+        "tuple": tuple,
+        "set": set,
+        "zip": zip,
+        "enumerate": enumerate,
+        "ValueError": ValueError,
+        "TypeError": TypeError,
+        "Exception": Exception,
+        "math": math,
+    }
+    dummy_inputs = {
+        str(inp.get("name", "")): _dummy_input_value(str(inp.get("type", "number")))
+        for inp in inputs
+        if str(inp.get("name", "")).strip()
+    }
+    env: Dict[str, Any] = {}
+    try:
+        exec(code, {"__builtins__": safe_builtins}, env)
+        fn = env.get("compute")
+        if not callable(fn):
+            return {"ok": False, "error": "compute function missing after exec"}
+        result = fn(dummy_inputs)
+        if isinstance(result, dict) and output_name and output_name not in result:
+            return {"ok": False, "error": f"output '{output_name}' missing in compute result dict"}
+        return {"ok": True, "error": None}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
 
 
 def _collect_diagnostic_checks(raw: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -370,11 +465,16 @@ def formalize_core_payload(
     raw: Dict[str, Any],
     *,
     source_meta: Dict[str, Any],
+    article_title: str,
+    article_doc_id: Optional[int],
+    article_content_excerpt: str,
     fallback_id: str,
     allow_new_topic: bool,
 ) -> Dict[str, Any]:
-    fic_id = safe_id(raw.get("fic_id") or raw.get("id") or fallback_id)
-    name = str(raw.get("name", "")).strip()
+    # Keep fic_id style deterministic across cards:
+    # prefer source function_id over model-proposed id.
+    fic_id = safe_id(source_meta.get("function_id") or raw.get("fic_id") or raw.get("id") or fallback_id)
+    name = str(article_title or "").strip() or str(raw.get("name", "")).strip()
     short_description = str(raw.get("short_description", "")).strip()
     domain, topic, is_new_topic = validate_domain_topic(
         str(raw.get("domain", "")),
@@ -414,15 +514,18 @@ def formalize_core_payload(
         _normalize_semantic_hint(h, idx)
         for idx, h in enumerate(semantic_hints_raw, start=1)
         if isinstance(h, dict)
-    ]
+    ][:SEMANTIC_HINT_MAX]
 
     if not name:
         raise ValueError("name is required")
     if not short_description:
         raise ValueError("short_description is required")
 
-    invariants = [x for x in checks if x.get("check_type") == "deterministic"]
-    scale_checks = [x for x in checks if x.get("check_type") == "normalization"]
+    execution_smoke = _execution_smoke_test(execution["code"], inputs, output["name"])
+    source_meta_out = dict(source_meta)
+    source_meta_out["execution_smoke_ok"] = bool(execution_smoke.get("ok"))
+    if not execution_smoke.get("ok"):
+        source_meta_out["execution_smoke_error"] = str(execution_smoke.get("error", "unknown error"))
 
     return {
         "fic_id": fic_id,
@@ -432,18 +535,17 @@ def formalize_core_payload(
         "topic": topic,
         "topic_extension": is_new_topic,
         "version": "v2",
-        "source_meta": source_meta,
+        "source_meta": source_meta_out,
         "selection_hints": selection_hints,
         "semantic_hints": semantic_hints,
         "inputs": inputs,
         "output": output,
         "execution": execution,
-        "diagnostics": {
-            "invariants": invariants,
-            "scale_checks": scale_checks,
-        },
-        # Keep v1 compatibility for existing downstream consumers.
         "diagnostic_checks": checks,
+        "execution_smoke_test": execution_smoke,
+        "article_title": article_title,
+        "article_doc_id": article_doc_id,
+        "article_content_excerpt": article_content_excerpt,
     }
 
 
@@ -479,6 +581,9 @@ def generate_core(
             return formalize_core_payload(
                 raw,
                 source_meta=defn.source_meta,
+                article_title=defn.article_title,
+                article_doc_id=defn.article_doc_id,
+                article_content_excerpt=defn.article_content_excerpt,
                 fallback_id=fallback_id,
                 allow_new_topic=allow_new_topic,
             )

@@ -63,6 +63,69 @@ Every financial card (FIC) must conform to this schema(but not limited to ):
 
 ---
 
+## Frozen Gate Order (Phase 0 Spec, April 7, 2026)
+When multiple issues are present, always return the first hit by this strict priority:
+
+1. `M/N` (intent/scope)
+2. `F` (missing/unparsable required fields)
+3. `E` (deterministic boundary/scale/invariant alerts)
+4. `I` (semantic ambiguity)
+5. `C` (execution/runtime error)
+
+Interpretation:
+- Prefer explicit/structural checks before hidden semantic checks.
+- `I` must not preempt `F` or `E`.
+- Use first-hit return policy for deterministic and reproducible behavior.
+
+---
+
+## I-Class Policy (Phase 0 Spec)
+Split I-class into two levels:
+
+- `I_hard`:
+  - Definition: If not clarified, calculation direction/unit/basis can be wrong.
+  - Action: Block execution before numeric output (`needs_clarification`).
+  - Examples: FX quote direction, decimal-vs-percent unit scale when it changes formula interpretation, time-basis direction that changes sign or formula path.
+
+- `I_soft`:
+  - Definition: Does not change formula direction; mainly affects confidence/interpretation.
+  - Action: Allow execution, then emit warning/assumption note.
+  - Examples: convention preference, reporting interpretation, non-critical contextual assumptions.
+
+Default policy:
+- If ambiguity is outside explicit semantic hints, default to `I_soft`.
+- Escalate to `I_hard` only when ambiguity can materially change computation direction or unit basis.
+
+---
+
+## I-Class Repair Rule Policy
+- Do not rely only on a generic `global_i_semantic_ambiguity` template.
+- Preferred design: one semantic hint -> one repair guide/rule.
+- Repair content should be concrete (question/options/assumption), not generic placeholders like `option_a/option_b`.
+
+---
+
+## Baseline Snapshot (Phase 0)
+Dataset context:
+- 50 medium questions sampled from the broader set (independent concept-focused sample).
+- Historical note: older Gemini 2.0 runs were used in prior paper workflow; current pipeline uses Gemini 2.5 because 2.0 is deprecated.
+- The first 25 and last 25 are no longer interpreted as guaranteed-correct vs guaranteed-wrong labels.
+
+Current framework result snapshot（version:2026/04/06）:
+- First 25:
+  - `success`: 12
+  - `error`: 2
+  - `needs_clarification`: 11
+- Last 25:
+  - `success`: 6
+  - `error`: 3
+  - `needs_clarification`: 16
+
+Observation:
+- `I`/`needs_clarification` is currently overrepresented and should be tuned using `I_hard`/`I_soft` split plus stronger semantic hints.
+
+---
+
 ## Principles of VerifiQuant V2
 1.  **Safety First**: It is better to trigger an **N-Class** refusal than to provide a "99% confident" hallucination.
 2. **Determinism over Stochasticity and Externalize Reasoning**: Prefer Python code executions over LLM raw math.  Move math out of the LLM's "brain" and into the FIC's "code."

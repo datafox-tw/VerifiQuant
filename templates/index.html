@@ -14,6 +14,7 @@
       </header>
       <nav class="tab-nav">
         <button id="tab-qa" class="tab-btn active" type="button">主問答介面</button>
+        <button id="tab-batch" class="tab-btn" type="button">批次 JSONL</button>
         <button id="tab-cards" class="tab-btn" type="button">卡片一覽表</button>
       </nav>
 
@@ -37,6 +38,16 @@
               <input id="topic" name="topic" type="text" placeholder="npv" />
             </label>
           </div>
+          <div class="inline-row">
+            <label>
+              top_k
+              <input id="top-k" name="top_k" type="number" min="1" value="3" />
+            </label>
+            <label>
+              m_min_top_score
+              <input id="m-min-top-score" name="m_min_top_score" type="number" step="0.01" min="0" value="0.05" />
+            </label>
+          </div>
           <button type="submit">執行診斷</button>
         </form>
         <div id="loader" class="loader hidden">
@@ -44,6 +55,63 @@
           <span>診斷中，請稍候…</span>
         </div>
         <section id="result" class="result hidden"></section>
+      </section>
+
+      <section id="panel-batch" class="panel">
+        <form id="upload-form" class="batch-form">
+          <label>
+            上傳 JSONL/JSON 到 data/
+            <input id="batch-file" type="file" accept=".jsonl,.json" />
+          </label>
+          <button id="upload-btn" type="submit">上傳檔案</button>
+        </form>
+
+        <form id="batch-form" class="batch-form">
+          <label>
+            input_path
+            <input id="batch-input-path" type="text" placeholder="verifiquant/data/testing_3Q.jsonl" required />
+          </label>
+          <label>
+            output_path
+            <input id="batch-output-path" type="text" placeholder="verifiquant/data/runs/demo_v2/testing_3Q_output.jsonl" />
+          </label>
+          <div class="inline-row triple">
+            <label>
+              max_records
+              <input id="batch-max-records" type="number" min="0" value="0" />
+            </label>
+            <label>
+              top_k
+              <input id="batch-top-k" type="number" min="1" value="3" />
+            </label>
+            <label>
+              m_min_top_score
+              <input id="batch-m-min-top-score" type="number" step="0.01" min="0" value="0.05" />
+            </label>
+          </div>
+          <div class="inline-row">
+            <label>
+              Domain (optional)
+              <input id="batch-domain" type="text" placeholder="investment_analysis" />
+            </label>
+            <label>
+              Topic (optional)
+              <input id="batch-topic" type="text" placeholder="npv" />
+            </label>
+          </div>
+          <button id="batch-run-btn" type="submit">開始批次執行</button>
+        </form>
+        <div id="batch-loader" class="loader hidden">
+          <div class="spinner"></div>
+          <span>批次執行中…</span>
+        </div>
+        <section id="batch-result" class="result"></section>
+        <section class="cards-toolbar history-toolbar">
+          <button id="refresh-history" type="button">刷新歷史輸出</button>
+          <span id="history-meta"></span>
+        </section>
+        <section id="history-result" class="result"></section>
+        <section id="history-summary" class="result"></section>
       </section>
 
       <section id="panel-cards" class="panel">

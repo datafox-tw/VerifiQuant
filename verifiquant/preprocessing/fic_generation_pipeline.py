@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 import json
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -62,7 +63,11 @@ def _merge_repair_rows(existing: List[Dict[str, Any]], new_rows: List[Dict[str, 
     for row in existing + new_rows:
         fic_id = str(row.get("fic_id", "")).strip()
         rule_id = str(row.get("rule_id", "")).strip()
+        diagnostic_type = str(row.get("diagnostic_type", "")).strip().upper()
         if not fic_id or not rule_id:
+            continue
+        # N is served by a single runtime fallback template, not persisted per card.
+        if diagnostic_type == "N" or rule_id == "global_n_not_supported":
             continue
         by_key[(fic_id, rule_id)] = row
     return list(by_key.values())
@@ -80,6 +85,76 @@ def _collect_processed_source_ids(existing_core_rows: List[Dict[str, Any]]) -> t
         if qid:
             question_ids.add(qid)
     return function_ids, question_ids
+
+
+def _build_doc_index(financial_docs_path: Path) -> Dict[str, Dict[str, Any]]:
+    docs = load_records(financial_docs_path)
+    if not isinstance(docs, list):
+        raise ValueError(f"financial docs must be JSON list: {financial_docs_path}")
+    out: Dict[str, Dict[str, Any]] = {}
+    for d in docs:
+        if not isinstance(d, dict):
+            continue
+        title = str(d.get("title", "")).strip()
+        if not title:
+            continue
+        out[title] = d
+    return out
+
+
+def _enrich_rows_with_article_docs(
+    rows: List[Dict[str, Any]],
+    *,
+    financial_docs_path: Path,
+    excerpt_chars: int,
+    strict_title_match: bool = True,
+) -> Dict[str, Any]:
+    def _clean_article_excerpt(text: str) -> str:
+        # Remove markdown images/links and bare URLs for cleaner semantic context.
+        out = str(text or "")
+        out = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", out)
+        out = re.sub(r"\[[^\]]+\]\([^)]*\)", "", out)
+        out = re.sub(r"<https?://[^>]+>", "", out)
+        out = re.sub(r"https?://\S+", "", out)
+        out = re.sub(r"www\.\S+", "", out)
+        out = re.sub(r"^\[[^\]]+\]:\s*\S+\s*$", "", out, flags=re.MULTILINE)
+        out = re.sub(r"[ \t]{2,}", " ", out)
+        out = re.sub(r"\n{3,}", "\n\n", out).strip()
+        return out
+
+    doc_by_title = _build_doc_index(financial_docs_path)
+    missing_titles: List[str] = []
+    enriched = 0
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        title = str(row.get("article_title", "")).strip()
+        if not title:
+            continue
+        doc = doc_by_title.get(title)
+        if doc is None:
+            missing_titles.append(title)
+            continue
+        row["article_doc_id"] = doc.get("id")
+        content = _clean_article_excerpt(str(doc.get("content", "")))
+        if excerpt_chars > 0 and len(content) > excerpt_chars:
+            content = content[:excerpt_chars].rstrip() + "\n...[truncated]"
+        row["article_content_excerpt"] = content
+        enriched += 1
+
+    unique_missing = sorted(set(t for t in missing_titles if t))
+    if strict_title_match and unique_missing:
+        preview = ", ".join(unique_missing[:5])
+        suffix = " ..." if len(unique_missing) > 5 else ""
+        raise ValueError(
+            f"article_title -> financial_documents.title mismatch for {len(unique_missing)} titles: {preview}{suffix}"
+        )
+    return {
+        "rows_total": len(rows),
+        "rows_enriched": enriched,
+        "missing_titles": unique_missing,
+    }
 
 
 def _normalize_token(raw: Any) -> str:
@@ -155,7 +230,6 @@ def run_pipeline(
     for idx, row in enumerate(rows, start=1):
         conversion_input = to_conversion_input(row)
         print(f"[fic-pipeline] processing record {idx} ...")
-
         core = generate_core(
             client=client,
             model=stage1_model,
@@ -227,6 +301,17 @@ def main() -> None:
         type=int,
         default=4000,
         help="When --seed-from-config is used, max document characters kept in generated seed context.",
+    )
+    parser.add_argument(
+        "--article-excerpt-chars",
+        type=int,
+        default=4000,
+        help="Max characters for article_content_excerpt joined from financial_documents.",
+    )
+    parser.add_argument(
+        "--allow-missing-article-doc",
+        action="store_true",
+        help="If set, do not fail when article_title has no matching financial_documents.title.",
     )
     parser.add_argument(
         "--no-dedupe-function-seeds",
@@ -324,6 +409,18 @@ def main() -> None:
         if args.max_records > 0:
             rows = rows[: args.max_records]
 
+    enrich_report = _enrich_rows_with_article_docs(
+        rows,
+        financial_docs_path=args.financial_docs_path,
+        excerpt_chars=max(0, args.article_excerpt_chars),
+        strict_title_match=not args.allow_missing_article_doc,
+    )
+    print(
+        "[fic-pipeline] article enrichment: "
+        f"rows={enrich_report['rows_total']} enriched={enrich_report['rows_enriched']} "
+        f"missing_titles={len(enrich_report['missing_titles'])}"
+    )
+
     client = require_gemini_client()
     stage1_model = args.stage1_model or args.model
     stage2_model = args.stage2_model or args.model
@@ -404,6 +501,22 @@ def main() -> None:
     if result.get("skipped_duplicates", 0):
         print(f"[fic-pipeline] skipped duplicate cards: {result['skipped_duplicates']}")
 
+    smoke_failures: List[Dict[str, Any]] = []
+    for row in result["core"]:
+        smoke = row.get("execution_smoke_test")
+        if not isinstance(smoke, dict):
+            continue
+        if bool(smoke.get("ok")):
+            continue
+        smoke_failures.append(
+            {
+                "fic_id": str(row.get("fic_id", "")),
+                "error": str(smoke.get("error", "unknown error")),
+            }
+        )
+    if smoke_failures:
+        print(f"[fic-pipeline] execution smoke failed on {len(smoke_failures)} core card(s).")
+
     validation_stats: Dict[str, Any] | None = None
     validation_error: str | None = None
     try:
@@ -446,6 +559,10 @@ def main() -> None:
                 "retrieval": len(result["retrieval"]),
                 "repair": len(result["repair"]),
                 "skipped_duplicates": result.get("skipped_duplicates", 0),
+            },
+            "execution_smoke": {
+                "failed_count": len(smoke_failures),
+                "failed_cards": smoke_failures,
             },
         }
         args.validation_report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

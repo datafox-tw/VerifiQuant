@@ -126,6 +126,8 @@ def build_seed_rows_from_config(
             "source": "config_target_function_seed",
             "function_id": function_id,
             "article_title": article_title,
+            "article_doc_id": doc.get("id"),
+            "article_content_excerpt": content,
             "function": function_code,
             "python_solution": function_code,
             "question": seed_question,

@@ -52,6 +52,22 @@ def _json_loads(value: str, *, default: Any) -> Any:
         return default
 
 
+def _derive_diagnostics_from_checks(checks: Any) -> Dict[str, List[Dict[str, Any]]]:
+    if not isinstance(checks, list):
+        return {"invariants": [], "scale_checks": []}
+    invariants: List[Dict[str, Any]] = []
+    scale_checks: List[Dict[str, Any]] = []
+    for chk in checks:
+        if not isinstance(chk, dict):
+            continue
+        ctype = str(chk.get("check_type", "")).strip().lower()
+        if ctype == "deterministic":
+            invariants.append(chk)
+        else:
+            scale_checks.append(chk)
+    return {"invariants": invariants, "scale_checks": scale_checks}
+
+
 if mapped_column is not None:
 
     class Base(DeclarativeBase):
@@ -194,6 +210,17 @@ class SQLAlchemyArtifactStore:
             if not fic_id:
                 continue
             row = session.get(CoreCard, fic_id)
+            diagnostic_checks = card.get("diagnostic_checks", [])
+            diagnostics = card.get("diagnostics")
+            if not isinstance(diagnostics, dict):
+                diagnostics = _derive_diagnostics_from_checks(diagnostic_checks)
+            source_meta = dict(card.get("source_meta", {}) or {})
+            if card.get("article_title") and "article_title" not in source_meta:
+                source_meta["article_title"] = card.get("article_title")
+            if card.get("article_doc_id") is not None and "article_doc_id" not in source_meta:
+                source_meta["article_doc_id"] = card.get("article_doc_id")
+            if card.get("article_content_excerpt") and "article_content_excerpt" not in source_meta:
+                source_meta["article_content_excerpt"] = card.get("article_content_excerpt")
             payload = {
                 "fic_id": fic_id,
                 "name": str(card.get("name", "")),
@@ -201,14 +228,14 @@ class SQLAlchemyArtifactStore:
                 "domain": str(card.get("domain", "")),
                 "topic": str(card.get("topic", "")),
                 "version": str(card.get("version", "v1")),
-                "source_meta_json": _json_dumps(card.get("source_meta", {})),
+                "source_meta_json": _json_dumps(source_meta),
                 "selection_hints_json": _json_dumps(card.get("selection_hints", [])),
                 "semantic_hints_json": _json_dumps(card.get("semantic_hints", [])),
                 "inputs_json": _json_dumps(card.get("inputs", [])),
                 "output_json": _json_dumps(card.get("output", {})),
                 "execution_json": _json_dumps(card.get("execution", {})),
-                "diagnostics_json": _json_dumps(card.get("diagnostics", {"invariants": [], "scale_checks": []})),
-                "diagnostic_checks_json": _json_dumps(card.get("diagnostic_checks", [])),
+                "diagnostics_json": _json_dumps(diagnostics),
+                "diagnostic_checks_json": _json_dumps(diagnostic_checks),
             }
             if row is None:
                 session.add(CoreCard(**payload))
@@ -294,6 +321,9 @@ class SQLAlchemyArtifactStore:
                 )
 
     def _core_row_to_dict(self, row: CoreCard) -> Dict[str, Any]:
+        diagnostic_checks = _json_loads(row.diagnostic_checks_json, default=[])
+        diagnostics = _derive_diagnostics_from_checks(diagnostic_checks)
+        source_meta = _json_loads(row.source_meta_json, default={})
         return {
             "fic_id": row.fic_id,
             "name": row.name,
@@ -301,14 +331,18 @@ class SQLAlchemyArtifactStore:
             "domain": row.domain,
             "topic": row.topic,
             "version": row.version,
-            "source_meta": _json_loads(row.source_meta_json, default={}),
+            "source_meta": source_meta,
+            "article_title": source_meta.get("article_title"),
+            "article_doc_id": source_meta.get("article_doc_id"),
+            "article_content_excerpt": source_meta.get("article_content_excerpt"),
             "selection_hints": _json_loads(getattr(row, "selection_hints_json", ""), default=[]),
             "semantic_hints": _json_loads(getattr(row, "semantic_hints_json", ""), default=[]),
             "inputs": _json_loads(row.inputs_json, default=[]),
             "output": _json_loads(row.output_json, default={}),
             "execution": _json_loads(row.execution_json, default={}),
-            "diagnostics": _json_loads(getattr(row, "diagnostics_json", ""), default={"invariants": [], "scale_checks": []}),
-            "diagnostic_checks": _json_loads(row.diagnostic_checks_json, default=[]),
+            # Keep backward-compatible response field, but derive it dynamically.
+            "diagnostics": diagnostics,
+            "diagnostic_checks": diagnostic_checks,
         }
 
     def _retrieval_row_to_dict(self, row: RetrievalCard) -> Dict[str, Any]:

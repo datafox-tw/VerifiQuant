@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover
     genai_types = None
 
 from verifiquant.preprocessing.validate_relations import validate_artifact_relations
+from verifiquant.preprocessing.stage_repair import GLOBAL_N_NOT_SUPPORTED_RULE, GLOBAL_SCOPE_FIC_ID
 from verifiquant.card_store import SQLAlchemyArtifactStore
 
 
@@ -303,8 +304,10 @@ def retrieve_candidates_from_store(
     *,
     query: str,
     top_k: int,
+    domain: Optional[str] = None,
+    topic: Optional[str] = None,
 ) -> List[RetrievalCandidate]:
-    rows = store.retrieve_candidates(query=query, top_k=top_k)
+    rows = store.retrieve_candidates(query=query, top_k=top_k, domain=domain, topic=topic)
     return [RetrievalCandidate(retrieval=row, score=float(row.get("score", 0.0))) for row in rows]
 
 
@@ -601,6 +604,8 @@ def _summarize_repairs(fic_id: str, rule_ids: List[str], repair_index: Dict[Tupl
     for rid in rule_ids:
         rule = repair_index.get((fic_id, rid))
         if not rule:
+            rule = repair_index.get((GLOBAL_SCOPE_FIC_ID, rid))
+        if not rule:
             continue
         out.append(
             {
@@ -615,6 +620,104 @@ def _summarize_repairs(fic_id: str, rule_ids: List[str], repair_index: Dict[Tupl
     return out
 
 
+def _default_scope_repair_hint() -> List[Dict[str, Any]]:
+    return [
+        {
+            "rule_id": str(GLOBAL_N_NOT_SUPPORTED_RULE.get("rule_id", "global_n_not_supported")),
+            "title": str(GLOBAL_N_NOT_SUPPORTED_RULE.get("title", "")),
+            "user_message": str(GLOBAL_N_NOT_SUPPORTED_RULE.get("user_message", "")),
+            "repair_action": GLOBAL_N_NOT_SUPPORTED_RULE.get("repair_action", {}),
+            "allowed_next_steps": GLOBAL_N_NOT_SUPPORTED_RULE.get("allowed_next_steps", []),
+            "ask_user_for": GLOBAL_N_NOT_SUPPORTED_RULE.get("ask_user_for", []),
+        }
+    ]
+
+
+def _i_rule_id_from_hint_id(hint_id: str, i_level: str = "soft") -> str:
+    token = re.sub(r"[^a-zA-Z0-9_]+", "_", str(hint_id or "").strip().lower()).strip("_")
+    level = str(i_level or "soft").strip().lower()
+    if level not in {"hard", "soft"}:
+        level = "soft"
+    return f"i_{token or 'semantic_ambiguity'}_{level}"
+
+
+def _semantic_hint_level(hint: Dict[str, Any]) -> str:
+    level = str(hint.get("i_level", "soft")).strip().lower()
+    if level not in {"hard", "soft"}:
+        return "soft"
+    return level
+
+
+def _infer_open_critic_i_level(critic: Dict[str, Any]) -> str:
+    reason = str(critic.get("reason", "") or "").lower()
+    tags = [str(x).strip().lower() for x in critic.get("ambiguity_tags", []) if str(x).strip()]
+    hard_signals = [
+        "formula",
+        "definition",
+        "direction",
+        "basis",
+        "unit",
+        "scale",
+        "numerator",
+        "denominator",
+        "fx",
+        "currency",
+    ]
+    if any(sig in reason for sig in hard_signals):
+        return "hard"
+    if any(any(sig in tag for sig in hard_signals) for tag in tags):
+        return "hard"
+    if "materially" in reason or "significantly different" in reason:
+        return "hard"
+    return "soft"
+
+
+def _build_soft_warnings(
+    *,
+    critic: Dict[str, Any],
+    semantic_hints: List[Dict[str, Any]],
+    triggered_hint_ids: List[str],
+) -> List[Dict[str, Any]]:
+    hint_by_id = {str(h.get("id", "")).strip(): h for h in semantic_hints if str(h.get("id", "")).strip()}
+    warnings: List[Dict[str, Any]] = []
+
+    if triggered_hint_ids:
+        for hid in triggered_hint_ids:
+            hint = hint_by_id.get(hid)
+            if not hint:
+                continue
+            if _semantic_hint_level(hint) != "soft":
+                continue
+            warnings.append(
+                {
+                    "hint_id": hid,
+                    "i_level": "soft",
+                    "impact_scope": str(hint.get("impact_scope", "output_interpretation")),
+                    "assumption_if_not_clarified": str(
+                        hint.get("assumption_if_not_clarified", "Proceed with default interpretation.")
+                    ),
+                    "clarification_question": str(hint.get("clarification_question", "")),
+                    "options": [str(x) for x in (hint.get("options") or []) if str(x).strip()],
+                }
+            )
+        return warnings
+
+    # open-mode soft fallback
+    warnings.append(
+        {
+            "hint_id": "open_critic",
+            "i_level": "soft",
+            "impact_scope": "output_interpretation",
+            "assumption_if_not_clarified": "Proceed with default interpretation inferred from context.",
+            "clarification_question": "; ".join(
+                [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
+            ),
+            "options": [str(x).strip() for x in critic.get("clarification_options", []) if str(x).strip()],
+        }
+    )
+    return warnings
+
+
 def _best_scope_repair(
     candidate_ids: List[Any],
     repair_index: Dict[Tuple[str, str], Dict[str, Any]],
@@ -626,7 +729,10 @@ def _best_scope_repair(
         rows = _summarize_repairs(fic_id, ["global_n_not_supported"], repair_index)
         if rows:
             return rows
-    return []
+    rows = _summarize_repairs(GLOBAL_SCOPE_FIC_ID, ["global_n_not_supported"], repair_index)
+    if rows:
+        return rows
+    return _default_scope_repair_hint()
 
 
 def run_case(
@@ -645,14 +751,18 @@ def run_case(
 ) -> Dict[str, Any]:
     q = str(row.get("question", "") or "")
     c = str(row.get("context", "") or "")
+    domain = str(row.get("domain", "") or "").strip() or None
+    topic = str(row.get("topic", "") or "").strip() or None
     case_id = str(row.get("case_id") or row.get("question_id") or "")
-    base = {"case_id": case_id}
+    base = {"case_id": case_id, "has_i_soft": False, "soft_warnings": []}
 
     if store is not None:
         candidates = retrieve_candidates_from_store(
             store,
             query=f"{q}\n{c}",
             top_k=top_k,
+            domain=domain,
+            topic=topic,
         )
     else:
         candidates = retrieve_candidates(retrieval_cards, f"{q}\n{c}", top_k=top_k)
@@ -887,12 +997,32 @@ def run_case(
         provided_inputs=provided_inputs,
     )
     needs_clarification = bool(critic.get("needs_clarification"))
+    soft_warnings: List[Dict[str, Any]] = []
     if needs_clarification:
         triggered_hint_ids = [str(x).strip() for x in critic.get("triggered_hint_ids", []) if str(x).strip()]
+        hint_by_id = {str(h.get("id", "")).strip(): h for h in semantic_hints if str(h.get("id", "")).strip()}
         i_tags = [str(x).strip() for x in critic.get("ambiguity_tags", []) if str(x).strip()]
         clar_qs = [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
         model_options = [str(x).strip() for x in critic.get("clarification_options", []) if str(x).strip()]
-        i_repairs = _summarize_repairs(chosen_fic_id, ["global_i_semantic_ambiguity"], repair_index)
+        hard_triggered = [
+            hid for hid in triggered_hint_ids if _semantic_hint_level(hint_by_id.get(hid, {})) == "hard"
+        ]
+        soft_triggered = [
+            hid for hid in triggered_hint_ids if _semantic_hint_level(hint_by_id.get(hid, {})) == "soft"
+        ]
+
+        open_inferred_level = _infer_open_critic_i_level(critic) if not triggered_hint_ids else None
+        is_hard_block = bool(hard_triggered) or (not triggered_hint_ids and open_inferred_level == "hard")
+
+        i_rule_ids = [
+            _i_rule_id_from_hint_id(hid, _semantic_hint_level(hint_by_id.get(hid, {})))
+            for hid in hard_triggered
+        ] if is_hard_block else []
+        if is_hard_block and not i_rule_ids:
+            i_rule_ids = ["global_i_semantic_ambiguity"]
+        i_repairs = _summarize_repairs(chosen_fic_id, i_rule_ids, repair_index) if i_rule_ids else []
+        if is_hard_block and not i_repairs:
+            i_repairs = _summarize_repairs(chosen_fic_id, ["global_i_semantic_ambiguity"], repair_index)
         options: List[str] = []
         if semantic_hints:
             for hint in semantic_hints:
@@ -901,27 +1031,39 @@ def run_case(
         else:
             options.extend(model_options)
         options = list(dict.fromkeys(options))
-        return {
-            **base,
-            "status": "needs_clarification",
-            "diagnostic_type": "I",
-            "funnel_layer": "Critic",
-            "gate_action": "critic_intervention",
-            "reason": str(critic.get("reason", "")).strip() or "Hidden semantic ambiguity detected.",
-            "fic_id": chosen_fic_id,
-            "candidate_ids": candidate_ids,
-            "support_gap_reason": None,
-            "ambiguity_tags": i_tags,
-            "clarification_request": {
-                "questions": clar_qs or ["Please confirm the intended financial interpretation."],
-                "options": options,
-                "triggered_hint_ids": triggered_hint_ids,
-                "mode": "hint_oriented" if semantic_hints else "open",
-            },
-            "provided_inputs": provided_inputs,
-            "normalization_note": normalization_note,
-            "repair_hints": i_repairs,
-        }
+        if is_hard_block:
+            return {
+                **base,
+                "status": "needs_clarification",
+                "diagnostic_type": "I",
+                "funnel_layer": "Critic",
+                "gate_action": "critic_intervention",
+                "reason": str(critic.get("reason", "")).strip() or "Hidden semantic ambiguity detected.",
+                "fic_id": chosen_fic_id,
+                "candidate_ids": candidate_ids,
+                "support_gap_reason": None,
+                "ambiguity_tags": i_tags,
+                "clarification_request": {
+                    "questions": clar_qs or ["Please confirm the intended financial interpretation."],
+                    "options": options,
+                    "triggered_hint_ids": triggered_hint_ids,
+                    "mode": "hint_oriented" if semantic_hints else "open",
+                },
+                "provided_inputs": provided_inputs,
+                "normalization_note": normalization_note,
+                "repair_hints": i_repairs,
+                "i_level": "hard",
+                "has_i_soft": False,
+                "soft_warnings": [],
+            }
+
+        # I_soft: do not block execution; add warning payload and continue to C-execution.
+        soft_warning_ids = soft_triggered if soft_triggered else []
+        soft_warnings = _build_soft_warnings(
+            critic=critic,
+            semantic_hints=semantic_hints,
+            triggered_hint_ids=soft_warning_ids,
+        )
 
     output_value, exec_err = _evaluate_execution(core, provided_inputs)
     if exec_err:
@@ -939,6 +1081,8 @@ def run_case(
             "clarification_request": None,
             "provided_inputs": provided_inputs,
             "normalization_note": normalization_note,
+            "has_i_soft": bool(soft_warnings),
+            "soft_warnings": soft_warnings,
         }
 
     gold = row.get("gold_answer", row.get("answer", row.get("ground_truth")))
@@ -964,6 +1108,8 @@ def run_case(
         "abs_error": abs_error,
         "is_correct": is_correct,
         "normalization_note": normalization_note,
+        "has_i_soft": bool(soft_warnings),
+        "soft_warnings": soft_warnings,
         "execution_trace": {
             "engine": "deterministic_python",
             "entrypoint": "compute",
@@ -1064,7 +1210,13 @@ class ErrorClassificationAPI:
             m_min_top_score=m_min_top_score,
         )
 
-    def diagnose_row(self, row: Dict[str, Any]) -> Dict[str, Any]:
+    def diagnose_row(
+        self,
+        row: Dict[str, Any],
+        *,
+        top_k: Optional[int] = None,
+        m_min_top_score: Optional[float] = None,
+    ) -> Dict[str, Any]:
         return run_case(
             row=row,
             core_by_id=self.core_by_id,
@@ -1075,18 +1227,63 @@ class ErrorClassificationAPI:
             selector_model=self.selector_model,
             extractor_model=self.extractor_model,
             judge_model=self.judge_model,
-            top_k=self.top_k,
-            m_min_top_score=self.m_min_top_score,
+            top_k=top_k if top_k is not None else self.top_k,
+            m_min_top_score=m_min_top_score if m_min_top_score is not None else self.m_min_top_score,
         )
 
-    def diagnose(self, *, question: str, context: str, case_id: str = "") -> Dict[str, Any]:
+    def diagnose(
+        self,
+        *,
+        question: str,
+        context: str,
+        case_id: str = "",
+        top_k: Optional[int] = None,
+        m_min_top_score: Optional[float] = None,
+    ) -> Dict[str, Any]:
         return self.diagnose_row(
             {
                 "case_id": case_id,
                 "question": question,
                 "context": context,
-            }
+            },
+            top_k=top_k,
+            m_min_top_score=m_min_top_score,
         )
+
+    def retrieve(
+        self,
+        *,
+        question: str,
+        context: str,
+        top_k: Optional[int] = None,
+        domain: Optional[str] = None,
+        topic: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        if self.store is not None:
+            rows = self.store.retrieve_candidates(
+                query=f"{question}\n{context}",
+                top_k=top_k or self.top_k,
+                domain=domain,
+                topic=topic,
+            )
+            return rows
+
+        candidates = retrieve_candidates(self.retrieval_cards, f"{question}\n{context}", top_k or self.top_k)
+        out: List[Dict[str, Any]] = []
+        for cand in candidates:
+            row = dict(cand.retrieval)
+            row["score"] = cand.score
+            out.append(row)
+        return out
+
+
+def create_genai_client_from_env() -> Any:
+    if genai is None or genai_types is None:
+        raise RuntimeError("Missing dependency: google.genai import failed.")
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing GEMINI_API_KEY in environment.")
+    return genai.Client(api_key=api_key)
 
 
 def main() -> None:
@@ -1107,12 +1304,10 @@ def main() -> None:
     parser.add_argument("--m-min-top-score", type=float, default=0.05)
     args = parser.parse_args()
 
-    if genai is None or genai_types is None:
-        print("Missing dependency: google.genai import failed.", file=sys.stderr)
-        sys.exit(1)
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("Missing GEMINI_API_KEY in environment.", file=sys.stderr)
+    try:
+        client = create_genai_client_from_env()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
         sys.exit(1)
 
     rows = _load_records(args.input)
@@ -1143,8 +1338,6 @@ def main() -> None:
             repair_rules=repair_rows,
         )
         repair_index = _build_repair_index(repair_rows)
-    client = genai.Client(api_key=api_key)
-
     out: List[Dict[str, Any]] = []
     for idx, row in enumerate(rows, 1):
         cid = row.get("case_id", row.get("question_id", idx))

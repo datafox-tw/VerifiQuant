@@ -8,9 +8,18 @@ const contextEl = document.getElementById("context");
 const questionEl = document.getElementById("question");
 
 const tabQa = document.getElementById("tab-qa");
+const tabBatch = document.getElementById("tab-batch");
 const tabCards = document.getElementById("tab-cards");
 const panelQa = document.getElementById("panel-qa");
+const panelBatch = document.getElementById("panel-batch");
 const panelCards = document.getElementById("panel-cards");
+const batchLoader = document.getElementById("batch-loader");
+const batchResult = document.getElementById("batch-result");
+const historyResult = document.getElementById("history-result");
+const historySummary = document.getElementById("history-summary");
+const historyMeta = document.getElementById("history-meta");
+const uploadForm = document.getElementById("upload-form");
+const batchForm = document.getElementById("batch-form");
 
 function setQaLoading(isLoading) {
   loader.classList.toggle("hidden", !isLoading);
@@ -23,10 +32,14 @@ function setCardsLoading(isLoading) {
 
 function activateTab(target) {
   const isQa = target === "qa";
+  const isBatch = target === "batch";
+  const isCards = target === "cards";
   tabQa.classList.toggle("active", isQa);
-  tabCards.classList.toggle("active", !isQa);
+  tabBatch.classList.toggle("active", isBatch);
+  tabCards.classList.toggle("active", isCards);
   panelQa.classList.toggle("active", isQa);
-  panelCards.classList.toggle("active", !isQa);
+  panelBatch.classList.toggle("active", isBatch);
+  panelCards.classList.toggle("active", isCards);
 }
 
 function escapeHtml(text) {
@@ -210,6 +223,108 @@ async function loadCardsOverview() {
   }
 }
 
+function setBatchLoading(isLoading) {
+  batchLoader.classList.toggle("hidden", !isLoading);
+  document.getElementById("batch-run-btn").disabled = isLoading;
+  document.getElementById("upload-btn").disabled = isLoading;
+}
+
+function renderBatchSummary(data) {
+  const sc = data.status_counts || {};
+  const dc = data.diagnostic_counts || {};
+  batchResult.innerHTML = `
+    <div class="meta-row">
+      <span class="badge badge-success">batch / ${escapeHtml(data.status || "ok")}</span>
+      <span>processed: <code>${escapeHtml(data.processed)}</code></span>
+    </div>
+    <p>input: <code>${escapeHtml(data.input_path || "")}</code></p>
+    <p>output: <code>${escapeHtml(data.output_path || "")}</code></p>
+    <p>top_k: <code>${escapeHtml(data.top_k)}</code>, m_min_top_score: <code>${escapeHtml(
+      data.m_min_top_score
+    )}</code></p>
+    <p>status_counts:</p>
+    <pre>${escapeHtml(JSON.stringify(sc, null, 2))}</pre>
+    <p>diagnostic_counts:</p>
+    <pre>${escapeHtml(JSON.stringify(dc, null, 2))}</pre>
+  `;
+}
+
+function renderHistoryList(data) {
+  const files = data.files || [];
+  historyMeta.textContent = `files: ${files.length}`;
+  if (!files.length) {
+    historyResult.innerHTML = "<p>目前沒有歷史輸出檔。</p>";
+    return;
+  }
+  const rows = files
+    .map(
+      (f) => `
+      <tr>
+        <td><code>${escapeHtml(f.name)}</code></td>
+        <td>${escapeHtml(f.modified_at)}</td>
+        <td>${escapeHtml(f.size_bytes)}</td>
+        <td>
+          <button class="summary-btn" data-path="${escapeHtml(f.relative_path)}" type="button">檢視摘要</button>
+          <a class="download-link" href="/api/files/download?path=${encodeURIComponent(f.relative_path)}">下載</a>
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+  historyResult.innerHTML = `
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>檔名</th>
+          <th>修改時間</th>
+          <th>大小(bytes)</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  document.querySelectorAll(".summary-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const path = btn.dataset.path;
+      if (!path) return;
+      await loadHistorySummary(path);
+    });
+  });
+}
+
+async function loadHistoryList() {
+  try {
+    const response = await fetch("/api/files/history");
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "load history failed");
+    renderHistoryList(data);
+  } catch (error) {
+    historyResult.innerHTML = `<p>讀取歷史清單失敗：${escapeHtml(error.message)}</p>`;
+  }
+}
+
+async function loadHistorySummary(path) {
+  try {
+    const response = await fetch(`/api/files/summary?path=${encodeURIComponent(path)}`);
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "summary failed");
+    historySummary.innerHTML = `
+      <h3>摘要：<code>${escapeHtml(path)}</code></h3>
+      <p>records: <code>${escapeHtml(data.records)}</code></p>
+      <p>status_counts:</p>
+      <pre>${escapeHtml(JSON.stringify(data.status_counts || {}, null, 2))}</pre>
+      <p>diagnostic_counts:</p>
+      <pre>${escapeHtml(JSON.stringify(data.diagnostic_counts || {}, null, 2))}</pre>
+      <p>sample:</p>
+      <pre>${escapeHtml(JSON.stringify(data.sample || [], null, 2))}</pre>
+    `;
+  } catch (error) {
+    historySummary.innerHTML = `<p>讀取摘要失敗：${escapeHtml(error.message)}</p>`;
+  }
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   resultEl.classList.add("hidden");
@@ -221,6 +336,8 @@ form.addEventListener("submit", async (event) => {
       context: contextEl.value,
       domain: document.getElementById("domain").value || null,
       topic: document.getElementById("topic").value || null,
+      top_k: Number(document.getElementById("top-k").value || 3),
+      m_min_top_score: Number(document.getElementById("m-min-top-score").value || 0.05),
     };
     const response = await fetch("/api/diagnose", {
       method: "POST",
@@ -238,7 +355,73 @@ form.addEventListener("submit", async (event) => {
 
 document.getElementById("refresh-cards").addEventListener("click", loadCardsOverview);
 tabQa.addEventListener("click", () => activateTab("qa"));
+tabBatch.addEventListener("click", () => {
+  activateTab("batch");
+  loadHistoryList();
+});
 tabCards.addEventListener("click", () => {
   activateTab("cards");
   if (!cardsResult.innerHTML.trim()) loadCardsOverview();
+});
+document.getElementById("refresh-history").addEventListener("click", loadHistoryList);
+
+uploadForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const fileInput = document.getElementById("batch-file");
+  const file = fileInput.files?.[0];
+  if (!file) {
+    alert("請先選擇 JSONL/JSON 檔案");
+    return;
+  }
+  setBatchLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch("/api/files/upload", { method: "POST", body: formData });
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "upload failed");
+    document.getElementById("batch-input-path").value = data.relative_path;
+    if (!document.getElementById("batch-output-path").value.trim()) {
+      const base = data.relative_path.replace(/\.jsonl?$/i, "");
+      document.getElementById("batch-output-path").value = `${base}_output.jsonl`;
+    }
+    loadHistoryList();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    setBatchLoading(false);
+  }
+});
+
+batchForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  setBatchLoading(true);
+  try {
+    const payload = {
+      input_path: document.getElementById("batch-input-path").value.trim(),
+      output_path: document.getElementById("batch-output-path").value.trim(),
+      max_records: Number(document.getElementById("batch-max-records").value || 0),
+      top_k: Number(document.getElementById("batch-top-k").value || 3),
+      m_min_top_score: Number(document.getElementById("batch-m-min-top-score").value || 0.05),
+      domain: document.getElementById("batch-domain").value.trim() || null,
+      topic: document.getElementById("batch-topic").value.trim() || null,
+      include_results: false,
+    };
+    const response = await fetch("/api/diagnose/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "batch failed");
+    renderBatchSummary(data);
+    loadHistoryList();
+    if (data.output_path) {
+      loadHistorySummary(data.output_path);
+    }
+  } catch (error) {
+    batchResult.innerHTML = `<p>批次執行失敗：${escapeHtml(error.message)}</p>`;
+  } finally {
+    setBatchLoading(false);
+  }
 });

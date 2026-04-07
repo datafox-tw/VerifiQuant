@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "error": null,
+  "validation_stats": {
+    "core_count": 5,
+    "retrieval_count": 5,
+    "repair_count": 31,
+    "diagnostic_rule_count": 24
+  },
+  "output": {
+    "core": "verifiquant/data/runs/demo_5q_0407_ver2/core.jsonl",
+    "retrieval": "verifiquant/data/runs/demo_5q_0407_ver2/retrieval.jsonl",
+    "repair": "verifiquant/data/runs/demo_5q_0407_ver2/repair.jsonl"
+  },
+  "counts": {
+    "core": 5,
+    "retrieval": 5,
+    "repair": 31,
+    "skipped_duplicates": 0
+  },
+  "execution_smoke": {
+    "failed_count": 0,
+    "failed_cards": []
+  }
+}
