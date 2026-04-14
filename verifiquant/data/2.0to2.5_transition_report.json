@@ -1,0 +1,77 @@
+{
+  "summary": {
+    "total_questions": 50,
+    "baseline_correct_count": 25,
+    "baseline_wrong_count": 25,
+    "new_correct_count": 32,
+    "new_accuracy": 0.64
+  },
+  "transition": {
+    "stayed_correct": 23,
+    "correct_to_wrong": 2,
+    "wrong_to_correct": 9,
+    "stayed_wrong": 16,
+    "correct_group_accuracy": 0.92,
+    "error_group_recovery_rate": 0.36
+  },
+  "details": {
+    "stayed_correct_ids": [
+      "test-1429",
+      "test-1470",
+      "test-1084",
+      "test-1453",
+      "test-1710",
+      "test-1673",
+      "test-1028",
+      "test-1920",
+      "test-1708",
+      "test-1031",
+      "test-1833",
+      "test-1005",
+      "test-1009",
+      "test-1426",
+      "test-1442",
+      "test-1604",
+      "test-1106",
+      "test-1832",
+      "test-1445",
+      "test-1776",
+      "test-1504",
+      "test-1697",
+      "test-1045"
+    ],
+    "correct_to_wrong_ids": [
+      "test-1264",
+      "test-1114"
+    ],
+    "wrong_to_correct_ids": [
+      "test-1881",
+      "test-1270",
+      "test-1979",
+      "test-1951",
+      "test-1012",
+      "test-1810",
+      "test-1842",
+      "test-1825",
+      "test-1457"
+    ],
+    "stayed_wrong_ids": [
+      "test-1593",
+      "test-1001",
+      "test-1553",
+      "test-1577",
+      "test-1490",
+      "test-1738",
+      "test-1109",
+      "test-1065",
+      "test-1570",
+      "test-1008",
+      "test-1890",
+      "test-1625",
+      "test-1707",
+      "test-1880",
+      "test-1896",
+      "test-1666"
+    ]
+  }
+}

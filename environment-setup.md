@@ -37,16 +37,16 @@ set -a
 
 ```bash
 python3 preprocessing/dataset_case_to_fic.py \
-  --input verifiquant/data/testing_5Q.jsonl \
+  --input verifiquant/data/testing_13Q_for_0408.jsonl \
   --functions-catalog-path verifiquant/data/functions-article-all.json \
   --financial-docs-path verifiquant/data/financial_documents.json \
-  --core-output verifiquant/data/runs/demo_5q_0407/core.jsonl \
-  --retrieval-output verifiquant/data/runs/demo_5q_0407/retrieval.jsonl \
-  --repair-output verifiquant/data/runs/demo_5q_0407/repair.jsonl \
+  --core-output verifiquant/data/runs/demo_50q_0408/core.jsonl \
+  --retrieval-output verifiquant/data/runs/demo_50q_0408/retrieval.jsonl \
+  --repair-output verifiquant/data/runs/demo_50q_0408/repair.jsonl \
   --duplicate-fic-policy suffix \
   --on-validation-error save \
-  --validation-report verifiquant/data/runs/demo_5q_0407/validation_report.json\
-  --seed-report-output verifiquant/data/runs/demo_5q_0407/seed_report.json\
+  --validation-report verifiquant/data/runs/demo_50q_0408/validation_report.json\
+  --seed-report-output verifiquant/data/runs/demo_50q_0408/seed_report.json \
   --skip-existing-core 
 
 ```
@@ -91,19 +91,18 @@ Output 預覽（core card 節錄）：
 ```bash
 python3 preprocessing/dataset_case_to_fic.py \
   --seed-from-config \
-  --config-path verifiquant/data/config.yaml \
+  --config-path verifiquant/data/config-with-npv.yaml \
   --qa-dataset-path verifiquant/data/medium.json \
   --functions-catalog-path verifiquant/data/functions-article-all.json \
   --financial-docs-path verifiquant/data/financial_documents.json \
-  --core-output verifiquant/data/runs/demo_v2/core.jsonl \
-  --retrieval-output verifiquant/data/runs/demo_v2/retrieval.jsonl \
-  --repair-output verifiquant/data/runs/demo_v2/repair.jsonl \
+  --core-output verifiquant/data/runs/demo_50q_0408/core.jsonl \
+  --retrieval-output verifiquant/data/runs/demo_50q_0408/retrieval.jsonl \
+  --repair-output verifiquant/data/runs/demo_50q_0408/repair.jsonl \
   --skip-existing-core \
   --duplicate-fic-policy suffix \
   --on-validation-error save \
-  --validation-report verifiquant/data/runs/demo_v2/validation_report.json \
-  --seed-report-output verifiquant/data/runs/demo_v2/seed_report.json
-
+  --validation-report verifiquant/data/runs/demo_50q_0408/validation_report.json \
+  --seed-report-output verifiquant/data/runs/demo_50q_0408/seed_report.json
 ```
 
 可選：
@@ -117,10 +116,10 @@ mkdir -p /Users/blackwingedkite/Desktop/verifiquant-update/data/runs/demo_v2
 
 ```bash
 python3 preprocessing/build_card_store.py \
-  --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/demo_v2/cards.db \
-  --core ./verifiquant/data/runs/demo_v2/core.jsonl \
-  --retrieval ./verifiquant/data/runs/demo_v2/retrieval.jsonl \
-  --repair ./verifiquant/data/runs/demo_v2/repair.jsonl
+  --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/demo_50q_0408/cards.db \
+  --core ./verifiquant/data/runs/demo_50q_0408/core.jsonl \
+  --retrieval ./verifiquant/data/runs/demo_50q_0408/retrieval.jsonl \
+  --repair ./verifiquant/data/runs/demo_50q_0408/repair.jsonl
 ```
 
 可選：
@@ -163,19 +162,20 @@ Output 預覽（單筆）：
 
 首先先讀config把1000題所小到只剩下五十題
 python3 preprocessing/extract_config_questions_to_jsonl.py \
-  --config verifiquant/data/config.yaml \
+  --config verifiquant/data/config-with-npv.yaml \
   --medium verifiquant/data/medium.json \
-  --out verifiquant/data/medium_config_50.jsonl
+  --out verifiquant/data/medium_config_50_0408.jsonl
 
 
 
 ### 4A. 使用 DB 載卡（建議）
 ```bash
 python3 preprocessing/run_error_classification_pipeline.py \
-  --input verifiquant/data/medium_config_50.jsonl \
-  --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/demo_v2/cards.db \
-  --output verifiquant/data/medium_config_50_output.jsonl \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/demo_50q_0408/cards.db \
+  --output verifiquant/data/runs/demo_50q_0408/testing_5Q_result.jsonl \
   --judge-model gemini-2.5-flash \
+  --debug-sanity \
   --top-k 3 
 ```
 

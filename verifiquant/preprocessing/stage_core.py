@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import ast
 import json
 import math
+import re
 from typing import Any, Dict, List, Optional
 
 from verifiquant.preprocessing.common import (
@@ -380,9 +382,12 @@ def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
     }
 
 
-def _dummy_input_value(input_type: str) -> Any:
+def _dummy_input_value(input_type: str, name: str) -> Any:
     t = str(input_type or "").strip().lower()
+    n = str(name or "").strip().lower()
     if t == "integer":
+        if "year" in n:
+            return 2000
         return 1
     if t == "boolean":
         return True
@@ -390,10 +395,257 @@ def _dummy_input_value(input_type: str) -> Any:
         return "x"
     if t == "array[number]":
         return [1.0, 2.0]
+    if "rate" in n or "yield" in n or "ratio" in n:
+        return 0.1
     return 1.0
 
 
-def _execution_smoke_test(code: str, inputs: List[Dict[str, Any]], output_name: str) -> Dict[str, Any]:
+class _InputAutoFixer(ast.NodeTransformer):
+    def __init__(self, canonical_name_by_lower: Dict[str, str]) -> None:
+        super().__init__()
+        self.canonical_name_by_lower = canonical_name_by_lower
+        self.fixes: List[str] = []
+        self.unknown_input_keys: List[str] = []
+
+    def _canonicalize_key(self, key: str) -> str:
+        return self.canonical_name_by_lower.get(key.lower(), key)
+
+    def _extract_subscript_key(self, node: ast.Subscript) -> Optional[str]:
+        slice_node = node.slice
+        if isinstance(slice_node, ast.Constant) and isinstance(slice_node.value, str):
+            return slice_node.value
+        return None
+
+    def visit_Attribute(self, node: ast.Attribute) -> ast.AST:
+        self.generic_visit(node)
+        if isinstance(node.value, ast.Name) and node.value.id == "inputs":
+            original = str(node.attr)
+            # Keep dict API method calls untouched, e.g. inputs.get("x").
+            if original in {
+                "get",
+                "keys",
+                "values",
+                "items",
+                "pop",
+                "setdefault",
+                "update",
+                "copy",
+                "clear",
+                "__getitem__",
+                "__setitem__",
+                "__contains__",
+            }:
+                return node
+            canonical = self._canonicalize_key(original)
+            if canonical != original:
+                self.fixes.append(f"inputs.{original} -> inputs['{canonical}']")
+            else:
+                self.fixes.append(f"inputs.{original} -> inputs['{original}']")
+            return ast.copy_location(
+                ast.Subscript(
+                    value=ast.Name(id="inputs", ctx=ast.Load()),
+                    slice=ast.Constant(value=canonical),
+                    ctx=node.ctx,
+                ),
+                node,
+            )
+        return node
+
+    def visit_Subscript(self, node: ast.Subscript) -> ast.AST:
+        self.generic_visit(node)
+        if not isinstance(node.value, ast.Name) or node.value.id != "inputs":
+            return node
+        key = self._extract_subscript_key(node)
+        if key is None:
+            return node
+        canonical = self._canonicalize_key(key)
+        if canonical != key:
+            self.fixes.append(f"inputs['{key}'] -> inputs['{canonical}']")
+            node.slice = ast.Constant(value=canonical)
+        elif canonical.lower() not in self.canonical_name_by_lower:
+            self.unknown_input_keys.append(key)
+        return node
+
+
+def _pre_smoke_lint_and_autofix(code: str, inputs: List[Dict[str, Any]]) -> Dict[str, Any]:
+    canonical_name_by_lower: Dict[str, str] = {}
+    for inp in inputs:
+        name = str(inp.get("name", "")).strip()
+        if name:
+            canonical_name_by_lower[name.lower()] = name
+
+    try:
+        tree = ast.parse(code)
+    except Exception as exc:
+        return {
+            "code": code,
+            "autofix_applied": False,
+            "fixes": [],
+            "unknown_input_keys": [],
+            "parse_error": str(exc),
+        }
+
+    fixer = _InputAutoFixer(canonical_name_by_lower)
+    fixed_tree = fixer.visit(tree)
+    ast.fix_missing_locations(fixed_tree)
+    fixed_code = ast.unparse(fixed_tree)
+    return {
+        "code": fixed_code,
+        "autofix_applied": bool(fixer.fixes),
+        "fixes": fixer.fixes,
+        "unknown_input_keys": sorted(set(fixer.unknown_input_keys)),
+        "parse_error": None,
+    }
+
+
+def _infer_unpack_arity_by_input(code: str) -> Dict[str, int]:
+    out: Dict[str, int] = {}
+    try:
+        tree = ast.parse(code)
+    except Exception:
+        return out
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.For):
+            continue
+        if not isinstance(node.target, ast.Tuple):
+            continue
+        if not isinstance(node.iter, ast.Name):
+            continue
+        iter_name = node.iter.id
+        # Look for assignment `iter_name = inputs['field']`
+        for stmt in ast.walk(tree):
+            if not isinstance(stmt, ast.Assign):
+                continue
+            if len(stmt.targets) != 1 or not isinstance(stmt.targets[0], ast.Name):
+                continue
+            if stmt.targets[0].id != iter_name:
+                continue
+            if not isinstance(stmt.value, ast.Subscript):
+                continue
+            if not isinstance(stmt.value.value, ast.Name) or stmt.value.value.id != "inputs":
+                continue
+            slice_node = stmt.value.slice
+            if isinstance(slice_node, ast.Constant) and isinstance(slice_node.value, str):
+                out[slice_node.value] = max(1, len(node.target.elts))
+    return out
+
+
+def _reverse_op(op: str) -> str:
+    return {">": "<=", ">=": "<", "<": ">=", "<=": ">"}.get(op, op)
+
+
+def _extract_field_constraints(
+    *,
+    checks: List[Dict[str, Any]],
+    field_name: str,
+) -> List[tuple[str, float]]:
+    constraints: List[tuple[str, float]] = []
+    # inputs['x'] <op> 123
+    pattern_a = re.compile(r"inputs\[['\"]([^'\"]+)['\"]\]\s*(<=|>=|<|>)\s*(-?\d+(?:\.\d+)?)")
+    # 123 <op> inputs['x']
+    pattern_b = re.compile(r"(-?\d+(?:\.\d+)?)\s*(<=|>=|<|>)\s*inputs\[['\"]([^'\"]+)['\"]\]")
+    reverse_cmp = {"<": ">", "<=": ">=", ">": "<", ">=": "<="}
+
+    for chk in checks:
+        ctype = str(chk.get("check_type", "")).strip().lower()
+        if ctype not in {"deterministic", "normalization"}:
+            continue
+        expr = str(chk.get("expression", "") or "")
+        if not expr:
+            continue
+        mode = str(chk.get("predicate_mode", "")).strip().lower()
+        if mode not in {"violation", "validity"}:
+            mode = "violation"
+
+        found: List[tuple[str, float]] = []
+        for m in pattern_a.finditer(expr):
+            name, op, num = str(m.group(1)), str(m.group(2)), float(m.group(3))
+            if name == field_name:
+                found.append((op, num))
+        for m in pattern_b.finditer(expr):
+            num, op, name = float(m.group(1)), str(m.group(2)), str(m.group(3))
+            if name == field_name:
+                found.append((reverse_cmp.get(op, op), num))
+        if mode == "validity":
+            constraints.extend(found)
+        else:
+            constraints.extend((_reverse_op(op), num) for op, num in found)
+    return constraints
+
+
+def _apply_constraints_to_dummy(
+    *,
+    value: Any,
+    input_type: str,
+    constraints: List[tuple[str, float]],
+) -> Any:
+    if not isinstance(value, (int, float)):
+        return value
+    is_int = str(input_type or "").strip().lower() == "integer"
+    eps = 1.0 if is_int else 0.1
+    lb: Optional[float] = None
+    ub: Optional[float] = None
+    for op, num in constraints:
+        if op == ">":
+            lb = max(lb if lb is not None else -1e18, num + eps)
+        elif op == ">=":
+            lb = max(lb if lb is not None else -1e18, num)
+        elif op == "<":
+            ub = min(ub if ub is not None else 1e18, num - eps)
+        elif op == "<=":
+            ub = min(ub if ub is not None else 1e18, num)
+    x = float(value)
+    if lb is not None and x < lb:
+        x = lb
+    if ub is not None and x > ub:
+        x = ub
+    if lb is not None and ub is not None and lb > ub:
+        # Conflicting bounds: choose middle to keep smoke progressing.
+        x = (lb + ub) / 2.0
+    return int(round(x)) if is_int else x
+
+
+def _build_smart_dummy_inputs(
+    *,
+    code: str,
+    inputs: List[Dict[str, Any]],
+    checks: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    dummy_inputs = {
+        str(inp.get("name", "")): _dummy_input_value(str(inp.get("type", "number")), str(inp.get("name", "")))
+        for inp in inputs
+        if str(inp.get("name", "")).strip()
+    }
+    # Small cross-field heuristic for common depreciation constraints.
+    if "cost" in dummy_inputs and "salvage_value" in dummy_inputs:
+        dummy_inputs["cost"] = 100.0
+        dummy_inputs["salvage_value"] = 10.0
+
+    unpack_arity = _infer_unpack_arity_by_input(code)
+    for inp in inputs:
+        name = str(inp.get("name", "")).strip()
+        if not name:
+            continue
+        input_type = str(inp.get("type", "number"))
+        constraints = _extract_field_constraints(checks=checks, field_name=name)
+        dummy_inputs[name] = _apply_constraints_to_dummy(
+            value=dummy_inputs.get(name),
+            input_type=input_type,
+            constraints=constraints,
+        )
+        if input_type == "array[number]" and name in unpack_arity and unpack_arity[name] > 1:
+            arity = unpack_arity[name]
+            row = [1.0 for _ in range(arity)]
+            dummy_inputs[name] = [list(row), list(row)]
+    return dummy_inputs
+
+
+def _execution_smoke_test(
+    code: str,
+    inputs: List[Dict[str, Any]],
+    output_name: str,
+    checks: List[Dict[str, Any]],
+) -> Dict[str, Any]:
     safe_builtins = {
         "abs": abs,
         "min": min,
@@ -421,23 +673,45 @@ def _execution_smoke_test(code: str, inputs: List[Dict[str, Any]], output_name: 
         "Exception": Exception,
         "math": math,
     }
-    dummy_inputs = {
-        str(inp.get("name", "")): _dummy_input_value(str(inp.get("type", "number")))
-        for inp in inputs
-        if str(inp.get("name", "")).strip()
-    }
+    lint = _pre_smoke_lint_and_autofix(code, inputs)
+    code_to_run = str(lint.get("code", "") or code)
+    dummy_inputs = _build_smart_dummy_inputs(code=code_to_run, inputs=inputs, checks=checks)
     env: Dict[str, Any] = {}
     try:
-        exec(code, {"__builtins__": safe_builtins}, env)
+        exec(code_to_run, {"__builtins__": safe_builtins}, env)
         fn = env.get("compute")
         if not callable(fn):
-            return {"ok": False, "error": "compute function missing after exec"}
+            return {
+                "ok": False,
+                "error": "compute function missing after exec",
+                "autofix_applied": bool(lint.get("autofix_applied")),
+                "lint_fixes": lint.get("fixes", []),
+                "effective_code": code_to_run,
+            }
         result = fn(dummy_inputs)
         if isinstance(result, dict) and output_name and output_name not in result:
-            return {"ok": False, "error": f"output '{output_name}' missing in compute result dict"}
-        return {"ok": True, "error": None}
+            return {
+                "ok": False,
+                "error": f"output '{output_name}' missing in compute result dict",
+                "autofix_applied": bool(lint.get("autofix_applied")),
+                "lint_fixes": lint.get("fixes", []),
+                "effective_code": code_to_run,
+            }
+        return {
+            "ok": True,
+            "error": None,
+            "autofix_applied": bool(lint.get("autofix_applied")),
+            "lint_fixes": lint.get("fixes", []),
+            "effective_code": code_to_run,
+        }
     except Exception as exc:
-        return {"ok": False, "error": str(exc)}
+        return {
+            "ok": False,
+            "error": str(exc),
+            "autofix_applied": bool(lint.get("autofix_applied")),
+            "lint_fixes": lint.get("fixes", []),
+            "effective_code": code_to_run,
+        }
 
 
 def _collect_diagnostic_checks(raw: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -521,9 +795,15 @@ def formalize_core_payload(
     if not short_description:
         raise ValueError("short_description is required")
 
-    execution_smoke = _execution_smoke_test(execution["code"], inputs, output["name"])
+    execution_smoke = _execution_smoke_test(execution["code"], inputs, output["name"], checks)
+    effective_code = str(execution_smoke.get("effective_code", "") or execution["code"])
+    execution["code"] = require_compute_code(effective_code)
     source_meta_out = dict(source_meta)
     source_meta_out["execution_smoke_ok"] = bool(execution_smoke.get("ok"))
+    source_meta_out["execution_autofix_applied"] = bool(execution_smoke.get("autofix_applied"))
+    lint_fixes = execution_smoke.get("lint_fixes", [])
+    if isinstance(lint_fixes, list) and lint_fixes:
+        source_meta_out["execution_lint_fixes"] = lint_fixes
     if not execution_smoke.get("ok"):
         source_meta_out["execution_smoke_error"] = str(execution_smoke.get("error", "unknown error"))
 

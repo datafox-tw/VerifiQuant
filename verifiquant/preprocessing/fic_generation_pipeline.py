@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from datetime import datetime
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -85,6 +87,102 @@ def _collect_processed_source_ids(existing_core_rows: List[Dict[str, Any]]) -> t
         if qid:
             question_ids.add(qid)
     return function_ids, question_ids
+
+
+def _remove_docstring_stmt(body: List[ast.stmt]) -> List[ast.stmt]:
+    if not body:
+        return body
+    first = body[0]
+    if (
+        isinstance(first, ast.Expr)
+        and isinstance(first.value, ast.Constant)
+        and isinstance(first.value.value, str)
+    ):
+        return body[1:]
+    return body
+
+
+class _DocstringStripper(ast.NodeTransformer):
+    def visit_Module(self, node: ast.Module) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+
+def _source_code_for_ast_kernel(row: Dict[str, Any]) -> str:
+    # Stage-core uses python_solution as primary executable signal.
+    code = str(row.get("python_solution", "") or "").strip()
+    if code:
+        return code
+    return str(row.get("function", "") or "").strip()
+
+
+def _build_ast_kernel_signature(row: Dict[str, Any]) -> Dict[str, Any]:
+    code = _source_code_for_ast_kernel(row)
+    if not code:
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": False,
+            "sanity_error": "missing python source code",
+            "ast_exact_hash": None,
+        }
+
+    try:
+        parsed = ast.parse(code)
+        stripped = _DocstringStripper().visit(parsed)
+        ast.fix_missing_locations(stripped)
+        normalized_code = ast.unparse(stripped)
+        compile(normalized_code, "<fic-normalized>", "exec")
+        canonical_dump = ast.dump(stripped, annotate_fields=True, include_attributes=False)
+        ast_exact_hash = hashlib.sha256(canonical_dump.encode("utf-8")).hexdigest()
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": True,
+            "sanity_error": None,
+            "ast_exact_hash": ast_exact_hash,
+            "normalized_code": normalized_code,
+        }
+    except Exception as exc:
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": False,
+            "sanity_error": str(exc),
+            "ast_exact_hash": None,
+        }
+
+
+def _collect_ast_hash_index(existing_core_rows: List[Dict[str, Any]]) -> Dict[str, str]:
+    out: Dict[str, str] = {}
+    for row in existing_core_rows:
+        if not isinstance(row, dict):
+            continue
+        fic_id = str(row.get("fic_id", "")).strip()
+        if not fic_id:
+            continue
+        sm = row.get("source_meta", {})
+        if not isinstance(sm, dict):
+            continue
+        ast_hash = str(sm.get("ast_exact_hash", "")).strip()
+        if not ast_hash:
+            continue
+        # Preserve first-seen canonical owner.
+        out.setdefault(ast_hash, fic_id)
+    return out
 
 
 def _build_doc_index(financial_docs_path: Path) -> Dict[str, Dict[str, Any]]:
@@ -218,16 +316,42 @@ def run_pipeline(
     allow_new_topic: bool,
     duplicate_fic_policy: str,
     initial_seen_fic_ids: Optional[set[str]] = None,
+    initial_ast_hash_to_fic_id: Optional[Dict[str, str]] = None,
     on_record_complete: Optional[Callable[[Dict[str, Any], Dict[str, Any], List[Dict[str, Any]], int], None]] = None,
 ) -> Dict[str, Any]:
     core_cards: List[Dict[str, Any]] = []
     retrieval_cards: List[Dict[str, Any]] = []
     repair_rules: List[Dict[str, Any]] = []
     skipped_duplicates = 0
+    skipped_kernel_duplicates = 0
+    kernel_duplicate_hits: List[Dict[str, Any]] = []
     seen_fic_ids: set[str] = set(initial_seen_fic_ids or set())
+    ast_hash_to_fic_id: Dict[str, str] = dict(initial_ast_hash_to_fic_id or {})
     processed_records = 0
 
     for idx, row in enumerate(rows, start=1):
+        kernel_sig = _build_ast_kernel_signature(row)
+        ast_exact_hash = str(kernel_sig.get("ast_exact_hash") or "").strip()
+        if ast_exact_hash and ast_exact_hash in ast_hash_to_fic_id:
+            duplicate_of = ast_hash_to_fic_id[ast_exact_hash]
+            skipped_kernel_duplicates += 1
+            kernel_duplicate_hits.append(
+                {
+                    "function_id": str(row.get("function_id", "")).strip() or None,
+                    "question_id": str(row.get("question_id", "")).strip() or None,
+                    "source": str(row.get("source", "")).strip() or None,
+                    "ast_exact_hash": ast_exact_hash,
+                    "is_duplicate_kernel": True,
+                    "duplicate_of": duplicate_of,
+                    "normalization_version": str(kernel_sig.get("normalization_version") or "ast_v1_docstring_strip"),
+                }
+            )
+            print(
+                "[fic-pipeline] skipped duplicate kernel at record "
+                f"{idx} (duplicate_of={duplicate_of})"
+            )
+            continue
+
         conversion_input = to_conversion_input(row)
         print(f"[fic-pipeline] processing record {idx} ...")
         core = generate_core(
@@ -249,6 +373,21 @@ def run_pipeline(
             continue
         core = resolved
         seen_fic_ids.add(str(core["fic_id"]))
+        source_meta = core.get("source_meta")
+        if not isinstance(source_meta, dict):
+            source_meta = {}
+            core["source_meta"] = source_meta
+        source_meta["normalization_version"] = str(kernel_sig.get("normalization_version") or "ast_v1_docstring_strip")
+        source_meta["code_sanity_ok"] = bool(kernel_sig.get("sanity_ok"))
+        if kernel_sig.get("sanity_error"):
+            source_meta["code_sanity_error"] = str(kernel_sig.get("sanity_error"))
+        else:
+            source_meta.pop("code_sanity_error", None)
+        if ast_exact_hash:
+            source_meta["ast_exact_hash"] = ast_exact_hash
+            source_meta["is_duplicate_kernel"] = False
+            source_meta["duplicate_of"] = None
+            ast_hash_to_fic_id.setdefault(ast_exact_hash, str(core["fic_id"]))
 
         retrieval = generate_retrieval(
             client=client,
@@ -273,6 +412,8 @@ def run_pipeline(
         "retrieval": retrieval_cards,
         "repair": repair_rules,
         "skipped_duplicates": skipped_duplicates,
+        "skipped_kernel_duplicates": skipped_kernel_duplicates,
+        "kernel_duplicate_hits": kernel_duplicate_hits,
         "processed_records": processed_records,
     }
 
@@ -473,6 +614,7 @@ def main() -> None:
         )
 
     seen_ids_seed = {str(x.get("fic_id", "")).strip() for x in existing_core_rows if str(x.get("fic_id", "")).strip()}
+    ast_hash_index_seed = _collect_ast_hash_index(existing_core_rows)
 
     result = run_pipeline(
         rows=rows,
@@ -483,6 +625,7 @@ def main() -> None:
         allow_new_topic=not args.disallow_new_topic,
         duplicate_fic_policy=args.duplicate_fic_policy,
         initial_seen_fic_ids=seen_ids_seed,
+        initial_ast_hash_to_fic_id=ast_hash_index_seed,
         on_record_complete=_checkpoint if args.checkpoint_every_record else None,
     )
 
@@ -500,6 +643,8 @@ def main() -> None:
     print(f"Wrote {len(result['repair'])} repair rules to {repair_output}")
     if result.get("skipped_duplicates", 0):
         print(f"[fic-pipeline] skipped duplicate cards: {result['skipped_duplicates']}")
+    if result.get("skipped_kernel_duplicates", 0):
+        print(f"[fic-pipeline] skipped duplicate kernels (ast_exact_hash): {result['skipped_kernel_duplicates']}")
 
     smoke_failures: List[Dict[str, Any]] = []
     for row in result["core"]:
@@ -559,6 +704,11 @@ def main() -> None:
                 "retrieval": len(result["retrieval"]),
                 "repair": len(result["repair"]),
                 "skipped_duplicates": result.get("skipped_duplicates", 0),
+                "skipped_kernel_duplicates": result.get("skipped_kernel_duplicates", 0),
+            },
+            "kernel_dedup": {
+                "normalization_version": "ast_v1_docstring_strip",
+                "duplicate_hits": result.get("kernel_duplicate_hits", []),
             },
             "execution_smoke": {
                 "failed_count": len(smoke_failures),

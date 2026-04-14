@@ -17,16 +17,24 @@ from verifiquant.pipeline.run_error_classification_pipeline import (
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_DB_PATH = os.path.join(
+    ROOT_DIR,
+    "verifiquant",
+    "data",
+    "runs",
+    "demo_50q_0408",
+    "cards.db",
+)
 DEFAULT_DB_URL = os.environ.get(
     "VERIFIQUANT_DB_URL",
-    "sqlite:///verifiquant/data/runs/demo_v2/cards.db",
+    f"sqlite:///{DEFAULT_DB_PATH}",
 )
 DEFAULT_TOP_K = int(os.environ.get("VERIFIQUANT_TOP_K", "3"))
 DEFAULT_SELECTOR_MODEL = os.environ.get("VERIFIQUANT_SELECTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
 DEFAULT_UPLOAD_DIR = os.path.join(ROOT_DIR, "data")
-DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_v2")
+DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_50q_0408")
 
 
 def _clean_text(value: Any) -> str:

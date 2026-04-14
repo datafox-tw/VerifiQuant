@@ -30,7 +30,7 @@ def _tokenize(text: str) -> List[str]:
     return re.findall(r"[a-z0-9_]+", str(text or "").lower())
 
 
-def _parse_number(value: Any) -> Optional[float]:
+def _parse_number(value: Any, *, percent_as_decimal: bool = True) -> Optional[float]:
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -57,17 +57,17 @@ def _parse_number(value: Any) -> Optional[float]:
         return None
     n = float(m.group())
     if is_pct:
-        return n / 100.0
+        return n / 100.0 if percent_as_decimal else n
     return n * multiplier
 
 
-def _extract_numeric_list(value: Any) -> List[float]:
+def _extract_numeric_list(value: Any, *, percent_as_decimal: bool = True) -> List[float]:
     if value is None:
         return []
     if isinstance(value, list):
         out = []
         for v in value:
-            n = _parse_number(v)
+            n = _parse_number(v, percent_as_decimal=percent_as_decimal)
             if n is not None:
                 out.append(n)
         return out
@@ -81,7 +81,7 @@ def _extract_numeric_list(value: Any) -> List[float]:
         if isinstance(parsed, list):
             out = []
             for v in parsed:
-                n = _parse_number(v)
+                n = _parse_number(v, percent_as_decimal=percent_as_decimal)
                 if n is not None:
                     out.append(n)
             if out:
@@ -92,19 +92,44 @@ def _extract_numeric_list(value: Any) -> List[float]:
     tokens = re.findall(r"-?\d[\d,]*(?:\.\d+)?%?", s)
     out = []
     for tok in tokens:
-        n = _parse_number(tok)
+        n = _parse_number(tok, percent_as_decimal=percent_as_decimal)
         if n is not None:
             out.append(n)
     return out
 
 
-def _parse_typed_value(raw_value: Any, declared_type: str) -> Optional[Any]:
+def _infer_percent_as_decimal(unit: Any, description: Any) -> bool:
+    u = str(unit or "").strip().lower()
+    d = str(description or "").strip().lower()
+    if "decimal" in u:
+        return True
+    if "as a decimal" in d or "expressed as a decimal" in d:
+        return True
+    if u in {"%", "percent", "percentage", "percentage_point", "percentage_points"}:
+        return False
+    if "percentage" in u and "decimal" not in u:
+        return False
+    return True
+
+
+def _is_percent_point_unit(unit: Any, description: Any) -> bool:
+    u = str(unit or "").strip().lower()
+    d = str(description or "").strip().lower()
+    if "decimal" in u or "as a decimal" in d or "expressed as a decimal" in d:
+        return False
+    return u in {"%", "percent", "percentage", "percentage_point", "percentage_points"} or (
+        "percentage" in u and "decimal" not in u
+    )
+
+
+def _parse_typed_value(raw_value: Any, declared_type: str, *, unit: Any = None, description: Any = None) -> Optional[Any]:
     dt = str(declared_type or "").lower()
+    percent_as_decimal = _infer_percent_as_decimal(unit, description)
     if "array" in dt or "list" in dt:
-        vals = _extract_numeric_list(raw_value)
+        vals = _extract_numeric_list(raw_value, percent_as_decimal=percent_as_decimal)
         return vals if vals else None
     if "int" in dt:
-        n = _parse_number(raw_value)
+        n = _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
         if n is None:
             return None
         return int(round(n))
@@ -115,7 +140,7 @@ def _parse_typed_value(raw_value: Any, declared_type: str) -> Optional[Any]:
         if s in {"false", "0", "no"}:
             return False
         return None
-    return _parse_number(raw_value)
+    return _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
 
 
 def _answer_match(question: str, output_value: Optional[float], gold_num: Optional[float]) -> Tuple[Optional[float], Optional[bool]]:
@@ -141,11 +166,34 @@ class _AttrDict(dict):
             raise AttributeError(key) from exc
 
 
-def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Tuple[Optional[bool], Optional[str]]:
+def _safe_eval_rule(
+    rule: str,
+    inputs: Dict[str, Any],
+    *,
+    compute_fn: Optional[Any] = None,
+) -> Tuple[Optional[bool], Optional[str]]:
+    """Evaluate a diagnostic rule expression against provided inputs.
+
+    Parameters
+    ----------
+    rule:
+        The expression string to evaluate (e.g. ``inputs['x'] < 0``).
+    inputs:
+        The bound input values for the current FIC.
+    compute_fn:
+        Optional: the compiled ``compute`` function from the FIC's execution
+        block.  Some FIC E-check expressions call ``compute(...)`` to inspect
+        the output range, so we expose it in the eval environment when provided.
+    """
     if not rule:
         return None, "empty rule expression"
     inputs_obj = _AttrDict(inputs)
-    env = {
+    env: Dict[str, Any] = {
+        # NOTE: __builtins__ must live inside env (passed as globals to eval).
+        # Generator / comprehension expressions look up free variables in the
+        # *globals* dict, NOT in the calling frame's locals.  Placing all
+        # helpers here ensures they are visible inside generator bodies too.
+        "__builtins__": {},
         "inputs": inputs_obj,
         "abs": abs,
         "min": min,
@@ -159,11 +207,24 @@ def _safe_eval_rule(rule: str, inputs: Dict[str, Any]) -> Tuple[Optional[bool], 
         "int": int,
         "bool": bool,
         "str": str,
+        "list": list,
+        "tuple": tuple,
+        "dict": dict,
+        "set": set,
+        "range": range,
+        "zip": zip,
+        "enumerate": enumerate,
         "math": math,
     }
+    # Flatten input values into the env so expressions can reference them
+    # directly (e.g. ``discount_rate < 0`` instead of ``inputs['discount_rate'] < 0``).
     env.update(inputs_obj)
+    # Expose the FIC's compiled compute function when available so that E-check
+    # expressions like ``compute({...}) > 10`` work correctly.
+    if compute_fn is not None and callable(compute_fn):
+        env["compute"] = compute_fn
     try:
-        return bool(eval(rule, {"__builtins__": {}}, env)), None
+        return bool(eval(rule, env)), None
     except Exception as exc:
         return None, str(exc)
 
@@ -201,8 +262,13 @@ def _infer_predicate_mode(chk: Dict[str, Any]) -> str:
     return "violation"
 
 
-def _is_check_triggered(chk: Dict[str, Any], inputs: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-    result, err = _safe_eval_rule(str(chk.get("expression", "")), inputs)
+def _is_check_triggered(
+    chk: Dict[str, Any],
+    inputs: Dict[str, Any],
+    *,
+    compute_fn: Optional[Any] = None,
+) -> Tuple[bool, Optional[str]]:
+    result, err = _safe_eval_rule(str(chk.get("expression", "")), inputs, compute_fn=compute_fn)
     if result is None:
         return False, err or "evaluation returned no result"
     mode = _infer_predicate_mode(chk)
@@ -748,6 +814,7 @@ def run_case(
     judge_model: str,
     top_k: int,
     m_min_top_score: float,
+    debug_sanity: bool = False,
 ) -> Dict[str, Any]:
     q = str(row.get("question", "") or "")
     c = str(row.get("context", "") or "")
@@ -755,6 +822,11 @@ def run_case(
     topic = str(row.get("topic", "") or "").strip() or None
     case_id = str(row.get("case_id") or row.get("question_id") or "")
     base = {"case_id": case_id, "has_i_soft": False, "soft_warnings": []}
+    debug_prefix = f"[sanity-debug][{case_id or 'unknown_case'}]"
+
+    def _dbg(message: str) -> None:
+        if debug_sanity:
+            print(f"{debug_prefix} {message}")
 
     if store is not None:
         candidates = retrieve_candidates_from_store(
@@ -766,7 +838,15 @@ def run_case(
         )
     else:
         candidates = retrieve_candidates(retrieval_cards, f"{q}\n{c}", top_k=top_k)
+    _dbg(
+        "retrieval: "
+        + ", ".join(
+            f"{str(cand.retrieval.get('fic_id', '')).strip() or '<missing_fic_id>'}@{cand.score:.3f}"
+            for cand in candidates
+        )
+    )
     if not candidates:
+        _dbg("early-exit: N (no candidate cards retrieved)")
         return {
             **base,
             "status": "refusal",
@@ -788,8 +868,14 @@ def run_case(
     support_gap_reason = str(selection.get("support_gap_reason", "")).strip()
     ambiguity_tags = [str(x).strip() for x in selection.get("ambiguity_tags", []) if str(x).strip()]
     clarification_questions = [str(x).strip() for x in selection.get("clarification_questions", []) if str(x).strip()]
+    _dbg(
+        "selector: "
+        f"decision={decision or '<empty>'}, chosen_fic_id={chosen_fic_id or '<empty>'}, "
+        f"reason={str(selection.get('reason', '')).strip() or '<empty>'}"
+    )
 
     if decision == "abstain_m":
+        _dbg("early-exit: M (selector abstain_m)")
         return {
             **base,
             "status": "refusal",
@@ -808,6 +894,7 @@ def run_case(
         }
 
     if decision == "abstain_n":
+        _dbg("early-exit: N (selector abstain_n)")
         return {
             **base,
             "status": "refusal",
@@ -823,6 +910,7 @@ def run_case(
         }
 
     if decision != "select_card" or not chosen_fic_id:
+        _dbg("early-exit: M (selector did not commit valid card)")
         return {
             **base,
             "status": "refusal",
@@ -840,7 +928,9 @@ def run_case(
         }
 
     top_score = candidates[0].score if candidates else 0.0
+    _dbg(f"retrieval-confidence: top_score={top_score:.3f}, threshold={m_min_top_score:.3f}")
     if top_score < m_min_top_score:
+        _dbg("early-exit: N (low retrieval confidence)")
         return {
             **base,
             "status": "refusal",
@@ -857,6 +947,7 @@ def run_case(
 
     core = core_by_id.get(chosen_fic_id)
     if core is None:
+        _dbg(f"early-exit: N (missing core card for chosen_fic_id={chosen_fic_id})")
         return {
             **base,
             "status": "refusal",
@@ -877,6 +968,8 @@ def run_case(
 
     core_inputs = core.get("inputs", [])
     type_map = {str(inp.get("name")): str(inp.get("type", "number")) for inp in core_inputs}
+    unit_map = {str(inp.get("name")): inp.get("unit") for inp in core_inputs}
+    desc_map = {str(inp.get("name")): str(inp.get("description", "")) for inp in core_inputs}
     required_names = [str(inp.get("name")) for inp in core_inputs if bool(inp.get("required", True))]
     extracted = {str(x.get("name")): x for x in extraction.get("inputs", []) if x.get("name")}
 
@@ -887,7 +980,12 @@ def run_case(
         if not item or item.get("status") != "provided":
             missing.append(name)
             continue
-        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "number"))
+        parsed = _parse_typed_value(
+            item.get("value", ""),
+            type_map.get(name, "number"),
+            unit=unit_map.get(name),
+            description=desc_map.get(name, ""),
+        )
         if parsed is None:
             missing.append(name)
         else:
@@ -896,11 +994,22 @@ def run_case(
     for name, item in extracted.items():
         if name in provided_inputs:
             continue
-        parsed = _parse_typed_value(item.get("value", ""), type_map.get(name, "number"))
+        parsed = _parse_typed_value(
+            item.get("value", ""),
+            type_map.get(name, "number"),
+            unit=unit_map.get(name),
+            description=desc_map.get(name, ""),
+        )
         if parsed is not None:
             provided_inputs[name] = parsed
+    _dbg(
+        "input-binding: "
+        f"required={required_names}, missing={missing}, provided_keys={sorted(list(provided_inputs.keys()))}, "
+        f"provided_inputs={json.dumps(provided_inputs, ensure_ascii=False, sort_keys=True)}"
+    )
 
     if missing:
+        _dbg("early-exit: F (missing or unparsable required inputs)")
         return {
             **base,
             "status": "error",
@@ -925,30 +1034,163 @@ def run_case(
             ],
         }
 
+    # Generic scale sanity: percent-point semantic inputs should not silently run in decimal scale.
+    percent_point_fields = [
+        str(inp.get("name"))
+        for inp in core_inputs
+        if _is_percent_point_unit(inp.get("unit"), inp.get("description"))
+    ]
+    percent_point_values = [
+        float(provided_inputs[name])
+        for name in percent_point_fields
+        if name in provided_inputs and isinstance(provided_inputs[name], (int, float))
+    ]
+    if len(percent_point_values) >= 2:
+        max_abs = max(abs(v) for v in percent_point_values)
+        if max_abs <= 1.0:
+            triggered = ["auto_percent_scale_mismatch"]
+            _dbg(f"early-exit: E (triggered_rule_ids={triggered}, max_abs_percent_point_input={max_abs})")
+            return {
+                **base,
+                "status": "alert",
+                "diagnostic_type": "E",
+                "funnel_layer": "Boundary",
+                "gate_action": "deterministic_alert",
+                "reason": (
+                    "Detected potential percent scale mismatch: inputs with '%' semantics appear to be "
+                    "in decimal scale (e.g., 0.125 instead of 12.5)."
+                ),
+                "fic_id": chosen_fic_id,
+                "candidate_ids": candidate_ids,
+                "support_gap_reason": None,
+                "ambiguity_tags": ["percent_scale_mismatch"],
+                "clarification_request": None,
+                "provided_inputs": provided_inputs,
+                "triggered_rule_ids": triggered,
+                "normalization_note": normalization_note,
+                "repair_hints": [
+                    {
+                        "rule_id": "auto_percent_scale_mismatch",
+                        "title": "Percent Scale Clarification",
+                        "user_message": "Please confirm whether rate/return inputs use percentage points or decimals.",
+                        "repair_action": {"type": "confirm_scale", "target": "percent_vs_decimal"},
+                        "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
+                        "ask_user_for": [
+                            {
+                                "slot": "rate_scale",
+                                "label": "Rate Scale",
+                                "type": "enum",
+                                "required": True,
+                                "options": [
+                                    {"value": "percent_points", "label": "12.5 means 12.5%"},
+                                    {"value": "decimal", "label": "0.125 means 12.5%"},
+                                ],
+                            }
+                        ],
+                    }
+                ],
+            }
+
+    # Pre-compile the FIC's compute function so E-check expressions that call
+    # ``compute({...})`` (e.g. plausibility range checks) can be evaluated.
+    _fic_compute_fn: Optional[Any] = None
+    _fic_code = str((core.get("execution") or {}).get("code", ""))
+    if "def compute(inputs)" in _fic_code:
+        _safe_builtins_exec = {
+            "abs": abs, "min": min, "max": max, "sum": sum, "len": len,
+            "all": all, "any": any, "isinstance": isinstance, "bool": bool,
+            "str": str, "float": float, "int": int, "pow": pow, "round": round,
+            "range": range, "list": list, "dict": dict, "tuple": tuple,
+            "set": set, "zip": zip, "enumerate": enumerate,
+            "ValueError": ValueError, "TypeError": TypeError, "Exception": Exception,
+            "math": math,
+        }
+        try:
+            _exec_env: Dict[str, Any] = {}
+            exec(_fic_code, {"__builtins__": _safe_builtins_exec}, _exec_env)  # noqa: S102
+            _fic_compute_fn = _exec_env.get("compute")
+        except Exception:
+            pass  # SyntaxError or other issue — will surface at C-execution stage
+
+    # Classify E-check eval errors: structural TypeError/AttributeError →  F-class;
+    # everything else (NameError, SyntaxError, genuine logic errors) → C-class.
+    _STRUCTURAL_ERROR_SIGNALS = (
+        "is not subscriptable",
+        "has no attribute",
+        "is not iterable",
+        "object is not callable",
+        "cannot unpack",
+        "must be",          # e.g. 'int' object must be ...
+    )
+
     checks = core.get("diagnostic_checks", [])
     e_checks = [chk for chk in checks if str(chk.get("diagnostic_type", "")).upper() == "E"]
     auto_triggered: List[str] = []
-    eval_errors: List[Dict[str, str]] = []
+    eval_errors: List[Dict[str, str]] = []        # genuine C-class issues
+    structural_errors: List[Dict[str, str]] = []  # input-shape issues → F-class
 
     for chk in e_checks:
         rule_id = str(chk.get("rule_id", "")).strip()
         ctype = str(chk.get("check_type", "")).strip().lower()
         if ctype in {"deterministic", "normalization"}:
-            is_triggered, eval_err = _is_check_triggered(chk, provided_inputs)
+            is_triggered, eval_err = _is_check_triggered(chk, provided_inputs, compute_fn=_fic_compute_fn)
             if eval_err:
-                eval_errors.append(
-                    {
-                        "rule_id": rule_id or "<unknown>",
-                        "expression": str(chk.get("expression", "")),
-                        "error": eval_err,
-                    }
-                )
+                err_record = {
+                    "rule_id": rule_id or "<unknown>",
+                    "expression": str(chk.get("expression", "")),
+                    "error": eval_err,
+                }
+                # Decide: is this a structural (F) or logic (C) failure?
+                if any(sig in eval_err for sig in _STRUCTURAL_ERROR_SIGNALS):
+                    structural_errors.append(err_record)
+                    _dbg(
+                        f"e-check: rule_id={rule_id or '<unknown>'}, triggered=<structural-error[F]>, "
+                        f"error={eval_err}"
+                    )
+                else:
+                    eval_errors.append(err_record)
+                    _dbg(
+                        f"e-check: rule_id={rule_id or '<unknown>'}, triggered=<error[C]>, "
+                        f"error={eval_err}"
+                    )
                 continue
             if is_triggered and rule_id:
                 auto_triggered.append(rule_id)
+            _dbg(
+                f"e-check: rule_id={rule_id or '<unknown>'}, mode={_infer_predicate_mode(chk)}, "
+                f"triggered={is_triggered}"
+            )
+
+    # Structural errors mean the input shape does not match the FIC schema → F.
+    if structural_errors:
+        first_s = structural_errors[0]
+        missing_structural = [e["rule_id"] for e in structural_errors]
+        _dbg(f"early-exit: F (structural E-check error → input shape mismatch on {first_s['rule_id']})")
+        return {
+            **base,
+            "status": "error",
+            "diagnostic_type": "F",
+            "funnel_layer": "Schema",
+            "gate_action": "slot_filling",
+            "reason": (
+                f"Input structure mismatch detected in rule {first_s['rule_id']}: {first_s['error']}. "
+                "One or more inputs have an unexpected type or shape (e.g., a flat list where a "
+                "list-of-lists was expected)."
+            ),
+            "fic_id": chosen_fic_id,
+            "candidate_ids": candidate_ids,
+            "support_gap_reason": None,
+            "ambiguity_tags": ["input_structure_mismatch"],
+            "clarification_request": None,
+            "provided_inputs": provided_inputs,
+            "normalization_note": normalization_note,
+            "rule_eval_errors": structural_errors,
+            "repair_hints": _summarize_repairs(chosen_fic_id, missing_structural, repair_index),
+        }
 
     if eval_errors:
         first = eval_errors[0]
+        _dbg(f"early-exit: C (E-check evaluation error on {first['rule_id']})")
         return {
             **base,
             "status": "error",
@@ -968,6 +1210,7 @@ def run_case(
 
     triggered = list(dict.fromkeys(auto_triggered))
     if triggered:
+        _dbg(f"early-exit: E (triggered_rule_ids={triggered})")
         reason = "Deterministic E-type checks detected potential inconsistencies."
         return {
             **base,
@@ -1013,6 +1256,12 @@ def run_case(
 
         open_inferred_level = _infer_open_critic_i_level(critic) if not triggered_hint_ids else None
         is_hard_block = bool(hard_triggered) or (not triggered_hint_ids and open_inferred_level == "hard")
+        _dbg(
+            "critic: "
+            f"needs_clarification={needs_clarification}, triggered_hint_ids={triggered_hint_ids}, "
+            f"hard_triggered={hard_triggered}, soft_triggered={soft_triggered}, "
+            f"open_inferred_level={open_inferred_level}, is_hard_block={is_hard_block}"
+        )
 
         i_rule_ids = [
             _i_rule_id_from_hint_id(hid, _semantic_hint_level(hint_by_id.get(hid, {})))
@@ -1032,6 +1281,7 @@ def run_case(
             options.extend(model_options)
         options = list(dict.fromkeys(options))
         if is_hard_block:
+            _dbg("early-exit: I_hard (needs clarification)")
             return {
                 **base,
                 "status": "needs_clarification",
@@ -1064,9 +1314,11 @@ def run_case(
             semantic_hints=semantic_hints,
             triggered_hint_ids=soft_warning_ids,
         )
+        _dbg(f"critic: I_soft warnings={len(soft_warnings)}")
 
     output_value, exec_err = _evaluate_execution(core, provided_inputs)
     if exec_err:
+        _dbg(f"early-exit: C (execution error: {exec_err})")
         return {
             **base,
             "status": "error",
@@ -1088,6 +1340,7 @@ def run_case(
     gold = row.get("gold_answer", row.get("answer", row.get("ground_truth")))
     gold_num = _parse_number(gold)
     abs_error, is_correct = _answer_match(q, output_value, gold_num)
+    _dbg(f"success: fic_id={chosen_fic_id}, output={output_value}, gold={gold_num}, is_correct={is_correct}")
 
     return {
         **base,
@@ -1302,6 +1555,11 @@ def main() -> None:
     parser.add_argument("--extractor-model", default="gemini-2.5-flash")
     parser.add_argument("--judge-model", default="gemini-2.5-flash")
     parser.add_argument("--m-min-top-score", type=float, default=0.05)
+    parser.add_argument(
+        "--debug-sanity",
+        action="store_true",
+        help="Print detailed per-case funnel diagnostics (retrieval, selector, checks, critic).",
+    )
     args = parser.parse_args()
 
     try:
@@ -1354,6 +1612,7 @@ def main() -> None:
             judge_model=args.judge_model,
             top_k=args.top_k,
             m_min_top_score=args.m_min_top_score,
+            debug_sanity=args.debug_sanity,
         )
 
         for k in ("variant_type", "expected_status", "expected_diagnostic_type", "source_sample_id", "reason"):

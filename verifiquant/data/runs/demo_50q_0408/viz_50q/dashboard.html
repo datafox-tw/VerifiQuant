@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>50Q Evaluation Dashboard</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --ink: #16202a;
+      --line: #d7e0ea;
+      --muted: #5e6a76;
+    }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Avenir Next", "Segoe UI", sans-serif; }
+    .wrap { max-width: 1160px; margin: 24px auto; padding: 0 16px; }
+    .hero { background: linear-gradient(120deg, #e9f1ff, #fdf1e9); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .hero h1 { margin: 0 0 6px 0; font-size: 26px; }
+    .hero p { margin: 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 14px; }
+    .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+    .kpi .t { color: var(--muted); font-size: 12px; }
+    .kpi .v { font-size: 28px; font-weight: 700; margin-top: 3px; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 14px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 140px; align-items: center; gap: 8px; margin: 6px 0; }
+    .bar-wrap { background: #edf2f8; border-radius: 8px; height: 14px; overflow: hidden; }
+    .bar { height: 14px; }
+    .bar-label, .bar-val { font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border: 1px solid var(--line); padding: 6px; text-align: left; }
+    th { background: #f3f7fc; }
+    ul { margin: 6px 0 0 16px; }
+    @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>50Q Run Visualization</h1>
+      <p>Input from config zones + run result JSONL. Focus on status and M/N/F/E/I/C distribution.</p>
+      <div class="grid">
+        <div class="kpi"><div class="t">Total Cases</div><div class="v">50</div></div>
+        <div class="kpi"><div class="t">Overall Success Rate</div><div class="v">44.0%</div></div>
+        <div class="kpi"><div class="t">Needs Clarification</div><div class="v">32.0%</div></div>
+        <div class="kpi"><div class="t">Execution/Other Errors</div><div class="v">14.0%</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Overall Status Distribution</h2>
+      <div class="bar-row"><div class="bar-label">success</div><div class="bar-wrap"><div class="bar" style="width:44.00%; background:#1463ff;"></div></div><div class="bar-val">22 (44.0%)</div></div><div class="bar-row"><div class="bar-label">needs_clarification</div><div class="bar-wrap"><div class="bar" style="width:32.00%; background:#1463ff;"></div></div><div class="bar-val">16 (32.0%)</div></div><div class="bar-row"><div class="bar-label">error</div><div class="bar-wrap"><div class="bar" style="width:14.00%; background:#1463ff;"></div></div><div class="bar-val">7 (14.0%)</div></div><div class="bar-row"><div class="bar-label">refusal</div><div class="bar-wrap"><div class="bar" style="width:6.00%; background:#1463ff;"></div></div><div class="bar-val">3 (6.0%)</div></div><div class="bar-row"><div class="bar-label">alert</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#1463ff;"></div></div><div class="bar-val">2 (4.0%)</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>Overall Diagnostic Distribution (M/N/F/E/I/C)</h2>
+      <div class="bar-row"><div class="bar-label">None</div><div class="bar-wrap"><div class="bar" style="width:44.00%; background:#ff6a3d;"></div></div><div class="bar-val">22 (44.0%)</div></div><div class="bar-row"><div class="bar-label">M</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#ff6a3d;"></div></div><div class="bar-val">2 (4.0%)</div></div><div class="bar-row"><div class="bar-label">N</div><div class="bar-wrap"><div class="bar" style="width:2.00%; background:#ff6a3d;"></div></div><div class="bar-val">1 (2.0%)</div></div><div class="bar-row"><div class="bar-label">F</div><div class="bar-wrap"><div class="bar" style="width:0.00%; background:#ff6a3d;"></div></div><div class="bar-val">0 (0.0%)</div></div><div class="bar-row"><div class="bar-label">E</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#ff6a3d;"></div></div><div class="bar-val">2 (4.0%)</div></div><div class="bar-row"><div class="bar-label">I</div><div class="bar-wrap"><div class="bar" style="width:32.00%; background:#ff6a3d;"></div></div><div class="bar-val">16 (32.0%)</div></div><div class="bar-row"><div class="bar-label">C</div><div class="bar-wrap"><div class="bar" style="width:14.00%; background:#ff6a3d;"></div></div><div class="bar-val">7 (14.0%)</div></div>
+    </section>
+
+    <section class="two">
+      <div class="panel">
+        <h2>Group A (25)</h2>
+        <p>Judged-correct (where available): 9/13 (69.2%)</p>
+        <div class="bar-row"><div class="bar-label">None</div><div class="bar-wrap"><div class="bar" style="width:52.00%; background:#2e9f5d;"></div></div><div class="bar-val">13 (52.0%)</div></div><div class="bar-row"><div class="bar-label">M</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#2e9f5d;"></div></div><div class="bar-val">1 (4.0%)</div></div><div class="bar-row"><div class="bar-label">N</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#2e9f5d;"></div></div><div class="bar-val">1 (4.0%)</div></div><div class="bar-row"><div class="bar-label">F</div><div class="bar-wrap"><div class="bar" style="width:0.00%; background:#2e9f5d;"></div></div><div class="bar-val">0 (0.0%)</div></div><div class="bar-row"><div class="bar-label">E</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#2e9f5d;"></div></div><div class="bar-val">1 (4.0%)</div></div><div class="bar-row"><div class="bar-label">I</div><div class="bar-wrap"><div class="bar" style="width:24.00%; background:#2e9f5d;"></div></div><div class="bar-val">6 (24.0%)</div></div><div class="bar-row"><div class="bar-label">C</div><div class="bar-wrap"><div class="bar" style="width:12.00%; background:#2e9f5d;"></div></div><div class="bar-val">3 (12.0%)</div></div>
+      </div>
+      <div class="panel">
+        <h2>Group B (25)</h2>
+        <p>Judged-correct (where available): 7/9 (77.8%)</p>
+        <div class="bar-row"><div class="bar-label">None</div><div class="bar-wrap"><div class="bar" style="width:36.00%; background:#8b5cf6;"></div></div><div class="bar-val">9 (36.0%)</div></div><div class="bar-row"><div class="bar-label">M</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#8b5cf6;"></div></div><div class="bar-val">1 (4.0%)</div></div><div class="bar-row"><div class="bar-label">N</div><div class="bar-wrap"><div class="bar" style="width:0.00%; background:#8b5cf6;"></div></div><div class="bar-val">0 (0.0%)</div></div><div class="bar-row"><div class="bar-label">F</div><div class="bar-wrap"><div class="bar" style="width:0.00%; background:#8b5cf6;"></div></div><div class="bar-val">0 (0.0%)</div></div><div class="bar-row"><div class="bar-label">E</div><div class="bar-wrap"><div class="bar" style="width:4.00%; background:#8b5cf6;"></div></div><div class="bar-val">1 (4.0%)</div></div><div class="bar-row"><div class="bar-label">I</div><div class="bar-wrap"><div class="bar" style="width:40.00%; background:#8b5cf6;"></div></div><div class="bar-val">10 (40.0%)</div></div><div class="bar-row"><div class="bar-label">C</div><div class="bar-wrap"><div class="bar" style="width:16.00%; background:#8b5cf6;"></div></div><div class="bar-val">4 (16.0%)</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Zone Summary Table</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Zone</th><th>Count</th><th>Success %</th><th>Need Clarification %</th><th>Error %</th><th>Refusal %</th><th>Has I_soft %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Group A</td><td>25</td><td>52.0%</td><td>24.0%</td><td>12.0%</td><td>8.0%</td><td>20.0%</td>
+          </tr>
+          <tr>
+            <td>Group B</td><td>25</td><td>36.0%</td><td>40.0%</td><td>16.0%</td><td>4.0%</td><td>20.0%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Missing Case IDs in Output</h2>
+      <ul><li>(none)</li></ul>
+    </section>
+  </div>
+</body>
+</html>

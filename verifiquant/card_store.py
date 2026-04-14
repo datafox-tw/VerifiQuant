@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -25,6 +26,37 @@ from verifiquant.preprocessing.validate_relations import validate_artifact_relat
 
 def _tokenize(text_value: str) -> List[str]:
     return re.findall(r"[a-z0-9_]+", str(text_value or "").lower())
+
+_FTS_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+    "with",
+}
 
 
 def _load_records(path: Path) -> List[Dict[str, Any]]:
@@ -415,10 +447,90 @@ class SQLAlchemyArtifactStore:
         topic: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         if self.is_sqlite:
-            fts = self._retrieve_candidates_fts(query=query, top_k=top_k, domain=domain, topic=topic)
-            if fts:
-                return fts
+            pool_k = max(int(top_k) * 8, 40)
+            fts = self._retrieve_candidates_fts(query=query, top_k=pool_k, domain=domain, topic=topic)
+            overlap = self._retrieve_candidates_overlap(query=query, top_k=pool_k, domain=domain, topic=topic)
+            hybrid = self._merge_hybrid_candidates(
+                query=query,
+                fts_rows=fts,
+                overlap_rows=overlap,
+                top_k=top_k,
+            )
+            if hybrid:
+                return hybrid
         return self._retrieve_candidates_overlap(query=query, top_k=top_k, domain=domain, topic=topic)
+
+    def _merge_hybrid_candidates(
+        self,
+        *,
+        query: str,
+        fts_rows: List[Dict[str, Any]],
+        overlap_rows: List[Dict[str, Any]],
+        top_k: int,
+    ) -> List[Dict[str, Any]]:
+        by_id: Dict[str, Dict[str, Any]] = {}
+        q_tokens = set(_tokenize(query))
+        q_is_generic_npv = (
+            "npv" in q_tokens
+            and "npvgo" not in q_tokens
+            and "growth" not in q_tokens
+            and "opportunities" not in q_tokens
+        )
+
+        for row in fts_rows:
+            fic_id = str(row.get("fic_id", "")).strip()
+            if not fic_id:
+                continue
+            payload = dict(row)
+            payload["fts_score"] = float(row.get("score", 0.0) or 0.0)
+            payload["overlap_score"] = 0.0
+            by_id[fic_id] = payload
+
+        for row in overlap_rows:
+            fic_id = str(row.get("fic_id", "")).strip()
+            if not fic_id:
+                continue
+            overlap_score = float(row.get("score", 0.0) or 0.0)
+            if fic_id not in by_id:
+                payload = dict(row)
+                payload["fts_score"] = 0.0
+                payload["overlap_score"] = overlap_score
+                by_id[fic_id] = payload
+            else:
+                by_id[fic_id]["overlap_score"] = overlap_score
+
+        merged: List[Dict[str, Any]] = []
+        for payload in by_id.values():
+            fts_score = float(payload.get("fts_score", 0.0) or 0.0)
+            overlap_score = float(payload.get("overlap_score", 0.0) or 0.0)
+            # Prioritize lexical relevance while preserving FTS ranking signal.
+            hybrid_score = (0.8 * overlap_score) + (0.2 * fts_score)
+            if q_is_generic_npv:
+                title_text = str(payload.get("title", "")).lower()
+                title_tokens = set(_tokenize(title_text))
+                keyword_tokens = set(_tokenize(" ".join(str(x) for x in payload.get("keywords", []))))
+                c_tokens = title_tokens | keyword_tokens
+                if "npvgo" in c_tokens or ("growth" in c_tokens and "opportunities" in c_tokens):
+                    hybrid_score -= 0.12
+                if "net_present_value" in c_tokens or ("net" in c_tokens and "present" in c_tokens and "value" in c_tokens):
+                    hybrid_score += 0.06
+                if "net present value (npv)" in title_text or {"net", "present", "value", "npv"}.issubset(title_tokens):
+                    hybrid_score += 0.06
+                if "discounted_cash_flow" in c_tokens or ("discounted" in c_tokens and "cash" in c_tokens and "flow" in c_tokens):
+                    hybrid_score += 0.03
+            payload["hybrid_score"] = hybrid_score
+            payload["score"] = hybrid_score
+            merged.append(payload)
+
+        merged.sort(
+            key=lambda row: (
+                float(row.get("hybrid_score", 0.0) or 0.0),
+                float(row.get("overlap_score", 0.0) or 0.0),
+                float(row.get("fts_score", 0.0) or 0.0),
+            ),
+            reverse=True,
+        )
+        return merged[: max(int(top_k), 1)]
 
     def _retrieve_candidates_fts(
         self,
@@ -428,7 +540,18 @@ class SQLAlchemyArtifactStore:
         domain: Optional[str],
         topic: Optional[str],
     ) -> List[Dict[str, Any]]:
-        tokens = _tokenize(query)
+        raw_tokens = _tokenize(query)
+        seen: set[str] = set()
+        tokens: List[str] = []
+        for tok in raw_tokens:
+            if tok in seen:
+                continue
+            seen.add(tok)
+            if tok in _FTS_STOPWORDS:
+                continue
+            if len(tok) <= 1:
+                continue
+            tokens.append(tok)
         if not tokens:
             return []
         match_q = " OR ".join(tokens[:24])
@@ -490,7 +613,9 @@ class SQLAlchemyArtifactStore:
     ) -> List[Dict[str, Any]]:
         q_tokens = set(_tokenize(query))
         all_rows = self.load_retrieval_cards()
-        scored = []
+        filtered_rows: List[Dict[str, Any]] = []
+        doc_tokens: List[set[str]] = []
+
         for row in all_rows:
             if domain and str(row.get("domain", "")).lower() != domain.lower():
                 continue
@@ -501,13 +626,35 @@ class SQLAlchemyArtifactStore:
                     str(row.get("title", "")),
                     str(row.get("summary", "")),
                     str(row.get("embedding_text", "")),
+                    " ".join(str(x) for x in row.get("selection_hints", [])),
+                    " ".join(str(x) for x in row.get("applicable_when", [])),
+                    " ".join(str(x) for x in row.get("not_applicable_when", [])),
+                    " ".join(str(x) for x in row.get("scope_boundaries", [])),
                     " ".join(str(x) for x in row.get("keywords", [])),
                 ]
             )
-            c_tokens = set(_tokenize(text_blob))
-            overlap = len(q_tokens & c_tokens)
-            denom = max(len(q_tokens), 1)
-            score = overlap / denom
+            filtered_rows.append(row)
+            doc_tokens.append(set(_tokenize(text_blob)))
+
+        if not filtered_rows:
+            return []
+
+        df: Dict[str, int] = {}
+        for toks in doc_tokens:
+            for tok in toks:
+                df[tok] = df.get(tok, 0) + 1
+
+        n_docs = len(doc_tokens)
+
+        def _idf(tok: str) -> float:
+            # Smooth IDF to avoid division-by-zero and keep bounded positive scores.
+            return math.log((1.0 + n_docs) / (1.0 + float(df.get(tok, 0)))) + 1.0
+
+        q_weight = sum(_idf(tok) for tok in q_tokens) or 1.0
+        scored = []
+        for row, c_tokens in zip(filtered_rows, doc_tokens):
+            overlap_tokens = q_tokens & c_tokens
+            score = sum(_idf(tok) for tok in overlap_tokens) / q_weight
             scored.append((score, row))
 
         scored.sort(key=lambda x: x[0], reverse=True)
