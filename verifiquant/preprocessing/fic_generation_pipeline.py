@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from datetime import datetime
+import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -62,7 +65,11 @@ def _merge_repair_rows(existing: List[Dict[str, Any]], new_rows: List[Dict[str, 
     for row in existing + new_rows:
         fic_id = str(row.get("fic_id", "")).strip()
         rule_id = str(row.get("rule_id", "")).strip()
+        diagnostic_type = str(row.get("diagnostic_type", "")).strip().upper()
         if not fic_id or not rule_id:
+            continue
+        # N is served by a single runtime fallback template, not persisted per card.
+        if diagnostic_type == "N" or rule_id == "global_n_not_supported":
             continue
         by_key[(fic_id, rule_id)] = row
     return list(by_key.values())
@@ -80,6 +87,172 @@ def _collect_processed_source_ids(existing_core_rows: List[Dict[str, Any]]) -> t
         if qid:
             question_ids.add(qid)
     return function_ids, question_ids
+
+
+def _remove_docstring_stmt(body: List[ast.stmt]) -> List[ast.stmt]:
+    if not body:
+        return body
+    first = body[0]
+    if (
+        isinstance(first, ast.Expr)
+        and isinstance(first.value, ast.Constant)
+        and isinstance(first.value.value, str)
+    ):
+        return body[1:]
+    return body
+
+
+class _DocstringStripper(ast.NodeTransformer):
+    def visit_Module(self, node: ast.Module) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.AST:
+        self.generic_visit(node)
+        node.body = _remove_docstring_stmt(node.body)
+        return node
+
+
+def _source_code_for_ast_kernel(row: Dict[str, Any]) -> str:
+    # Stage-core uses python_solution as primary executable signal.
+    code = str(row.get("python_solution", "") or "").strip()
+    if code:
+        return code
+    return str(row.get("function", "") or "").strip()
+
+
+def _build_ast_kernel_signature(row: Dict[str, Any]) -> Dict[str, Any]:
+    code = _source_code_for_ast_kernel(row)
+    if not code:
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": False,
+            "sanity_error": "missing python source code",
+            "ast_exact_hash": None,
+        }
+
+    try:
+        parsed = ast.parse(code)
+        stripped = _DocstringStripper().visit(parsed)
+        ast.fix_missing_locations(stripped)
+        normalized_code = ast.unparse(stripped)
+        compile(normalized_code, "<fic-normalized>", "exec")
+        canonical_dump = ast.dump(stripped, annotate_fields=True, include_attributes=False)
+        ast_exact_hash = hashlib.sha256(canonical_dump.encode("utf-8")).hexdigest()
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": True,
+            "sanity_error": None,
+            "ast_exact_hash": ast_exact_hash,
+            "normalized_code": normalized_code,
+        }
+    except Exception as exc:
+        return {
+            "normalization_version": "ast_v1_docstring_strip",
+            "sanity_ok": False,
+            "sanity_error": str(exc),
+            "ast_exact_hash": None,
+        }
+
+
+def _collect_ast_hash_index(existing_core_rows: List[Dict[str, Any]]) -> Dict[str, str]:
+    out: Dict[str, str] = {}
+    for row in existing_core_rows:
+        if not isinstance(row, dict):
+            continue
+        fic_id = str(row.get("fic_id", "")).strip()
+        if not fic_id:
+            continue
+        sm = row.get("source_meta", {})
+        if not isinstance(sm, dict):
+            continue
+        ast_hash = str(sm.get("ast_exact_hash", "")).strip()
+        if not ast_hash:
+            continue
+        # Preserve first-seen canonical owner.
+        out.setdefault(ast_hash, fic_id)
+    return out
+
+
+def _build_doc_index(financial_docs_path: Path) -> Dict[str, Dict[str, Any]]:
+    docs = load_records(financial_docs_path)
+    if not isinstance(docs, list):
+        raise ValueError(f"financial docs must be JSON list: {financial_docs_path}")
+    out: Dict[str, Dict[str, Any]] = {}
+    for d in docs:
+        if not isinstance(d, dict):
+            continue
+        title = str(d.get("title", "")).strip()
+        if not title:
+            continue
+        out[title] = d
+    return out
+
+
+def _enrich_rows_with_article_docs(
+    rows: List[Dict[str, Any]],
+    *,
+    financial_docs_path: Path,
+    excerpt_chars: int,
+    strict_title_match: bool = True,
+) -> Dict[str, Any]:
+    def _clean_article_excerpt(text: str) -> str:
+        # Remove markdown images/links and bare URLs for cleaner semantic context.
+        out = str(text or "")
+        out = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", out)
+        out = re.sub(r"\[[^\]]+\]\([^)]*\)", "", out)
+        out = re.sub(r"<https?://[^>]+>", "", out)
+        out = re.sub(r"https?://\S+", "", out)
+        out = re.sub(r"www\.\S+", "", out)
+        out = re.sub(r"^\[[^\]]+\]:\s*\S+\s*$", "", out, flags=re.MULTILINE)
+        out = re.sub(r"[ \t]{2,}", " ", out)
+        out = re.sub(r"\n{3,}", "\n\n", out).strip()
+        return out
+
+    doc_by_title = _build_doc_index(financial_docs_path)
+    missing_titles: List[str] = []
+    enriched = 0
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        title = str(row.get("article_title", "")).strip()
+        if not title:
+            continue
+        doc = doc_by_title.get(title)
+        if doc is None:
+            missing_titles.append(title)
+            continue
+        row["article_doc_id"] = doc.get("id")
+        content = _clean_article_excerpt(str(doc.get("content", "")))
+        if excerpt_chars > 0 and len(content) > excerpt_chars:
+            content = content[:excerpt_chars].rstrip() + "\n...[truncated]"
+        row["article_content_excerpt"] = content
+        enriched += 1
+
+    unique_missing = sorted(set(t for t in missing_titles if t))
+    if strict_title_match and unique_missing:
+        preview = ", ".join(unique_missing[:5])
+        suffix = " ..." if len(unique_missing) > 5 else ""
+        raise ValueError(
+            f"article_title -> financial_documents.title mismatch for {len(unique_missing)} titles: {preview}{suffix}"
+        )
+    return {
+        "rows_total": len(rows),
+        "rows_enriched": enriched,
+        "missing_titles": unique_missing,
+    }
 
 
 def _normalize_token(raw: Any) -> str:
@@ -143,19 +316,44 @@ def run_pipeline(
     allow_new_topic: bool,
     duplicate_fic_policy: str,
     initial_seen_fic_ids: Optional[set[str]] = None,
+    initial_ast_hash_to_fic_id: Optional[Dict[str, str]] = None,
     on_record_complete: Optional[Callable[[Dict[str, Any], Dict[str, Any], List[Dict[str, Any]], int], None]] = None,
 ) -> Dict[str, Any]:
     core_cards: List[Dict[str, Any]] = []
     retrieval_cards: List[Dict[str, Any]] = []
     repair_rules: List[Dict[str, Any]] = []
     skipped_duplicates = 0
+    skipped_kernel_duplicates = 0
+    kernel_duplicate_hits: List[Dict[str, Any]] = []
     seen_fic_ids: set[str] = set(initial_seen_fic_ids or set())
+    ast_hash_to_fic_id: Dict[str, str] = dict(initial_ast_hash_to_fic_id or {})
     processed_records = 0
 
     for idx, row in enumerate(rows, start=1):
+        kernel_sig = _build_ast_kernel_signature(row)
+        ast_exact_hash = str(kernel_sig.get("ast_exact_hash") or "").strip()
+        if ast_exact_hash and ast_exact_hash in ast_hash_to_fic_id:
+            duplicate_of = ast_hash_to_fic_id[ast_exact_hash]
+            skipped_kernel_duplicates += 1
+            kernel_duplicate_hits.append(
+                {
+                    "function_id": str(row.get("function_id", "")).strip() or None,
+                    "question_id": str(row.get("question_id", "")).strip() or None,
+                    "source": str(row.get("source", "")).strip() or None,
+                    "ast_exact_hash": ast_exact_hash,
+                    "is_duplicate_kernel": True,
+                    "duplicate_of": duplicate_of,
+                    "normalization_version": str(kernel_sig.get("normalization_version") or "ast_v1_docstring_strip"),
+                }
+            )
+            print(
+                "[fic-pipeline] skipped duplicate kernel at record "
+                f"{idx} (duplicate_of={duplicate_of})"
+            )
+            continue
+
         conversion_input = to_conversion_input(row)
         print(f"[fic-pipeline] processing record {idx} ...")
-
         core = generate_core(
             client=client,
             model=stage1_model,
@@ -175,6 +373,21 @@ def run_pipeline(
             continue
         core = resolved
         seen_fic_ids.add(str(core["fic_id"]))
+        source_meta = core.get("source_meta")
+        if not isinstance(source_meta, dict):
+            source_meta = {}
+            core["source_meta"] = source_meta
+        source_meta["normalization_version"] = str(kernel_sig.get("normalization_version") or "ast_v1_docstring_strip")
+        source_meta["code_sanity_ok"] = bool(kernel_sig.get("sanity_ok"))
+        if kernel_sig.get("sanity_error"):
+            source_meta["code_sanity_error"] = str(kernel_sig.get("sanity_error"))
+        else:
+            source_meta.pop("code_sanity_error", None)
+        if ast_exact_hash:
+            source_meta["ast_exact_hash"] = ast_exact_hash
+            source_meta["is_duplicate_kernel"] = False
+            source_meta["duplicate_of"] = None
+            ast_hash_to_fic_id.setdefault(ast_exact_hash, str(core["fic_id"]))
 
         retrieval = generate_retrieval(
             client=client,
@@ -199,6 +412,8 @@ def run_pipeline(
         "retrieval": retrieval_cards,
         "repair": repair_rules,
         "skipped_duplicates": skipped_duplicates,
+        "skipped_kernel_duplicates": skipped_kernel_duplicates,
+        "kernel_duplicate_hits": kernel_duplicate_hits,
         "processed_records": processed_records,
     }
 
@@ -227,6 +442,17 @@ def main() -> None:
         type=int,
         default=4000,
         help="When --seed-from-config is used, max document characters kept in generated seed context.",
+    )
+    parser.add_argument(
+        "--article-excerpt-chars",
+        type=int,
+        default=4000,
+        help="Max characters for article_content_excerpt joined from financial_documents.",
+    )
+    parser.add_argument(
+        "--allow-missing-article-doc",
+        action="store_true",
+        help="If set, do not fail when article_title has no matching financial_documents.title.",
     )
     parser.add_argument(
         "--no-dedupe-function-seeds",
@@ -324,6 +550,18 @@ def main() -> None:
         if args.max_records > 0:
             rows = rows[: args.max_records]
 
+    enrich_report = _enrich_rows_with_article_docs(
+        rows,
+        financial_docs_path=args.financial_docs_path,
+        excerpt_chars=max(0, args.article_excerpt_chars),
+        strict_title_match=not args.allow_missing_article_doc,
+    )
+    print(
+        "[fic-pipeline] article enrichment: "
+        f"rows={enrich_report['rows_total']} enriched={enrich_report['rows_enriched']} "
+        f"missing_titles={len(enrich_report['missing_titles'])}"
+    )
+
     client = require_gemini_client()
     stage1_model = args.stage1_model or args.model
     stage2_model = args.stage2_model or args.model
@@ -376,6 +614,7 @@ def main() -> None:
         )
 
     seen_ids_seed = {str(x.get("fic_id", "")).strip() for x in existing_core_rows if str(x.get("fic_id", "")).strip()}
+    ast_hash_index_seed = _collect_ast_hash_index(existing_core_rows)
 
     result = run_pipeline(
         rows=rows,
@@ -386,6 +625,7 @@ def main() -> None:
         allow_new_topic=not args.disallow_new_topic,
         duplicate_fic_policy=args.duplicate_fic_policy,
         initial_seen_fic_ids=seen_ids_seed,
+        initial_ast_hash_to_fic_id=ast_hash_index_seed,
         on_record_complete=_checkpoint if args.checkpoint_every_record else None,
     )
 
@@ -403,6 +643,24 @@ def main() -> None:
     print(f"Wrote {len(result['repair'])} repair rules to {repair_output}")
     if result.get("skipped_duplicates", 0):
         print(f"[fic-pipeline] skipped duplicate cards: {result['skipped_duplicates']}")
+    if result.get("skipped_kernel_duplicates", 0):
+        print(f"[fic-pipeline] skipped duplicate kernels (ast_exact_hash): {result['skipped_kernel_duplicates']}")
+
+    smoke_failures: List[Dict[str, Any]] = []
+    for row in result["core"]:
+        smoke = row.get("execution_smoke_test")
+        if not isinstance(smoke, dict):
+            continue
+        if bool(smoke.get("ok")):
+            continue
+        smoke_failures.append(
+            {
+                "fic_id": str(row.get("fic_id", "")),
+                "error": str(smoke.get("error", "unknown error")),
+            }
+        )
+    if smoke_failures:
+        print(f"[fic-pipeline] execution smoke failed on {len(smoke_failures)} core card(s).")
 
     validation_stats: Dict[str, Any] | None = None
     validation_error: str | None = None
@@ -446,6 +704,15 @@ def main() -> None:
                 "retrieval": len(result["retrieval"]),
                 "repair": len(result["repair"]),
                 "skipped_duplicates": result.get("skipped_duplicates", 0),
+                "skipped_kernel_duplicates": result.get("skipped_kernel_duplicates", 0),
+            },
+            "kernel_dedup": {
+                "normalization_version": "ast_v1_docstring_strip",
+                "duplicate_hits": result.get("kernel_duplicate_hits", []),
+            },
+            "execution_smoke": {
+                "failed_count": len(smoke_failures),
+                "failed_cards": smoke_failures,
             },
         }
         args.validation_report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

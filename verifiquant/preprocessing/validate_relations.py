@@ -107,13 +107,18 @@ def validate_artifact_relations(
                 )
             continue
 
+        d_repair = str(rr.get("diagnostic_type", "")).strip().upper()
+        # I-class rules are semantic guides generated from semantic_hints and
+        # do not require 1:1 mapping to core F/E diagnostic_checks.
+        if d_repair == "I":
+            continue
+
         if key not in rules_by_key:
             errors.append(f"repair rule {fic_id}/{rid} has no matching core diagnostic_check")
             continue
 
         core_check = rules_by_key[key]
         d_core = str(core_check.get("diagnostic_type", "")).strip().upper()
-        d_repair = str(rr.get("diagnostic_type", "")).strip().upper()
         if d_repair != d_core:
             errors.append(f"repair {fic_id}/{rid} diagnostic_type mismatch: core={d_core}, repair={d_repair}")
 

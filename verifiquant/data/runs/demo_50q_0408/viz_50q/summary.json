@@ -1,0 +1,102 @@
+{
+  "config_path": "verifiquant/data/config-with-npv.yaml",
+  "result_path": "verifiquant/data/runs/demo_50q_0408/testing_50Q_result.jsonl",
+  "expected_total_ids": 50,
+  "result_total_rows": 50,
+  "matched_rows": 50,
+  "missing_case_ids_in_output": [],
+  "zones": {
+    "group_a": {
+      "count": 25,
+      "status_counts": {
+        "success": 13,
+        "needs_clarification": 6,
+        "error": 3,
+        "refusal": 2,
+        "alert": 1
+      },
+      "diagnostic_counts": {
+        "None": 13,
+        "I": 6,
+        "C": 3,
+        "N": 1,
+        "M": 1,
+        "E": 1
+      },
+      "success_count": 13,
+      "success_rate_pct": 52.0,
+      "needs_clarification_count": 6,
+      "needs_clarification_rate_pct": 24.0,
+      "refusal_count": 2,
+      "refusal_rate_pct": 8.0,
+      "error_count": 3,
+      "error_rate_pct": 12.0,
+      "has_i_soft_count": 5,
+      "has_i_soft_rate_pct": 20.0,
+      "judged_total": 13,
+      "judged_correct_count": 9,
+      "judged_correct_rate_pct": 69.23076923076923
+    },
+    "group_b": {
+      "count": 25,
+      "status_counts": {
+        "error": 4,
+        "success": 9,
+        "needs_clarification": 10,
+        "alert": 1,
+        "refusal": 1
+      },
+      "diagnostic_counts": {
+        "C": 4,
+        "None": 9,
+        "I": 10,
+        "E": 1,
+        "M": 1
+      },
+      "success_count": 9,
+      "success_rate_pct": 36.0,
+      "needs_clarification_count": 10,
+      "needs_clarification_rate_pct": 40.0,
+      "refusal_count": 1,
+      "refusal_rate_pct": 4.0,
+      "error_count": 4,
+      "error_rate_pct": 16.0,
+      "has_i_soft_count": 5,
+      "has_i_soft_rate_pct": 20.0,
+      "judged_total": 9,
+      "judged_correct_count": 7,
+      "judged_correct_rate_pct": 77.77777777777777
+    }
+  },
+  "overall": {
+    "count": 50,
+    "status_counts": {
+      "success": 22,
+      "needs_clarification": 16,
+      "error": 7,
+      "refusal": 3,
+      "alert": 2
+    },
+    "diagnostic_counts": {
+      "None": 22,
+      "I": 16,
+      "C": 7,
+      "N": 1,
+      "M": 2,
+      "E": 2
+    },
+    "success_count": 22,
+    "success_rate_pct": 44.0,
+    "needs_clarification_count": 16,
+    "needs_clarification_rate_pct": 32.0,
+    "refusal_count": 3,
+    "refusal_rate_pct": 6.0,
+    "error_count": 7,
+    "error_rate_pct": 14.0,
+    "has_i_soft_count": 10,
+    "has_i_soft_rate_pct": 20.0,
+    "judged_total": 22,
+    "judged_correct_count": 16,
+    "judged_correct_rate_pct": 72.72727272727273
+  }
+}

@@ -3,47 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VerifiQuant 問答介面</title>
+    <title>VerifiQuant Frontend Console</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-    <script>
-      window.TOPIC_OPTIONS = {{ topic_options | tojson }};
-    </script>
   </head>
   <body>
     <div class="app-container">
       <header>
-        <h1>VerifiQuant 計算服務</h1>
-        <p>輸入問題並選擇可用的 Domain / Topic，系統會檢索資料卡完成計算。</p>
+        <h1>VerifiQuant Memoryless QA Console</h1>
+        <p>入口固定使用 <code>question + context</code>。若被攔截，先依 repair guide 修正後再重送。</p>
       </header>
-      <form id="question-form">
-        <label>
-          問題描述
-          <textarea id="question" name="question" rows="5" placeholder="例如：我投資50000，預期一年後得到60000，折現率8%，NPV是多少？" required></textarea>
-        </label>
-        <label>
-          Domain
-          <select id="domain" name="domain">
-            <option value="">全部領域</option>
-            {% for domain in domain_options %}
-            <option value="{{ domain }}">{{ domain }}</option>
-            {% endfor %}
-          </select>
-        </label>
-        <label>
-          Topic
-          <select id="topic" name="topic">
-            <option value="">全部主題</option>
-          </select>
-        </label>
-        <button type="submit">送出問題</button>
-      </form>
-      <div id="loader" class="loader hidden">
-        <div class="spinner"></div>
-        <span>LLM 計算中，請稍候…</span>
-      </div>
-      <section id="result" class="result hidden"></section>
+      <nav class="tab-nav">
+        <button id="tab-qa" class="tab-btn active" type="button">主問答介面</button>
+        <button id="tab-batch" class="tab-btn" type="button">批次 JSONL</button>
+        <button id="tab-cards" class="tab-btn" type="button">卡片一覽表</button>
+      </nav>
+
+      <section id="panel-qa" class="panel active">
+        <form id="question-form">
+          <label>
+            Question
+            <textarea id="question" name="question" rows="4" placeholder="例如：請計算這筆投資的 NPV" required></textarea>
+          </label>
+          <label>
+            Context
+            <textarea id="context" name="context" rows="8" placeholder='建議使用 JSON，例如：{"initial_investment":100000,"cash_flows":[30000,40000,50000],"discount_rate":0.1}'></textarea>
+          </label>
+          <div class="inline-row">
+            <label>
+              Domain (optional)
+              <input id="domain" name="domain" type="text" placeholder="investment_analysis" />
+            </label>
+            <label>
+              Topic (optional)
+              <input id="topic" name="topic" type="text" placeholder="npv" />
+            </label>
+          </div>
+          <div class="inline-row">
+            <label>
+              top_k
+              <input id="top-k" name="top_k" type="number" min="1" value="3" />
+            </label>
+            <label>
+              m_min_top_score
+              <input id="m-min-top-score" name="m_min_top_score" type="number" step="0.01" min="0" value="0.05" />
+            </label>
+          </div>
+          <button type="submit">執行診斷</button>
+        </form>
+        <div id="loader" class="loader hidden">
+          <div class="spinner"></div>
+          <span>診斷中，請稍候…</span>
+        </div>
+        <section id="result" class="result hidden"></section>
+      </section>
+
+      <section id="panel-batch" class="panel">
+        <form id="upload-form" class="batch-form">
+          <label>
+            上傳 JSONL/JSON 到 data/
+            <input id="batch-file" type="file" accept=".jsonl,.json" />
+          </label>
+          <button id="upload-btn" type="submit">上傳檔案</button>
+        </form>
+
+        <form id="batch-form" class="batch-form">
+          <label>
+            input_path
+            <input id="batch-input-path" type="text" placeholder="verifiquant/data/testing_3Q.jsonl" required />
+          </label>
+          <label>
+            output_path
+            <input id="batch-output-path" type="text" placeholder="verifiquant/data/runs/demo_v2/testing_3Q_output.jsonl" />
+          </label>
+          <div class="inline-row triple">
+            <label>
+              max_records
+              <input id="batch-max-records" type="number" min="0" value="0" />
+            </label>
+            <label>
+              top_k
+              <input id="batch-top-k" type="number" min="1" value="3" />
+            </label>
+            <label>
+              m_min_top_score
+              <input id="batch-m-min-top-score" type="number" step="0.01" min="0" value="0.05" />
+            </label>
+          </div>
+          <div class="inline-row">
+            <label>
+              Domain (optional)
+              <input id="batch-domain" type="text" placeholder="investment_analysis" />
+            </label>
+            <label>
+              Topic (optional)
+              <input id="batch-topic" type="text" placeholder="npv" />
+            </label>
+          </div>
+          <button id="batch-run-btn" type="submit">開始批次執行</button>
+        </form>
+        <div id="batch-loader" class="loader hidden">
+          <div class="spinner"></div>
+          <span>批次執行中…</span>
+        </div>
+        <section id="batch-result" class="result"></section>
+        <section class="cards-toolbar history-toolbar">
+          <button id="refresh-history" type="button">刷新歷史輸出</button>
+          <span id="history-meta"></span>
+        </section>
+        <section id="history-result" class="result"></section>
+        <section id="history-summary" class="result"></section>
+      </section>
+
+      <section id="panel-cards" class="panel">
+        <div class="cards-toolbar">
+          <button id="refresh-cards" type="button">重新整理卡片</button>
+          <span id="cards-meta"></span>
+        </div>
+        <div id="cards-loader" class="loader hidden">
+          <div class="spinner"></div>
+          <span>載入卡片中…</span>
+        </div>
+        <section id="cards-result" class="result"></section>
+      </section>
     </div>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>
-

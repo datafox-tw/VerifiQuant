@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "error": null,
+  "validation_stats": {
+    "core_count": 49,
+    "retrieval_count": 49,
+    "repair_count": 366,
+    "diagnostic_rule_count": 267
+  },
+  "output": {
+    "core": "verifiquant/data/runs/demo_50q_0407/core.jsonl",
+    "retrieval": "verifiquant/data/runs/demo_50q_0407/retrieval.jsonl",
+    "repair": "verifiquant/data/runs/demo_50q_0407/repair.jsonl"
+  },
+  "counts": {
+    "core": 49,
+    "retrieval": 49,
+    "repair": 366,
+    "skipped_duplicates": 0,
+    "skipped_kernel_duplicates": 0
+  },
+  "kernel_dedup": {
+    "normalization_version": "ast_v1_docstring_strip",
+    "duplicate_hits": []
+  },
+  "execution_smoke": {
+    "failed_count": 7,
+    "failed_cards": [
+      {
+        "fic_id": "fic_article_306",
+        "error": "'dW_t'"
+      },
+      {
+        "fic_id": "fic_article_2995",
+        "error": "This function is applicable only for birth years 1943 and later."
+      },
+      {
+        "fic_id": "fic_article_1803",
+        "error": "Penalty rate must be between 0 and 1."
+      },
+      {
+        "fic_id": "fic_article_2552",
+        "error": "Cost must be greater than salvage value."
+      },
+      {
+        "fic_id": "fic_article_2533",
+        "error": "'dict' object has no attribute 'previous_revenue'"
+      },
+      {
+        "fic_id": "fic_article_2098",
+        "error": "cannot unpack non-iterable float object"
+      },
+      {
+        "fic_id": "fic_article_2366",
+        "error": "'dict' object has no attribute 'book_value_total_assets'"
+      }
+    ]
+  }
+}

@@ -39,6 +39,36 @@ NEXT_STEPS = {
     "stop_with_refusal",
 }
 
+GLOBAL_SCOPE_FIC_ID = "__global__"
+
+GLOBAL_N_NOT_SUPPORTED_RULE: Dict[str, Any] = {
+    "rule_id": "global_n_not_supported",
+    "fic_id": GLOBAL_SCOPE_FIC_ID,
+    "diagnostic_type": "N",
+    "severity": "error",
+    "title": "Out-of-Scope Request",
+    "user_message": "This request appears outside the currently supported formula scope.",
+    "explanation": "The system can explain the current scope boundary and suggest supported alternatives.",
+    "ask_user_for": [
+        {
+            "slot": "target_metric",
+            "label": "Select a supported metric",
+            "type": "enum",
+            "required": True,
+            "options": [
+                {"value": "npv", "label": "npv"},
+                {"value": "irr", "label": "irr"},
+                {"value": "payback_period", "label": "payback_period"},
+            ],
+        }
+    ],
+    "repair_action": {
+        "type": "declare_scope_boundary",
+        "target": "scope_boundary",
+    },
+    "allowed_next_steps": ["select_alternative_fic", "ask_followup", "stop_with_refusal"],
+}
+
 
 STAGE_REPAIR_PROMPT = """Role:
 You are a product workflow designer creating repair rules for diagnostic checks.
@@ -274,56 +304,90 @@ def formalize_repair_payload(raw: Dict[str, Any], core: Dict[str, Any]) -> List[
     out: List[Dict[str, Any]] = []
     for rid, chk in checks_by_id.items():
         out.append(normalized.get(rid) or _default_repair_for_check(core, chk))
-    out.extend(_global_v2_rules(core))
     return out
 
 
-def _global_v2_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
-    selection_hints = [str(x).strip() for x in (core.get("selection_hints") or []) if str(x).strip()]
+def _i_rule_id_from_hint_id(hint_id: str) -> str:
+    h = normalize_label(hint_id) or "semantic_ambiguity"
+    return f"i_{h}"
+
+
+def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
     semantic_hints = [x for x in (core.get("semantic_hints") or []) if isinstance(x, dict)]
-    i_options: List[Dict[str, str]] = []
+    out: List[Dict[str, Any]] = []
+
     for hint in semantic_hints:
+        hint_id = str(hint.get("id", "")).strip()
+        i_level = str(hint.get("i_level", "soft")).strip().lower()
+        if i_level not in {"hard", "soft"}:
+            i_level = "soft"
+        rule_id = f"{_i_rule_id_from_hint_id(hint_id)}_{i_level}"
+        impact_scope = str(hint.get("impact_scope", "output_interpretation")).strip().lower()
+        assumption = str(hint.get("assumption_if_not_clarified", "")).strip()
+        clarification_question = str(hint.get("clarification_question", "")).strip()
+
+        i_options: List[Dict[str, str]] = []
         for opt in hint.get("options", []):
             text = str(opt).strip()
             if text:
                 i_options.append({"value": text, "label": text})
-    if not i_options:
-        i_options = [
-            {"value": "option_a", "label": "Option A"},
-            {"value": "option_b", "label": "Option B"},
-        ]
+        if not i_options:
+            i_options = [
+                {"value": "confirm_intended_interpretation", "label": "Confirm intended interpretation"},
+                {"value": "use_default_assumption", "label": "Use default assumption"},
+            ]
+        if not clarification_question:
+            clarification_question = "Please clarify the intended financial interpretation."
+        if not assumption:
+            assumption = "Proceed with the default interpretation inferred from context."
 
+        user_message = (
+            f"{clarification_question} "
+            f"[i_level={i_level}; impact_scope={impact_scope}]"
+        )
+        explanation = (
+            f"Semantic hint '{hint_id or 'semantic_hint'}' triggered. "
+            f"Default assumption if unresolved: {assumption}"
+        )
+
+        out.append(
+            {
+                "rule_id": rule_id,
+                "fic_id": core["fic_id"],
+                "diagnostic_type": "I",
+                "severity": "error" if i_level == "hard" else "alert",
+                "title": f"Semantic Clarification: {hint_id or 'semantic_hint'}",
+                "user_message": user_message,
+                "explanation": explanation,
+                "ask_user_for": [
+                    {
+                        "slot": "clarification_choice",
+                        "label": clarification_question,
+                        "type": "enum",
+                        "required": True,
+                        "options": i_options,
+                    }
+                ],
+                "repair_action": {
+                    "type": "present_clarification_options",
+                    "target": hint_id or "semantic_hints",
+                },
+                "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
+            }
+        )
+
+    if out:
+        return out
+
+    # Backward-compatible fallback when no semantic hints are available.
     return [
-        {
-            "rule_id": "global_n_not_supported",
-            "fic_id": core["fic_id"],
-            "diagnostic_type": "N",
-            "severity": "error",
-            "title": "Out-of-Scope Request",
-            "user_message": "This request appears outside the currently supported formula scope.",
-            "explanation": "The system can explain the current scope boundary and suggest supported alternatives.",
-            "ask_user_for": [
-                {
-                    "slot": "target_metric",
-                    "label": "Select a supported metric",
-                    "type": "enum",
-                    "required": True,
-                    "options": [{"value": x, "label": x} for x in (selection_hints or ["npv", "irr", "payback_period"])],
-                }
-            ],
-            "repair_action": {
-                "type": "declare_scope_boundary",
-                "target": "scope_boundary",
-            },
-            "allowed_next_steps": ["select_alternative_fic", "ask_followup", "stop_with_refusal"],
-        },
         {
             "rule_id": "global_i_semantic_ambiguity",
             "fic_id": core["fic_id"],
             "diagnostic_type": "I",
             "severity": "alert",
             "title": "Semantic Ambiguity Clarification",
-            "user_message": "A hidden ambiguity was detected (for example FX direction or time basis).",
+            "user_message": "A hidden ambiguity was detected; please clarify intended interpretation.",
             "explanation": "Ask a constrained clarification question before deterministic execution.",
             "ask_user_for": [
                 {
@@ -331,7 +395,10 @@ def _global_v2_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
                     "label": "Clarification option",
                     "type": "enum",
                     "required": True,
-                    "options": i_options,
+                    "options": [
+                        {"value": "confirm_intended_interpretation", "label": "Confirm intended interpretation"},
+                        {"value": "use_default_assumption", "label": "Use default assumption"},
+                    ],
                 }
             ],
             "repair_action": {
@@ -339,7 +406,7 @@ def _global_v2_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "target": "semantic_hints",
             },
             "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
-        },
+        }
     ]
 
 
@@ -353,4 +420,8 @@ def generate_repair_rules(*, client: Any, model: str, core: Dict[str, Any]) -> L
         prompt=build_stage_repair_prompt(core),
         schema=schema,
     )
-    return formalize_repair_payload(raw, core)
+    rules = formalize_repair_payload(raw, core)
+    # Replace monolithic global I template with hint-specific I guides.
+    rules = [r for r in rules if str(r.get("diagnostic_type", "")).upper() != "I"]
+    rules.extend(_global_i_rules(core))
+    return rules

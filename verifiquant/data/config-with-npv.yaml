@@ -1,0 +1,58 @@
+experiment_info:
+  description: 自動抽樣的 50 題測試清單(with npv 取代correct的最後五題)
+  total_count: 50
+  status: ready_to_run
+  random_seed: 12345
+target_ids:
+  correct_samples:
+  - test-1697
+  - test-1264
+  - test-1470
+  - test-1084
+  - test-1504
+  - test-1710
+  - test-1673
+  - test-1028
+  - test-1920
+  - test-1708
+  - test-1031
+  - test-1833
+  - test-1005
+  - test-1009
+  - test-1426
+  - test-1442
+  - test-1604
+  - test-1106
+  - test-1832
+  - test-1114
+  - test-1134
+  - test-1460
+  - test-1944
+  - test-1925
+  - test-1045
+  error_samples:
+  - test-1593
+  - test-1881
+  - test-1001
+  - test-1553
+  - test-1577
+  - test-1270
+  - test-1490
+  - test-1738
+  - test-1979
+  - test-1109
+  - test-1951
+  - test-1012
+  - test-1810
+  - test-1065
+  - test-1842
+  - test-1570
+  - test-1008
+  - test-1890
+  - test-1625
+  - test-1707
+  - test-1825
+  - test-1457
+  - test-1880
+  - test-1896
+  - test-1666

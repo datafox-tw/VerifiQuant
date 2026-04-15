@@ -23,6 +23,9 @@ except ImportError:  # pragma: no cover - runtime dependency guard
 @dataclass
 class ConversionInput:
     source_meta: Dict[str, Any]
+    article_title: str
+    article_doc_id: Optional[int]
+    article_content_excerpt: str
     function: str
     python_solution: str
     context: str
@@ -53,15 +56,25 @@ def dump_records(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
 
 
 def to_conversion_input(record: Dict[str, Any]) -> ConversionInput:
+    doc_id_raw = record.get("article_doc_id")
+    article_doc_id: Optional[int] = None
+    try:
+        if doc_id_raw is not None and str(doc_id_raw).strip() != "":
+            article_doc_id = int(doc_id_raw)
+    except Exception:
+        article_doc_id = None
+
     return ConversionInput(
         source_meta={
             "function_id": record.get("function_id"),
-            "article_title": record.get("article_title"),
             "source": record.get("source"),
             "question_id": record.get("question_id"),
             "difficulty": record.get("difficulty"),
             "level": record.get("level"),
         },
+        article_title=str(record.get("article_title", "") or ""),
+        article_doc_id=article_doc_id,
+        article_content_excerpt=str(record.get("article_content_excerpt", "") or ""),
         function=str(record.get("function", "") or ""),
         python_solution=str(record.get("python_solution", "") or ""),
         context=str(record.get("context", "") or ""),

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -25,6 +26,37 @@ from verifiquant.preprocessing.validate_relations import validate_artifact_relat
 
 def _tokenize(text_value: str) -> List[str]:
     return re.findall(r"[a-z0-9_]+", str(text_value or "").lower())
+
+_FTS_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "in",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+    "with",
+}
 
 
 def _load_records(path: Path) -> List[Dict[str, Any]]:
@@ -50,6 +82,22 @@ def _json_loads(value: str, *, default: Any) -> Any:
         return json.loads(value)
     except Exception:
         return default
+
+
+def _derive_diagnostics_from_checks(checks: Any) -> Dict[str, List[Dict[str, Any]]]:
+    if not isinstance(checks, list):
+        return {"invariants": [], "scale_checks": []}
+    invariants: List[Dict[str, Any]] = []
+    scale_checks: List[Dict[str, Any]] = []
+    for chk in checks:
+        if not isinstance(chk, dict):
+            continue
+        ctype = str(chk.get("check_type", "")).strip().lower()
+        if ctype == "deterministic":
+            invariants.append(chk)
+        else:
+            scale_checks.append(chk)
+    return {"invariants": invariants, "scale_checks": scale_checks}
 
 
 if mapped_column is not None:
@@ -194,6 +242,17 @@ class SQLAlchemyArtifactStore:
             if not fic_id:
                 continue
             row = session.get(CoreCard, fic_id)
+            diagnostic_checks = card.get("diagnostic_checks", [])
+            diagnostics = card.get("diagnostics")
+            if not isinstance(diagnostics, dict):
+                diagnostics = _derive_diagnostics_from_checks(diagnostic_checks)
+            source_meta = dict(card.get("source_meta", {}) or {})
+            if card.get("article_title") and "article_title" not in source_meta:
+                source_meta["article_title"] = card.get("article_title")
+            if card.get("article_doc_id") is not None and "article_doc_id" not in source_meta:
+                source_meta["article_doc_id"] = card.get("article_doc_id")
+            if card.get("article_content_excerpt") and "article_content_excerpt" not in source_meta:
+                source_meta["article_content_excerpt"] = card.get("article_content_excerpt")
             payload = {
                 "fic_id": fic_id,
                 "name": str(card.get("name", "")),
@@ -201,14 +260,14 @@ class SQLAlchemyArtifactStore:
                 "domain": str(card.get("domain", "")),
                 "topic": str(card.get("topic", "")),
                 "version": str(card.get("version", "v1")),
-                "source_meta_json": _json_dumps(card.get("source_meta", {})),
+                "source_meta_json": _json_dumps(source_meta),
                 "selection_hints_json": _json_dumps(card.get("selection_hints", [])),
                 "semantic_hints_json": _json_dumps(card.get("semantic_hints", [])),
                 "inputs_json": _json_dumps(card.get("inputs", [])),
                 "output_json": _json_dumps(card.get("output", {})),
                 "execution_json": _json_dumps(card.get("execution", {})),
-                "diagnostics_json": _json_dumps(card.get("diagnostics", {"invariants": [], "scale_checks": []})),
-                "diagnostic_checks_json": _json_dumps(card.get("diagnostic_checks", [])),
+                "diagnostics_json": _json_dumps(diagnostics),
+                "diagnostic_checks_json": _json_dumps(diagnostic_checks),
             }
             if row is None:
                 session.add(CoreCard(**payload))
@@ -294,6 +353,9 @@ class SQLAlchemyArtifactStore:
                 )
 
     def _core_row_to_dict(self, row: CoreCard) -> Dict[str, Any]:
+        diagnostic_checks = _json_loads(row.diagnostic_checks_json, default=[])
+        diagnostics = _derive_diagnostics_from_checks(diagnostic_checks)
+        source_meta = _json_loads(row.source_meta_json, default={})
         return {
             "fic_id": row.fic_id,
             "name": row.name,
@@ -301,14 +363,18 @@ class SQLAlchemyArtifactStore:
             "domain": row.domain,
             "topic": row.topic,
             "version": row.version,
-            "source_meta": _json_loads(row.source_meta_json, default={}),
+            "source_meta": source_meta,
+            "article_title": source_meta.get("article_title"),
+            "article_doc_id": source_meta.get("article_doc_id"),
+            "article_content_excerpt": source_meta.get("article_content_excerpt"),
             "selection_hints": _json_loads(getattr(row, "selection_hints_json", ""), default=[]),
             "semantic_hints": _json_loads(getattr(row, "semantic_hints_json", ""), default=[]),
             "inputs": _json_loads(row.inputs_json, default=[]),
             "output": _json_loads(row.output_json, default={}),
             "execution": _json_loads(row.execution_json, default={}),
-            "diagnostics": _json_loads(getattr(row, "diagnostics_json", ""), default={"invariants": [], "scale_checks": []}),
-            "diagnostic_checks": _json_loads(row.diagnostic_checks_json, default=[]),
+            # Keep backward-compatible response field, but derive it dynamically.
+            "diagnostics": diagnostics,
+            "diagnostic_checks": diagnostic_checks,
         }
 
     def _retrieval_row_to_dict(self, row: RetrievalCard) -> Dict[str, Any]:
@@ -381,10 +447,90 @@ class SQLAlchemyArtifactStore:
         topic: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         if self.is_sqlite:
-            fts = self._retrieve_candidates_fts(query=query, top_k=top_k, domain=domain, topic=topic)
-            if fts:
-                return fts
+            pool_k = max(int(top_k) * 8, 40)
+            fts = self._retrieve_candidates_fts(query=query, top_k=pool_k, domain=domain, topic=topic)
+            overlap = self._retrieve_candidates_overlap(query=query, top_k=pool_k, domain=domain, topic=topic)
+            hybrid = self._merge_hybrid_candidates(
+                query=query,
+                fts_rows=fts,
+                overlap_rows=overlap,
+                top_k=top_k,
+            )
+            if hybrid:
+                return hybrid
         return self._retrieve_candidates_overlap(query=query, top_k=top_k, domain=domain, topic=topic)
+
+    def _merge_hybrid_candidates(
+        self,
+        *,
+        query: str,
+        fts_rows: List[Dict[str, Any]],
+        overlap_rows: List[Dict[str, Any]],
+        top_k: int,
+    ) -> List[Dict[str, Any]]:
+        by_id: Dict[str, Dict[str, Any]] = {}
+        q_tokens = set(_tokenize(query))
+        q_is_generic_npv = (
+            "npv" in q_tokens
+            and "npvgo" not in q_tokens
+            and "growth" not in q_tokens
+            and "opportunities" not in q_tokens
+        )
+
+        for row in fts_rows:
+            fic_id = str(row.get("fic_id", "")).strip()
+            if not fic_id:
+                continue
+            payload = dict(row)
+            payload["fts_score"] = float(row.get("score", 0.0) or 0.0)
+            payload["overlap_score"] = 0.0
+            by_id[fic_id] = payload
+
+        for row in overlap_rows:
+            fic_id = str(row.get("fic_id", "")).strip()
+            if not fic_id:
+                continue
+            overlap_score = float(row.get("score", 0.0) or 0.0)
+            if fic_id not in by_id:
+                payload = dict(row)
+                payload["fts_score"] = 0.0
+                payload["overlap_score"] = overlap_score
+                by_id[fic_id] = payload
+            else:
+                by_id[fic_id]["overlap_score"] = overlap_score
+
+        merged: List[Dict[str, Any]] = []
+        for payload in by_id.values():
+            fts_score = float(payload.get("fts_score", 0.0) or 0.0)
+            overlap_score = float(payload.get("overlap_score", 0.0) or 0.0)
+            # Prioritize lexical relevance while preserving FTS ranking signal.
+            hybrid_score = (0.8 * overlap_score) + (0.2 * fts_score)
+            if q_is_generic_npv:
+                title_text = str(payload.get("title", "")).lower()
+                title_tokens = set(_tokenize(title_text))
+                keyword_tokens = set(_tokenize(" ".join(str(x) for x in payload.get("keywords", []))))
+                c_tokens = title_tokens | keyword_tokens
+                if "npvgo" in c_tokens or ("growth" in c_tokens and "opportunities" in c_tokens):
+                    hybrid_score -= 0.12
+                if "net_present_value" in c_tokens or ("net" in c_tokens and "present" in c_tokens and "value" in c_tokens):
+                    hybrid_score += 0.06
+                if "net present value (npv)" in title_text or {"net", "present", "value", "npv"}.issubset(title_tokens):
+                    hybrid_score += 0.06
+                if "discounted_cash_flow" in c_tokens or ("discounted" in c_tokens and "cash" in c_tokens and "flow" in c_tokens):
+                    hybrid_score += 0.03
+            payload["hybrid_score"] = hybrid_score
+            payload["score"] = hybrid_score
+            merged.append(payload)
+
+        merged.sort(
+            key=lambda row: (
+                float(row.get("hybrid_score", 0.0) or 0.0),
+                float(row.get("overlap_score", 0.0) or 0.0),
+                float(row.get("fts_score", 0.0) or 0.0),
+            ),
+            reverse=True,
+        )
+        return merged[: max(int(top_k), 1)]
 
     def _retrieve_candidates_fts(
         self,
@@ -394,7 +540,18 @@ class SQLAlchemyArtifactStore:
         domain: Optional[str],
         topic: Optional[str],
     ) -> List[Dict[str, Any]]:
-        tokens = _tokenize(query)
+        raw_tokens = _tokenize(query)
+        seen: set[str] = set()
+        tokens: List[str] = []
+        for tok in raw_tokens:
+            if tok in seen:
+                continue
+            seen.add(tok)
+            if tok in _FTS_STOPWORDS:
+                continue
+            if len(tok) <= 1:
+                continue
+            tokens.append(tok)
         if not tokens:
             return []
         match_q = " OR ".join(tokens[:24])
@@ -456,7 +613,9 @@ class SQLAlchemyArtifactStore:
     ) -> List[Dict[str, Any]]:
         q_tokens = set(_tokenize(query))
         all_rows = self.load_retrieval_cards()
-        scored = []
+        filtered_rows: List[Dict[str, Any]] = []
+        doc_tokens: List[set[str]] = []
+
         for row in all_rows:
             if domain and str(row.get("domain", "")).lower() != domain.lower():
                 continue
@@ -467,13 +626,35 @@ class SQLAlchemyArtifactStore:
                     str(row.get("title", "")),
                     str(row.get("summary", "")),
                     str(row.get("embedding_text", "")),
+                    " ".join(str(x) for x in row.get("selection_hints", [])),
+                    " ".join(str(x) for x in row.get("applicable_when", [])),
+                    " ".join(str(x) for x in row.get("not_applicable_when", [])),
+                    " ".join(str(x) for x in row.get("scope_boundaries", [])),
                     " ".join(str(x) for x in row.get("keywords", [])),
                 ]
             )
-            c_tokens = set(_tokenize(text_blob))
-            overlap = len(q_tokens & c_tokens)
-            denom = max(len(q_tokens), 1)
-            score = overlap / denom
+            filtered_rows.append(row)
+            doc_tokens.append(set(_tokenize(text_blob)))
+
+        if not filtered_rows:
+            return []
+
+        df: Dict[str, int] = {}
+        for toks in doc_tokens:
+            for tok in toks:
+                df[tok] = df.get(tok, 0) + 1
+
+        n_docs = len(doc_tokens)
+
+        def _idf(tok: str) -> float:
+            # Smooth IDF to avoid division-by-zero and keep bounded positive scores.
+            return math.log((1.0 + n_docs) / (1.0 + float(df.get(tok, 0)))) + 1.0
+
+        q_weight = sum(_idf(tok) for tok in q_tokens) or 1.0
+        scored = []
+        for row, c_tokens in zip(filtered_rows, doc_tokens):
+            overlap_tokens = q_tokens & c_tokens
+            score = sum(_idf(tok) for tok in overlap_tokens) / q_weight
             scored.append((score, row))
 
         scored.sort(key=lambda x: x[0], reverse=True)
