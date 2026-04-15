@@ -41,6 +41,7 @@ Critical rules:
 2) `function` is SECONDARY for naming and financial semantics.
 3) Do not hardcode case-specific constants into execution; use inputs.
 4) Use `article_content_excerpt` as supporting context to generate higher-quality `semantic_hints`.
+5) If a diagnostic rule expression needs to validate the formula's output, you MUST call `compute(inputs)` to obtain the output value. You CANNOT access output variables directly from the `inputs` dictionary.
 
 Taxonomy policy:
 - Domain MUST be one of taxonomy domains.
@@ -51,7 +52,7 @@ Taxonomy policy:
 Diagnostic rules policy:
 - Provide 3 to 8 checks.
 - check_type must be one of: deterministic, normalization.
-- deterministic checks must include a valid python boolean `expression` using input names.
+- deterministic checks must include a valid python boolean `expression` using input names. If the expression needs to check the computed output, you MUST call `compute(inputs)` instead of reading the output name from the `inputs` dictionary.
 - For deterministic/normalization checks, include `predicate_mode`:
   - `violation`: expression=True means the rule is triggered (preferred default).
   - `validity`: expression=True means the input is valid, and expression=False triggers the rule.
@@ -62,6 +63,10 @@ Diagnostic rules policy:
     - required input missing
     - input cannot be parsed to expected type
     - malformed structure (for example expected list but got scalar and cannot normalize)
+    - for array inputs whose elements are tuples/pairs (e.g. each element must be
+      [quantity, price]), the STRUCTURE check (each element is a list/tuple of the
+      expected length) is F — because malformed structure means the input cannot be
+      parsed to the expected schema, even if numbers were provided.
   - E is for value-level or interpretation-level issues AFTER inputs exist:
     - unit/scale mismatch (8 vs 0.08, 15 vs 0.15)
     - bound/plausibility violations (negative rate, impossible ratio)
@@ -69,6 +74,10 @@ Diagnostic rules policy:
   - Prefer E over F when a value is present but suspicious or needs confirmation.
   - Do NOT classify percentage-range checks as F when the value exists; classify them as E with deterministic alert.
   - "Hard formula preconditions" should generally be E unless the variable is truly missing/unparseable.
+  - If an array input is described as a list of (quantity, price) pairs or similar
+    multi-element tuples, you MUST include an F-class check that verifies the structure
+    of each element (e.g. `all(isinstance(item, (list, tuple)) and len(item) == 2 for item in inputs['field'])`)
+    with predicate_mode="validity".
 - severity must be error or alert.
 - semantic_hints are for I-gate only (hidden ambiguity checks like FX direction/time basis),
   and must include clarification question plus fixed options.
@@ -530,6 +539,70 @@ def _infer_unpack_arity_by_input(code: str) -> Dict[str, int]:
     return out
 
 
+
+def _auto_inject_structure_checks(
+    inputs: List[Dict[str, Any]],
+    code: str,
+    existing_checks: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Automatically append F-class structural checks for array inputs whose
+    execution code iterates elements as tuples (multi-element unpack).
+
+    Uses the already-existing ``_infer_unpack_arity_by_input`` to detect which
+    input fields are consumed as ``for a, b, ... in field``.  For each such
+    field an F-class ``validity`` check is injected *unless* the existing checks
+    already contain a structural expression for that field.
+
+    This is schema-general — it works for any formula that iterates an array as
+    a sequence of fixed-width tuples, not just LIFO inventory.
+    """
+    arity_map = _infer_unpack_arity_by_input(code)
+    if not arity_map:
+        return existing_checks
+
+    # Build a set of input fields already covered by some structural check.
+    existing_rules = [str(chk.get("expression", "")) for chk in existing_checks]
+    covered = set()
+    for field, arity in arity_map.items():
+        for expr in existing_rules:
+            if field in expr and ("isinstance" in expr or "len(" in expr):
+                covered.add(field)
+                break
+
+    name_map = {str(inp.get("name", "")): inp for inp in inputs}
+    injected = list(existing_checks)
+
+    for field, arity in sorted(arity_map.items()):
+        if arity < 2 or field in covered:
+            continue
+        inp = name_map.get(field, {})
+        description = str(inp.get("description", "") or "").strip()
+        rule_id = f"auto_structure_{field}"
+        arity_s = str(arity)
+        element_desc = " and ".join(f"element {i+1}" for i in range(arity))
+        injected.append({
+            "rule_id": rule_id,
+            "name": f"{field} element structure",
+            "check_type": "deterministic",
+            "diagnostic_type": "F",
+            "severity": "error",
+            "predicate_mode": "validity",
+            "expression": (
+                f"isinstance(inputs['{field}'], list) and "
+                f"all(isinstance(item, (list, tuple)) and len(item) == {arity_s} "
+                f"for item in inputs['{field}'])"
+            ),
+            "applies_to": [field],
+            "description": (
+                f"Each element of '{field}' must be a list or tuple with exactly "
+                f"{arity_s} numeric values ({element_desc})."
+                + (f" {description}" if description else "")
+            ),
+        })
+
+    return injected
+
+
 def _reverse_op(op: str) -> str:
     return {">": "<=", ">=": "<", "<": ">=", "<=": ">"}.get(op, op)
 
@@ -776,6 +849,11 @@ def formalize_core_payload(
     checks = _collect_diagnostic_checks(raw)
     if not checks:
         raise ValueError("diagnostics checks must be a non-empty list")
+    # Semi-automatically inject F-class structural checks for array inputs
+    # whose execution code iterates elements as tuples.  This catches cases where
+    # the LLM-authored checks omit the element-structure guard, which would
+    # otherwise surface as a TypeError at runtime (misclassified as C-class).
+    checks = _auto_inject_structure_checks(inputs, execution["code"], checks)
 
     selection_hints = _norm_str_list(raw.get("selection_hints", []))
     if not selection_hints:

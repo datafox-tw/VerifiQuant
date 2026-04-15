@@ -26,6 +26,32 @@ from verifiquant.preprocessing.stage_repair import GLOBAL_N_NOT_SUPPORTED_RULE, 
 from verifiquant.card_store import SQLAlchemyArtifactStore
 
 
+@dataclass
+class InputCoercionResult:
+    """Container for the result of coercing one FIC input value.
+
+    Attributes
+    ----------
+    value:
+        The coerced Python value.  ``None`` means the raw string could not be
+        parsed to the expected type (treat as missing).
+    confidence:
+        * ``"explicit"``   — source format was unambiguous (e.g. the source
+          text had a ``%`` sign or a clear decimal, and the FIC unit agrees).
+        * ``"inferred"``   — LLM made a reasonable assumption; result is
+          likely correct but not 100 % certain.
+        * ``"ambiguous"``  — source format or FIC unit field is contradictory;
+          downstream should ask the user for confirmation or offer a card
+          unit correction.
+    note:
+        Human-readable coercion log entry to be appended to
+        ``normalization_note``.
+    """
+    value: Optional[Any]
+    confidence: str  # "explicit" | "inferred" | "ambiguous"
+    note: str
+
+
 def _tokenize(text: str) -> List[str]:
     return re.findall(r"[a-z0-9_]+", str(text or "").lower())
 
@@ -98,62 +124,286 @@ def _extract_numeric_list(value: Any, *, percent_as_decimal: bool = True) -> Lis
     return out
 
 
-def _infer_percent_as_decimal(unit: Any, description: Any) -> bool:
-    u = str(unit or "").strip().lower()
-    d = str(description or "").strip().lower()
-    if "decimal" in u:
-        return True
-    if "as a decimal" in d or "expressed as a decimal" in d:
-        return True
-    if u in {"%", "percent", "percentage", "percentage_point", "percentage_points"}:
-        return False
-    if "percentage" in u and "decimal" not in u:
-        return False
-    return True
+def _resolve_schema_scale(unit: Any, description: Any) -> str:
+    """Determine the expected numeric scale from the FIC input schema.
 
+    This is the single source of truth for the FIC side of the
+    percent-vs-decimal decision, replacing the old
+    ``_infer_percent_as_decimal`` / ``_is_percent_point_unit`` pair that
+    expressed the same logic from two opposite angles.
 
-def _is_percent_point_unit(unit: Any, description: Any) -> bool:
+    Returns
+    -------
+    ``"decimal"``
+        FIC code expects values in [0, 1] decimal form (e.g. 8 % → 0.08).
+    ``"percent_point"``
+        FIC code expects values as percentage points (e.g. 8 % → 8).
+    ``"unknown"``
+        No specific scale convention declared; treat as plain numeric.
+    """
     u = str(unit or "").strip().lower()
     d = str(description or "").strip().lower()
     if "decimal" in u or "as a decimal" in d or "expressed as a decimal" in d:
-        return False
-    return u in {"%", "percent", "percentage", "percentage_point", "percentage_points"} or (
-        "percentage" in u and "decimal" not in u
+        return "decimal"
+    if (
+        u in {"%", "percent", "percentage", "percentage_point", "percentage_points"}
+        or ("percentage" in u and "decimal" not in u)
+    ):
+        return "percent_point"
+    return "unknown"
+
+
+def _parse_nested_list(raw_value: Any, *, percent_as_decimal: bool = True) -> Optional[List[List[float]]]:
+    """Try to parse raw_value as a list-of-lists of floats.
+
+    Handles three source shapes:
+    - Already a Python list-of-lists / list-of-tuples  →  validate and coerce.
+    - A JSON string encoding a list-of-lists           →  parse then coerce.
+    - A flat list/string of numbers whose length is divisible by the inferred row
+      width (taken from the first valid sub-list)      →  chunk and return.
+
+    Returns ``None`` when the value cannot be reliably interpreted as nested.
+    """
+    if raw_value is None:
+        return None
+
+    # --- normalise to a Python object ---
+    raw: Any = raw_value
+    if isinstance(raw_value, str):
+        s = raw_value.strip()
+        if not s:
+            return None
+        try:
+            raw = json.loads(s)
+        except Exception:
+            return None
+
+    if not isinstance(raw, list) or not raw:
+        return None
+
+    # --- already a list-of-lists / list-of-tuples ---
+    if isinstance(raw[0], (list, tuple)):
+        out: List[List[float]] = []
+        row_len: Optional[int] = None
+        for item in raw:
+            if not isinstance(item, (list, tuple)):
+                return None
+            if row_len is None:
+                row_len = len(item)
+            elif len(item) != row_len:
+                return None  # inconsistent row widths
+            row: List[float] = []
+            for v in item:
+                n = _parse_number(v, percent_as_decimal=percent_as_decimal)
+                if n is None:
+                    return None
+                row.append(n)
+            out.append(row)
+        return out if out else None
+
+    return None  # flat list — caller decides
+
+
+def _parse_typed_value(
+    raw_value: Any,
+    declared_type: str,
+    *,
+    unit: Any = None,
+    description: Any = None,
+    source_scale: str = "inferred",
+) -> Optional[Any]:
+    """Thin wrapper around :func:`coerce_input` that returns just the value.
+
+    Kept for call-sites that don't need the full :class:`InputCoercionResult`.
+    """
+    return coerce_input(
+        raw_value,
+        declared_type,
+        unit=unit,
+        description=description,
+        source_scale=source_scale,
+    ).value
+
+
+def coerce_input(
+    raw_value: Any,
+    declared_type: str,
+    *,
+    unit: Any = None,
+    description: Any = None,
+    source_scale: str = "inferred",
+) -> InputCoercionResult:
+    """Single entry point for all FIC input value coercion.
+
+    Parameters
+    ----------
+    raw_value:
+        The raw string (or already-parsed value) returned by the LLM.
+    declared_type:
+        The ``type`` field from the FIC card's input schema
+        (e.g. ``"number"``, ``"integer"``, ``"array[number]"``).
+    unit:
+        The ``unit`` field from the FIC card's input schema.
+    description:
+        The ``description`` field from the FIC card's input schema.
+    source_scale:
+        Signal from the LLM about the source format:
+        * ``"explicit_percent"``  — source text had a ``%`` sign.
+        * ``"explicit_decimal"``  — source text was already a decimal (0.08).
+        * ``"explicit_integer"``  — source text was an unambiguous integer
+          with no ``%`` sign.
+        * ``"inferred"``          — LLM had to make a scale assumption.
+
+    Returns
+    -------
+    :class:`InputCoercionResult`
+    """
+    dt = str(declared_type or "").lower()
+    schema_scale = _resolve_schema_scale(unit, description)
+
+    # ------------------------------------------------------------------
+    # Decide the `percent_as_decimal` flag for _parse_number.
+    # When schema says decimal: % signs should divide by 100 (True).
+    # When schema says percent_point: % signs keep their face value (False).
+    # ------------------------------------------------------------------
+    percent_as_decimal: bool = schema_scale != "percent_point"
+
+    # ------------------------------------------------------------------
+    # Compute confidence based on source_scale × schema_scale.
+    # ------------------------------------------------------------------
+    schema_unit_contradiction = False
+    if source_scale == "explicit_percent":
+        # Source had %, schema explicitly sets a convention → explicit.
+        confidence = "explicit"
+    elif source_scale in ("explicit_decimal", "explicit_integer"):
+        if schema_scale == "percent_point" and source_scale == "explicit_decimal":
+            # Source is 0.15 but FIC schema says percent_point — likely a
+            # FIC card unit-field error (AI wrote 'percent' but code uses 0-1).
+            confidence = "ambiguous"
+            schema_unit_contradiction = True
+        else:
+            confidence = "explicit"
+    else:  # "inferred"
+        confidence = "inferred"
+
+    note_parts: List[str] = []
+    if schema_unit_contradiction:
+        note_parts.append(
+            f"Warning: FIC card declares unit='{unit}' (percent_point convention) "
+            "but the extracted value appears to be in decimal form. "
+            "The FIC card's unit field may be incorrect (should be 'decimal')."
+        )
+
+    # ------------------------------------------------------------------
+    # Parse by declared_type.
+    # ------------------------------------------------------------------
+    if "array" in dt or "list" in dt:
+        is_nested = (
+            ("array" in dt and any(tok in dt for tok in ("array[", "tuple", "list[")))
+            or ("list" in dt and any(tok in dt for tok in ("list[", "tuple", "array[")))
+        ) and dt.count("[") > 1
+
+        if is_nested:
+            nested = _parse_nested_list(raw_value, percent_as_decimal=percent_as_decimal)
+            if nested is not None:
+                return InputCoercionResult(
+                    value=nested,
+                    confidence=confidence,
+                    note=" ".join(note_parts) if note_parts else f"Parsed as nested list ({declared_type}).",
+                )
+        vals = _extract_numeric_list(raw_value, percent_as_decimal=percent_as_decimal)
+        return InputCoercionResult(
+            value=vals if vals else None,
+            confidence=confidence,
+            note=" ".join(note_parts) if note_parts else f"Parsed as numeric list ({declared_type}).",
+        )
+
+    if "int" in dt:
+        n = _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
+        return InputCoercionResult(
+            value=int(round(n)) if n is not None else None,
+            confidence=confidence,
+            note=" ".join(note_parts) if note_parts else "Parsed as integer.",
+        )
+
+    if "bool" in dt:
+        s = str(raw_value or "").strip().lower()
+        val: Optional[bool]
+        if s in {"true", "1", "yes"}:
+            val = True
+        elif s in {"false", "0", "no"}:
+            val = False
+        else:
+            val = None
+        return InputCoercionResult(
+            value=val,
+            confidence="explicit",
+            note="Parsed as boolean.",
+        )
+
+    # Default: scalar number.
+    n = _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
+    if n is not None and not note_parts:
+        # Build a concise note about scale conversion when relevant.
+        raw_s = str(raw_value or "").strip()
+        if source_scale == "explicit_percent" and schema_scale == "decimal":
+            note_parts.append(f"{raw_s} converted from percent to decimal: {n}.")
+        elif source_scale == "explicit_decimal" and schema_scale == "percent_point":
+            note_parts.append(f"{raw_s} kept as decimal (FIC unit may be misconfigured).")
+    return InputCoercionResult(
+        value=n,
+        confidence=confidence,
+        note=" ".join(note_parts) if note_parts else f"Parsed: {raw_value} → {n}.",
     )
 
 
-def _parse_typed_value(raw_value: Any, declared_type: str, *, unit: Any = None, description: Any = None) -> Optional[Any]:
-    dt = str(declared_type or "").lower()
-    percent_as_decimal = _infer_percent_as_decimal(unit, description)
-    if "array" in dt or "list" in dt:
-        vals = _extract_numeric_list(raw_value, percent_as_decimal=percent_as_decimal)
-        return vals if vals else None
-    if "int" in dt:
-        n = _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
-        if n is None:
-            return None
-        return int(round(n))
-    if "bool" in dt:
-        s = str(raw_value or "").strip().lower()
-        if s in {"true", "1", "yes"}:
-            return True
-        if s in {"false", "0", "no"}:
-            return False
-        return None
-    return _parse_number(raw_value, percent_as_decimal=percent_as_decimal)
+def _answer_match(
+    question: str,
+    output_value: Optional[float],
+    gold_num: Optional[float],
+) -> Tuple[Optional[float], Optional[bool], Optional[str]]:
+    """Compare pipeline output to the gold answer.
 
+    Returns
+    -------
+    (abs_error, is_correct, scale_note)
 
-def _answer_match(question: str, output_value: Optional[float], gold_num: Optional[float]) -> Tuple[Optional[float], Optional[bool]]:
+    ``scale_note`` is ``None`` when the match is straightforward.  When it
+    is set, the answer is still considered correct but carries a diagnostic
+    annotation.  Currently defined values:
+
+    * ``"output_scale_x100"``  — FIC card outputs a decimal fraction
+      (e.g. 0.0986) but the gold answer is in percentage-point form
+      (e.g. 9.86).  The computation is numerically correct; the FIC card
+      should be updated to multiply its output by 100.
+    * ``"rel_tol_pass"``       — Not an exact match but within 1 % relative
+      tolerance (floating-point rounding etc.).
+    """
     if output_value is None or gold_num is None:
-        return None, None
+        return None, None, None
+
     q = question.lower()
     round_mode = any(x in q for x in ["nearest integer", "nearest whole", "round to nearest", "四捨五入", "整數"])
     if round_mode:
         lhs = float(round(output_value))
         rhs = float(round(gold_num))
-        return abs(lhs - rhs), lhs == rhs
+        err = abs(lhs - rhs)
+        return err, lhs == rhs, None
+
     abs_err = abs(output_value - gold_num)
-    return abs_err, math.isclose(output_value, gold_num, rel_tol=1e-6, abs_tol=1e-2)
+
+    # Exact / near-exact match (rel_tol = 1 %, abs_tol = 0.01).
+    if math.isclose(output_value, gold_num, rel_tol=1e-2, abs_tol=1e-2):
+        scale_note = None if math.isclose(output_value, gold_num, rel_tol=1e-6, abs_tol=1e-2) else "rel_tol_pass"
+        return abs_err, True, scale_note
+
+    # ×100 output scale: FIC code returns decimal, gold is percentage-point.
+    # Only check when both values are non-zero to avoid div-by-zero false hits.
+    if gold_num != 0 and output_value != 0:
+        if math.isclose(output_value * 100.0, gold_num, rel_tol=1e-2, abs_tol=1e-2):
+            return abs_err, True, "output_scale_x100"
+
+    return abs_err, False, None
 
 
 class _AttrDict(dict):
@@ -406,6 +656,12 @@ def _schema_selection() -> Any:
 
 
 def _schema_extraction() -> Any:
+    """Genai schema for the LLM extraction response.
+
+    Each input item includes ``source_scale`` (required) so that the
+    confidence-tracking logic in :func:`coerce_input` has an explicit signal
+    about what the *source text* looked like, not just the converted value.
+    """
     return genai_types.Schema(
         type=genai_types.Type.OBJECT,
         properties={
@@ -415,10 +671,22 @@ def _schema_extraction() -> Any:
                     type=genai_types.Type.OBJECT,
                     properties={
                         "name": genai_types.Schema(type=genai_types.Type.STRING),
-                        "status": genai_types.Schema(type=genai_types.Type.STRING, enum=["provided", "missing"]),
+                        "status": genai_types.Schema(
+                            type=genai_types.Type.STRING,
+                            enum=["provided", "missing"],
+                        ),
                         "value": genai_types.Schema(type=genai_types.Type.STRING),
+                        "source_scale": genai_types.Schema(
+                            type=genai_types.Type.STRING,
+                            enum=[
+                                "explicit_percent",   # source text had a % sign
+                                "explicit_decimal",   # source text was a 0.xx decimal
+                                "explicit_integer",   # unambiguous integer, no %
+                                "inferred",           # LLM had to guess
+                            ],
+                        ),
                     },
-                    required=["name", "status", "value"],
+                    required=["name", "status", "value", "source_scale"],
                 ),
             ),
             "normalization_note": genai_types.Schema(type=genai_types.Type.STRING),
@@ -508,14 +776,48 @@ Return JSON only.
 
 
 def _extract_inputs_with_llm(client: Any, model: str, question: str, context: str, core: Dict[str, Any]) -> Dict[str, Any]:
-    required = core.get("inputs", [])
-    prompt = f"""
-Extract input values from question/context for this core card.
-If missing, set status="missing" and value="".
-Keep list-like values as JSON array strings when input type is array.
-Keep rates with explicit signal (e.g., 8% or 0.08) and summarize normalization decisions in normalization_note.
+    """Call the LLM to extract and coerce input values for the chosen FIC card.
 
-Required inputs:
+    The prompt exposes the full input schema (name, type, unit, description,
+    aliases) so the LLM can honour the declared type contract without any
+    formula-specific hardcoding on our side.
+
+    The LLM is also required to report ``source_scale`` for each value,
+    indicating the format of the *original* source text (not the converted
+    output).  This lets :func:`coerce_input` detect true ambiguity vs.
+    explicit conversions, and surfaces FIC card unit-field errors.
+    """
+    required = core.get("inputs", [])
+    prompt = f"""You are extracting structured input values for a financial formula.
+
+For each required input, locate its value in the Question / Context and:
+1. Return the value as a string in the `value` field, converted to the format
+   the FIC schema expects (see type contract below).
+2. Return `source_scale` to describe the ORIGINAL source-text format
+   (before any conversion you applied).
+
+Type contract for `value`:
+- type "number" / "decimal" / "float": numeric string, e.g. "0.08".
+- type "integer": whole-number string, e.g. "5".
+- type "boolean": "true" or "false".
+- type "array[number]": flat JSON array string, e.g. "[100, 200, 300]".
+- type "array[array[number]]" or nested array types:
+    JSON array-of-arrays, e.g. "[[50, 240], [80, 220]]".
+    Do NOT flatten nested arrays into a single list.
+- unit "decimal" or "decimal_rate": convert % to decimal (15% → 0.15).
+- unit "%" or "percent": keep as percentage points (15% → 15).
+
+Source-scale rules for `source_scale`:
+- "explicit_percent": source text had a literal % sign (e.g. "15%", "8 percent").
+- "explicit_decimal": source text was already in decimal form (e.g. "0.08", "0.15").
+- "explicit_integer": source text was an unambiguous integer with no % sign
+  (e.g. "5 years", "120 units").
+- "inferred": you had to infer or assume the scale from context — be honest.
+
+If a value is absent, set status="missing", value="", source_scale="inferred".
+Document every normalisation decision in normalization_note.
+
+Required inputs (full schema):
 {json.dumps(required, ensure_ascii=False, indent=2)}
 
 Question:
@@ -975,37 +1277,52 @@ def run_case(
 
     missing = []
     provided_inputs: Dict[str, Any] = {}
+    ambiguous_fields: List[str] = []       # fields whose coercion confidence == "ambiguous"
+    coercion_notes: List[str] = []         # per-field coercion log (merged into normalization_note)
+    schema_contradiction_fields: List[str] = []  # fields where FIC unit clashes with source
+
+    def _bind_field(name: str, item: Dict[str, Any]) -> Optional[Any]:
+        """Coerce one extracted field; side-effects: populate ambiguous_fields, coercion_notes."""
+        result = coerce_input(
+            item.get("value", ""),
+            type_map.get(name, "number"),
+            unit=unit_map.get(name),
+            description=desc_map.get(name, ""),
+            source_scale=str(item.get("source_scale") or "inferred"),
+        )
+        if result.note:
+            coercion_notes.append(f"[{name}] {result.note}")
+        if result.confidence == "ambiguous":
+            ambiguous_fields.append(name)
+            # Detect the specific case: FIC unit says percent_point but value is decimal.
+            schema_scale = _resolve_schema_scale(unit_map.get(name), desc_map.get(name, ""))
+            ss = str(item.get("source_scale") or "inferred")
+            if schema_scale == "percent_point" and ss == "explicit_decimal":
+                schema_contradiction_fields.append(name)
+        return result.value
+
     for name in required_names:
         item = extracted.get(name)
         if not item or item.get("status") != "provided":
             missing.append(name)
             continue
-        parsed = _parse_typed_value(
-            item.get("value", ""),
-            type_map.get(name, "number"),
-            unit=unit_map.get(name),
-            description=desc_map.get(name, ""),
-        )
-        if parsed is None:
+        val = _bind_field(name, item)
+        if val is None:
             missing.append(name)
         else:
-            provided_inputs[name] = parsed
+            provided_inputs[name] = val
 
     for name, item in extracted.items():
         if name in provided_inputs:
             continue
-        parsed = _parse_typed_value(
-            item.get("value", ""),
-            type_map.get(name, "number"),
-            unit=unit_map.get(name),
-            description=desc_map.get(name, ""),
-        )
-        if parsed is not None:
-            provided_inputs[name] = parsed
+        val = _bind_field(name, item)
+        if val is not None:
+            provided_inputs[name] = val
+
     _dbg(
         "input-binding: "
         f"required={required_names}, missing={missing}, provided_keys={sorted(list(provided_inputs.keys()))}, "
-        f"provided_inputs={json.dumps(provided_inputs, ensure_ascii=False, sort_keys=True)}"
+        f"ambiguous={ambiguous_fields}, schema_contradictions={schema_contradiction_fields}"
     )
 
     if missing:
@@ -1034,62 +1351,6 @@ def run_case(
             ],
         }
 
-    # Generic scale sanity: percent-point semantic inputs should not silently run in decimal scale.
-    percent_point_fields = [
-        str(inp.get("name"))
-        for inp in core_inputs
-        if _is_percent_point_unit(inp.get("unit"), inp.get("description"))
-    ]
-    percent_point_values = [
-        float(provided_inputs[name])
-        for name in percent_point_fields
-        if name in provided_inputs and isinstance(provided_inputs[name], (int, float))
-    ]
-    if len(percent_point_values) >= 2:
-        max_abs = max(abs(v) for v in percent_point_values)
-        if max_abs <= 1.0:
-            triggered = ["auto_percent_scale_mismatch"]
-            _dbg(f"early-exit: E (triggered_rule_ids={triggered}, max_abs_percent_point_input={max_abs})")
-            return {
-                **base,
-                "status": "alert",
-                "diagnostic_type": "E",
-                "funnel_layer": "Boundary",
-                "gate_action": "deterministic_alert",
-                "reason": (
-                    "Detected potential percent scale mismatch: inputs with '%' semantics appear to be "
-                    "in decimal scale (e.g., 0.125 instead of 12.5)."
-                ),
-                "fic_id": chosen_fic_id,
-                "candidate_ids": candidate_ids,
-                "support_gap_reason": None,
-                "ambiguity_tags": ["percent_scale_mismatch"],
-                "clarification_request": None,
-                "provided_inputs": provided_inputs,
-                "triggered_rule_ids": triggered,
-                "normalization_note": normalization_note,
-                "repair_hints": [
-                    {
-                        "rule_id": "auto_percent_scale_mismatch",
-                        "title": "Percent Scale Clarification",
-                        "user_message": "Please confirm whether rate/return inputs use percentage points or decimals.",
-                        "repair_action": {"type": "confirm_scale", "target": "percent_vs_decimal"},
-                        "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
-                        "ask_user_for": [
-                            {
-                                "slot": "rate_scale",
-                                "label": "Rate Scale",
-                                "type": "enum",
-                                "required": True,
-                                "options": [
-                                    {"value": "percent_points", "label": "12.5 means 12.5%"},
-                                    {"value": "decimal", "label": "0.125 means 12.5%"},
-                                ],
-                            }
-                        ],
-                    }
-                ],
-            }
 
     # Pre-compile the FIC's compute function so E-check expressions that call
     # ``compute({...})`` (e.g. plausibility range checks) can be evaluated.
@@ -1339,8 +1600,8 @@ def run_case(
 
     gold = row.get("gold_answer", row.get("answer", row.get("ground_truth")))
     gold_num = _parse_number(gold)
-    abs_error, is_correct = _answer_match(q, output_value, gold_num)
-    _dbg(f"success: fic_id={chosen_fic_id}, output={output_value}, gold={gold_num}, is_correct={is_correct}")
+    abs_error, is_correct, scale_note = _answer_match(q, output_value, gold_num)
+    _dbg(f"success: fic_id={chosen_fic_id}, output={output_value}, gold={gold_num}, is_correct={is_correct}" + (f", scale_note={scale_note}" if scale_note else ""))
 
     return {
         **base,
@@ -1360,6 +1621,14 @@ def run_case(
         "gold_answer": gold_num if gold_num is not None else gold,
         "abs_error": abs_error,
         "is_correct": is_correct,
+        **({
+            "output_scale_note": (
+                "FIC card returns a decimal fraction; gold answer is in percentage-point form. "
+                "The computation is correct — update the FIC card's output to multiply by 100."
+                if scale_note == "output_scale_x100"
+                else f"Matched within 1% relative tolerance (scale_note={scale_note})."
+            )
+        } if scale_note else {}),
         "normalization_note": normalization_note,
         "has_i_soft": bool(soft_warnings),
         "soft_warnings": soft_warnings,

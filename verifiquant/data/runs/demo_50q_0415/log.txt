@@ -1,0 +1,587 @@
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_error_classification_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/demo_50q_0415/cards.db \
+  --output verifiquant/data/runs/demo_50q_0415/testing_5Q_result.jsonl \
+  --judge-model gemini-2.5-flash \
+  --debug-sanity \
+  --top-k 4
+[run_run_error_classification_pipeline] db relation check passed: core=50, retrieval=50, repair=386, diagnostic_rules=291
+[run_run_error_classification_pipeline] processing test-1697
+[sanity-debug][test-1697] retrieval: fic_article_2513@0.474, fic_article_1050@0.287, fic_article_897@0.195, fic_article_762@0.176
+[sanity-debug][test-1697] selector: decision=select_card, chosen_fic_id=fic_article_2513, reason=The user is asking to calculate the Qstick indicator using a 3-day simple moving average of the difference between closing and opening prices. Candidate 1, 'Qstick Indicator', directly addresses this by explicitly stating it calculates a 'moving average of the difference between closing and opening prices' and can use either 'SMA or EMA'. The problem clearly specifies '3-day simple moving average', which is fully supported by this candidate.
+[sanity-debug][test-1697] retrieval-confidence: top_score=0.474, threshold=0.050
+[sanity-debug][test-1697] input-binding: required=['open_prices', 'close_prices', 'period'], missing=[], provided_keys=['close_prices', 'open_prices', 'period', 'use_ema'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1697] e-check: rule_id=qc_003, mode=violation, triggered=False
+[sanity-debug][test-1697] e-check: rule_id=qp_005, mode=violation, triggered=False
+[sanity-debug][test-1697] e-check: rule_id=qc_006, mode=violation, triggered=False
+[sanity-debug][test-1697] early-exit: C (execution error: name '_calculate_sma' is not defined)
+[run_run_error_classification_pipeline] processing test-1264
+[sanity-debug][test-1264] retrieval: fic_article_306@0.559, fic_article_678@0.180, fic_article_783@0.178, fic_article_2091@0.176
+[sanity-debug][test-1264] selector: decision=select_card, chosen_fic_id=fic_article_306, reason=The user explicitly requests the 'change in the bond's interest rate over the 0.25 years period based on the Vasicek Interest Rate Model'. Candidate 1, titled 'Vasicek Interest Rate Model', directly addresses this by stating it 'Calculates the instantaneous change in interest rate using the Vasicek stochastic model' and its scope boundary specifies it 'Calculates the instantaneous change in interest rate (dr_t)'. All parameters provided in the context (a, b, r_t, sigma, dW_t, dt) are relevant inputs for this model.
+[sanity-debug][test-1264] retrieval-confidence: top_score=0.559, threshold=0.050
+[sanity-debug][test-1264] input-binding: required=['a', 'b', 'r_t', 'sigma', 'dw_t', 'dt'], missing=[], provided_keys=['a', 'b', 'dt', 'dw_t', 'r_t', 'sigma'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1264] e-check: rule_id=a_positive, mode=violation, triggered=False
+[sanity-debug][test-1264] e-check: rule_id=sigma_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1264] e-check: rule_id=dt_positive, mode=violation, triggered=False
+[sanity-debug][test-1264] e-check: rule_id=b_plausible_range, mode=violation, triggered=False
+[sanity-debug][test-1264] e-check: rule_id=rt_plausible_range, mode=violation, triggered=False
+[sanity-debug][test-1264] success: fic_id=fic_article_306, output=0.0008100000000000001, gold=0.00081, is_correct=True
+[run_run_error_classification_pipeline] processing test-1470
+[sanity-debug][test-1470] retrieval: fic_article_2331@0.453, fic_article_450@0.309, fic_article_124@0.259, fic_article_1213@0.223
+[sanity-debug][test-1470] selector: decision=select_card, chosen_fic_id=fic_article_2331, reason=The user explicitly asks for the 'annualized return' from a 'cumulative return' over a specified number of 'days'. Candidate 1, 'Annualized Total Return', directly addresses this need by converting a cumulative return over a specific number of days into an annual geometric average, which precisely matches the user's intent and provided context. The selection hints and applicable_when criteria perfectly align with the question.
+[sanity-debug][test-1470] retrieval-confidence: top_score=0.453, threshold=0.050
+[sanity-debug][test-1470] input-binding: required=['cumulative_return', 'days_held'], missing=[], provided_keys=['cumulative_return', 'days_held'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1470] e-check: rule_id=edh001, mode=violation, triggered=False
+[sanity-debug][test-1470] e-check: rule_id=ecr001, mode=violation, triggered=False
+[sanity-debug][test-1470] e-check: rule_id=ecr002, mode=violation, triggered=False
+[sanity-debug][test-1470] critic: needs_clarification=True, triggered_hint_ids=['dy001'], hard_triggered=[], soft_triggered=['dy001'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1470] critic: I_soft warnings=1
+[sanity-debug][test-1470] success: fic_id=fic_article_2331, output=0.2583550971734798, gold=25.84, is_correct=False
+[run_run_error_classification_pipeline] processing test-1084
+[sanity-debug][test-1084] retrieval: fic_article_1550@0.436, fic_article_571@0.267, fic_article_1400@0.254, fic_article_2533@0.185
+[sanity-debug][test-1084] selector: decision=select_card, chosen_fic_id=fic_article_1550, reason=The user explicitly asks for the 'Return on Net Assets (RONA) percentage'. Candidate 1, 'Return on Net Assets (RONA)', directly addresses this request and its summary and selection hints align perfectly with the user's query and provided context data. The context provides all necessary financial figures (net income, fixed assets, current assets, current liabilities) for its calculation.
+[sanity-debug][test-1084] retrieval-confidence: top_score=0.436, threshold=0.050
+[sanity-debug][test-1084] input-binding: required=['net_income', 'fixed_assets', 'current_assets', 'current_liabilities'], missing=[], provided_keys=['current_assets', 'current_liabilities', 'fixed_assets', 'net_income'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1084] e-check: rule_id=rona_fixed_assets_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1084] e-check: rule_id=rona_current_assets_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1084] e-check: rule_id=rona_current_liabilities_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1084] e-check: rule_id=rona_net_assets_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1084] critic: needs_clarification=True, triggered_hint_ids=['rona_net_income_adjustment', 'rona_fixed_assets_adjustment_depreciation'], hard_triggered=[], soft_triggered=['rona_net_income_adjustment', 'rona_fixed_assets_adjustment_depreciation'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1084] critic: I_soft warnings=2
+[sanity-debug][test-1084] success: fic_id=fic_article_1550, output=0.18461538461538463, gold=18.46, is_correct=False
+[run_run_error_classification_pipeline] processing test-1504
+[sanity-debug][test-1504] retrieval: fic_article_1845@0.469, fic_article_417@0.193, fic_article_924@0.175, fic_article_2816@0.163
+[sanity-debug][test-1504] selector: decision=select_card, chosen_fic_id=fic_article_1845, reason=The user explicitly asks for the 'total standard deduction' for an individual (John) who is '67 years old' and 'legally blind', and mentions an 'additional standard deduction... for both age (65 or older) and blindness'. Candidate 1 directly addresses this by calculating the 'Total Standard Deduction with Age and Blindness Allowances' by adding specific allowances for being age 65 or older and/or legally blind to a provided base standard deduction amount. This is a perfect match.
+[sanity-debug][test-1504] retrieval-confidence: top_score=0.469, threshold=0.050
+[sanity-debug][test-1504] input-binding: required=['age', 'is_blind', 'base_deduction'], missing=[], provided_keys=['age', 'base_deduction', 'is_blind'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1504] e-check: rule_id=age_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1504] e-check: rule_id=base_deduction_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1504] e-check: rule_id=base_deduction_plausible_range, mode=violation, triggered=False
+[sanity-debug][test-1504] critic: needs_clarification=True, triggered_hint_ids=['additional_deduction_amount_year'], hard_triggered=[], soft_triggered=['additional_deduction_amount_year'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1504] critic: I_soft warnings=1
+[sanity-debug][test-1504] success: fic_id=fic_article_1845, output=15900.0, gold=15900.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1710
+[sanity-debug][test-1710] retrieval: fic_article_1400@0.559, fic_article_450@0.203, fic_article_2533@0.187, fic_article_2513@0.170
+[sanity-debug][test-1710] selector: decision=select_card, chosen_fic_id=fic_article_1400, reason=The user explicitly asks for the 'PMI' and provides survey results with percentages for improvement, no change, and deterioration, which directly align with the inputs and purpose of the 'Purchasing Managers' Index (PMI)' card. The card's summary, selection hints, and applicable_when criteria perfectly match the user's request and context.
+[sanity-debug][test-1710] retrieval-confidence: top_score=0.559, threshold=0.050
+[sanity-debug][test-1710] input-binding: required=['p1', 'p2', 'p3'], missing=[], provided_keys=['p1', 'p2', 'p3'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1710] e-check: rule_id=pmi_input_sum_100, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p1_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p2_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p3_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p1_max_100, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p2_max_100, mode=violation, triggered=False
+[sanity-debug][test-1710] e-check: rule_id=pmi_p3_max_100, mode=violation, triggered=False
+[sanity-debug][test-1710] success: fic_id=fic_article_1400, output=57.5, gold=57.5, is_correct=True
+[run_run_error_classification_pipeline] processing test-1673
+[sanity-debug][test-1673] retrieval: fic_article_897@0.555, fic_article_1050@0.318, fic_article_762@0.267, fic_article_2350@0.208
+[sanity-debug][test-1673] selector: decision=select_card, chosen_fic_id=fic_article_897, reason=The user explicitly asks for 'Adjusted Net Advances (ANA)' which directly matches the title and summary of Candidate 1. The context provides the necessary inputs (advancing and declining stocks) for this calculation, and the card's scope confirms it outputs a normalized ratio that can be expressed as a percentage.
+[sanity-debug][test-1673] retrieval-confidence: top_score=0.555, threshold=0.050
+[sanity-debug][test-1673] input-binding: required=['advances', 'declines'], missing=[], provided_keys=['advances', 'declines'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1673] e-check: rule_id=ana_001, mode=violation, triggered=False
+[sanity-debug][test-1673] e-check: rule_id=ana_002, mode=violation, triggered=False
+[sanity-debug][test-1673] e-check: rule_id=ana_003, mode=violation, triggered=False
+[sanity-debug][test-1673] e-check: rule_id=ana_004, mode=violation, triggered=False
+[sanity-debug][test-1673] e-check: rule_id=ana_005, mode=violation, triggered=False
+[sanity-debug][test-1673] success: fic_id=fic_article_897, output=0.4, gold=40.0, is_correct=False
+[run_run_error_classification_pipeline] processing test-1028
+[sanity-debug][test-1028] retrieval: fic_article_571@0.473, fic_article_1550@0.241, fic_article_2533@0.230, fic_article_897@0.151
+[sanity-debug][test-1028] selector: decision=select_card, chosen_fic_id=fic_article_571, reason=The user explicitly asks for the 'Fixed Asset Turnover ratio', which directly matches the title and purpose of Candidate 1. The context provides all necessary inputs (net sales and fixed assets at the beginning and end of the period) for this calculation. Candidate 1 also highlights its applicability for evaluating the efficiency of capital investments and analyzing manufacturing companies, which aligns perfectly with ABC Corp's scenario and management's interest.
+[sanity-debug][test-1028] retrieval-confidence: top_score=0.473, threshold=0.050
+[sanity-debug][test-1028] input-binding: required=['net_sales', 'beginning_fixed_assets', 'ending_fixed_assets'], missing=[], provided_keys=['beginning_fixed_assets', 'ending_fixed_assets', 'net_sales'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1028] e-check: rule_id=fatr_e_001, mode=violation, triggered=False
+[sanity-debug][test-1028] e-check: rule_id=fatr_e_002, mode=violation, triggered=False
+[sanity-debug][test-1028] e-check: rule_id=fatr_e_003, mode=violation, triggered=False
+[sanity-debug][test-1028] e-check: rule_id=fatr_e_004, mode=violation, triggered=False
+[sanity-debug][test-1028] e-check: rule_id=fatr_e_005, mode=violation, triggered=False
+[sanity-debug][test-1028] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=hard, is_hard_block=True
+[sanity-debug][test-1028] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1920
+[sanity-debug][test-1920] retrieval: fic_article_3052@0.439, fic_article_2168@0.272, fic_article_571@0.199, fic_article_1400@0.198
+[sanity-debug][test-1920] selector: decision=select_card, chosen_fic_id=fic_article_3052, reason=The user explicitly asks for the 'Weighted Average Cost of Capital (WACC)' and provides all the necessary inputs (debt ratio, equity ratio, cost of debt, cost of equity, tax rate). Candidate 1 directly calculates WACC and its scope and summary align perfectly with the user's request.
+[sanity-debug][test-1920] retrieval-confidence: top_score=0.439, threshold=0.050
+[sanity-debug][test-1920] input-binding: required=['debt_ratio', 'cost_of_debt', 'equity_ratio', 'cost_of_equity', 'tax_rate'], missing=[], provided_keys=['cost_of_debt', 'cost_of_equity', 'debt_ratio', 'equity_ratio', 'tax_rate'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1920] e-check: rule_id=dr1, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr2, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr3, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr4, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr5, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr6, mode=validity, triggered=False
+[sanity-debug][test-1920] e-check: rule_id=dr7, mode=validity, triggered=False
+[sanity-debug][test-1920] success: fic_id=fic_article_3052, output=0.063, gold=6.3, is_correct=False
+[run_run_error_classification_pipeline] processing test-1708
+[sanity-debug][test-1708] retrieval: fic_article_1213@0.424, fic_article_137@0.325, fic_article_2091@0.257, fic_article_2533@0.201
+[sanity-debug][test-1708] selector: decision=select_card, chosen_fic_id=fic_article_1213, reason=The user explicitly asks for the 'compound annual growth rate (CAGR)' of an investment. Candidate 1 directly calculates the Compound Annual Growth Rate (CAGR) and requires the beginning value, ending value, and the total number of years, which are all clearly provided in the context.
+[sanity-debug][test-1708] retrieval-confidence: top_score=0.424, threshold=0.050
+[sanity-debug][test-1708] input-binding: required=['beginning_value', 'ending_value', 'num_years'], missing=[], provided_keys=['beginning_value', 'ending_value', 'num_years'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1708] e-check: rule_id=cagr_input_positive_beginning_value, mode=violation, triggered=False
+[sanity-debug][test-1708] e-check: rule_id=cagr_input_positive_ending_value, mode=violation, triggered=False
+[sanity-debug][test-1708] e-check: rule_id=cagr_input_positive_num_years, mode=violation, triggered=False
+[sanity-debug][test-1708] success: fic_id=fic_article_1213, output=0.09856054330611785, gold=9.86, is_correct=False
+[run_run_error_classification_pipeline] processing test-1031
+[sanity-debug][test-1031] retrieval: fic_article_1132@0.436, fic_article_57@0.192, fic_article_2366@0.172, fic_article_2350@0.159
+[sanity-debug][test-1031] selector: decision=select_card, chosen_fic_id=fic_article_1132, reason=The user's question is about calculating the remaining down payment for a home purchase after considering a gift of equity. Candidate 1, 'Gift of Equity', directly addresses this by calculating 'the remaining cash required for a down payment on a home purchase, considering a gift of equity', which perfectly aligns with the user's need.
+[sanity-debug][test-1031] retrieval-confidence: top_score=0.436, threshold=0.050
+[sanity-debug][test-1031] input-binding: required=['market_value', 'percent_required', 'gift_of_equity'], missing=[], provided_keys=['gift_of_equity', 'market_value', 'percent_required'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1031] e-check: rule_id=mv_positive, mode=violation, triggered=False
+[sanity-debug][test-1031] e-check: rule_id=pr_positive, mode=violation, triggered=False
+[sanity-debug][test-1031] e-check: rule_id=pr_range, mode=violation, triggered=False
+[sanity-debug][test-1031] e-check: rule_id=goe_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1031] e-check: rule_id=goe_not_excessive, mode=violation, triggered=False
+[sanity-debug][test-1031] critic: needs_clarification=True, triggered_hint_ids=['percent_required_unit'], hard_triggered=['percent_required_unit'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1031] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1833
+[sanity-debug][test-1833] retrieval: fic_article_2995@0.465, fic_article_2091@0.200, fic_article_2331@0.160, fic_article_924@0.143
+[sanity-debug][test-1833] selector: decision=select_card, chosen_fic_id=fic_article_2995, reason=The user is asking to determine the Full Retirement Age (FRA) under the U.S. Social Security system based on a birth year. Candidate 1 (fic_article_2995) is explicitly designed for this purpose, calculating the 'Full Retirement Age (FRA) for U.S. Social Security benefits based on an individual's birth year'. The question provides the necessary input (Jane's birth year is 1957).
+[sanity-debug][test-1833] retrieval-confidence: top_score=0.465, threshold=0.050
+[sanity-debug][test-1833] input-binding: required=['birth_year'], missing=[], provided_keys=['birth_year'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1833] e-check: rule_id=input_birth_year_positive, mode=violation, triggered=False
+[sanity-debug][test-1833] e-check: rule_id=input_birth_year_future, mode=violation, triggered=False
+[sanity-debug][test-1833] e-check: rule_id=input_birth_year_too_old, mode=violation, triggered=False
+[sanity-debug][test-1833] e-check: rule_id=input_birth_year_applicability, mode=violation, triggered=False
+[sanity-debug][test-1833] success: fic_id=fic_article_2995, output=66.0, gold=66.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1005
+[sanity-debug][test-1005] retrieval: fic_article_1803@0.473, fic_article_207@0.182, fic_article_2366@0.139, fic_article_2091@0.127
+[sanity-debug][test-1005] selector: decision=select_card, chosen_fic_id=fic_article_1803, reason=The user's question explicitly asks to calculate a 'penalty fee' for 'not meeting the contract quantity' in a 'take-or-pay contract'. Candidate 1, titled 'Take or Pay', directly addresses this scenario, as its summary states it 'Calculates the penalty fee a buyer incurs in a take-or-pay contract for not meeting the agreed-upon purchase quantity.' The context provided also clearly describes a take-or-pay contract and the associated penalty.
+[sanity-debug][test-1005] retrieval-confidence: top_score=0.473, threshold=0.050
+[sanity-debug][test-1005] input-binding: required=['contract_quantity', 'purchased_quantity', 'contract_price', 'penalty_rate'], missing=[], provided_keys=['contract_price', 'contract_quantity', 'penalty_rate', 'purchased_quantity'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1005] e-check: rule_id=dq005_e_qty_neg, mode=violation, triggered=False
+[sanity-debug][test-1005] e-check: rule_id=dq006_e_cp_neg, mode=violation, triggered=False
+[sanity-debug][test-1005] e-check: rule_id=dq007_e_pr_range, mode=violation, triggered=False
+[sanity-debug][test-1005] e-check: rule_id=dq008_e_pq_gt_cq, mode=violation, triggered=False
+[sanity-debug][test-1005] success: fic_id=fic_article_1803, output=12800.0, gold=12800.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1009
+[sanity-debug][test-1009] retrieval: fic_article_2552@0.455, fic_article_2098@0.238, fic_article_1400@0.235, fic_article_2940@0.175
+[sanity-debug][test-1009] selector: decision=select_card, chosen_fic_id=fic_article_2552, reason=The user explicitly asks for the 'total depreciation expense... using the units of production method'. Candidate 1 directly addresses this by stating its purpose is to calculate 'periodic depreciation expenses for an asset using the units of production method' and its summary and applicable conditions perfectly match the user's query and provided context, including details like asset cost, salvage value, total capacity, and actual production units.
+[sanity-debug][test-1009] retrieval-confidence: top_score=0.455, threshold=0.050
+[sanity-debug][test-1009] input-binding: required=['cost', 'salvage_value', 'total_units', 'units_produced'], missing=[], provided_keys=['cost', 'salvage_value', 'total_units', 'units_produced'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1009] e-check: rule_id=cost_positive, mode=violation, triggered=False
+[sanity-debug][test-1009] e-check: rule_id=salvage_value_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1009] e-check: rule_id=cost_greater_than_salvage, mode=violation, triggered=False
+[sanity-debug][test-1009] e-check: rule_id=total_units_positive, mode=violation, triggered=False
+[sanity-debug][test-1009] e-check: rule_id=units_produced_elements_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1009] success: fic_id=fic_article_2552, output=15000.0, gold=70000.0, is_correct=False
+[run_run_error_classification_pipeline] processing test-1426
+[sanity-debug][test-1426] retrieval: fic_article_627@0.514, fic_article_51@0.328, fic_article_2942@0.254, fic_article_91@0.234
+[sanity-debug][test-1426] selector: decision=select_card, chosen_fic_id=fic_article_627, reason=The user explicitly asked for 'Free Cash Flow to the Firm (FCFF)', and Candidate 1 directly calculates FCFF using the provided inputs: Cash Flow from Operations (CFO), Interest Expense, Tax Rate, and Capital Expenditures (CAPEX). The formula specified in the candidate's 'scope_boundaries' (CFO + IE * (1 - Tax Rate) - CAPEX) aligns with standard FCFF calculation methods when CFO is the starting point.
+[sanity-debug][test-1426] retrieval-confidence: top_score=0.514, threshold=0.050
+[sanity-debug][test-1426] input-binding: required=['cfo', 'ie', 'tax_rate', 'capex'], missing=[], provided_keys=['capex', 'cfo', 'ie', 'tax_rate'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1426] e-check: rule_id=tax_rate_range_check, mode=validity, triggered=False
+[sanity-debug][test-1426] critic: needs_clarification=True, triggered_hint_ids=['tax_rate_unit'], hard_triggered=[], soft_triggered=['tax_rate_unit'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1426] critic: I_soft warnings=1
+[sanity-debug][test-1426] success: fic_id=fic_article_627, output=215000.0, gold=215000.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1442
+[sanity-debug][test-1442] retrieval: fic_article_1213@0.393, fic_article_137@0.297, fic_article_783@0.204, fic_article_2533@0.199
+[sanity-debug][test-1442] selector: decision=select_card, chosen_fic_id=fic_article_1213, reason=The user explicitly asks for the 'Compound Annual Growth Rate (CAGR)' and provides the necessary beginning value, ending value, and time period. Candidate 1 directly calculates CAGR and aligns perfectly with the user's request.
+[sanity-debug][test-1442] retrieval-confidence: top_score=0.393, threshold=0.050
+[sanity-debug][test-1442] input-binding: required=['beginning_value', 'ending_value', 'num_years'], missing=[], provided_keys=['beginning_value', 'ending_value', 'num_years'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1442] e-check: rule_id=cagr_input_positive_beginning_value, mode=violation, triggered=False
+[sanity-debug][test-1442] e-check: rule_id=cagr_input_positive_ending_value, mode=violation, triggered=False
+[sanity-debug][test-1442] e-check: rule_id=cagr_input_positive_num_years, mode=violation, triggered=False
+[sanity-debug][test-1442] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=hard, is_hard_block=True
+[sanity-debug][test-1442] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1604
+[sanity-debug][test-1604] retrieval: fic_article_783@0.477, fic_article_124@0.244, fic_article_2168@0.223, fic_article_1132@0.213
+[sanity-debug][test-1604] selector: decision=select_card, chosen_fic_id=fic_article_783, reason=The user explicitly asks for the 'total bullet repayment amount' at loan maturity for a loan where annual interest payments are made and the principal is paid as a single lump sum at the end. Candidate 1, 'Bullet Repayment', directly addresses this scenario by calculating the total single lump sum payment required at maturity for an interest-only loan, which includes both the initial principal and the total interest paid. The description and applicable conditions perfectly align with the user's request and context.
+[sanity-debug][test-1604] retrieval-confidence: top_score=0.477, threshold=0.050
+[sanity-debug][test-1604] input-binding: required=['loan_principal', 'interest_rate', 'term_years'], missing=[], provided_keys=['interest_rate', 'loan_principal', 'payment_frequency', 'term_years'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1604] e-check: rule_id=d001, mode=violation, triggered=False
+[sanity-debug][test-1604] e-check: rule_id=d002, mode=violation, triggered=False
+[sanity-debug][test-1604] e-check: rule_id=d003, mode=violation, triggered=False
+[sanity-debug][test-1604] e-check: rule_id=d004, mode=violation, triggered=False
+[sanity-debug][test-1604] e-check: rule_id=d005, mode=violation, triggered=False
+[sanity-debug][test-1604] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=hard, is_hard_block=True
+[sanity-debug][test-1604] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1106
+[sanity-debug][test-1106] retrieval: fic_article_2533@0.415, fic_article_571@0.270, fic_article_1213@0.194, fic_article_2098@0.193
+[sanity-debug][test-1106] selector: decision=select_card, chosen_fic_id=fic_article_2533, reason=The user is asking for the revenue growth percentage between two consecutive quarters (first quarter to second quarter). Candidate 1, 'Quarterly Revenue Growth', precisely matches this request by calculating the percentage growth in revenue from one quarter to the next and is applicable when comparing revenue between two consecutive quarters and having current and previous quarter revenue figures, which are provided in the context.
+[sanity-debug][test-1106] retrieval-confidence: top_score=0.415, threshold=0.050
+[sanity-debug][test-1106] input-binding: required=['previous_revenue', 'current_revenue'], missing=[], provided_keys=['current_revenue', 'previous_revenue'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1106] e-check: rule_id=dc003, mode=violation, triggered=False
+[sanity-debug][test-1106] e-check: rule_id=dc004, mode=violation, triggered=False
+[sanity-debug][test-1106] success: fic_id=fic_article_2533, output=20.0, gold=20.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1832
+[sanity-debug][test-1832] retrieval: fic_article_417@0.485, fic_article_2967@0.346, fic_article_1400@0.214, fic_article_1213@0.195
+[sanity-debug][test-1832] selector: decision=select_card, chosen_fic_id=fic_article_417, reason=The user explicitly asks for the 'real return percentage on the investment after accounting for inflation.' Candidate 1's summary directly states it 'Calculates the real return of an investment by adjusting the nominal return for the effects of inflation' and its selection hints include 'real return' and 'return after inflation,' perfectly aligning with the user's query and the provided context.
+[sanity-debug][test-1832] retrieval-confidence: top_score=0.485, threshold=0.050
+[sanity-debug][test-1832] input-binding: required=['nominal_return', 'inflation_rate'], missing=[], provided_keys=['inflation_rate', 'nominal_return'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1832] e-check: rule_id=inflation_rate_denominator_check, mode=violation, triggered=False
+[sanity-debug][test-1832] e-check: rule_id=nominal_return_plausibility_high, mode=violation, triggered=False
+[sanity-debug][test-1832] e-check: rule_id=nominal_return_plausibility_low, mode=violation, triggered=False
+[sanity-debug][test-1832] e-check: rule_id=inflation_rate_plausibility_high, mode=violation, triggered=False
+[sanity-debug][test-1832] critic: needs_clarification=True, triggered_hint_ids=['percentage_input_format'], hard_triggered=[], soft_triggered=['percentage_input_format'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1832] critic: I_soft warnings=1
+[sanity-debug][test-1832] success: fic_id=fic_article_417, output=4.347826086956541, gold=4.35, is_correct=True
+[run_run_error_classification_pipeline] processing test-1114
+[sanity-debug][test-1114] retrieval: fic_article_596@0.469, fic_article_450@0.283, fic_article_417@0.199, fic_article_207@0.148
+[sanity-debug][test-1114] selector: decision=select_card, chosen_fic_id=fic_article_596, reason=The user's question explicitly asks for the 'financial outcome (profit or cost) of the corporation's hedging strategy using the forward contract' and provides all necessary details (forward rate, spot rate, transaction amount). Candidate 1, 'Foreign Exchange Risk: Hedging Cost or Profit with Forward Contracts', directly addresses this need, as its title, summary, selection hints, and applicable conditions perfectly match the user's intent to calculate the financial impact of a forward contract used for hedging.
+[sanity-debug][test-1114] retrieval-confidence: top_score=0.469, threshold=0.050
+[sanity-debug][test-1114] input-binding: required=['forward_rate', 'spot_rate', 'contract_amount'], missing=[], provided_keys=['contract_amount', 'forward_rate', 'spot_rate'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1114] e-check: rule_id=dc001, mode=violation, triggered=False
+[sanity-debug][test-1114] e-check: rule_id=dc002, mode=violation, triggered=False
+[sanity-debug][test-1114] e-check: rule_id=dc003, mode=violation, triggered=False
+[sanity-debug][test-1114] e-check: rule_id=dc004, mode=violation, triggered=False
+[sanity-debug][test-1114] e-check: rule_id=dc005, mode=violation, triggered=False
+[sanity-debug][test-1114] critic: needs_clarification=True, triggered_hint_ids=['output_interpretation'], hard_triggered=[], soft_triggered=['output_interpretation'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1114] critic: I_soft warnings=1
+[sanity-debug][test-1114] success: fic_id=fic_article_596, output=9999.999999999942, gold=10000.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1134
+[sanity-debug][test-1134] retrieval: fic_article_417@0.376, fic_article_2091@0.330, fic_article_2967@0.250, fic_article_1213@0.223
+[sanity-debug][test-1134] selector: decision=select_card, chosen_fic_id=fic_article_2967, reason=The user explicitly asks for the 'nominal rate of return'. Candidate 3, 'Nominal Rate of Return', directly matches this request in its title, summary, and selection hints, describing the calculation of the percentage increase in an investment's value before considering external factors like inflation or taxes. This perfectly aligns with the user's goal of assessing the raw performance of their investment given the initial and current market values.
+[sanity-debug][test-1134] retrieval-confidence: top_score=0.376, threshold=0.050
+[sanity-debug][test-1134] input-binding: required=['current_market_value', 'original_investment_value'], missing=[], provided_keys=['current_market_value', 'original_investment_value'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1134] e-check: rule_id=nrr_e_001, mode=violation, triggered=False
+[sanity-debug][test-1134] e-check: rule_id=nrr_e_002, mode=violation, triggered=False
+[sanity-debug][test-1134] e-check: rule_id=nrr_e_003, mode=violation, triggered=False
+[sanity-debug][test-1134] e-check: rule_id=nrr_e_004, mode=violation, triggered=False
+[sanity-debug][test-1134] success: fic_id=fic_article_2967, output=60.0, gold=60.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1460
+[sanity-debug][test-1460] retrieval: fic_article_2816@0.481, fic_article_306@0.235, fic_article_2331@0.232, fic_article_627@0.206
+[sanity-debug][test-1460] selector: decision=select_card, chosen_fic_id=fic_article_2816, reason=The user explicitly asks for the 'alpha of the mutual fund', and Candidate 1 (fic_article_2816) is titled 'Excess Return (Alpha)' and its summary directly states it 'Calculates Alpha, a specific measure of excess return, representing the return of an investment above its expected return as predicted by the Capital Asset Pricing Model (CAPM)'. The context provides all necessary inputs for this calculation: investment return, risk-free rate, market return, and beta.
+[sanity-debug][test-1460] retrieval-confidence: top_score=0.481, threshold=0.050
+[sanity-debug][test-1460] input-binding: required=['investment_return', 'benchmark_return', 'beta', 'market_return'], missing=[], provided_keys=['benchmark_return', 'beta', 'investment_return', 'market_return'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1460] e-check: rule_id=alpha_returns_range, mode=violation, triggered=False
+[sanity-debug][test-1460] e-check: rule_id=alpha_beta_range, mode=violation, triggered=False
+[sanity-debug][test-1460] e-check: rule_id=alpha_mkt_risk_premium, mode=violation, triggered=False
+[sanity-debug][test-1460] success: fic_id=fic_article_2816, output=0.023000000000000007, gold=2.3, is_correct=False
+[run_run_error_classification_pipeline] processing test-1944
+[sanity-debug][test-1944] retrieval: fic_article_2940@0.419, fic_article_2942@0.338, fic_article_2168@0.301, fic_article_1732@0.282
+[sanity-debug][test-1944] selector: decision=select_card, chosen_fic_id=fic_article_2940, reason=The user explicitly asks for the 'Net Present Value (NPV)' of a project. Candidate 1, 'Net Present Value (NPV)', directly matches this request in its title, summary, and applicable when/scope boundaries, which perfectly align with the provided context of an initial investment, future cash flows, and a discount rate.
+[sanity-debug][test-1944] retrieval-confidence: top_score=0.419, threshold=0.050
+[sanity-debug][test-1944] input-binding: required=['cash_flows', 'discount_rate'], missing=[], provided_keys=['cash_flows', 'discount_rate', 'initial_investment'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1944] e-check: rule_id=npv_dr_nonneg_e01, mode=violation, triggered=False
+[sanity-debug][test-1944] e-check: rule_id=npv_dr_plaus_e02, mode=violation, triggered=False
+[sanity-debug][test-1944] e-check: rule_id=npv_ii_nonneg_e03, mode=violation, triggered=False
+[sanity-debug][test-1944] critic: needs_clarification=True, triggered_hint_ids=['discount_rate_basis', 'cash_flow_timing'], hard_triggered=[], soft_triggered=['discount_rate_basis', 'cash_flow_timing'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1944] critic: I_soft warnings=2
+[sanity-debug][test-1944] success: fic_id=fic_article_2940, output=32050.24954165495, gold=32050.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1925
+[sanity-debug][test-1925] retrieval: fic_article_2940@0.410, fic_article_2942@0.326, fic_article_1732@0.265, fic_article_2168@0.265
+[sanity-debug][test-1925] selector: decision=select_card, chosen_fic_id=fic_article_2940, reason=The user explicitly asks for the 'Net Present Value (NPV)' and provides all necessary inputs: an initial investment, a series of future cash flows over five years, and a required rate of return. Candidate 1, 'Net Present Value (NPV)', directly matches the user's query and its summary and scope boundaries confirm it calculates the present value of future cash flows and subtracts the initial investment, precisely aligning with the problem statement. Other candidates are either specific variants of NPV (NPVGO), a component of NPV (DCF without initial investment subtraction), or entirely different financial ratios (LLCR).
+[sanity-debug][test-1925] retrieval-confidence: top_score=0.410, threshold=0.050
+[sanity-debug][test-1925] input-binding: required=['cash_flows', 'discount_rate'], missing=[], provided_keys=['cash_flows', 'discount_rate', 'initial_investment'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1925] e-check: rule_id=npv_dr_nonneg_e01, mode=violation, triggered=False
+[sanity-debug][test-1925] e-check: rule_id=npv_dr_plaus_e02, mode=violation, triggered=False
+[sanity-debug][test-1925] e-check: rule_id=npv_ii_nonneg_e03, mode=violation, triggered=False
+[sanity-debug][test-1925] critic: needs_clarification=True, triggered_hint_ids=['cash_flow_timing'], hard_triggered=[], soft_triggered=['cash_flow_timing'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1925] critic: I_soft warnings=1
+[sanity-debug][test-1925] success: fic_id=fic_article_2940, output=180270.9938115843, gold=180271.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1045
+[sanity-debug][test-1045] retrieval: fic_article_2942@0.551, fic_article_2940@0.416, fic_article_1732@0.327, fic_article_2168@0.241
+[sanity-debug][test-1045] selector: decision=select_card, chosen_fic_id=fic_article_2942, reason=The user explicitly asked for the 'Net Present Value of Growth Opportunities (NPVGO)'. Candidate 1 is titled 'Net Present Value of Growth Opportunities (NPVGO)' and its description perfectly matches the scenario provided, which involves valuing a growth opportunity with a single projected future cash inflow and an initial investment.
+[sanity-debug][test-1045] retrieval-confidence: top_score=0.551, threshold=0.050
+[sanity-debug][test-1045] input-binding: required=['projected_cash_inflows', 'cost_of_capital', 'initial_investment'], missing=[], provided_keys=['cost_of_capital', 'initial_investment', 'projected_cash_inflows'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1045] e-check: rule_id=d001, mode=violation, triggered=False
+[sanity-debug][test-1045] e-check: rule_id=d002, mode=violation, triggered=False
+[sanity-debug][test-1045] e-check: rule_id=d003, mode=violation, triggered=False
+[sanity-debug][test-1045] e-check: rule_id=d004, mode=violation, triggered=False
+[sanity-debug][test-1045] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=hard, is_hard_block=True
+[sanity-debug][test-1045] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1593
+[sanity-debug][test-1593] retrieval: fic_article_207@0.378, fic_article_1132@0.222, fic_article_1803@0.146, fic_article_2942@0.144
+[sanity-debug][test-1593] selector: decision=select_card, chosen_fic_id=fic_article_207, reason=The user is asking to calculate the payment amount for a construction company based on the progress of a cost-plus contract. Candidate 1, 'Cost-Plus Contract', directly addresses this by calculating the payment due in a cost-plus contract at a specific completion percentage.
+[sanity-debug][test-1593] retrieval-confidence: top_score=0.378, threshold=0.050
+[sanity-debug][test-1593] input-binding: required=['contract_value', 'profit_percentage', 'completion_percentage'], missing=[], provided_keys=['completion_percentage', 'contract_value', 'profit_percentage'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1593] e-check: rule_id=contract_value_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1593] e-check: rule_id=profit_percentage_range, mode=violation, triggered=False
+[sanity-debug][test-1593] e-check: rule_id=completion_percentage_range, mode=violation, triggered=False
+[sanity-debug][test-1593] critic: needs_clarification=True, triggered_hint_ids=['profit_percentage_interpretation'], hard_triggered=['profit_percentage_interpretation'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1593] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1881
+[sanity-debug][test-1881] retrieval: fic_article_924@0.403, fic_article_2995@0.164, fic_article_57@0.149, fic_article_2274@0.133
+[sanity-debug][test-1881] selector: decision=select_card, chosen_fic_id=fic_article_924, reason=The user explicitly asks to calculate 'Modified Adjusted Gross Income (MAGI)' and provides all necessary components, including AGI and various add-back items. Candidate 1, 'Modified Adjusted Gross Income (MAGI)', directly matches this request and its summary and selection hints align perfectly with the user's query and context.
+[sanity-debug][test-1881] retrieval-confidence: top_score=0.403, threshold=0.050
+[sanity-debug][test-1881] input-binding: required=['agi'], missing=[], provided_keys=['agi', 'excluded_foreign_income', 'ira_deductions', 'rental_losses', 'self_employment_tax', 'student_loan_interest', 'tuition_and_fees'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1881] e-check: rule_id=magi_001, mode=violation, triggered=False
+[sanity-debug][test-1881] e-check: rule_id=magi_002, mode=violation, triggered=False
+[sanity-debug][test-1881] e-check: rule_id=magi_003, mode=violation, triggered=False
+[sanity-debug][test-1881] e-check: rule_id=magi_004, mode=violation, triggered=False
+[sanity-debug][test-1881] e-check: rule_id=magi_005, mode=violation, triggered=False
+[sanity-debug][test-1881] e-check: rule_id=magi_006, mode=violation, triggered=False
+[sanity-debug][test-1881] critic: needs_clarification=True, triggered_hint_ids=['magi_definition_scope'], hard_triggered=[], soft_triggered=['magi_definition_scope'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1881] critic: I_soft warnings=1
+[sanity-debug][test-1881] success: fic_id=fic_article_924, output=97000.0, gold=97000.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1001
+[sanity-debug][test-1001] retrieval: fic_article_584@0.372, fic_article_1050@0.244, fic_article_2331@0.179, fic_article_2513@0.140
+[sanity-debug][test-1001] selector: decision=select_card, chosen_fic_id=fic_article_584, reason=The user's question directly asks for the 'average daily float' and provides data that includes varying float amounts and their respective days outstanding. Candidate 1, 'Average Daily Float', precisely matches this intent as its title, summary, and 'applicable_when' criteria align perfectly with the user's request and context.
+[sanity-debug][test-1001] retrieval-confidence: top_score=0.372, threshold=0.050
+[sanity-debug][test-1001] input-binding: required=['float_amounts', 'days_outstanding'], missing=[], provided_keys=['days_outstanding', 'float_amounts'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1001] e-check: rule_id=adf_e_001, mode=violation, triggered=False
+[sanity-debug][test-1001] e-check: rule_id=adf_e_002, mode=violation, triggered=True
+[sanity-debug][test-1001] e-check: rule_id=adf_e_003, mode=violation, triggered=False
+[sanity-debug][test-1001] e-check: rule_id=adf_e_004, mode=violation, triggered=False
+[sanity-debug][test-1001] e-check: rule_id=adf_e_005, mode=violation, triggered=False
+[sanity-debug][test-1001] early-exit: E (triggered_rule_ids=['adf_e_002'])
+[run_run_error_classification_pipeline] processing test-1553
+[sanity-debug][test-1553] retrieval: fic_article_2289@0.520, fic_article_2366@0.226, fic_article_1895@0.217, fic_article_2816@0.198
+[sanity-debug][test-1553] selector: decision=select_card, chosen_fic_id=fic_article_2289, reason=The user explicitly asks to calculate 'Risk-Weighted Asset (RWA)' and provides all necessary inputs: Exposure at Default (EAD), Probability of Default (PD), and Loss Given Default (LGD). Candidate 1, 'Advanced Internal Rating-Based (AIRB)', directly calculates RWA using these exact parameters under the Basel II framework, which is also mentioned in the context.
+[sanity-debug][test-1553] retrieval-confidence: top_score=0.520, threshold=0.050
+[sanity-debug][test-1553] input-binding: required=['pd', 'lgd', 'ead'], missing=[], provided_keys=['ead', 'lgd', 'pd'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1553] e-check: rule_id=rwa_d_001, mode=validity, triggered=False
+[sanity-debug][test-1553] e-check: rule_id=rwa_d_002, mode=validity, triggered=False
+[sanity-debug][test-1553] e-check: rule_id=rwa_d_003, mode=validity, triggered=False
+[sanity-debug][test-1553] success: fic_id=fic_article_2289, output=45000.00000000001, gold=45000.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1577
+[sanity-debug][test-1577] retrieval: fic_article_450@0.518, fic_article_596@0.277, fic_article_2905@0.220, fic_article_306@0.175
+[sanity-debug][test-1577] selector: decision=select_card, chosen_fic_id=fic_article_450, reason=The user explicitly asks for the 'forward exchange rate' and mentions 'interest rate parity'. Candidate 1 (fic_article_450) is titled 'Interest Rate Parity (IRP)' and its summary directly states it 'Calculates the theoretical forward exchange rate between two currencies based on their spot exchange rate and the interest rate differentials'. This perfectly matches the user's request and the context provided.
+[sanity-debug][test-1577] retrieval-confidence: top_score=0.518, threshold=0.050
+[sanity-debug][test-1577] input-binding: required=['spot_rate', 'interest_rate_country_c', 'interest_rate_country_b'], missing=[], provided_keys=['interest_rate_country_b', 'interest_rate_country_c', 'spot_rate'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1577] e-check: rule_id=spot_rate_positive, mode=violation, triggered=False
+[sanity-debug][test-1577] e-check: rule_id=ir_country_c_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1577] e-check: rule_id=ir_country_b_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1577] e-check: rule_id=ir_country_c_decimal_format, mode=violation, triggered=False
+[sanity-debug][test-1577] e-check: rule_id=ir_country_b_decimal_format, mode=violation, triggered=False
+[sanity-debug][test-1577] critic: needs_clarification=True, triggered_hint_ids=['irp_currencydirection'], hard_triggered=['irp_currencydirection'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1577] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1270
+[sanity-debug][test-1270] retrieval: fic_article_57@0.446, fic_article_1132@0.215, fic_article_2098@0.164, fic_article_417@0.154
+[sanity-debug][test-1270] selector: decision=select_card, chosen_fic_id=fic_article_57, reason=The user's question explicitly asks to calculate the 'taxable capital gain' on the sale of a property, providing all necessary figures including purchase price, capital improvements, sale price, and capital gains exclusion. Candidate 1, 'Capital Improvement Tax Gain', directly addresses this by calculating taxable capital gain on property sales, adjusting for cost basis, capital improvements, and applicable exclusions, which perfectly matches the user's request and the provided context.
+[sanity-debug][test-1270] retrieval-confidence: top_score=0.446, threshold=0.050
+[sanity-debug][test-1270] input-binding: required=['property_sell_price', 'property_purchase_price', 'capital_improvements', 'capital_gains_exclusion'], missing=[], provided_keys=['capital_gains_exclusion', 'capital_improvements', 'property_purchase_price', 'property_sell_price'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1270] e-check: rule_id=e_sellprice_nonneg, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_purchaseprice_nonneg, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_capimprov_nonneg, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_capexclusion_nonneg, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_capimprov_plausibility, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_purchaseprice_pos, mode=violation, triggered=False
+[sanity-debug][test-1270] e-check: rule_id=e_sellprice_pos, mode=violation, triggered=False
+[sanity-debug][test-1270] critic: needs_clarification=True, triggered_hint_ids=['ci_definition'], hard_triggered=['ci_definition'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1270] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1490
+[sanity-debug][test-1490] retrieval: fic_article_678@0.423, fic_article_783@0.236, fic_article_450@0.211, fic_article_1050@0.206
+[sanity-debug][test-1490] selector: decision=select_card, chosen_fic_id=fic_article_678, reason=The user explicitly asks for the 'Bank Bill Swap Rate (BBSW)' including a 'risk premium' for floating rate loans. Candidate 1, 'Bank Bill Swap Rate (BBSW)', directly matches this request, stating in its summary that it 'Calculates the Bank Bill Swap Rate (BBSW) ... by averaging market bank bill rates and adding a specified risk premium.' The context provides all necessary data for this calculation: specific bank bill rates to average and a risk premium in basis points.
+[sanity-debug][test-1490] retrieval-confidence: top_score=0.423, threshold=0.050
+[sanity-debug][test-1490] input-binding: required=['bank_bill_rates', 'risk_premium_bps'], missing=[], provided_keys=['bank_bill_rates', 'risk_premium_bps'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1490] e-check: rule_id=bbr_002, mode=violation, triggered=False
+[sanity-debug][test-1490] e-check: rule_id=bbr_004, mode=violation, triggered=False
+[sanity-debug][test-1490] e-check: rule_id=rpb_002, mode=violation, triggered=False
+[sanity-debug][test-1490] e-check: rule_id=rpb_003, mode=violation, triggered=False
+[sanity-debug][test-1490] critic: needs_clarification=True, triggered_hint_ids=['bbsw_rates_source_methodology', 'bbsw_rates_maturity_period', 'risk_premium_nature'], hard_triggered=[], soft_triggered=['bbsw_rates_source_methodology', 'bbsw_rates_maturity_period', 'risk_premium_nature'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1490] critic: I_soft warnings=3
+[sanity-debug][test-1490] success: fic_id=fic_article_678, output=0.036000000000000004, gold=3.35, is_correct=False
+[run_run_error_classification_pipeline] processing test-1738
+[sanity-debug][test-1738] retrieval: fic_article_2091@0.417, fic_article_2995@0.209, fic_article_2552@0.187, fic_article_1732@0.171
+[sanity-debug][test-1738] selector: decision=select_card, chosen_fic_id=fic_article_2091, reason=The user is asking for the future value of an annuity investment, considering an initial investment, an annual growth rate, and annual fees over a specified term. Candidate 1 directly calculates the future value of a variable annuity investment, accounting for an annual growth rate and annual percentage-based fees, which perfectly aligns with the user's request and the provided context.
+[sanity-debug][test-1738] retrieval-confidence: top_score=0.417, threshold=0.050
+[sanity-debug][test-1738] input-binding: required=['initial_investment', 'growth_rate', 'years', 'annual_fees'], missing=[], provided_keys=['annual_fees', 'growth_rate', 'initial_investment', 'years'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1738] e-check: rule_id=initial_investment_positive, mode=violation, triggered=False
+[sanity-debug][test-1738] e-check: rule_id=growth_rate_range, mode=violation, triggered=False
+[sanity-debug][test-1738] e-check: rule_id=years_positive_integer, mode=violation, triggered=False
+[sanity-debug][test-1738] e-check: rule_id=annual_fees_range, mode=violation, triggered=False
+[sanity-debug][test-1738] e-check: rule_id=effective_growth_positive, mode=violation, triggered=False
+[sanity-debug][test-1738] critic: needs_clarification=True, triggered_hint_ids=['compounding_frequency'], hard_triggered=[], soft_triggered=['compounding_frequency'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1738] critic: I_soft warnings=1
+[sanity-debug][test-1738] success: fic_id=fic_article_2091, output=312619.5489935134, gold=312620.0, is_correct=False
+[run_run_error_classification_pipeline] processing test-1979
+[sanity-debug][test-1979] retrieval: fic_article_2098@0.428, fic_article_2552@0.200, fic_article_571@0.154, fic_article_1400@0.136
+[sanity-debug][test-1979] selector: decision=select_card, chosen_fic_id=fic_article_2098, reason=The user explicitly requests the 'Cost of Goods Sold (COGS)' using the 'LIFO inventory method' for a specific number of units. Candidate 1, 'Last In, First Out (LIFO) Cost of Goods Sold', directly matches these keywords and the calculation required, as indicated by its title, summary, and selection hints.
+[sanity-debug][test-1979] retrieval-confidence: top_score=0.428, threshold=0.050
+[sanity-debug][test-1979] input-binding: required=['units_sold', 'purchase_costs'], missing=[], provided_keys=['purchase_costs', 'units_sold'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1979] e-check: rule_id=e_units_sold_non_negative, mode=validity, triggered=False
+[sanity-debug][test-1979] e-check: rule_id=e_purchase_costs_non_empty_if_needed, mode=validity, triggered=False
+[sanity-debug][test-1979] e-check: rule_id=e_units_purchased_non_negative, triggered=<structural-error[F]>, error='float' object is not subscriptable
+[sanity-debug][test-1979] e-check: rule_id=e_cost_per_unit_non_negative, triggered=<structural-error[F]>, error='float' object is not subscriptable
+[sanity-debug][test-1979] e-check: rule_id=e_sufficient_inventory, triggered=<structural-error[F]>, error='float' object is not subscriptable
+[sanity-debug][test-1979] early-exit: F (structural E-check error → input shape mismatch on e_units_purchased_non_negative)
+[run_run_error_classification_pipeline] processing test-1109
+[sanity-debug][test-1109] retrieval: fic_article_2831@0.400, fic_article_2168@0.211, fic_article_2366@0.155, fic_article_2552@0.143
+[sanity-debug][test-1109] selector: decision=select_card, chosen_fic_id=fic_article_2831, reason=The user is explicitly asking for the 'IBNR reserve amount' and provides all the necessary inputs: earned premiums, expected loss ratio, paid claims, and cash reserve. Candidate 1, 'Expected Loss Ratio (ELR Method)', directly calculates the IBNR reserve using these exact inputs, matching the user's request perfectly.
+[sanity-debug][test-1109] retrieval-confidence: top_score=0.400, threshold=0.050
+[sanity-debug][test-1109] input-binding: required=['earned_premiums', 'expected_loss_ratio', 'paid_losses', 'cash_reserve'], missing=[], provided_keys=['cash_reserve', 'earned_premiums', 'expected_loss_ratio', 'paid_losses'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1109] e-check: rule_id=prem_non_neg, mode=violation, triggered=False
+[sanity-debug][test-1109] e-check: rule_id=elr_range, mode=violation, triggered=False
+[sanity-debug][test-1109] e-check: rule_id=paid_losses_non_neg, mode=violation, triggered=False
+[sanity-debug][test-1109] e-check: rule_id=cash_reserve_non_neg, mode=violation, triggered=False
+[sanity-debug][test-1109] e-check: rule_id=total_reserve_neg, mode=violation, triggered=False
+[sanity-debug][test-1109] e-check: rule_id=ibnr_reserve_neg, mode=violation, triggered=False
+[sanity-debug][test-1109] success: fic_id=fic_article_2831, output=0.0, gold=0.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1951
+[sanity-debug][test-1951] retrieval: fic_article_2168@0.491, fic_article_2942@0.237, fic_article_2940@0.189, fic_article_2366@0.183
+[sanity-debug][test-1951] selector: decision=select_card, chosen_fic_id=fic_article_2168, reason=The user explicitly asks for the 'Loan Life Coverage Ratio (LLCR)', and Candidate 1 is specifically titled 'Loan Life Coverage Ratio (LLCR)'. Its summary and scope boundaries perfectly match the calculation required, utilizing the net present value of future cash flows available for debt service, debt reserve, and current outstanding debt, all of which are provided in the context.
+[sanity-debug][test-1951] retrieval-confidence: top_score=0.491, threshold=0.050
+[sanity-debug][test-1951] input-binding: required=['cash_flows', 'wacc', 'debt_reserve', 'outstanding_debt'], missing=[], provided_keys=['cash_flows', 'debt_reserve', 'outstanding_debt', 'wacc'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_001, mode=violation, triggered=False
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_002, mode=violation, triggered=False
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_003, mode=violation, triggered=False
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_005, mode=violation, triggered=False
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_006, mode=violation, triggered=False
+[sanity-debug][test-1951] e-check: rule_id=llcr_dc_007, mode=violation, triggered=False
+[sanity-debug][test-1951] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=hard, is_hard_block=True
+[sanity-debug][test-1951] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1012
+[sanity-debug][test-1012] retrieval: fic_article_2905@0.480, fic_article_450@0.257, fic_article_596@0.230, fic_article_417@0.226
+[sanity-debug][test-1012] selector: decision=select_card, chosen_fic_id=fic_article_2905, reason=The user explicitly asks for the 'adjusted net foreign assets value' after accounting for an 'exchange rate change'. Candidate 1, 'Net Foreign Assets (NFA) Exchange Rate Adjustment', directly addresses this requirement by calculating the adjusted NFA based on exchange rate changes impacting foreign currency assets and liabilities. The context provides all necessary inputs: initial NFA, foreign assets, foreign liabilities, and the percentage exchange rate change.
+[sanity-debug][test-1012] retrieval-confidence: top_score=0.480, threshold=0.050
+[sanity-debug][test-1012] input-binding: required=['nfa', 'asset_in_foreign_currency', 'liability_in_foreign_currency', 'exchange_rate_change'], missing=[], provided_keys=['asset_in_foreign_currency', 'exchange_rate_change', 'liability_in_foreign_currency', 'nfa'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1012] e-check: rule_id=nfa_dc_001, mode=violation, triggered=False
+[sanity-debug][test-1012] e-check: rule_id=nfa_dc_002, mode=violation, triggered=False
+[sanity-debug][test-1012] e-check: rule_id=nfa_dc_003, mode=violation, triggered=False
+[sanity-debug][test-1012] critic: needs_clarification=True, triggered_hint_ids=['exchange_rate_direction'], hard_triggered=['exchange_rate_direction'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1012] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1810
+[sanity-debug][test-1810] retrieval: fic_article_1668@0.438, fic_article_783@0.330, fic_article_2940@0.240, fic_article_2552@0.176
+[sanity-debug][test-1810] selector: decision=select_card, chosen_fic_id=fic_article_1668, reason=The user explicitly asks for Jane's loan balance after accounting for deferred interest, stating that any unpaid interest is deferred and compounded onto the loan balance. Candidate 1, 'Deferred Interest Loan Balance', directly addresses this by calculating the loan balance after a period where minimum payments do not cover all accrued interest, leading to unpaid interest being added to the principal (negative amortization). The selection hints and applicable scenarios of Candidate 1 perfectly align with the user's context of a promotional loan with deferred and compounded interest.
+[sanity-debug][test-1810] retrieval-confidence: top_score=0.438, threshold=0.050
+[sanity-debug][test-1810] input-binding: required=['initial_balance', 'min_payment', 'interest_rate', 'num_months'], missing=[], provided_keys=['initial_balance', 'interest_rate', 'min_payment', 'num_months'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1810] e-check: rule_id=di_001, mode=violation, triggered=False
+[sanity-debug][test-1810] e-check: rule_id=di_002, mode=violation, triggered=False
+[sanity-debug][test-1810] e-check: rule_id=di_003, mode=violation, triggered=False
+[sanity-debug][test-1810] e-check: rule_id=di_004, mode=violation, triggered=False
+[sanity-debug][test-1810] e-check: rule_id=di_005, mode=violation, triggered=False
+[sanity-debug][test-1810] e-check: rule_id=di_006, mode=violation, triggered=False
+[sanity-debug][test-1810] critic: needs_clarification=True, triggered_hint_ids=['deferred_interest_type'], hard_triggered=['deferred_interest_type'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1810] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1065
+[sanity-debug][test-1065] retrieval: fic_article_762@0.448, fic_article_897@0.291, fic_article_1050@0.217, fic_article_1400@0.210
+[sanity-debug][test-1065] selector: decision=select_card, chosen_fic_id=fic_article_762, reason=The user explicitly asks to calculate the 'Arms Index (TRIN)' and Candidate 1 is titled 'Arms Index (TRIN)' with a summary that perfectly matches the user's request for calculating market sentiment using advancing/declining stocks and volume. The context provides all necessary inputs for this formula.
+[sanity-debug][test-1065] retrieval-confidence: top_score=0.448, threshold=0.050
+[sanity-debug][test-1065] input-binding: required=['advancing_stocks', 'declining_stocks', 'advancing_volume', 'declining_volume'], missing=[], provided_keys=['advancing_stocks', 'advancing_volume', 'declining_stocks', 'declining_volume'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1065] e-check: rule_id=as_001, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=ds_001, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=ds_002, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=av_001, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=dv_001, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=dv_002, mode=violation, triggered=False
+[sanity-debug][test-1065] e-check: rule_id=ts_001, mode=violation, triggered=False
+[sanity-debug][test-1065] success: fic_id=fic_article_762, output=1.2063492063492063, gold=1.21, is_correct=True
+[run_run_error_classification_pipeline] processing test-1842
+[sanity-debug][test-1842] retrieval: fic_article_1050@0.620, fic_article_2513@0.271, fic_article_762@0.237, fic_article_897@0.220
+[sanity-debug][test-1842] selector: decision=select_card, chosen_fic_id=fic_article_1050, reason=Candidate 1, 'Hindenburg Omen', is a direct and exact match for the user's query about assessing the Hindenburg Omen signal. Its summary, selection hints, and 'applicable_when' conditions perfectly align with the scenario described in the context. Based on the provided context and the conditions specified in the candidate card:
+1. The market index is in an uptrend (Met).
+2. Both new 52-week highs (120) and new 52-week lows (100) exceed 2.2% of total stocks (2.2% of 4,500 = 99) (Met).
+3. New 52-week highs (120) are not more than twice the new 52-week lows (2 * 100 = 200) (Met, as 120 <= 200).
+4. The McClellan Oscillator value (-5.2) is negative (Met).
+All conditions for the Hindenburg Omen to be active are met. Therefore, the Hindenburg Omen signal is active (True).
+[sanity-debug][test-1842] retrieval-confidence: top_score=0.620, threshold=0.050
+[sanity-debug][test-1842] input-binding: required=['new_highs', 'new_lows', 'total_stocks', 'index_trend', 'mcclellan_oscillator'], missing=[], provided_keys=['index_trend', 'mcclellan_oscillator', 'new_highs', 'new_lows', 'total_stocks'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1842] e-check: rule_id=ho_input_positive_highs, mode=violation, triggered=False
+[sanity-debug][test-1842] e-check: rule_id=ho_input_positive_lows, mode=violation, triggered=False
+[sanity-debug][test-1842] e-check: rule_id=ho_input_total_stocks_positive, mode=violation, triggered=False
+[sanity-debug][test-1842] e-check: rule_id=ho_input_highs_vs_total, mode=violation, triggered=False
+[sanity-debug][test-1842] e-check: rule_id=ho_input_lows_vs_total, mode=violation, triggered=False
+[sanity-debug][test-1842] e-check: rule_id=ho_input_highs_lows_sum_vs_total, mode=violation, triggered=False
+[sanity-debug][test-1842] critic: needs_clarification=True, triggered_hint_ids=['threshold_percentage_value'], hard_triggered=[], soft_triggered=['threshold_percentage_value'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1842] critic: I_soft warnings=1
+[sanity-debug][test-1842] success: fic_id=fic_article_1050, output=1.0, gold=1.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1570
+[sanity-debug][test-1570] retrieval: fic_article_2366@0.521, fic_article_2168@0.292, fic_article_571@0.276, fic_article_627@0.229
+[sanity-debug][test-1570] selector: decision=select_card, chosen_fic_id=fic_article_2366, reason=The user explicitly asked for the 'asset coverage ratio', which is the primary formula provided by Candidate 1. The summary, selection hints, and applicable_when criteria of Candidate 1 directly match the user's intent to evaluate tangible assets against total debt obligations. The provided context contains all necessary data for this calculation (total assets, intangible assets, and total debt outstanding).
+[sanity-debug][test-1570] retrieval-confidence: top_score=0.521, threshold=0.050
+[sanity-debug][test-1570] input-binding: required=['book_value_total_assets', 'intangible_assets', 'current_liabilities', 'short_term_debt_obligations', 'total_debt_outstanding'], missing=[], provided_keys=['book_value_total_assets', 'current_liabilities', 'intangible_assets', 'short_term_debt_obligations', 'total_debt_outstanding'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1570] e-check: rule_id=dcr1, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr2, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr3, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr4, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr5, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr6, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr7, mode=violation, triggered=False
+[sanity-debug][test-1570] e-check: rule_id=dcr8, mode=violation, triggered=False
+[sanity-debug][test-1570] critic: needs_clarification=True, triggered_hint_ids=['asset_coverage_ratio_cl_stdo'], hard_triggered=['asset_coverage_ratio_cl_stdo'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1570] early-exit: I_hard (needs clarification)
+[run_run_error_classification_pipeline] processing test-1008
+[sanity-debug][test-1008] retrieval: fic_article_2494@0.465, fic_article_2366@0.240, fic_article_2533@0.240, fic_article_1550@0.215
+[sanity-debug][test-1008] selector: decision=select_card, chosen_fic_id=fic_article_2494, reason=The user explicitly asked for the 'working ratio'. Candidate 1, titled 'Working Ratio', directly addresses this request and its summary, applicable_when, and scope_boundaries align perfectly with the user's intent to understand if the company can cover its operating costs using its gross income. The provided context contains all the necessary data points (total annual expense, depreciation expense, annual debt-related expenses, and annual gross income) required to calculate the working ratio as defined by Candidate 1.
+[sanity-debug][test-1008] retrieval-confidence: top_score=0.465, threshold=0.050
+[sanity-debug][test-1008] input-binding: required=['total_annual_expenses', 'depreciation', 'debt_expenses', 'annual_gross_income'], missing=[], provided_keys=['annual_gross_income', 'debt_expenses', 'depreciation', 'total_annual_expenses'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1008] e-check: rule_id=agi_001, mode=violation, triggered=False
+[sanity-debug][test-1008] e-check: rule_id=tae_001, mode=violation, triggered=False
+[sanity-debug][test-1008] e-check: rule_id=dep_001, mode=violation, triggered=False
+[sanity-debug][test-1008] e-check: rule_id=deb_001, mode=violation, triggered=False
+[sanity-debug][test-1008] e-check: rule_id=agi_002, mode=violation, triggered=False
+[sanity-debug][test-1008] e-check: rule_id=ope_001, mode=violation, triggered=False
+[sanity-debug][test-1008] critic: needs_clarification=True, triggered_hint_ids=['debt_expenses_scope'], hard_triggered=[], soft_triggered=['debt_expenses_scope'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1008] critic: I_soft warnings=1
+[sanity-debug][test-1008] success: fic_id=fic_article_2494, output=0.8846153846153846, gold=88.46, is_correct=False
+[run_run_error_classification_pipeline] processing test-1890
+[sanity-debug][test-1890] retrieval: fic_article_91@0.459, fic_article_627@0.252, fic_article_2098@0.246, fic_article_2812@0.225
+[sanity-debug][test-1890] selector: decision=select_card, chosen_fic_id=fic_article_91, reason=The user explicitly asks for 'cash flow from operating activities using the indirect method'. Candidate 1's title directly matches this request, and its summary and applicable_when sections confirm it calculates CFO using the indirect method by adjusting net income for non-cash items and working capital changes, which aligns perfectly with the provided context data.
+[sanity-debug][test-1890] retrieval-confidence: top_score=0.459, threshold=0.050
+[sanity-debug][test-1890] input-binding: required=['net_income', 'depreciation', 'amortization', 'tax_adjustments', 'changes_in_accounts_receivable', 'changes_in_liabilities', 'changes_in_inventories', 'changes_in_other_operating_activities'], missing=[], provided_keys=['amortization', 'changes_in_accounts_receivable', 'changes_in_inventories', 'changes_in_liabilities', 'changes_in_other_operating_activities', 'depreciation', 'net_income', 'tax_adjustments'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1890] e-check: rule_id=da_e1, mode=violation, triggered=False
+[sanity-debug][test-1890] e-check: rule_id=ni_e1, mode=violation, triggered=False
+[sanity-debug][test-1890] e-check: rule_id=wc_e1, mode=violation, triggered=False
+[sanity-debug][test-1890] e-check: rule_id=tx_e1, mode=violation, triggered=False
+[sanity-debug][test-1890] e-check: rule_id=cfo_sign_e, triggered=<error[C]>, error='cash_flow_from_operations'
+[sanity-debug][test-1890] early-exit: C (E-check evaluation error on cfo_sign_e)
+[run_run_error_classification_pipeline] processing test-1625
+[sanity-debug][test-1625] retrieval: fic_article_2667@0.372, fic_article_2533@0.313, fic_article_137@0.266, fic_article_1213@0.244
+[sanity-debug][test-1625] selector: decision=select_card, chosen_fic_id=fic_article_2667, reason=The user explicitly requests to 'Calculate the sum of squares of deviations from the mean for the quarterly returns.' Candidate 1, 'Sum of Squares', directly addresses this request by calculating 'the sum of squares of deviations from the mean for a given dataset, indicating statistical dispersion or data variability.' The context also supports this by mentioning the need to 'assess the variability of these returns to understand the stability of the portfolio's performance,' which aligns with the purpose of sum of squares.
+[sanity-debug][test-1625] retrieval-confidence: top_score=0.372, threshold=0.050
+[sanity-debug][test-1625] input-binding: required=['data'], missing=[], provided_keys=['data'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1625] e-check: rule_id=data_not_empty, mode=violation, triggered=False
+[sanity-debug][test-1625] e-check: rule_id=min_data_points, mode=violation, triggered=False
+[sanity-debug][test-1625] success: fic_id=fic_article_2667, output=0.004475000000000001, gold=44.75, is_correct=False
+[run_run_error_classification_pipeline] processing test-1707
+[sanity-debug][test-1707] retrieval: fic_article_124@0.444, fic_article_2331@0.268, fic_article_2816@0.183, fic_article_1400@0.180
+[sanity-debug][test-1707] selector: decision=select_card, chosen_fic_id=fic_article_124, reason=The user explicitly asks for the 'effective annual yield of the commercial paper'. Candidate 1, titled 'Commercial Paper Effective Annual Yield', directly addresses this request. Its summary and applicable_when criteria perfectly align with the user's query about calculating the annualized return on a commercial paper investment using face value, purchase price, and days to maturity from the context.
+[sanity-debug][test-1707] retrieval-confidence: top_score=0.444, threshold=0.050
+[sanity-debug][test-1707] input-binding: required=['face_value', 'purchase_price', 'days_to_maturity'], missing=[], provided_keys=['days_to_maturity', 'face_value', 'purchase_price'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1707] e-check: rule_id=cp_ey_e1, mode=violation, triggered=False
+[sanity-debug][test-1707] e-check: rule_id=cp_ey_e2, mode=violation, triggered=False
+[sanity-debug][test-1707] e-check: rule_id=cp_ey_e3, mode=violation, triggered=False
+[sanity-debug][test-1707] e-check: rule_id=cp_ey_e4, mode=violation, triggered=False
+[sanity-debug][test-1707] critic: needs_clarification=True, triggered_hint_ids=['day_count_convention'], hard_triggered=[], soft_triggered=['day_count_convention'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1707] critic: I_soft warnings=1
+[sanity-debug][test-1707] success: fic_id=fic_article_124, output=5.193951347797476, gold=5.19, is_correct=True
+[run_run_error_classification_pipeline] processing test-1825
+[sanity-debug][test-1825] retrieval: fic_article_51@0.516, fic_article_627@0.320, fic_article_1550@0.260, fic_article_571@0.214
+[sanity-debug][test-1825] selector: decision=select_card, chosen_fic_id=fic_article_51, reason=The user explicitly asks for 'Free Cash Flow to Equity (FCFE)'. Candidate 1 directly addresses this with its title, summary, and selection hints, which all perfectly align with the user's intent and the provided context details (earnings, capital expenditures, depreciation, debt ratio, and change in net working capital). The other candidates are for FCFF or other financial ratios which do not match the user's request.
+[sanity-debug][test-1825] retrieval-confidence: top_score=0.516, threshold=0.050
+[sanity-debug][test-1825] input-binding: required=['ep', 'ce', 'd', 'dr', 'delta_c'], missing=[], provided_keys=['ce', 'd', 'delta_c', 'dr', 'ep'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1825] e-check: rule_id=ep_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1825] e-check: rule_id=ce_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1825] e-check: rule_id=depreciation_non_negative, mode=violation, triggered=False
+[sanity-debug][test-1825] e-check: rule_id=debt_ratio_bounds, mode=violation, triggered=False
+[sanity-debug][test-1825] e-check: rule_id=capex_vs_depreciation_alert, mode=violation, triggered=False
+[sanity-debug][test-1825] critic: needs_clarification=True, triggered_hint_ids=['capex_interpretation', 'debt_ratio_definition', 'nwc_change_interpretation'], hard_triggered=[], soft_triggered=['capex_interpretation', 'debt_ratio_definition', 'nwc_change_interpretation'], open_inferred_level=None, is_hard_block=False
+[sanity-debug][test-1825] critic: I_soft warnings=3
+[sanity-debug][test-1825] success: fic_id=fic_article_51, output=1050000.0, gold=1050000.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1457
+[sanity-debug][test-1457] retrieval: fic_article_1895@0.555, fic_article_584@0.211, fic_article_2366@0.205, fic_article_2533@0.201
+[sanity-debug][test-1457] selector: decision=select_card, chosen_fic_id=fic_article_1895, reason=The user explicitly asks for the 'Tier 1 Common Capital Ratio' and provides all necessary financial figures (Tier 1 capital, preferred stock, noncontrolling interests, and risk-weighted assets) to calculate it. Candidate 1, 'Tier 1 Common Capital Ratio', perfectly matches the request, its summary describes the calculation, and its scope boundaries confirm it applies to banks and excludes preferred stock and noncontrolling interests from the numerator, which is consistent with the calculation of Common Equity Tier 1 capital. The other candidates are irrelevant to the user's specific query.
+[sanity-debug][test-1457] retrieval-confidence: top_score=0.555, threshold=0.050
+[sanity-debug][test-1457] input-binding: required=['tier1_capital', 'preferred_stock', 'noncontrolling_interests', 'total_risk_weighted_assets'], missing=[], provided_keys=['noncontrolling_interests', 'preferred_stock', 'tier1_capital', 'total_risk_weighted_assets'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1457] e-check: rule_id=dc001, mode=violation, triggered=False
+[sanity-debug][test-1457] e-check: rule_id=dc002, mode=violation, triggered=False
+[sanity-debug][test-1457] e-check: rule_id=dc003, mode=violation, triggered=False
+[sanity-debug][test-1457] e-check: rule_id=dc004, mode=violation, triggered=False
+[sanity-debug][test-1457] e-check: rule_id=dc005, mode=violation, triggered=False
+[sanity-debug][test-1457] e-check: rule_id=dc006, mode=violation, triggered=False
+[sanity-debug][test-1457] success: fic_id=fic_article_1895, output=11.25, gold=11.25, is_correct=True
+[run_run_error_classification_pipeline] processing test-1880
+[sanity-debug][test-1880] retrieval: fic_article_2274@0.485, fic_article_1845@0.212, fic_article_924@0.176, fic_article_2812@0.127
+[sanity-debug][test-1880] selector: decision=select_card, chosen_fic_id=fic_article_2274, reason=The user explicitly asks for the 'Additional Child Tax Credit' and 'refund', which directly aligns with the title, summary, and scope of 'fic_article_2274'. The candidate's description precisely matches the user's intent to calculate the refundable portion of the Child Tax Credit using the provided parameters (earned income, CTC used, maximum credit per child, and number of qualifying children).
+[sanity-debug][test-1880] retrieval-confidence: top_score=0.485, threshold=0.050
+[sanity-debug][test-1880] input-binding: required=['earned_income', 'child_tax_credit_used', 'max_credit_per_child', 'num_qualifying_children'], missing=[], provided_keys=['child_tax_credit_used', 'earned_income', 'max_credit_per_child', 'num_qualifying_children'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1880] e-check: rule_id=dc001, mode=violation, triggered=False
+[sanity-debug][test-1880] e-check: rule_id=dc002, mode=violation, triggered=False
+[sanity-debug][test-1880] e-check: rule_id=dc003, mode=violation, triggered=False
+[sanity-debug][test-1880] e-check: rule_id=dc004, mode=violation, triggered=False
+[sanity-debug][test-1880] e-check: rule_id=dc006, mode=violation, triggered=False
+[sanity-debug][test-1880] success: fic_id=fic_article_2274, output=2600.0, gold=2600.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1896
+[sanity-debug][test-1896] retrieval: fic_article_2350@0.474, fic_article_1050@0.343, fic_article_2513@0.201, fic_article_1895@0.186
+[sanity-debug][test-1896] selector: decision=select_card, chosen_fic_id=fic_article_2350, reason=The user's question explicitly asks for the "Aroon Up value" for a "25-day period" and provides context directly relevant to calculating this indicator, including when new highs occurred. Candidate 1, "Aroon Up Indicator," directly matches this request and its summary, selection hints, and scope boundaries perfectly align with the user's intent and provided information.
+[sanity-debug][test-1896] retrieval-confidence: top_score=0.474, threshold=0.050
+[sanity-debug][test-1896] input-binding: required=['period_highs'], missing=[], provided_keys=['period_highs', 'total_periods'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1896] e-check: rule_id=aroon_up_e1, mode=violation, triggered=False
+[sanity-debug][test-1896] e-check: rule_id=aroon_up_e2, mode=violation, triggered=False
+[sanity-debug][test-1896] e-check: rule_id=aroon_up_e3, mode=violation, triggered=False
+[sanity-debug][test-1896] e-check: rule_id=aroon_up_e4, mode=violation, triggered=False
+[sanity-debug][test-1896] critic: needs_clarification=True, triggered_hint_ids=[], hard_triggered=[], soft_triggered=[], open_inferred_level=soft, is_hard_block=False
+[sanity-debug][test-1896] critic: I_soft warnings=1
+[sanity-debug][test-1896] success: fic_id=fic_article_2350, output=12.0, gold=12.0, is_correct=True
+[run_run_error_classification_pipeline] processing test-1666
+[sanity-debug][test-1666] retrieval: fic_article_2812@0.466, fic_article_571@0.238, fic_article_627@0.226, fic_article_91@0.210
+[sanity-debug][test-1666] selector: decision=select_card, chosen_fic_id=fic_article_2812, reason=The user explicitly asks for 'excess cash flow', which is the exact title and primary function of candidate fic_article_2812. The context provides all the necessary inputs (net income, non-cash charges, working capital adjustment, non-cash gains, capital expenditures, debt payments, internally financed investments) that align perfectly with the scope boundaries described in fic_article_2812's summary and details. The other candidates address different financial concepts (Fixed Asset Turnover, FCFF, CFO) which do not directly match the specific request for 'excess cash flow'.
+[sanity-debug][test-1666] retrieval-confidence: top_score=0.466, threshold=0.050
+[sanity-debug][test-1666] input-binding: required=['net_income', 'non_cash_charges', 'working_capital_adjustment', 'non_cash_gains', 'capital_expenditures', 'debt_payments', 'investment_financed'], missing=[], provided_keys=['capital_expenditures', 'debt_payments', 'investment_financed', 'net_income', 'non_cash_charges', 'non_cash_gains', 'working_capital_adjustment'], ambiguous=[], schema_contradictions=[]
+[sanity-debug][test-1666] e-check: rule_id=ecf_dc_001, mode=violation, triggered=False
+[sanity-debug][test-1666] e-check: rule_id=ecf_dc_002, mode=violation, triggered=False
+[sanity-debug][test-1666] e-check: rule_id=ecf_dc_003, mode=violation, triggered=False
+[sanity-debug][test-1666] e-check: rule_id=ecf_dc_004, mode=violation, triggered=False
+[sanity-debug][test-1666] e-check: rule_id=ecf_dc_005, mode=violation, triggered=False
+[sanity-debug][test-1666] critic: needs_clarification=True, triggered_hint_ids=['ecf_non_cash_charges_scope', 'ecf_working_capital_adjustment_method', 'ecf_non_cash_gains_scope', 'ecf_capex_scope', 'ecf_debt_payments_scope', 'ecf_investment_financed_source'], hard_triggered=['ecf_non_cash_charges_scope', 'ecf_working_capital_adjustment_method', 'ecf_non_cash_gains_scope', 'ecf_capex_scope', 'ecf_debt_payments_scope', 'ecf_investment_financed_source'], soft_triggered=[], open_inferred_level=None, is_hard_block=True
+[sanity-debug][test-1666] early-exit: I_hard (needs clarification)
+Wrote 50 results to verifiquant/data/runs/demo_50q_0415/testing_5Q_result.jsonl
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % 

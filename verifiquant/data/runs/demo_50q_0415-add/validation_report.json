@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "error": null,
+  "validation_stats": {
+    "core_count": 1,
+    "retrieval_count": 1,
+    "repair_count": 7,
+    "diagnostic_rule_count": 4
+  },
+  "output": {
+    "core": "verifiquant/data/runs/demo_50q_0415-add/core.jsonl",
+    "retrieval": "verifiquant/data/runs/demo_50q_0415-add/retrieval.jsonl",
+    "repair": "verifiquant/data/runs/demo_50q_0415-add/repair.jsonl"
+  },
+  "counts": {
+    "core": 1,
+    "retrieval": 1,
+    "repair": 7,
+    "skipped_duplicates": 0,
+    "skipped_kernel_duplicates": 0
+  },
+  "kernel_dedup": {
+    "normalization_version": "ast_v1_docstring_strip",
+    "duplicate_hits": []
+  },
+  "execution_smoke": {
+    "failed_count": 0,
+    "failed_cards": []
+  }
+}
