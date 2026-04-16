@@ -1,0 +1,150 @@
+結果我把嘗試結果隱藏起來之後資料是
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_cot_self_improve_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --output verifiquant/data/runs/demo_50q_0415/cot_self_improve-50-no-gt.jsonl \
+  --summary-output verifiquant/data/runs/demo_50q_0415/cot_self_improve_summary-50-no-gt.json \
+  --max-records 50 \
+  --max-turns 3 \
+  --cot-model gemini-2.5-flash \
+  --oracle-model gemini-2.5-flash
+[cot-self-improve] processing test-1697
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1264
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1470
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=False
+[cot-self-improve] processing test-1084
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1504
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1710
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1673
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1028
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1920
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1708
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1031
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1833
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1005
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1009
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1426
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1442
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1604
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1106
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1832
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1114
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1134
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1460
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1944
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1925
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing test-1045
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1593
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1881
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1001
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1553
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1577
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1270
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1490
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1738
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=False
+[cot-self-improve] processing test-1979
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1109
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1951
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing test-1012
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1810
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1065
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1842
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing test-1570
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1008
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1890
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1625
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1707
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1825
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1457
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1880
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1896
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1666
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+Wrote 50 cot self-improve records to verifiquant/data/runs/demo_50q_0415/cot_self_improve-50-no-gt.jsonl
+{
+  "total_cases": 50,
+  "correct_count": 45,
+  "accuracy": 0.9,
+  "improved_count": 16,
+  "improved_rate": 0.32
+}
+lol 好吧 ai隨機性
+
+第一次 32/40
+第二次 30/44
+第三次 29/45

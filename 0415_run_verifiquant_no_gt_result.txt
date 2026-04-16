@@ -1,0 +1,167 @@
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_framework_guided_self_improve_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --db-url sqlite:///verifiquant/data/runs/demo_50q_0415/cards.db \
+  --output verifiquant/data/runs/demo_50q_0415/framework_guided-5Q.jsonl \
+  --summary-output verifiquant/data/runs/demo_50q_0415/framework_guided_summary-5Q.json \
+  --max-records 5 \
+  --max-turns 3
+[framework-guided] processing test-1697
+  ↳ Turn 1: C
+[framework-guided] processing test-1264
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1470
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1084
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1504
+  ↳ Turn 1: NONE
+Wrote 5 framework-guided records to verifiquant/data/runs/demo_50q_0415/framework_guided-5Q.jsonl
+{
+  "total_cases": 5,
+  "success_count": 4,
+  "success_rate": 0.8,
+  "correct_count": 4,
+  "accuracy": 0.8,
+  "recovery_count": 0,
+  "recovery_rate": 0.0
+}
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_framework_guided_self_improve_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --db-url sqlite:///verifiquant/data/runs/demo_50q_0415/cards.db \
+  --output verifiquant/data/runs/demo_50q_0415/framework_guided-50Q.jsonl \
+  --summary-output verifiquant/data/runs/demo_50q_0415/framework_guided_summary-50Q.json \
+  --max-records 50 \
+  --max-turns 3
+[framework-guided] processing test-1697
+  ↳ Turn 1: C
+[framework-guided] processing test-1264
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1470
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1084
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1504
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1710
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1673
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1028
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1920
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1708
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1031
+  ↳ Turn 1: I
+  ↳ Turn 2: I
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1833
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1005
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1009
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1426
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1442
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1604
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1106
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1832
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1114
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1134
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1460
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1944
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1925
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1045
+  ↳ Turn 1: I
+  ↳ Turn 2: I
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1593
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1881
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1001
+  ↳ Turn 1: E
+  ↳ Turn 2: E
+  ↳ Turn 3: E
+[framework-guided] processing test-1553
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1577
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1270
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1490
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1738
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1979
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1109
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1951
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1012
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1810
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1065
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1842
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1570
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1008
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1890
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1625
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1707
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1825
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1457
+  ↳ Turn 1: I
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1880
+  ↳ Turn 1: I
+  ↳ Turn 2: I
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1896
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1666
+  ↳ Turn 1: I
+  ↳ Turn 2: I
+  ↳ Turn 3: NONE
+Wrote 50 framework-guided records to verifiquant/data/runs/demo_50q_0415/framework_guided-50Q.jsonl
+{
+  "total_cases": 50,
+  "success_count": 47,
+  "success_rate": 0.94,
+  "correct_count": 44,
+  "accuracy": 0.88,
+  "recovery_count": 14,
+  "recovery_rate": 0.28
+}
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % 

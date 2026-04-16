@@ -1,0 +1,10 @@
+experiment_info:
+  description: 由 evaluation.json 自動整理之正確與錯誤樣本
+  total_count: 50
+  model: gemini-2.5-flash
+  status: evaluated
+target_ids:
+  correct_samples:
+    - test-1958
+    - test-2188
+  error_samples:
