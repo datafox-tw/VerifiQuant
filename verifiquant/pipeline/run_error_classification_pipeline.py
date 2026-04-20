@@ -749,14 +749,20 @@ def _select_card_with_llm(client: Any, model: str, question: str, context: str, 
             f"summary={r.get('summary','')}\n"
             f"selection_hints={r.get('selection_hints', [])}\n"
             f"applicable_when={r.get('applicable_when', [])}\n"
+            f"not_applicable_when={r.get('not_applicable_when', [])}\n"
             f"scope_boundaries={r.get('scope_boundaries', [])}"
         )
+# 如果要刻意展現出M類錯誤用這個
+# 1) If one candidate clearly and unambiguously matches the explicitly stated user intent, return decision="select_card" and chosen_fic_id. You MUST strictly evaluate the candidate's selection_hints, applicable_when, not_applicable_when, and scope_boundaries. If the user's intent or scenario violates any of these, or if they are not definitively met, you MUST default to letting the user clarify.
+# 2) If the exact formula or metric (e.g., "NPV", "IRR", "Payback Period", etc.) is NOT explicitly named in the problem AND there is room for multiple valid interpretations (e.g., assessing general "profitability" or "feasibility"), you MUST return decision="abstain_m". DO NOT guess which metric is "most appropriate" or "industry standard", even if the provided variables perfectly match the inputs of a specific formula. If the user's question is vague (e.g., "will it earn money?"), you MUST trigger abstain_m to clarify which metric they want to use.
+
     prompt = f"""
 You are selecting a financial formula card from candidates.
 
 Decision policy:
 1) If one candidate clearly matches user intent, return decision="select_card" and chosen_fic_id.
 2) If intent is ambiguous (e.g., could be NPV vs IRR vs payback) or no candidate fits, return decision="abstain_m".
+
 3) If intent is clear but current candidate library does not support the requested logic/formula, return decision="abstain_n".
 4) For abstain_m, provide 1-3 clarification_questions and ambiguity_tags.
 5) For abstain_n, provide support_gap_reason; clarification_questions can be empty.
@@ -900,14 +906,33 @@ Return JSON only.
     return _llm_json(client, model=model, prompt=prompt, schema=_schema_critic_check())
 
 
-def _evaluate_execution(core: Dict[str, Any], provided_inputs: Dict[str, Any]) -> Tuple[Optional[float], Optional[str]]:
+def _evaluate_execution(
+    core: Dict[str, Any],
+    provided_inputs: Dict[str, Any],
+) -> Tuple[Optional[float], Optional[str], Dict[str, Any]]:
+    def _json_safe(value: Any) -> Any:
+        try:
+            json.dumps(value, ensure_ascii=False)
+            return value
+        except Exception:
+            return repr(value)
+
     execution = core.get("execution", {})
     code = str(execution.get("code", ""))
     output_name = str((core.get("output") or {}).get("name", ""))
+    trace: Dict[str, Any] = {
+        "engine": "deterministic_python",
+        "entrypoint": "compute",
+        "code": code,
+        "inputs": _json_safe(provided_inputs),
+        "output_name": output_name,
+    }
     if "def compute(inputs)" not in code:
-        return None, "execution code missing compute(inputs)"
+        trace["error"] = "execution code missing compute(inputs)"
+        return None, "execution code missing compute(inputs)", trace
     if not output_name:
-        return None, "output.name missing in core"
+        trace["error"] = "output.name missing in core"
+        return None, "output.name missing in core", trace
 
     safe_builtins = {
         "abs": abs,
@@ -940,21 +965,30 @@ def _evaluate_execution(core: Dict[str, Any], provided_inputs: Dict[str, Any]) -
         exec(code, {"__builtins__": safe_builtins}, local_env)
         fn = local_env.get("compute")
         if not callable(fn):
-            return None, "compute function missing after exec"
+            trace["error"] = "compute function missing after exec"
+            return None, "compute function missing after exec", trace
         result = fn(provided_inputs)
+        trace["raw_result"] = _json_safe(result)
         if isinstance(result, dict):
             if output_name not in result:
-                return None, f"output '{output_name}' missing from compute result"
+                err = f"output '{output_name}' missing from compute result"
+                trace["error"] = err
+                return None, err, trace
             raw_output = result.get(output_name)
         else:
             # Backward compatibility: some generated cards return scalar directly.
             raw_output = result
         val = _parse_number(raw_output)
         if val is None:
-            return None, "output value not numeric"
-        return val, None
+            trace["raw_output"] = _json_safe(raw_output)
+            trace["error"] = "output value not numeric"
+            return None, "output value not numeric", trace
+        trace["raw_output"] = _json_safe(raw_output)
+        trace["parsed_output_value"] = val
+        return val, None, trace
     except Exception as exc:
-        return None, str(exc)
+        trace["error"] = str(exc)
+        return None, str(exc), trace
 
 
 def _build_repair_index(repair_rows: List[Dict[str, Any]]) -> Dict[Tuple[str, str], Dict[str, Any]]:
@@ -1125,11 +1159,56 @@ def run_case(
     case_id = str(row.get("case_id") or row.get("question_id") or "")
     base = {"case_id": case_id, "has_i_soft": False, "soft_warnings": []}
     debug_prefix = f"[sanity-debug][{case_id or 'unknown_case'}]"
+    pipeline_logs: List[str] = []
+    step_order = [
+        ("rag_cards", "1) RAG 卡片檢索"),
+        ("mn_analysis", "2) M/N 意圖與卡片匹配分析"),
+        ("extract_values", "3) LLM 抽取數值"),
+        ("fe_checks", "4) F/E 規則檢查"),
+        ("ihard_check", "5) I_hard 假設檢查"),
+        ("python_execution", "6) Python 計算"),
+        ("final_response", "7) 回傳結果與 I_soft 提醒"),
+    ]
+    timeline: Dict[str, Dict[str, Any]] = {
+        key: {
+            "key": key,
+            "label": label,
+            "status": "pending",
+            "detail": "",
+        }
+        for key, label in step_order
+    }
+    selection_trace: Dict[str, Any] = {}
+    extraction_trace: Dict[str, Any] = {}
+    critic_trace: Dict[str, Any] = {}
+    echeck_trace: Dict[str, Any] = {}
+    execution_trace: Dict[str, Any] = {}
+
+    def _set_step(step_key: str, status: str, detail: str = "") -> None:
+        if step_key in timeline:
+            timeline[step_key]["status"] = status
+            timeline[step_key]["detail"] = detail
+
+    def _finalize(payload: Dict[str, Any]) -> Dict[str, Any]:
+        for step in timeline.values():
+            if step["status"] == "pending":
+                step["status"] = "skipped"
+                step["detail"] = step["detail"] or "Not reached in this run."
+        payload["pipeline_logs"] = list(pipeline_logs)
+        payload["pipeline_timeline"] = [timeline[key] for key, _ in step_order]
+        payload["selection_trace"] = selection_trace
+        payload["extraction_trace"] = extraction_trace
+        payload["echeck_trace"] = echeck_trace
+        payload["critic_trace"] = critic_trace
+        payload["execution_trace"] = execution_trace
+        return payload
 
     def _dbg(message: str) -> None:
+        pipeline_logs.append(message)
         if debug_sanity:
             print(f"{debug_prefix} {message}")
 
+    _set_step("rag_cards", "running", "Retrieving candidate cards from artifact store.")
     if store is not None:
         candidates = retrieve_candidates_from_store(
             store,
@@ -1140,6 +1219,21 @@ def run_case(
         )
     else:
         candidates = retrieve_candidates(retrieval_cards, f"{q}\n{c}", top_k=top_k)
+    if candidates:
+        top_rows = [
+            {
+                "fic_id": str(cand.retrieval.get("fic_id", "")).strip(),
+                "score": round(float(cand.score), 6),
+                "title": cand.retrieval.get("title"),
+                "topic": cand.retrieval.get("topic"),
+                "domain": cand.retrieval.get("domain"),
+            }
+            for cand in candidates
+        ]
+        selection_trace["retrieval_candidates"] = top_rows
+        _set_step("rag_cards", "success", f"Retrieved {len(candidates)} cards.")
+    else:
+        _set_step("rag_cards", "error", "No candidate cards retrieved.")
     _dbg(
         "retrieval: "
         + ", ".join(
@@ -1149,7 +1243,13 @@ def run_case(
     )
     if not candidates:
         _dbg("early-exit: N (no candidate cards retrieved)")
-        return {
+        _set_step("mn_analysis", "skipped", "No cards available for M/N analysis.")
+        _set_step("extract_values", "skipped", "No selected FIC card.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned N refusal response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "N",
@@ -1161,8 +1261,9 @@ def run_case(
             "ambiguity_tags": [],
             "clarification_request": None,
             "repair_hints": [],
-        }
+        })
 
+    _set_step("mn_analysis", "running", "Selector is deciding M/N/select_card.")
     selection = _select_card_with_llm(client, selector_model, q, c, candidates)
     decision = str(selection.get("decision", "")).strip()
     chosen_fic_id = str(selection.get("chosen_fic_id", "")).strip()
@@ -1170,6 +1271,14 @@ def run_case(
     support_gap_reason = str(selection.get("support_gap_reason", "")).strip()
     ambiguity_tags = [str(x).strip() for x in selection.get("ambiguity_tags", []) if str(x).strip()]
     clarification_questions = [str(x).strip() for x in selection.get("clarification_questions", []) if str(x).strip()]
+    selection_trace["selector"] = {
+        "decision": decision,
+        "chosen_fic_id": chosen_fic_id,
+        "reason": str(selection.get("reason", "")).strip(),
+        "support_gap_reason": support_gap_reason,
+        "ambiguity_tags": ambiguity_tags,
+        "clarification_questions": clarification_questions,
+    }
     _dbg(
         "selector: "
         f"decision={decision or '<empty>'}, chosen_fic_id={chosen_fic_id or '<empty>'}, "
@@ -1178,7 +1287,13 @@ def run_case(
 
     if decision == "abstain_m":
         _dbg("early-exit: M (selector abstain_m)")
-        return {
+        _set_step("mn_analysis", "error", "M ambiguity detected by selector.")
+        _set_step("extract_values", "skipped", "No card selected.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned M clarification/refusal response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "M",
@@ -1193,11 +1308,17 @@ def run_case(
                 or ["Please specify the target metric (for example NPV, IRR, or Payback)."],
                 "options": [],
             },
-        }
+        })
 
     if decision == "abstain_n":
         _dbg("early-exit: N (selector abstain_n)")
-        return {
+        _set_step("mn_analysis", "error", "N out-of-scope detected by selector.")
+        _set_step("extract_values", "skipped", "No card selected.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned N graceful-exit response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "N",
@@ -1209,11 +1330,17 @@ def run_case(
             "ambiguity_tags": ambiguity_tags,
             "clarification_request": None,
             "repair_hints": _best_scope_repair(candidate_ids, repair_index),
-        }
+        })
 
     if decision != "select_card" or not chosen_fic_id:
         _dbg("early-exit: M (selector did not commit valid card)")
-        return {
+        _set_step("mn_analysis", "error", "Selector did not commit a valid card.")
+        _set_step("extract_values", "skipped", "No card selected.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned M clarification/refusal response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "M",
@@ -1227,13 +1354,19 @@ def run_case(
                 "questions": ["Please specify the target metric explicitly (for example NPV, IRR, Payback)."],
                 "options": [],
             },
-        }
+        })
 
     top_score = candidates[0].score if candidates else 0.0
     _dbg(f"retrieval-confidence: top_score={top_score:.3f}, threshold={m_min_top_score:.3f}")
     if top_score < m_min_top_score:
         _dbg("early-exit: N (low retrieval confidence)")
-        return {
+        _set_step("mn_analysis", "error", "Retrieval confidence below threshold.")
+        _set_step("extract_values", "skipped", "No trusted card selected.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned N low-confidence response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "N",
@@ -1245,12 +1378,18 @@ def run_case(
             "ambiguity_tags": ambiguity_tags,
             "clarification_request": None,
             "repair_hints": _best_scope_repair(candidate_ids, repair_index),
-        }
+        })
 
     core = core_by_id.get(chosen_fic_id)
     if core is None:
         _dbg(f"early-exit: N (missing core card for chosen_fic_id={chosen_fic_id})")
-        return {
+        _set_step("mn_analysis", "error", "Chosen card has no core artifact.")
+        _set_step("extract_values", "skipped", "No core card for extraction.")
+        _set_step("fe_checks", "skipped", "No extracted inputs to check.")
+        _set_step("ihard_check", "skipped", "No extracted inputs to review.")
+        _set_step("python_execution", "skipped", "No selected FIC execution path.")
+        _set_step("final_response", "success", "Returned N missing-core response.")
+        return _finalize({
             **base,
             "status": "refusal",
             "diagnostic_type": "N",
@@ -1262,7 +1401,10 @@ def run_case(
             "ambiguity_tags": ambiguity_tags,
             "clarification_request": None,
             "repair_hints": _best_scope_repair(candidate_ids, repair_index),
-        }
+        })
+
+    _set_step("mn_analysis", "success", f"Selected fic_id={chosen_fic_id}.")
+    _set_step("extract_values", "running", "LLM extracting and normalizing input fields.")
 
     # card_committed=True beyond this point; only F/E/I/C/success should appear.
     extraction = _extract_inputs_with_llm(client, extractor_model, q, c, core)
@@ -1319,6 +1461,17 @@ def run_case(
         if val is not None:
             provided_inputs[name] = val
 
+    extraction_trace = {
+        "required_names": required_names,
+        "llm_extracted_inputs": extraction.get("inputs", []),
+        "normalization_note": normalization_note,
+        "missing_fields": missing,
+        "provided_keys": sorted(list(provided_inputs.keys())),
+        "ambiguous_fields": ambiguous_fields,
+        "schema_contradiction_fields": schema_contradiction_fields,
+        "coercion_notes": coercion_notes,
+    }
+
     _dbg(
         "input-binding: "
         f"required={required_names}, missing={missing}, provided_keys={sorted(list(provided_inputs.keys()))}, "
@@ -1327,7 +1480,12 @@ def run_case(
 
     if missing:
         _dbg("early-exit: F (missing or unparsable required inputs)")
-        return {
+        _set_step("extract_values", "error", f"Missing required fields: {', '.join(missing)}")
+        _set_step("fe_checks", "skipped", "Cannot run checks before required fields are filled.")
+        _set_step("ihard_check", "skipped", "Cannot run critic before required fields are filled.")
+        _set_step("python_execution", "skipped", "Cannot execute compute() with missing required fields.")
+        _set_step("final_response", "success", "Returned F slot-filling response.")
+        return _finalize({
             **base,
             "status": "error",
             "diagnostic_type": "F",
@@ -1349,7 +1507,10 @@ def run_case(
                     "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
                 }
             ],
-        }
+        })
+
+    _set_step("extract_values", "success", f"Extracted {len(provided_inputs)} input fields.")
+    _set_step("fe_checks", "running", "Running deterministic F/E checks.")
 
 
     # Pre-compile the FIC's compute function so E-check expressions that call
@@ -1422,12 +1583,24 @@ def run_case(
                 f"triggered={is_triggered}"
             )
 
+    echeck_trace = {
+        "total_checks": len(checks),
+        "e_checks_count": len(e_checks),
+        "auto_triggered_rule_ids": list(dict.fromkeys(auto_triggered)),
+        "structural_errors": structural_errors,
+        "evaluation_errors": eval_errors,
+    }
+
     # Structural errors mean the input shape does not match the FIC schema → F.
     if structural_errors:
         first_s = structural_errors[0]
         missing_structural = [e["rule_id"] for e in structural_errors]
         _dbg(f"early-exit: F (structural E-check error → input shape mismatch on {first_s['rule_id']})")
-        return {
+        _set_step("fe_checks", "error", f"F structural mismatch in {first_s['rule_id']}.")
+        _set_step("ihard_check", "skipped", "Blocked by F structural error.")
+        _set_step("python_execution", "skipped", "Blocked by F structural error.")
+        _set_step("final_response", "success", "Returned F slot-filling response.")
+        return _finalize({
             **base,
             "status": "error",
             "diagnostic_type": "F",
@@ -1447,12 +1620,16 @@ def run_case(
             "normalization_note": normalization_note,
             "rule_eval_errors": structural_errors,
             "repair_hints": _summarize_repairs(chosen_fic_id, missing_structural, repair_index),
-        }
+        })
 
     if eval_errors:
         first = eval_errors[0]
         _dbg(f"early-exit: C (E-check evaluation error on {first['rule_id']})")
-        return {
+        _set_step("fe_checks", "error", f"C evaluation error in {first['rule_id']}.")
+        _set_step("ihard_check", "skipped", "Blocked by E-check evaluation error.")
+        _set_step("python_execution", "skipped", "Blocked by E-check evaluation error.")
+        _set_step("final_response", "success", "Returned C audit-log response.")
+        return _finalize({
             **base,
             "status": "error",
             "diagnostic_type": "C",
@@ -1467,13 +1644,17 @@ def run_case(
             "provided_inputs": provided_inputs,
             "normalization_note": normalization_note,
             "rule_eval_errors": eval_errors,
-        }
+        })
 
     triggered = list(dict.fromkeys(auto_triggered))
     if triggered:
         _dbg(f"early-exit: E (triggered_rule_ids={triggered})")
         reason = "Deterministic E-type checks detected potential inconsistencies."
-        return {
+        _set_step("fe_checks", "alert", f"E rules triggered: {', '.join(triggered)}")
+        _set_step("ihard_check", "skipped", "Execution blocked by deterministic E alert.")
+        _set_step("python_execution", "skipped", "Execution blocked by deterministic E alert.")
+        _set_step("final_response", "success", "Returned E deterministic-alert response.")
+        return _finalize({
             **base,
             "status": "alert",
             "diagnostic_type": "E",
@@ -1489,7 +1670,10 @@ def run_case(
             "triggered_rule_ids": triggered,
             "normalization_note": normalization_note,
             "repair_hints": _summarize_repairs(chosen_fic_id, triggered, repair_index),
-        }
+        })
+
+    _set_step("fe_checks", "success", "F/E checks passed.")
+    _set_step("ihard_check", "running", "Running I-gate critic for hidden assumptions.")
 
     semantic_hints = [h for h in (core.get("semantic_hints") or []) if isinstance(h, dict)]
     critic = _critic_check_with_llm(
@@ -1500,6 +1684,10 @@ def run_case(
         semantic_hints=semantic_hints,
         provided_inputs=provided_inputs,
     )
+    critic_trace = {
+        "semantic_hints_count": len(semantic_hints),
+        "raw_critic": critic,
+    }
     needs_clarification = bool(critic.get("needs_clarification"))
     soft_warnings: List[Dict[str, Any]] = []
     if needs_clarification:
@@ -1543,7 +1731,10 @@ def run_case(
         options = list(dict.fromkeys(options))
         if is_hard_block:
             _dbg("early-exit: I_hard (needs clarification)")
-            return {
+            _set_step("ihard_check", "error", "I_hard ambiguity requires user clarification.")
+            _set_step("python_execution", "skipped", "Blocked by I_hard ambiguity.")
+            _set_step("final_response", "success", "Returned I_hard clarification response.")
+            return _finalize({
                 **base,
                 "status": "needs_clarification",
                 "diagnostic_type": "I",
@@ -1566,7 +1757,7 @@ def run_case(
                 "i_level": "hard",
                 "has_i_soft": False,
                 "soft_warnings": [],
-            }
+            })
 
         # I_soft: do not block execution; add warning payload and continue to C-execution.
         soft_warning_ids = soft_triggered if soft_triggered else []
@@ -1577,10 +1768,20 @@ def run_case(
         )
         _dbg(f"critic: I_soft warnings={len(soft_warnings)}")
 
-    output_value, exec_err = _evaluate_execution(core, provided_inputs)
+    _set_step("ihard_check", "success", "I_hard check passed.")
+    _set_step("python_execution", "running", "Executing deterministic Python compute(inputs).")
+
+    output_value, exec_err, exec_trace = _evaluate_execution(core, provided_inputs)
+    execution_trace = {
+        **exec_trace,
+        "fic_id": chosen_fic_id,
+        "fic_version": core.get("version", "v1"),
+    }
     if exec_err:
         _dbg(f"early-exit: C (execution error: {exec_err})")
-        return {
+        _set_step("python_execution", "error", f"C execution error: {exec_err}")
+        _set_step("final_response", "success", "Returned C audit-log response.")
+        return _finalize({
             **base,
             "status": "error",
             "diagnostic_type": "C",
@@ -1596,14 +1797,21 @@ def run_case(
             "normalization_note": normalization_note,
             "has_i_soft": bool(soft_warnings),
             "soft_warnings": soft_warnings,
-        }
+        })
 
     gold = row.get("gold_answer", row.get("answer", row.get("ground_truth")))
     gold_num = _parse_number(gold)
     abs_error, is_correct, scale_note = _answer_match(q, output_value, gold_num)
     _dbg(f"success: fic_id={chosen_fic_id}, output={output_value}, gold={gold_num}, is_correct={is_correct}" + (f", scale_note={scale_note}" if scale_note else ""))
 
-    return {
+    _set_step("python_execution", "success", "Python execution completed.")
+    _set_step(
+        "final_response",
+        "success",
+        "Completed response generation." + (f" I_soft warnings={len(soft_warnings)}." if soft_warnings else ""),
+    )
+
+    return _finalize({
         **base,
         "status": "success",
         "diagnostic_type": "None",
@@ -1632,12 +1840,7 @@ def run_case(
         "normalization_note": normalization_note,
         "has_i_soft": bool(soft_warnings),
         "soft_warnings": soft_warnings,
-        "execution_trace": {
-            "engine": "deterministic_python",
-            "entrypoint": "compute",
-            "fic_version": core.get("version", "v1"),
-        },
-    }
+    })
 
 
 class ErrorClassificationAPI:
@@ -1738,6 +1941,7 @@ class ErrorClassificationAPI:
         *,
         top_k: Optional[int] = None,
         m_min_top_score: Optional[float] = None,
+        debug_sanity: bool = False,
     ) -> Dict[str, Any]:
         return run_case(
             row=row,
@@ -1751,6 +1955,7 @@ class ErrorClassificationAPI:
             judge_model=self.judge_model,
             top_k=top_k if top_k is not None else self.top_k,
             m_min_top_score=m_min_top_score if m_min_top_score is not None else self.m_min_top_score,
+            debug_sanity=debug_sanity,
         )
 
     def diagnose(

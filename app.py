@@ -22,7 +22,7 @@ DEFAULT_DB_PATH = os.path.join(
     "verifiquant",
     "data",
     "runs",
-    "demo_50q_0408",
+    "demo_50q_0415",
     "cards.db",
 )
 DEFAULT_DB_URL = os.environ.get(
@@ -34,7 +34,7 @@ DEFAULT_SELECTOR_MODEL = os.environ.get("VERIFIQUANT_SELECTOR_MODEL", "gemini-2.
 DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
 DEFAULT_UPLOAD_DIR = os.path.join(ROOT_DIR, "data")
-DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_50q_0408")
+DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_50q_0415")
 
 
 def _clean_text(value: Any) -> str:
@@ -331,6 +331,7 @@ def create_app() -> Flask:
         topic = _clean_text(payload.get("topic")) or None
         top_k = int(payload.get("top_k") or diag_api.top_k)
         m_min_top_score = float(payload.get("m_min_top_score") or diag_api.m_min_top_score)
+        debug_sanity = bool(payload.get("debug_sanity", True))
 
         if not question:
             return jsonify({"status": "error", "message": "question is required"}), 400
@@ -350,6 +351,7 @@ def create_app() -> Flask:
                 row,
                 top_k=top_k,
                 m_min_top_score=m_min_top_score,
+                debug_sanity=debug_sanity,
             )
         except Exception as exc:
             return jsonify({"status": "error", "diagnostic_type": "Unknown", "message": str(exc)}), 500
@@ -369,6 +371,7 @@ def create_app() -> Flask:
         top_k = int(payload.get("top_k") or diag_api.top_k)
         m_min_top_score = float(payload.get("m_min_top_score") or diag_api.m_min_top_score)
         include_results = bool(payload.get("include_results", True))
+        debug_sanity = bool(payload.get("debug_sanity", False))
 
         if not input_path:
             return jsonify({"status": "error", "message": "input_path is required"}), 400
@@ -416,6 +419,7 @@ def create_app() -> Flask:
                         run_row,
                         top_k=top_k,
                         m_min_top_score=m_min_top_score,
+                        debug_sanity=debug_sanity,
                     )
                 except Exception as exc:
                     result = {

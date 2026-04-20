@@ -279,6 +279,121 @@ code {
   margin-bottom: 0.25rem;
 }
 
+.trace-section {
+  margin-top: 0.9rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.8rem;
+}
+
+.trace-section h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.98rem;
+}
+
+.timeline-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.timeline-step {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #f8fafc;
+}
+
+.timeline-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.timeline-step p {
+  margin: 0.45rem 0 0;
+  font-size: 0.92rem;
+}
+
+.step-status {
+  font-size: 0.75rem;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.step-success {
+  background: #15803d;
+}
+
+.step-running {
+  background: #0369a1;
+}
+
+.step-alert {
+  background: #b45309;
+}
+
+.step-error {
+  background: #b91c1c;
+}
+
+.step-skipped {
+  background: #64748b;
+}
+
+.step-pending {
+  background: #94a3b8;
+}
+
+.pipeline-log-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.pipeline-log-list li {
+  margin-bottom: 0.28rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.88rem;
+}
+
+.interaction-priority {
+  background: #f0f9ff;
+  border-top: 2px solid #0284c7;
+  border-radius: 12px;
+  padding: 0.9rem;
+}
+
+.interactive-grid {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.6rem;
+}
+
+.interactive-answer-card {
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 0.7rem;
+  background: #ffffff;
+}
+
+.interactive-answer-card h4 {
+  margin: 0 0 0.45rem;
+}
+
+.interactive-answer-card p {
+  margin: 0.35rem 0;
+}
+
+.interactive-question {
+  color: #0c4a6e;
+}
+
+.compact-table th,
+.compact-table td {
+  font-size: 0.86rem;
+  padding: 0.42rem 0.45rem;
+}
+
 .result-output {
   font-size: 1.05rem;
   font-weight: 700;

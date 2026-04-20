@@ -65,11 +65,11 @@ def _oracle_rewrite_for_framework(
 ) -> Dict[str, str]:
     prompt = f"""
 You are an Oracle-in-the-loop rewriter for VerifiQuant framework-guided iteration.
-You can only use ground-truth code + result to clarify assumptions and revise user question/context.
+You can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.
 
 Goal:
 - Given framework diagnostic output, rewrite question/context so the next run can pass gates.
-- Keep semantics faithful to original task and provided code/result.
+- Keep semantics faithful to original task and the logic implied by the provided code.
 - Do NOT output the final numeric answer directly in question/context.
 
 Current question:
@@ -83,9 +83,6 @@ Framework diagnostic:
 
 Ground-truth code:
 {row.get("code", row.get("python_solution", ""))}
-
-Ground-truth result:
-{_gold_value(row)}
 
 Return JSON only.
 """
@@ -120,19 +117,42 @@ def _framework_oracle_loop(
             }
         )
         final_diag = diag
+
+        diag_type = str(diag.get("diagnostic_type", "")).strip().upper()
+        status = diag.get("status")
+        is_correct = diag.get("is_correct")
+        has_i_soft = diag.get("has_i_soft", False)
+
+        intercepted = False
+        if status == "success":
+            if has_i_soft and is_correct is False:
+                # Intercept for iteration: computed but failed to match ground truth under I_soft
+                diag_type = "I_SOFT_MISMATCH"
+                status = "needs_iteration"
+                diag["diagnostic_type"] = diag_type
+                diag["status"] = status
+                diag["oracle_hint"] = "System completed execution but final logic/result mismatch ground truth. Soft missing information hints were triggered. Please use ground-truth code logic to resolve the soft_warnings."
+                intercepted = True
+
+        recorded_error = diag_type if diag_type else status
+
         history.append(
             {
                 "turn": turn,
                 "question": question,
                 "context": context,
                 "diagnostic": diag,
+                "recorded_error": recorded_error,
             }
         )
-        if diag.get("status") == "success":
+
+        print(f"  \u21b3 Turn {turn}: {recorded_error}")
+
+        if status == "success" and not intercepted:
             break
         if turn >= max_turns:
             break
-        if str(diag.get("diagnostic_type", "")).strip().upper() not in {"M", "N", "F", "E", "I"}:
+        if recorded_error not in {"M", "N", "F", "E", "I", "I_SOFT_MISMATCH"}:
             break
 
         rewrite = _oracle_rewrite_for_framework(

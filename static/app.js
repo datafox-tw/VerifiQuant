@@ -66,8 +66,34 @@ function collectRepairUpdates() {
   return updates;
 }
 
-async function composeAndApplyRepair() {
-  const updates = collectRepairUpdates();
+function toSlotToken(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function collectInteractiveUpdates() {
+  const updates = {};
+  document.querySelectorAll(".interactive-answer-card").forEach((card) => {
+    const slot = card.dataset.slot;
+    if (!slot) return;
+    const optionEl = card.querySelector(".interactive-option");
+    const freeEl = card.querySelector(".interactive-free");
+    const optionValue = optionEl ? String(optionEl.value || "").trim() : "";
+    const freeValue = freeEl ? String(freeEl.value || "").trim() : "";
+    const chosen = freeValue || optionValue;
+    if (chosen) updates[slot] = chosen;
+  });
+  const contextNote = document.getElementById("interactive-context-note");
+  if (contextNote && contextNote.value.trim()) {
+    updates.user_context_note = contextNote.value.trim();
+  }
+  return updates;
+}
+
+async function composeAndApplyUpdates(updates) {
+  if (!updates || Object.keys(updates).length === 0) return;
   const payload = {
     question: questionEl.value,
     context: contextEl.value,
@@ -84,6 +110,19 @@ async function composeAndApplyRepair() {
   }
   questionEl.value = data.repaired_question || questionEl.value;
   contextEl.value = data.repaired_context || contextEl.value;
+}
+
+async function composeAndApplyRepair() {
+  await composeAndApplyUpdates(collectRepairUpdates());
+}
+
+async function applyInteractiveAdjustments() {
+  const qRewriteEl = document.getElementById("interactive-question-rewrite");
+  const rewrittenQuestion = qRewriteEl ? qRewriteEl.value.trim() : "";
+  if (rewrittenQuestion) {
+    questionEl.value = rewrittenQuestion;
+  }
+  await composeAndApplyUpdates(collectInteractiveUpdates());
 }
 
 function renderRepairHints(repairHints) {
@@ -123,6 +162,206 @@ function renderRepairHints(repairHints) {
   `;
 }
 
+function renderSelectionSummary(selectionTrace) {
+  if (!selectionTrace || Object.keys(selectionTrace).length === 0) return "";
+  const selector = selectionTrace.selector || {};
+  const candidates = selectionTrace.retrieval_candidates || [];
+  const candidateRows = candidates
+    .map(
+      (c) => `
+      <tr>
+        <td><code>${escapeHtml(c.fic_id || "-")}</code></td>
+        <td>${escapeHtml(c.title || "-")}</td>
+        <td>${escapeHtml(c.domain || "-")} / ${escapeHtml(c.topic || "-")}</td>
+        <td>${escapeHtml(c.score)}</td>
+      </tr>
+    `
+    )
+    .join("");
+  return `
+    <section class="trace-section">
+      <h3>選卡與 M/N 決策</h3>
+      <p>decision: <code>${escapeHtml(selector.decision || "-")}</code></p>
+      <p>chosen_fic_id: <code>${escapeHtml(selector.chosen_fic_id || "-")}</code></p>
+      <p>reason: ${escapeHtml(selector.reason || "-")}</p>
+      ${
+        candidateRows
+          ? `
+          <table class="history-table compact-table">
+            <thead>
+              <tr><th>fic_id</th><th>title</th><th>domain/topic</th><th>score</th></tr>
+            </thead>
+            <tbody>${candidateRows}</tbody>
+          </table>
+        `
+          : ""
+      }
+    </section>
+  `;
+}
+
+function renderInteractiveAssistant(data) {
+  const clarification = data.clarification_request || null;
+  const softWarnings = Array.isArray(data.soft_warnings) ? data.soft_warnings : [];
+  if (!clarification && !softWarnings.length) return "";
+
+  const clarificationCards = clarification
+    ? (clarification.questions || [])
+        .map((q, idx) => {
+          const slot = `clarification_${idx + 1}`;
+          const options = (clarification.options || [])
+            .map((opt) => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`)
+            .join("");
+          return `
+            <article class="interactive-answer-card" data-slot="${slot}">
+              <h4>Clarification ${idx + 1}</h4>
+              <p class="interactive-question">${escapeHtml(q)}</p>
+              ${
+                options
+                  ? `
+                  <label>
+                    選擇答案
+                    <select class="interactive-option">
+                      <option value="">請選擇</option>
+                      ${options}
+                    </select>
+                  </label>
+                `
+                  : ""
+              }
+              <label>
+                或手動輸入
+                <input class="interactive-free" type="text" placeholder="輸入更精確的答案" />
+              </label>
+            </article>
+          `;
+        })
+        .join("")
+    : "";
+
+  const softCards = softWarnings
+    .map((w, idx) => {
+      const token = toSlotToken(w.hint_id || `i_soft_${idx + 1}`) || `i_soft_${idx + 1}`;
+      const slot = `i_soft_${token}`;
+      const options = (w.options || [])
+        .map((opt) => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`)
+        .join("");
+      return `
+        <article class="interactive-answer-card" data-slot="${slot}">
+          <h4>I_soft ${idx + 1}</h4>
+          <p><strong>assumption_if_not_clarified</strong>: ${escapeHtml(w.assumption_if_not_clarified || "-")}</p>
+          <p class="interactive-question"><strong>clarification_question</strong>: ${escapeHtml(w.clarification_question || "-")}</p>
+          ${
+            options
+              ? `
+              <label>
+                options
+                <select class="interactive-option">
+                  <option value="">請選擇</option>
+                  ${options}
+                </select>
+              </label>
+            `
+              : ""
+          }
+          <label>
+            或手動輸入
+            <input class="interactive-free" type="text" placeholder="若 options 不足，請輸入你的答案" />
+          </label>
+        </article>
+      `;
+    })
+    .join("");
+
+  return `
+    <section class="trace-section interaction-priority">
+      <h3>互動修正（優先處理）</h3>
+      <label>
+        改寫 Question（選填）
+        <input id="interactive-question-rewrite" type="text" placeholder="可直接改寫成更精確問題" />
+      </label>
+      <label>
+        補充 Context（選填）
+        <input id="interactive-context-note" type="text" placeholder="例如：使用年末現金流、折現率 10%" />
+      </label>
+      <div class="interactive-grid">
+        ${clarificationCards}
+        ${softCards}
+      </div>
+      <div class="repair-actions">
+        <button id="apply-interactive-btn" type="button">套用互動內容到 context</button>
+        <button id="rerun-interactive-btn" type="button">套用後重新診斷</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderPipelineTimeline(timeline) {
+  if (!Array.isArray(timeline) || !timeline.length) return "";
+  const rows = timeline
+    .map((step) => {
+      const status = String(step.status || "pending");
+      return `
+        <article class="timeline-step">
+          <div class="timeline-head">
+            <span class="step-status step-${escapeHtml(status)}">${escapeHtml(status)}</span>
+            <strong>${escapeHtml(step.label || step.key || "")}</strong>
+          </div>
+          <p>${escapeHtml(step.detail || "")}</p>
+        </article>
+      `;
+    })
+    .join("");
+  return `
+    <section class="trace-section">
+      <h3>Pipeline Timeline</h3>
+      <div class="timeline-grid">${rows}</div>
+    </section>
+  `;
+}
+
+function renderPipelineLogs(logs) {
+  if (!Array.isArray(logs) || !logs.length) return "";
+  const items = logs.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+  return `
+    <section class="trace-section">
+      <h3>Pipeline Logs</h3>
+      <ol class="pipeline-log-list">${items}</ol>
+    </section>
+  `;
+}
+
+function renderTraceBlock(title, value) {
+  if (!value || (typeof value === "object" && Object.keys(value).length === 0)) return "";
+  return `
+    <section class="trace-section">
+      <h3>${escapeHtml(title)}</h3>
+      <pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre>
+    </section>
+  `;
+}
+
+function renderPythonExecution(executionTrace) {
+  if (!executionTrace || Object.keys(executionTrace).length === 0) return "";
+  return `
+    <section class="trace-section">
+      <h3>Python Execution</h3>
+      <p>engine: <code>${escapeHtml(executionTrace.engine || "-")}</code></p>
+      <p>entrypoint: <code>${escapeHtml(executionTrace.entrypoint || "compute")}</code></p>
+      <p>fic_id: <code>${escapeHtml(executionTrace.fic_id || "-")}</code></p>
+      <p>fic_version: <code>${escapeHtml(executionTrace.fic_version || "-")}</code></p>
+      <p>code:</p>
+      <pre>${escapeHtml(executionTrace.code || "")}</pre>
+      <p>input:</p>
+      <pre>${escapeHtml(JSON.stringify(executionTrace.inputs || {}, null, 2))}</pre>
+      <p>output(raw):</p>
+      <pre>${escapeHtml(JSON.stringify(executionTrace.raw_output, null, 2))}</pre>
+      <p>output(parsed): <code>${escapeHtml(executionTrace.parsed_output_value)}</code></p>
+      ${executionTrace.error ? `<p>error: <code>${escapeHtml(executionTrace.error)}</code></p>` : ""}
+    </section>
+  `;
+}
+
 function renderResult(data) {
   resultEl.classList.remove("hidden");
   const summary = `
@@ -148,7 +387,42 @@ function renderResult(data) {
   const rulePart = data.triggered_rule_ids?.length
     ? `<p>觸發規則：<code>${escapeHtml(data.triggered_rule_ids.join(", "))}</code></p>`
     : "";
-  resultEl.innerHTML = `${summary}${rulePart}${successPart}${renderRepairHints(data.repair_hints)}`;
+  const interactionPart = renderInteractiveAssistant(data);
+  const selectionPart = renderSelectionSummary(data.selection_trace);
+  const executionPart = renderPythonExecution(data.execution_trace);
+  const timelinePart = renderPipelineTimeline(data.pipeline_timeline);
+  const logsPart = renderPipelineLogs(data.pipeline_logs);
+  const extractionPart = renderTraceBlock("抽值與標準化（詳細）", data.extraction_trace);
+  const checksPart = renderTraceBlock("F/E 檢查（詳細）", data.echeck_trace);
+  const criticPart = renderTraceBlock("I Gate（詳細）", data.critic_trace);
+  resultEl.innerHTML = `${summary}${rulePart}${successPart}${executionPart}${interactionPart}${renderRepairHints(
+    data.repair_hints
+  )}${selectionPart}${timelinePart}${extractionPart}${checksPart}${criticPart}${logsPart}${renderTraceBlock(
+    "Execution Trace（Raw）",
+    data.execution_trace
+  )}`;
+
+  const applyInteractiveBtn = document.getElementById("apply-interactive-btn");
+  const rerunInteractiveBtn = document.getElementById("rerun-interactive-btn");
+  if (applyInteractiveBtn) {
+    applyInteractiveBtn.addEventListener("click", async () => {
+      try {
+        await applyInteractiveAdjustments();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  }
+  if (rerunInteractiveBtn) {
+    rerunInteractiveBtn.addEventListener("click", async () => {
+      try {
+        await applyInteractiveAdjustments();
+        form.requestSubmit();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  }
 
   const applyBtn = document.getElementById("apply-repair-btn");
   const rerunBtn = document.getElementById("rerun-btn");
@@ -338,6 +612,7 @@ form.addEventListener("submit", async (event) => {
       topic: document.getElementById("topic").value || null,
       top_k: Number(document.getElementById("top-k").value || 3),
       m_min_top_score: Number(document.getElementById("m-min-top-score").value || 0.05),
+      debug_sanity: true,
     };
     const response = await fetch("/api/diagnose", {
       method: "POST",

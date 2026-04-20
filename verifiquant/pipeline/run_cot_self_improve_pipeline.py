@@ -168,7 +168,7 @@ def _oracle_rewrite_for_cot(
     prompt = f"""
 You are Oracle-in-the-loop support for a pure CoT baseline.
 There is no VerifiQuant framework in this loop.
-Use only ground-truth code + result to rewrite question/context to reduce ambiguity and missing fields.
+You can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.
 
 Current question:
 {current_question}
@@ -183,9 +183,6 @@ Current correctness against gold (if available): {is_correct}
 
 Ground-truth code:
 {row.get("code", row.get("python_solution", ""))}
-
-Ground-truth result:
-{_gold_value(row)}
 
 Return JSON only.
 """
@@ -238,6 +235,8 @@ def _cot_oracle_loop(
                 "abs_error": abs_err,
             }
         )
+
+        print(f"  \u21b3 CoT Turn {turn}: is_correct={is_correct}")
 
         needs_more = bool(step.get("needs_more_info"))
         should_iterate = needs_more or (is_correct is False)

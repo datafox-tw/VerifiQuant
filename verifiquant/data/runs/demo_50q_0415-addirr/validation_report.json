@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "error": null,
+  "validation_stats": {
+    "core_count": 2,
+    "retrieval_count": 2,
+    "repair_count": 19,
+    "diagnostic_rule_count": 13
+  },
+  "output": {
+    "core": "verifiquant/data/runs/demo_50q_0415-addirr/core.jsonl",
+    "retrieval": "verifiquant/data/runs/demo_50q_0415-addirr/retrieval.jsonl",
+    "repair": "verifiquant/data/runs/demo_50q_0415-addirr/repair.jsonl"
+  },
+  "counts": {
+    "core": 2,
+    "retrieval": 2,
+    "repair": 19,
+    "skipped_duplicates": 0,
+    "skipped_kernel_duplicates": 0
+  },
+  "kernel_dedup": {
+    "normalization_version": "ast_v1_docstring_strip",
+    "duplicate_hits": []
+  },
+  "execution_smoke": {
+    "failed_count": 1,
+    "failed_cards": [
+      {
+        "fic_id": "fic_article_30",
+        "error": "unexpected character after line continuation character (<string>, line 1)"
+      }
+    ]
+  }
+}
