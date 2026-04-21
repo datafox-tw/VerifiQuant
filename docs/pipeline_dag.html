@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VerifiQuant LangGraph Pipeline</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a; color: #e2e8f0;
+    margin: 0; padding: 24px;
+  }
+  h1 { font-size: 1.4rem; color: #93c5fd; margin-bottom: 4px; }
+  .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 24px; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-bottom: 20px; font-size: 0.78rem;
+  }
+  .legend-item {
+    padding: 4px 10px; border-radius: 99px; border: 1px solid;
+  }
+  .diagram-wrap {
+    background: #f8fafc; border-radius: 12px;
+    padding: 32px; overflow-x: auto;
+  }
+  .mermaid { display: flex; justify-content: center; }
+  details { margin-top: 24px; }
+  summary { cursor: pointer; color: #93c5fd; font-size: 0.85rem; }
+  pre {
+    background: #1e293b; border-radius: 8px; padding: 16px;
+    font-size: 0.75rem; color: #94a3b8; overflow-x: auto;
+    max-height: 400px;
+  }
+</style>
+</head>
+<body>
+<h1>VerifiQuant — LangGraph Pipeline DAG</h1>
+<p class="subtitle">
+  M/N/F/E/I/C funnel · 14 nodes · 24 edges
+</p>
+
+<div class="legend">
+  <span class="legend-item" style="background:#dbeafe;border-color:#3b82f6;color:#1e3a8a">Processing</span>
+  <span class="legend-item" style="background:#fee2e2;border-color:#ef4444;color:#7f1d1d">M exit</span>
+  <span class="legend-item" style="background:#ffedd5;border-color:#f97316;color:#7c2d12">N exit</span>
+  <span class="legend-item" style="background:#fef9c3;border-color:#eab308;color:#713f12">F exit</span>
+  <span class="legend-item" style="background:#fde68a;border-color:#d97706;color:#78350f">E exit</span>
+  <span class="legend-item" style="background:#ede9fe;border-color:#8b5cf6;color:#4c1d95">I exit</span>
+  <span class="legend-item" style="background:#f3f4f6;border-color:#6b7280;color:#111827">C exit</span>
+  <span class="legend-item" style="background:#dcfce7;border-color:#22c55e;color:#14532d">Success</span>
+  <span class="legend-item" style="background:#1e293b;border-color:#0f172a;color:#f8fafc">Finalize</span>
+</div>
+
+<div class="diagram-wrap">
+  <div class="mermaid">
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	retrieve("① Retrieve\n(RAG top-k)"):::processing
+	mn_select("② M/N Select\n(LLM selector)"):::processing
+	extract("③ Extract\n(LLM extractor)"):::processing
+	fe_checks("④ F/E Checks\n(deterministic)"):::processing
+	i_gate("⑤ I-gate\n(Critic agent)"):::processing
+	execute("⑥ Execute\n(Python compute)"):::processing
+	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
+	exit_n("EXIT: N\nOut of scope"):::exit_n
+	exit_f("EXIT: F\nMissing inputs"):::exit_f
+	exit_e("EXIT: E\nBoundary violation"):::exit_e
+	exit_i("EXIT: I\nSemantic ambiguity"):::exit_i
+	exit_c("EXIT: C\nExec error"):::exit_c
+	exit_success("✓ SUCCESS"):::exit_ok
+	finalize("Finalize\n_build_result()"):::finalize
+	__end__([<p>__end__</p>]):::last
+	__start__ --> retrieve;
+	execute -.-> exit_c;
+	execute -.-> exit_success;
+	exit_c --> finalize;
+	exit_e --> finalize;
+	exit_f --> finalize;
+	exit_i --> finalize;
+	exit_m --> finalize;
+	exit_n --> finalize;
+	exit_success --> finalize;
+	extract -.-> exit_f;
+	extract -.-> fe_checks;
+	fe_checks -.-> exit_c;
+	fe_checks -.-> exit_e;
+	fe_checks -.-> exit_f;
+	fe_checks -.-> i_gate;
+	i_gate -.-> execute;
+	i_gate -.-> exit_i;
+	mn_select -.-> exit_m;
+	mn_select -.-> exit_n;
+	mn_select -.-> extract;
+	retrieve -.-> exit_n;
+	retrieve -.-> mn_select;
+	finalize --> __end__;
+
+    classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+    classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
+    classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef exit_e     fill:#fde68a,stroke:#d97706,color:#78350f
+    classDef exit_i     fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95
+    classDef exit_c     fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef exit_ok    fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef finalize   fill:#1e293b,stroke:#0f172a,color:#f8fafc,font-weight:bold
+
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+  </div>
+</div>
+
+<details>
+  <summary>▸ Raw Mermaid source</summary>
+  <pre>---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([&lt;p&gt;__start__&lt;/p&gt;]):::first
+	retrieve("① Retrieve\n(RAG top-k)"):::processing
+	mn_select("② M/N Select\n(LLM selector)"):::processing
+	extract("③ Extract\n(LLM extractor)"):::processing
+	fe_checks("④ F/E Checks\n(deterministic)"):::processing
+	i_gate("⑤ I-gate\n(Critic agent)"):::processing
+	execute("⑥ Execute\n(Python compute)"):::processing
+	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
+	exit_n("EXIT: N\nOut of scope"):::exit_n
+	exit_f("EXIT: F\nMissing inputs"):::exit_f
+	exit_e("EXIT: E\nBoundary violation"):::exit_e
+	exit_i("EXIT: I\nSemantic ambiguity"):::exit_i
+	exit_c("EXIT: C\nExec error"):::exit_c
+	exit_success("✓ SUCCESS"):::exit_ok
+	finalize("Finalize\n_build_result()"):::finalize
+	__end__([&lt;p&gt;__end__&lt;/p&gt;]):::last
+	__start__ --&gt; retrieve;
+	execute -.-&gt; exit_c;
+	execute -.-&gt; exit_success;
+	exit_c --&gt; finalize;
+	exit_e --&gt; finalize;
+	exit_f --&gt; finalize;
+	exit_i --&gt; finalize;
+	exit_m --&gt; finalize;
+	exit_n --&gt; finalize;
+	exit_success --&gt; finalize;
+	extract -.-&gt; exit_f;
+	extract -.-&gt; fe_checks;
+	fe_checks -.-&gt; exit_c;
+	fe_checks -.-&gt; exit_e;
+	fe_checks -.-&gt; exit_f;
+	fe_checks -.-&gt; i_gate;
+	i_gate -.-&gt; execute;
+	i_gate -.-&gt; exit_i;
+	mn_select -.-&gt; exit_m;
+	mn_select -.-&gt; exit_n;
+	mn_select -.-&gt; extract;
+	retrieve -.-&gt; exit_n;
+	retrieve -.-&gt; mn_select;
+	finalize --&gt; __end__;
+
+    classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+    classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
+    classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef exit_e     fill:#fde68a,stroke:#d97706,color:#78350f
+    classDef exit_i     fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95
+    classDef exit_c     fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef exit_ok    fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef finalize   fill:#1e293b,stroke:#0f172a,color:#f8fafc,font-weight:bold
+
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc</pre>
+</details>
+
+<details>
+  <summary>▸ LangSmith tracing setup</summary>
+  <pre>
+# Add to your .env file:
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=&lt;your-key-from-smith.langchain.com&gt;
+LANGCHAIN_PROJECT=verifiquant-pipeline
+
+# LangGraph automatically sends every .invoke() call to LangSmith.
+# Traces show per-node state diffs, execution time, and branching path.
+# No code changes needed — just set the env vars before running.
+  </pre>
+</details>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default' });
+</script>
+</body>
+</html>
