@@ -271,8 +271,99 @@ LANGCHAIN_PROJECT=verifiquant-pipeline
 """
 
 
+_MERMAID_V2 = """\
+---
+config:
+  flowchart:
+    curve: basis
+---
+flowchart TD
+  START(["▶ START"]):::first
+
+  subgraph PROC["  Processing Pipeline  "]
+    direction TB
+    retrieve("① Retrieve\\n(RAG top-k)"):::processing
+    mn_select("② M/N Select\\n(LLM selector)"):::processing
+    extract("③ Extract\\n(LLM extractor)"):::processing
+    fe_checks("④ F/E Checks\\n(deterministic)"):::processing
+    i_gate("⑤ I-gate\\n(Critic agent)"):::processing
+    execute("⑥ Execute\\n(Python compute)"):::processing
+  end
+
+  subgraph HITL["  ⏸ HITL Gates — interrupt & resume  "]
+    direction TB
+    hitl_m("⏸ HITL-M\\nClarify intent"):::hitl
+    hitl_f("⏸ HITL-F\\nFill missing slots"):::hitl
+    hitl_e("⏸ HITL-E\\nCorrect values"):::hitl
+    hitl_i("⏸ HITL-I\\nPick interpretation"):::hitl
+  end
+
+  subgraph EXITS["  Exit Nodes  "]
+    direction TB
+    exit_m("EXIT: M\\nIntent ambiguous"):::exit_m
+    exit_n("EXIT: N\\nOut of scope"):::exit_n
+    exit_f("EXIT: F\\nMissing inputs"):::exit_f
+    exit_e("EXIT: E\\nBoundary violation"):::exit_e
+    exit_i("EXIT: I\\nSemantic ambiguity"):::exit_i
+    exit_c("EXIT: C\\nExec error"):::exit_c
+    exit_success("✓ SUCCESS"):::exit_ok
+  end
+
+  finalize("Finalize\\n_build_result()"):::finalize
+  END(["⏹ END"]):::last
+
+  %% ── Main flow ──────────────────────────────────────────────
+  START --> retrieve
+  retrieve -->|no cards| exit_n
+  retrieve --> mn_select
+  mn_select -->|N: out of scope| exit_n
+  mn_select --> extract
+  extract --> fe_checks
+  fe_checks -->|C: eval error| exit_c
+  fe_checks --> i_gate
+  i_gate --> execute
+  execute -->|C: exec error| exit_c
+  execute --> exit_success
+
+  %% ── Processing → HITL gate (trigger) ──────────────────────
+  mn_select  -->|M: ambiguous| hitl_m
+  extract    -->|F: missing| hitl_f
+  fe_checks  -->|F: structural| hitl_f
+  fe_checks  -->|E: boundary| hitl_e
+  i_gate     -->|I: ambiguity| hitl_i
+
+  %% ── HITL resume paths (thick green = back to pipeline) ────
+  hitl_m ==o|"✎ user clarifies intent\\n→ retry selector"| mn_select
+  hitl_f ==o|"✎ user fills values\\n→ retry fe_checks"| fe_checks
+  hitl_e ==o|"✎ user corrects values\\n→ retry fe_checks"| fe_checks
+  hitl_i ==o|"✎ user picks interpretation\\n→ direct execute"| execute
+
+  %% ── HITL fallback (user gives up / max retries) ───────────
+  hitl_m -.->|give up| exit_m
+  hitl_f -.->|give up| exit_f
+  hitl_e -.->|give up| exit_e
+  hitl_i -.->|give up| exit_i
+
+  %% ── All exits → finalize ───────────────────────────────────
+  exit_m & exit_n & exit_f & exit_e & exit_i & exit_c & exit_success --> finalize
+  finalize --> END
+
+  classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+  classDef hitl       fill:#fdf4ff,stroke:#a855f7,color:#581c87,font-weight:bold
+  classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+  classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
+  classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
+  classDef exit_e     fill:#fde68a,stroke:#d97706,color:#78350f
+  classDef exit_i     fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95
+  classDef exit_c     fill:#f3f4f6,stroke:#6b7280,color:#111827
+  classDef exit_ok    fill:#dcfce7,stroke:#22c55e,color:#14532d
+  classDef finalize   fill:#1e293b,stroke:#0f172a,color:#f8fafc,font-weight:bold
+  classDef first      fill:#0ea5e9,stroke:#0284c7,color:#fff,font-weight:bold
+  classDef last       fill:#64748b,stroke:#475569,color:#fff
+"""
+
+
 def generate_html(out_path: Path) -> None:
-    # Both graphs have the same structure; the visual difference is the HITL callout text
     deps = PipelineDeps(
         client=MagicMock(), store=None,
         core_by_id={}, retrieval_cards=[], repair_index={},
@@ -280,7 +371,8 @@ def generate_html(out_path: Path) -> None:
     app = build_pipeline(deps)
     graph = app.get_graph()
     raw_mermaid = graph.draw_mermaid()
-    enhanced = _enhance_mermaid(raw_mermaid)
+    mermaid_v1 = _enhance_mermaid(raw_mermaid)   # auto-generated, shows all edges
+    mermaid_v2 = _MERMAID_V2                       # hand-crafted: subgraphs + resume loops
 
     node_count = len([n for n in graph.nodes if n not in ("__start__", "__end__")])
     edge_count = len(graph.edges)
@@ -288,9 +380,9 @@ def generate_html(out_path: Path) -> None:
     html = _HTML_TEMPLATE.format(
         node_count=node_count,
         edge_count=edge_count,
-        mermaid_v1=enhanced,   # same diagram — callout text explains the mode difference
-        mermaid_v2=enhanced,
-        mermaid_escaped=enhanced.replace("<", "&lt;").replace(">", "&gt;"),
+        mermaid_v1=mermaid_v1,
+        mermaid_v2=mermaid_v2,
+        mermaid_escaped=mermaid_v2.replace("<", "&lt;").replace(">", "&gt;"),
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(html, encoding="utf-8")
