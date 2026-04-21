@@ -6,55 +6,80 @@
 <title>VerifiQuant LangGraph Pipeline</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
+  * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f172a; color: #e2e8f0;
-    margin: 0; padding: 24px;
+    background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px;
   }
   h1 { font-size: 1.4rem; color: #93c5fd; margin-bottom: 4px; }
-  .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 24px; }
+  .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; }
+
+  /* Tab switcher */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab {
+    padding: 8px 20px; border-radius: 8px 8px 0 0; cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; border: 1px solid #334155;
+    background: #1e293b; color: #94a3b8; transition: all .15s;
+  }
+  .tab.active { background: #f8fafc; color: #1e293b; border-bottom-color: #f8fafc; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
   .legend {
-    display: flex; flex-wrap: wrap; gap: 10px;
-    margin-bottom: 20px; font-size: 0.78rem;
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; font-size: 0.76rem;
   }
   .legend-item {
-    padding: 4px 10px; border-radius: 99px; border: 1px solid;
+    padding: 3px 10px; border-radius: 99px; border: 1px solid;
   }
   .diagram-wrap {
-    background: #f8fafc; border-radius: 12px;
-    padding: 32px; overflow-x: auto;
+    background: #f8fafc; border-radius: 0 12px 12px 12px;
+    padding: 28px; overflow-x: auto; border: 1px solid #334155;
   }
   .mermaid { display: flex; justify-content: center; }
-  details { margin-top: 24px; }
-  summary { cursor: pointer; color: #93c5fd; font-size: 0.85rem; }
+  .callout {
+    background: #1e293b; border-left: 3px solid #a855f7;
+    border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
+    font-size: 0.82rem; color: #c4b5fd;
+  }
+  .callout code { background: #0f172a; padding: 1px 5px; border-radius: 3px; }
+  details { margin-top: 20px; }
+  summary { cursor: pointer; color: #93c5fd; font-size: 0.82rem; }
   pre {
-    background: #1e293b; border-radius: 8px; padding: 16px;
-    font-size: 0.75rem; color: #94a3b8; overflow-x: auto;
-    max-height: 400px;
+    background: #1e293b; border-radius: 8px; padding: 14px;
+    font-size: 0.74rem; color: #94a3b8; overflow-x: auto; max-height: 360px;
   }
 </style>
 </head>
 <body>
 <h1>VerifiQuant — LangGraph Pipeline DAG</h1>
-<p class="subtitle">
-  M/N/F/E/I/C funnel · 14 nodes · 24 edges
-</p>
+<p class="subtitle">M/N/F/E/I/C funnel · 18 nodes · 32 edges</p>
 
-<div class="legend">
-  <span class="legend-item" style="background:#dbeafe;border-color:#3b82f6;color:#1e3a8a">Processing</span>
-  <span class="legend-item" style="background:#fee2e2;border-color:#ef4444;color:#7f1d1d">M exit</span>
-  <span class="legend-item" style="background:#ffedd5;border-color:#f97316;color:#7c2d12">N exit</span>
-  <span class="legend-item" style="background:#fef9c3;border-color:#eab308;color:#713f12">F exit</span>
-  <span class="legend-item" style="background:#fde68a;border-color:#d97706;color:#78350f">E exit</span>
-  <span class="legend-item" style="background:#ede9fe;border-color:#8b5cf6;color:#4c1d95">I exit</span>
-  <span class="legend-item" style="background:#f3f4f6;border-color:#6b7280;color:#111827">C exit</span>
-  <span class="legend-item" style="background:#dcfce7;border-color:#22c55e;color:#14532d">Success</span>
-  <span class="legend-item" style="background:#1e293b;border-color:#0f172a;color:#f8fafc">Finalize</span>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('v1')">v1 — Stateless (one-shot)</div>
+  <div class="tab"        onclick="switchTab('v2')">v2 — HITL (stateful resume)</div>
 </div>
 
-<div class="diagram-wrap">
-  <div class="mermaid">
----
+<!-- ═══ v1: Stateless ═══ -->
+<div id="panel-v1" class="panel active">
+  <div class="legend">
+    <span class="legend-item" style="background:#dbeafe;border-color:#3b82f6;color:#1e3a8a">Processing</span>
+    <span class="legend-item" style="background:#fee2e2;border-color:#ef4444;color:#7f1d1d">M exit</span>
+    <span class="legend-item" style="background:#ffedd5;border-color:#f97316;color:#7c2d12">N exit</span>
+    <span class="legend-item" style="background:#fef9c3;border-color:#eab308;color:#713f12">F exit</span>
+    <span class="legend-item" style="background:#fde68a;border-color:#d97706;color:#78350f">E exit</span>
+    <span class="legend-item" style="background:#ede9fe;border-color:#8b5cf6;color:#4c1d95">I exit</span>
+    <span class="legend-item" style="background:#f3f4f6;border-color:#6b7280;color:#111827">C exit</span>
+    <span class="legend-item" style="background:#dcfce7;border-color:#22c55e;color:#14532d">Success</span>
+    <span class="legend-item" style="background:#1e293b;border-color:#0f172a;color:#f8fafc">Finalize</span>
+    <span class="legend-item" style="background:#fdf4ff;border-color:#a855f7;color:#581c87;border-style:dashed">HITL (pass-through)</span>
+  </div>
+  <div class="callout">
+    <strong>use_hitl=False</strong> — HITL nodes (<code>hitl_m/f/e/i</code>) are transparent pass-throughs.
+    Every <code>diagnose_row()</code> call completes in one shot and returns a final result dict.
+    Callers handle HITL externally by merging new info into question+context and re-running from START.
+  </div>
+  <div class="diagram-wrap">
+    <div class="mermaid" id="diag-v1">---
 config:
   flowchart:
     curve: linear
@@ -67,6 +92,10 @@ graph TD;
 	fe_checks("④ F/E Checks\n(deterministic)"):::processing
 	i_gate("⑤ I-gate\n(Critic agent)"):::processing
 	execute("⑥ Execute\n(Python compute)"):::processing
+	hitl_m("⏸ HITL-M\nClarify intent"):::hitl
+	hitl_f("⏸ HITL-F\nFill missing slots"):::hitl
+	hitl_e("⏸ HITL-E\nCorrect values"):::hitl
+	hitl_i("⏸ HITL-I\nPick interpretation"):::hitl
 	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
 	exit_n("EXIT: N\nOut of scope"):::exit_n
 	exit_f("EXIT: F\nMissing inputs"):::exit_f
@@ -86,22 +115,31 @@ graph TD;
 	exit_m --> finalize;
 	exit_n --> finalize;
 	exit_success --> finalize;
-	extract -.-> exit_f;
 	extract -.-> fe_checks;
+	extract -.-> hitl_f;
 	fe_checks -.-> exit_c;
-	fe_checks -.-> exit_e;
-	fe_checks -.-> exit_f;
+	fe_checks -.-> hitl_e;
+	fe_checks -.-> hitl_f;
 	fe_checks -.-> i_gate;
+	hitl_e -.-> exit_e;
+	hitl_e -.-> fe_checks;
+	hitl_f -.-> exit_f;
+	hitl_f -.-> fe_checks;
+	hitl_i -.-> execute;
+	hitl_i -.-> exit_i;
+	hitl_m -.-> exit_m;
+	hitl_m -.-> mn_select;
 	i_gate -.-> execute;
-	i_gate -.-> exit_i;
-	mn_select -.-> exit_m;
+	i_gate -.-> hitl_i;
 	mn_select -.-> exit_n;
 	mn_select -.-> extract;
+	mn_select -.-> hitl_m;
 	retrieve -.-> exit_n;
 	retrieve -.-> mn_select;
 	finalize --> __end__;
 
     classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef hitl       fill:#fdf4ff,stroke:#a855f7,color:#581c87,font-weight:bold,stroke-dasharray:5 3
     classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
     classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
     classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
@@ -113,12 +151,145 @@ graph TD;
 
 	classDef default fill:#f2f0ff,line-height:1.2
 	classDef first fill-opacity:0
-	classDef last fill:#bfb6fc
+	classDef last fill:#bfb6fc</div>
+  </div>
+</div>
+
+<!-- ═══ v2: HITL ═══ -->
+<div id="panel-v2" class="panel">
+  <div class="legend">
+    <span class="legend-item" style="background:#dbeafe;border-color:#3b82f6;color:#1e3a8a">Processing</span>
+    <span class="legend-item" style="background:#fdf4ff;border-color:#a855f7;color:#581c87;border-style:dashed">⏸ HITL interrupt</span>
+    <span class="legend-item" style="background:#fee2e2;border-color:#ef4444;color:#7f1d1d">M exit</span>
+    <span class="legend-item" style="background:#ffedd5;border-color:#f97316;color:#7c2d12">N exit</span>
+    <span class="legend-item" style="background:#fef9c3;border-color:#eab308;color:#713f12">F exit</span>
+    <span class="legend-item" style="background:#fde68a;border-color:#d97706;color:#78350f">E exit</span>
+    <span class="legend-item" style="background:#ede9fe;border-color:#8b5cf6;color:#4c1d95">I exit</span>
+    <span class="legend-item" style="background:#f3f4f6;border-color:#6b7280;color:#111827">C exit</span>
+    <span class="legend-item" style="background:#dcfce7;border-color:#22c55e;color:#14532d">Success</span>
+    <span class="legend-item" style="background:#1e293b;border-color:#0f172a;color:#f8fafc">Finalize</span>
+  </div>
+  <div class="callout">
+    <strong>use_hitl=True</strong> — HITL nodes <em>pause</em> execution via <code>interrupt()</code> and surface a clarification
+    payload. The caller calls <code>api.resume(answer, thread_id=...)</code> which injects a
+    <code>Command(resume=answer)</code> and continues from the exact paused node.
+    State is persisted in a <code>MemorySaver</code> checkpointer (no DB needed for v1).
+    <br><br>
+    <strong>Resume paths:</strong>
+    hitl_m → mn_select &nbsp;|&nbsp; hitl_f → fe_checks &nbsp;|&nbsp; hitl_e → fe_checks &nbsp;|&nbsp; hitl_i → execute
+  </div>
+  <div class="diagram-wrap">
+    <div class="mermaid" id="diag-v2">---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	retrieve("① Retrieve\n(RAG top-k)"):::processing
+	mn_select("② M/N Select\n(LLM selector)"):::processing
+	extract("③ Extract\n(LLM extractor)"):::processing
+	fe_checks("④ F/E Checks\n(deterministic)"):::processing
+	i_gate("⑤ I-gate\n(Critic agent)"):::processing
+	execute("⑥ Execute\n(Python compute)"):::processing
+	hitl_m("⏸ HITL-M\nClarify intent"):::hitl
+	hitl_f("⏸ HITL-F\nFill missing slots"):::hitl
+	hitl_e("⏸ HITL-E\nCorrect values"):::hitl
+	hitl_i("⏸ HITL-I\nPick interpretation"):::hitl
+	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
+	exit_n("EXIT: N\nOut of scope"):::exit_n
+	exit_f("EXIT: F\nMissing inputs"):::exit_f
+	exit_e("EXIT: E\nBoundary violation"):::exit_e
+	exit_i("EXIT: I\nSemantic ambiguity"):::exit_i
+	exit_c("EXIT: C\nExec error"):::exit_c
+	exit_success("✓ SUCCESS"):::exit_ok
+	finalize("Finalize\n_build_result()"):::finalize
+	__end__([<p>__end__</p>]):::last
+	__start__ --> retrieve;
+	execute -.-> exit_c;
+	execute -.-> exit_success;
+	exit_c --> finalize;
+	exit_e --> finalize;
+	exit_f --> finalize;
+	exit_i --> finalize;
+	exit_m --> finalize;
+	exit_n --> finalize;
+	exit_success --> finalize;
+	extract -.-> fe_checks;
+	extract -.-> hitl_f;
+	fe_checks -.-> exit_c;
+	fe_checks -.-> hitl_e;
+	fe_checks -.-> hitl_f;
+	fe_checks -.-> i_gate;
+	hitl_e -.-> exit_e;
+	hitl_e -.-> fe_checks;
+	hitl_f -.-> exit_f;
+	hitl_f -.-> fe_checks;
+	hitl_i -.-> execute;
+	hitl_i -.-> exit_i;
+	hitl_m -.-> exit_m;
+	hitl_m -.-> mn_select;
+	i_gate -.-> execute;
+	i_gate -.-> hitl_i;
+	mn_select -.-> exit_n;
+	mn_select -.-> extract;
+	mn_select -.-> hitl_m;
+	retrieve -.-> exit_n;
+	retrieve -.-> mn_select;
+	finalize --> __end__;
+
+    classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef hitl       fill:#fdf4ff,stroke:#a855f7,color:#581c87,font-weight:bold,stroke-dasharray:5 3
+    classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+    classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
+    classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
+    classDef exit_e     fill:#fde68a,stroke:#d97706,color:#78350f
+    classDef exit_i     fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95
+    classDef exit_c     fill:#f3f4f6,stroke:#6b7280,color:#111827
+    classDef exit_ok    fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef finalize   fill:#1e293b,stroke:#0f172a,color:#f8fafc,font-weight:bold
+
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc</div>
   </div>
 </div>
 
 <details>
-  <summary>▸ Raw Mermaid source</summary>
+  <summary>▸ HITL usage example (Python)</summary>
+  <pre>
+# HITL mode: pause on ambiguity, resume after user answers
+api = ErrorClassificationLG.from_db(db_url=DB, client=client, use_hitl=True)
+thread_id = "session-001"
+
+r1 = api.diagnose_hitl(row, thread_id=thread_id)
+if r1.get("__interrupt__"):
+    payload = r1["__interrupt__"][0].value
+    # payload = {"hitl_type": "I_ambiguity", "questions": [...], "options": [...]}
+    user_answer = "The exchange rate is USD/TWD (how many TWD per 1 USD)"
+    r2 = api.resume(answer=user_answer, thread_id=thread_id)
+    # r2 resumes from hitl_i → execute (no LLM calls repeated)
+    final = r2["result"]
+else:
+    final = r1["result"]   # completed without interruption
+  </pre>
+</details>
+
+<details>
+  <summary>▸ LangSmith tracing setup</summary>
+  <pre>
+# Add to .env:
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=&lt;your-key-from-smith.langchain.com&gt;
+LANGCHAIN_PROJECT=verifiquant-pipeline
+
+# LangGraph auto-traces every .invoke() — shows per-node state diffs,
+# execution time, branch taken (which exit_* was reached), and LLM token counts.
+  </pre>
+</details>
+
+<details>
+  <summary>▸ Raw Mermaid source (v2)</summary>
   <pre>---
 config:
   flowchart:
@@ -132,6 +303,10 @@ graph TD;
 	fe_checks("④ F/E Checks\n(deterministic)"):::processing
 	i_gate("⑤ I-gate\n(Critic agent)"):::processing
 	execute("⑥ Execute\n(Python compute)"):::processing
+	hitl_m("⏸ HITL-M\nClarify intent"):::hitl
+	hitl_f("⏸ HITL-F\nFill missing slots"):::hitl
+	hitl_e("⏸ HITL-E\nCorrect values"):::hitl
+	hitl_i("⏸ HITL-I\nPick interpretation"):::hitl
 	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
 	exit_n("EXIT: N\nOut of scope"):::exit_n
 	exit_f("EXIT: F\nMissing inputs"):::exit_f
@@ -151,22 +326,31 @@ graph TD;
 	exit_m --&gt; finalize;
 	exit_n --&gt; finalize;
 	exit_success --&gt; finalize;
-	extract -.-&gt; exit_f;
 	extract -.-&gt; fe_checks;
+	extract -.-&gt; hitl_f;
 	fe_checks -.-&gt; exit_c;
-	fe_checks -.-&gt; exit_e;
-	fe_checks -.-&gt; exit_f;
+	fe_checks -.-&gt; hitl_e;
+	fe_checks -.-&gt; hitl_f;
 	fe_checks -.-&gt; i_gate;
+	hitl_e -.-&gt; exit_e;
+	hitl_e -.-&gt; fe_checks;
+	hitl_f -.-&gt; exit_f;
+	hitl_f -.-&gt; fe_checks;
+	hitl_i -.-&gt; execute;
+	hitl_i -.-&gt; exit_i;
+	hitl_m -.-&gt; exit_m;
+	hitl_m -.-&gt; mn_select;
 	i_gate -.-&gt; execute;
-	i_gate -.-&gt; exit_i;
-	mn_select -.-&gt; exit_m;
+	i_gate -.-&gt; hitl_i;
 	mn_select -.-&gt; exit_n;
 	mn_select -.-&gt; extract;
+	mn_select -.-&gt; hitl_m;
 	retrieve -.-&gt; exit_n;
 	retrieve -.-&gt; mn_select;
 	finalize --&gt; __end__;
 
     classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef hitl       fill:#fdf4ff,stroke:#a855f7,color:#581c87,font-weight:bold,stroke-dasharray:5 3
     classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
     classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
     classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
@@ -181,22 +365,12 @@ graph TD;
 	classDef last fill:#bfb6fc</pre>
 </details>
 
-<details>
-  <summary>▸ LangSmith tracing setup</summary>
-  <pre>
-# Add to your .env file:
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_API_KEY=&lt;your-key-from-smith.langchain.com&gt;
-LANGCHAIN_PROJECT=verifiquant-pipeline
-
-# LangGraph automatically sends every .invoke() call to LangSmith.
-# Traces show per-node state diffs, execution time, and branching path.
-# No code changes needed — just set the env vars before running.
-  </pre>
-</details>
-
 <script>
   mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  function switchTab(v) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['v1','v2'][i]===v));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id==='panel-'+v));
+  }
 </script>
 </body>
 </html>

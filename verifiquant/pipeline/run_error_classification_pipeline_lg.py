@@ -40,7 +40,9 @@ from functools import partial
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Optional, Tuple
 
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
 from typing_extensions import TypedDict
 
 from verifiquant.card_store import SQLAlchemyArtifactStore
@@ -221,6 +223,10 @@ class PipelineDeps:
     judge_model: str = "gemini-2.5-flash"
     top_k: int = 3
     m_min_top_score: float = 0.05
+    # HITL mode: pause at M/F/E/I exits and wait for user clarification.
+    # Requires a checkpointer (MemorySaver auto-created when True).
+    # When False (default) the pipeline is stateless / one-shot.
+    use_hitl: bool = False
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -852,36 +858,202 @@ def node_finalize(state: PipelineState, *, deps: PipelineDeps) -> dict:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 6. ROUTERS
+# 6. HITL NODES  (inserted between processing and exit; always in the graph)
+#
+# Stateless mode (use_hitl=False):
+#   Each hitl_* node is a transparent pass-through — no interrupt is raised.
+#   exit_gate is unchanged, so the downstream router falls through to exit_*.
+#
+# HITL mode (use_hitl=True):
+#   interrupt() pauses execution and surfaces a clarification payload.
+#   The caller calls api.resume(answer, thread_id) which triggers Command(resume=).
+#   The node re-executes: gets the answer, updates state, clears exit_gate.
+#   The downstream router then continues to the next processing node.
 # ══════════════════════════════════════════════════════════════════════════════
+
+def node_hitl_m(state: PipelineState, *, deps: PipelineDeps) -> dict:
+    """HITL gate for M-class: ask user to clarify intent, then retry mn_select."""
+    if not deps.use_hitl:
+        return {"pipeline_logs": ["[hitl_m] pass-through (stateless)"]}
+
+    clar_qs = state.get("clarification_questions") or [
+        "Please specify the target metric (e.g. NPV, IRR, Payback Period)."
+    ]
+    answer = interrupt({
+        "hitl_type": "M_clarify",
+        "questions": clar_qs,
+        "ambiguity_tags": state.get("ambiguity_tags", []),
+    })
+    # Append clarification to context and retry mn_select from candidates
+    new_context = state["context"] + f"\n\n[User clarification: {answer}]"
+    return {
+        "context": new_context,
+        "exit_gate": None,     # clears M → router will go back to mn_select
+        "clarification_questions": [],
+        "pipeline_logs": [f"[hitl_m] clarification received → retrying mn_select"],
+    }
+
+
+def node_hitl_f(state: PipelineState, *, deps: PipelineDeps) -> dict:
+    """HITL gate for F-class: collect missing/mismatched inputs, then retry fe_checks."""
+    if not deps.use_hitl:
+        return {"pipeline_logs": ["[hitl_f] pass-through (stateless)"]}
+
+    missing = state.get("missing", [])
+    structural = state.get("structural_errors", [])
+    ask = (
+        [{"slot": m, "label": f"Provide value for: {m}", "type": "text",
+          "required": True, "options": []} for m in missing]
+        or [{"slot": e["rule_id"], "label": e["error"],
+             "type": "text", "required": True, "options": []} for e in structural]
+    )
+    # answer should be a dict: {field_name: value, ...}
+    answer: Any = interrupt({"hitl_type": "F_slot_fill", "ask_user_for": ask})
+
+    if isinstance(answer, dict):
+        new_inputs = {**state.get("provided_inputs", {}), **answer}
+    else:
+        # fallback: user passed a string description → append to context
+        new_inputs = state.get("provided_inputs", {})
+        return {
+            "context": state["context"] + f"\n\n[User provided: {answer}]",
+            "exit_gate": None,
+            "missing": [], "structural_errors": [],
+            "pipeline_logs": [f"[hitl_f] context updated → retrying extract"],
+        }
+
+    return {
+        "provided_inputs": new_inputs,
+        "missing": [], "structural_errors": [],
+        "exit_gate": None,  # → fe_checks
+        "pipeline_logs": [f"[hitl_f] slots filled: {list(answer.keys())} → retrying fe_checks"],
+    }
+
+
+def node_hitl_e(state: PipelineState, *, deps: PipelineDeps) -> dict:
+    """HITL gate for E-class: confirm / correct boundary-violating values."""
+    if not deps.use_hitl:
+        return {"pipeline_logs": ["[hitl_e] pass-through (stateless)"]}
+
+    triggered = state.get("auto_triggered_e", [])
+    repair_hints = state.get("repair_hints", [])
+    ask = []
+    for h in repair_hints:
+        ask.extend(h.get("ask_user_for", []))
+
+    answer: Any = interrupt({
+        "hitl_type": "E_alert",
+        "triggered_rules": triggered,
+        "current_inputs": state.get("provided_inputs", {}),
+        "ask_user_for": ask,
+    })
+
+    if isinstance(answer, dict):
+        new_inputs = {**state.get("provided_inputs", {}), **answer}
+    else:
+        new_inputs = state.get("provided_inputs", {})
+
+    return {
+        "provided_inputs": new_inputs,
+        "auto_triggered_e": [],   # clear triggers → will re-run fe_checks
+        "eval_errors": [],
+        "exit_gate": None,        # → fe_checks
+        "pipeline_logs": [f"[hitl_e] values corrected → retrying fe_checks"],
+    }
+
+
+def node_hitl_i(state: PipelineState, *, deps: PipelineDeps) -> dict:
+    """HITL gate for I-class (hard): resolve semantic ambiguity, then execute."""
+    if not deps.use_hitl:
+        return {"pipeline_logs": ["[hitl_i] pass-through (stateless)"]}
+
+    critic = state.get("critic_raw", {})
+    clar_qs = [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
+    options = [str(x).strip() for x in critic.get("clarification_options", []) if str(x).strip()]
+    # Pull options from semantic hints if available
+    core = state.get("core") or {}
+    for hint in core.get("semantic_hints", []):
+        if isinstance(hint, dict):
+            options.extend([str(o) for o in hint.get("options", []) if str(o).strip()])
+    options = list(dict.fromkeys(options))
+
+    answer: Any = interrupt({
+        "hitl_type": "I_ambiguity",
+        "questions": clar_qs or ["Please clarify the intended financial interpretation."],
+        "options": options,
+        "triggered_hints": state.get("i_hard_triggered", []),
+    })
+
+    # Append user's choice to context so execute() has the full picture
+    new_context = state["context"] + f"\n\n[Interpretation clarification: {answer}]"
+    return {
+        "context": new_context,
+        "exit_gate": None,          # → execute
+        "needs_clarification": False,
+        "i_level": "",
+        "i_hard_triggered": [],
+        "pipeline_logs": [f"[hitl_i] interpretation clarified → continuing to execute"],
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 7. ROUTERS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Processing → HITL (always route through hitl_* nodes;
+# in stateless mode they pass through to exit_*; in HITL mode they pause)
 
 def _route_retrieve(state: PipelineState) -> str:
     return "exit_n" if state.get("exit_gate") else "mn_select"
 
 def _route_mn_select(state: PipelineState) -> str:
     gate = state.get("exit_gate")
-    return {"M": "exit_m", "N": "exit_n"}.get(gate, "extract")  # type: ignore[return-value]
+    if gate == "M": return "hitl_m"
+    if gate == "N": return "exit_n"
+    return "extract"
 
 def _route_extract(state: PipelineState) -> str:
-    return "exit_f" if state.get("exit_gate") == "F" else "fe_checks"
+    return "hitl_f" if state.get("exit_gate") == "F" else "fe_checks"
 
 def _route_fe_checks(state: PipelineState) -> str:
-    return {"F": "exit_f", "C": "exit_c", "E": "exit_e"}.get(
-        state.get("exit_gate", ""), "i_gate"   # type: ignore[arg-type]
-    )
+    gate = state.get("exit_gate", "")
+    if gate == "F": return "hitl_f"
+    if gate == "C": return "exit_c"
+    if gate == "E": return "hitl_e"
+    return "i_gate"
 
 def _route_i_gate(state: PipelineState) -> str:
-    return "exit_i" if state.get("exit_gate") == "I" else "execute"
+    return "hitl_i" if state.get("exit_gate") == "I" else "execute"
 
 def _route_execute(state: PipelineState) -> str:
     return "exit_c" if state.get("exit_gate") == "C" else "exit_success"
 
+# HITL → resume processing OR fall through to exit_*
+
+def _route_hitl_m(state: PipelineState) -> str:
+    return "mn_select" if not state.get("exit_gate") else "exit_m"
+
+def _route_hitl_f(state: PipelineState) -> str:
+    # After F-slot-fill: if context-only update happened, re-extract first
+    return "fe_checks" if not state.get("exit_gate") else "exit_f"
+
+def _route_hitl_e(state: PipelineState) -> str:
+    return "fe_checks" if not state.get("exit_gate") else "exit_e"
+
+def _route_hitl_i(state: PipelineState) -> str:
+    return "execute" if not state.get("exit_gate") else "exit_i"
+
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. GRAPH FACTORY
+# 8. GRAPH FACTORY
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_pipeline(deps: PipelineDeps):
+def build_pipeline(deps: PipelineDeps, checkpointer=None):
+    """Compile the pipeline graph.
+
+    When deps.use_hitl=True, a MemorySaver checkpointer is created automatically
+    (unless one is explicitly passed). Checkpointing is required for interrupt().
+    """
     def _bind(fn):
         return partial(fn, deps=deps)
 
@@ -889,12 +1061,21 @@ def build_pipeline(deps: PipelineDeps):
 
     # Processing nodes
     for name, fn in [
-        ("retrieve",     node_retrieve),
-        ("mn_select",    node_mn_select),
-        ("extract",      node_extract),
-        ("fe_checks",    node_fe_checks),
-        ("i_gate",       node_i_gate),
-        ("execute",      node_execute),
+        ("retrieve",  node_retrieve),
+        ("mn_select", node_mn_select),
+        ("extract",   node_extract),
+        ("fe_checks", node_fe_checks),
+        ("i_gate",    node_i_gate),
+        ("execute",   node_execute),
+    ]:
+        g.add_node(name, _bind(fn))
+
+    # HITL nodes (always present; transparent in stateless mode)
+    for name, fn in [
+        ("hitl_m", node_hitl_m),
+        ("hitl_f", node_hitl_f),
+        ("hitl_e", node_hitl_e),
+        ("hitl_i", node_hitl_i),
     ]:
         g.add_node(name, _bind(fn))
 
@@ -912,24 +1093,39 @@ def build_pipeline(deps: PipelineDeps):
 
     g.add_node("finalize", _bind(node_finalize))
 
-    # Wiring
+    # Wiring: processing → HITL → (exit or resume)
     g.add_edge(START, "retrieve")
-    g.add_conditional_edges("retrieve",  _route_retrieve,  {"mn_select": "mn_select", "exit_n": "exit_n"})
-    g.add_conditional_edges("mn_select", _route_mn_select, {"extract": "extract", "exit_m": "exit_m", "exit_n": "exit_n"})
-    g.add_conditional_edges("extract",   _route_extract,   {"fe_checks": "fe_checks", "exit_f": "exit_f"})
-    g.add_conditional_edges("fe_checks", _route_fe_checks, {"i_gate": "i_gate", "exit_f": "exit_f", "exit_c": "exit_c", "exit_e": "exit_e"})
-    g.add_conditional_edges("i_gate",    _route_i_gate,    {"execute": "execute", "exit_i": "exit_i"})
-    g.add_conditional_edges("execute",   _route_execute,   {"exit_success": "exit_success", "exit_c": "exit_c"})
+    g.add_conditional_edges("retrieve",  _route_retrieve,
+        {"mn_select": "mn_select", "exit_n": "exit_n"})
+    g.add_conditional_edges("mn_select", _route_mn_select,
+        {"extract": "extract", "hitl_m": "hitl_m", "exit_n": "exit_n"})
+    g.add_conditional_edges("extract",   _route_extract,
+        {"fe_checks": "fe_checks", "hitl_f": "hitl_f"})
+    g.add_conditional_edges("fe_checks", _route_fe_checks,
+        {"i_gate": "i_gate", "hitl_f": "hitl_f", "exit_c": "exit_c", "hitl_e": "hitl_e"})
+    g.add_conditional_edges("i_gate",    _route_i_gate,
+        {"execute": "execute", "hitl_i": "hitl_i"})
+    g.add_conditional_edges("execute",   _route_execute,
+        {"exit_success": "exit_success", "exit_c": "exit_c"})
 
+    # HITL → resume or exit
+    g.add_conditional_edges("hitl_m", _route_hitl_m, {"mn_select": "mn_select", "exit_m": "exit_m"})
+    g.add_conditional_edges("hitl_f", _route_hitl_f, {"fe_checks": "fe_checks", "exit_f": "exit_f"})
+    g.add_conditional_edges("hitl_e", _route_hitl_e, {"fe_checks": "fe_checks", "exit_e": "exit_e"})
+    g.add_conditional_edges("hitl_i", _route_hitl_i, {"execute": "execute",     "exit_i": "exit_i"})
+
+    # All exit_* → finalize → END
     for exit_node in ("exit_m", "exit_n", "exit_f", "exit_e", "exit_i", "exit_c", "exit_success"):
         g.add_edge(exit_node, "finalize")
     g.add_edge("finalize", END)
 
-    return g.compile()
+    if deps.use_hitl and checkpointer is None:
+        checkpointer = MemorySaver()
+    return g.compile(checkpointer=checkpointer)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 8. PUBLIC API
+# 9. PUBLIC API
 # ══════════════════════════════════════════════════════════════════════════════
 
 _EMPTY_STATE: PipelineState = {          # type: ignore[assignment]
@@ -954,7 +1150,25 @@ _EMPTY_STATE: PipelineState = {          # type: ignore[assignment]
 
 
 class ErrorClassificationLG:
-    """Drop-in replacement for ErrorClassificationAPI backed by LangGraph."""
+    """LangGraph-backed pipeline with optional HITL mode.
+
+    Stateless mode (default, use_hitl=False):
+      api = ErrorClassificationLG.from_db(db_url=..., client=..., use_hitl=False)
+      result = api.diagnose_row(row)   # one-shot, same interface as ErrorClassificationAPI
+
+    HITL mode (use_hitl=True):
+      api = ErrorClassificationLG.from_db(db_url=..., client=..., use_hitl=True)
+      thread_id = "session-abc"
+
+      # Step 1: run pipeline — may return with __interrupt__
+      r1 = api.diagnose_hitl(row, thread_id=thread_id)
+      if r1.get("__interrupt__"):
+          payload = r1["__interrupt__"][0].value   # hitl_type, questions, options
+          user_answer = ask_user(payload)           # your UI layer
+          # Step 2: resume with user's answer
+          r2 = api.resume(answer=user_answer, thread_id=thread_id)
+          # r2 may have another __interrupt__ (multi-turn) or a final result["result"]
+    """
 
     def __init__(self, deps: PipelineDeps) -> None:
         self.deps = deps
@@ -971,6 +1185,7 @@ class ErrorClassificationLG:
         judge_model: str = "gemini-2.5-flash",
         top_k: int = 3,
         m_min_top_score: float = 0.05,
+        use_hitl: bool = False,
     ) -> "ErrorClassificationLG":
         store = SQLAlchemyArtifactStore(db_url)
         return cls(PipelineDeps(
@@ -982,6 +1197,7 @@ class ErrorClassificationLG:
             extractor_model=extractor_model,
             judge_model=judge_model,
             top_k=top_k, m_min_top_score=m_min_top_score,
+            use_hitl=use_hitl,
         ))
 
     @classmethod
@@ -997,6 +1213,7 @@ class ErrorClassificationLG:
         judge_model: str = "gemini-2.5-flash",
         top_k: int = 3,
         m_min_top_score: float = 0.05,
+        use_hitl: bool = False,
     ) -> "ErrorClassificationLG":
         core_by_id = _load_core(core_path)
         retrieval_cards = _load_retrieval(retrieval_path)
@@ -1015,7 +1232,19 @@ class ErrorClassificationLG:
             extractor_model=extractor_model,
             judge_model=judge_model,
             top_k=top_k, m_min_top_score=m_min_top_score,
+            use_hitl=use_hitl,
         ))
+
+    def _make_initial(
+        self, *, question: str, context: str, case_id: str = "",
+        gold_answer: Optional[Any] = None,
+        domain: Optional[str] = None, topic: Optional[str] = None,
+    ) -> dict:
+        return {**_EMPTY_STATE,
+                "case_id": case_id, "question": question, "context": context,
+                "domain": domain, "topic": topic, "gold_answer": gold_answer}
+
+    # ── Stateless (one-shot) interface ────────────────────────────────────────
 
     def diagnose(
         self,
@@ -1027,10 +1256,11 @@ class ErrorClassificationLG:
         domain: Optional[str] = None,
         topic: Optional[str] = None,
     ) -> Dict[str, Any]:
-        initial = {**_EMPTY_STATE,
-                   "case_id": case_id, "question": question, "context": context,
-                   "domain": domain, "topic": topic, "gold_answer": gold_answer}
-        return self._app.invoke(initial)["result"]
+        """One-shot diagnose; always returns the final result dict."""
+        return self._app.invoke(
+            self._make_initial(question=question, context=context, case_id=case_id,
+                               gold_answer=gold_answer, domain=domain, topic=topic)
+        )["result"]
 
     def diagnose_row(self, row: Dict[str, Any]) -> Dict[str, Any]:
         return self.diagnose(
@@ -1041,3 +1271,48 @@ class ErrorClassificationLG:
             domain=str(row.get("domain", "") or "") or None,
             topic=str(row.get("topic", "") or "") or None,
         )
+
+    # ── HITL (stateful, multi-turn) interface ─────────────────────────────────
+
+    def diagnose_hitl(
+        self,
+        row: Dict[str, Any],
+        *,
+        thread_id: str,
+    ) -> Dict[str, Any]:
+        """Start a HITL-enabled pipeline run.
+
+        Returns either:
+        - A normal result dict (via result["result"]) if no interrupt occurred.
+        - A raw state dict containing `__interrupt__` if the pipeline paused.
+          Inspect `raw["__interrupt__"][0].value` for the clarification payload,
+          then call self.resume(answer, thread_id=thread_id) to continue.
+
+        Requires use_hitl=True and a checkpointer (auto-created as MemorySaver).
+        """
+        cfg = {"configurable": {"thread_id": thread_id}}
+        initial = self._make_initial(
+            question=str(row.get("question", "")),
+            context=str(row.get("context", "")),
+            case_id=str(row.get("case_id") or row.get("question_id") or ""),
+            gold_answer=row.get("gold_answer", row.get("answer", row.get("ground_truth"))),
+            domain=str(row.get("domain", "") or "") or None,
+            topic=str(row.get("topic", "") or "") or None,
+        )
+        return self._app.invoke(initial, cfg)
+
+    def resume(self, answer: Any, *, thread_id: str) -> Dict[str, Any]:
+        """Resume a paused HITL run with the user's answer.
+
+        answer: str | dict
+          - str: free-text clarification (appended to context)
+          - dict: field-value pairs for slot-filling (merged into provided_inputs)
+
+        Returns the same shape as diagnose_hitl().
+        """
+        cfg = {"configurable": {"thread_id": thread_id}}
+        return self._app.invoke(Command(resume=answer), cfg)
+
+    def get_thread_state(self, thread_id: str) -> Any:
+        """Inspect the persisted state of a HITL thread (for debugging)."""
+        return self._app.get_state({"configurable": {"thread_id": thread_id}})

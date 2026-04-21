@@ -14,6 +14,10 @@ graph TD;
 	fe_checks("④ F/E Checks\n(deterministic)"):::processing
 	i_gate("⑤ I-gate\n(Critic agent)"):::processing
 	execute("⑥ Execute\n(Python compute)"):::processing
+	hitl_m("⏸ HITL-M\nClarify intent"):::hitl
+	hitl_f("⏸ HITL-F\nFill missing slots"):::hitl
+	hitl_e("⏸ HITL-E\nCorrect values"):::hitl
+	hitl_i("⏸ HITL-I\nPick interpretation"):::hitl
 	exit_m("EXIT: M\nIntent ambiguous"):::exit_m
 	exit_n("EXIT: N\nOut of scope"):::exit_n
 	exit_f("EXIT: F\nMissing inputs"):::exit_f
@@ -33,22 +37,31 @@ graph TD;
 	exit_m --> finalize;
 	exit_n --> finalize;
 	exit_success --> finalize;
-	extract -.-> exit_f;
 	extract -.-> fe_checks;
+	extract -.-> hitl_f;
 	fe_checks -.-> exit_c;
-	fe_checks -.-> exit_e;
-	fe_checks -.-> exit_f;
+	fe_checks -.-> hitl_e;
+	fe_checks -.-> hitl_f;
 	fe_checks -.-> i_gate;
+	hitl_e -.-> exit_e;
+	hitl_e -.-> fe_checks;
+	hitl_f -.-> exit_f;
+	hitl_f -.-> fe_checks;
+	hitl_i -.-> execute;
+	hitl_i -.-> exit_i;
+	hitl_m -.-> exit_m;
+	hitl_m -.-> mn_select;
 	i_gate -.-> execute;
-	i_gate -.-> exit_i;
-	mn_select -.-> exit_m;
+	i_gate -.-> hitl_i;
 	mn_select -.-> exit_n;
 	mn_select -.-> extract;
+	mn_select -.-> hitl_m;
 	retrieve -.-> exit_n;
 	retrieve -.-> mn_select;
 	finalize --> __end__;
 
     classDef processing fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a,font-weight:bold
+    classDef hitl       fill:#fdf4ff,stroke:#a855f7,color:#581c87,font-weight:bold,stroke-dasharray:5 3
     classDef exit_m     fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
     classDef exit_n     fill:#ffedd5,stroke:#f97316,color:#7c2d12
     classDef exit_f     fill:#fef9c3,stroke:#eab308,color:#713f12
