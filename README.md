@@ -137,8 +137,10 @@ When an I-class clarification resolves a hidden ambiguity (e.g. "these are begin
 
 | Patch type | What it does | How it is verified |
 |---|---|---|
-| `result_postprocess` | Applies a pure arithmetic expression to the final result (`result * (1+r)`, `1/result`, …) | AST node-count bound + safe-name whitelist + numerical determinism + SymPy static audit |
-| `code_patch` | Surgical text replacement in the FIC code (`start=1` → `start=0`) | (1) pattern occurs exactly once, (2) shallow AST-diff ≤ declared blast-radius bound, (3) **cross-verification**: patched code's output must numerically match an equivalent `result_postprocess` expression, (4) optional SymPy audit |
+| `result_postprocess` | Applies a pure arithmetic expression to the final result (`result * (1+r)`, `1/result`, …) | AST node-count bound + safe-name whitelist + numerical determinism + numerical invariant check |
+| `code_patch` | Surgical text replacement in the FIC code (`start=1` → `start=0`) | (1) pattern occurs exactly once, (2) shallow AST-diff ≤ declared blast-radius bound, (3) **cross-verification**: patched code's output must numerically match an equivalent `result_postprocess` expression, (4) numerical invariant check |
+
+The `invariant` field is a plain Python `lhs == rhs` equation over `result_old` / `result_new` / input names. It is safety-audited (same whitelist as `result_expr`) then verified numerically across sample inputs — no symbolic-math dependency, and it works for iterative (loop-based) formulas.
 
 The **cross-verification** is the mathematical guarantee: a code change is only accepted if its numerical effect provably equals a declared algebraic relationship. A malicious or buggy patch (wrong math, sneaked import, oversized diff) is rejected. See `test_transform_poc.py` for the end-to-end NPV annuity-due demonstration.
 
@@ -186,7 +188,7 @@ Flask app wrapping `ErrorClassificationAPI`. Returns the full diagnostic report 
 | True HITL for I-class | Current loop is LLM↔LLM, not human confirmation |
 | Silent Wrong Rate measurement | Needs ground truth on trap cases |
 | Broader baselines (GPT-4 / DeepSeek direct CoT) | Only JPMorgan paper number + Gemini CoT compared |
-| SymPy symbolic *math engine* | Not built. NB: SymPy *is* used in `stage_transform.py` as a static **audit oracle**, which is a different (and implemented) role than the old vision's full symbolic engine |
+| SymPy symbolic *math engine* | Not built, and SymPy was removed entirely. The old vision assumed prompt→SymPy formalization; the current design verifies transforms numerically instead (no symbolic dependency) |
 | PDF/RAG over financial documents | Not implemented; system uses structured JSONL inputs |
 | `transform_spec` auto-generation in production cards | Schema + pipeline wired (`stage_core` → `stage_repair` → `stage_transform`); not yet validated on a full Gemini card-build run |
 
@@ -228,4 +230,4 @@ python3 app.py
 
 ## Tech Stack
 
-Google Gemini 2.5 Flash · SQLite/SQLAlchemy · Flask · SymPy (transform audit only) · FinChain/FinanceReasoning dataset.
+Google Gemini 2.5 Flash · SQLite/SQLAlchemy · Flask · FinChain/FinanceReasoning dataset. No symbolic-math dependency (transforms are verified numerically).

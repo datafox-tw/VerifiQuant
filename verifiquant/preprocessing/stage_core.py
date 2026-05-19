@@ -105,8 +105,8 @@ Each option must be:
     "patch_type": "result_postprocess",
     "result_expr": "<Python expression using `result` and any input variable names>",
     "max_expr_nodes": <int, expected AST node count of result_expr>,
-    "sympy_invariant": "<algebraic relationship, e.g. result_new / result_old == (1 + discount_rate)>",
-    "affected_inputs": ["<list of input names referenced in result_expr>"]
+    "invariant": "<a Python `lhs == rhs` equality over result_old / result_new / input names, e.g. result_new == result_old * (1 + discount_rate)>",
+    "affected_inputs": ["<list of input names referenced in result_expr / invariant>"]
   }}
 - result_expr rules:
   * Use only `result` (the output of the original execution) and names that appear in the FIC inputs.
@@ -149,13 +149,13 @@ def stage_core_schema() -> Any:
             ),
             "result_expr": genai_types.Schema(type=genai_types.Type.STRING),
             "max_expr_nodes": genai_types.Schema(type=genai_types.Type.INTEGER),
-            "sympy_invariant": genai_types.Schema(type=genai_types.Type.STRING),
+            "invariant": genai_types.Schema(type=genai_types.Type.STRING),
             "affected_inputs": genai_types.Schema(
                 type=genai_types.Type.ARRAY,
                 items=genai_types.Schema(type=genai_types.Type.STRING),
             ),
         },
-        required=["patch_type", "result_expr", "max_expr_nodes", "sympy_invariant", "affected_inputs"],
+        required=["patch_type", "result_expr", "max_expr_nodes", "invariant", "affected_inputs"],
     )
 
     hint_option_schema = genai_types.Schema(

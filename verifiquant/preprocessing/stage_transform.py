@@ -2,21 +2,28 @@
 
 Two patch types
 ---------------
-**result_postprocess**  (V1, already implemented)
+**result_postprocess**
     new_result = eval(result_expr, {"result": original_result, **bound_inputs})
-    Verified by: AST guard on result_expr + SymPy static audit.
+    Verified by: AST guard on result_expr + numerical determinism +
+    numerical invariant check (the declared `invariant` equation must hold
+    numerically across sample inputs).
 
-**code_patch**  (V2, new)
+**code_patch**
     Replace `target_pattern` in FIC code with `replacement`.
-    Verified by three independent layers:
+    Verified by:
     1. Occurrence guard — target_pattern appears exactly once in the code.
-    2. AST diff guard   — # changed nodes ≤ max_changed_nodes.
+    2. AST diff guard   — # changed nodes ≤ max_changed_nodes (shallow diff).
     3. Cross-verify     — patched_code(inputs) ≈ eval(cross_verify_expr,
                            {result: original_code(inputs), **inputs})
        This links the code change to its declared algebraic meaning.
-       If both paths agree numerically, the patch does exactly what it claims.
+    4. Numerical invariant check — the declared `invariant` equation holds.
 
-SymPy is optional and used only for the static algebraic audit.
+No symbolic-math dependency. The `invariant` field is a plain Python
+boolean expression (`lhs == rhs`) referencing `result_old`, `result_new`
+and input names; it is safety-audited and then verified numerically over
+sample inputs. This works for iterative formulas (loops) that a symbolic
+engine cannot represent, and uses the same eval/whitelist mechanism as
+result_expr and cross_verify_result_expr.
 """
 from __future__ import annotations
 
@@ -26,11 +33,6 @@ import textwrap
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
-try:
-    import sympy
-except ImportError:
-    sympy = None  # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------
@@ -52,7 +54,7 @@ class TransformSpec:
     patch_type: str = "result_postprocess"
     result_expr: str = ""
     max_expr_nodes: int = 99
-    sympy_invariant: str = ""
+    invariant: str = ""
     affected_inputs: List[str] = field(default_factory=list)
 
     @classmethod
@@ -61,7 +63,7 @@ class TransformSpec:
             patch_type=str(d.get("patch_type", "result_postprocess")),
             result_expr=str(d.get("result_expr", "")),
             max_expr_nodes=int(d.get("max_expr_nodes", 99)),
-            sympy_invariant=str(d.get("sympy_invariant", "")),
+            invariant=str(d.get("invariant", "")),
             affected_inputs=list(d.get("affected_inputs") or []),
         )
 
@@ -87,10 +89,11 @@ class CodePatchSpec:
             eval(cross_verify_result_expr, {"result": original_result, **inputs})
         This is the mathematical proof that the patch does what it claims.
         Example: "(result + initial_investment) * (1 + discount_rate) - initial_investment"
-    sympy_invariant:
-        Algebraic statement for documentation / static audit.
+    invariant:
+        A plain Python `lhs == rhs` expression over result_old / result_new /
+        input names. Verified numerically across sample inputs.
     affected_inputs:
-        Input names that appear in cross_verify_result_expr.
+        Input names that appear in cross_verify_result_expr / invariant.
     """
     patch_type: str = "code_patch"
     target_pattern: str = ""
@@ -98,7 +101,7 @@ class CodePatchSpec:
     max_changed_nodes: int = 4
     cross_verify_result_expr: str = ""
     cross_verify_max_nodes: int = 30
-    sympy_invariant: str = ""
+    invariant: str = ""
     affected_inputs: List[str] = field(default_factory=list)
 
     @classmethod
@@ -110,7 +113,7 @@ class CodePatchSpec:
             max_changed_nodes=int(d.get("max_changed_nodes", 4)),
             cross_verify_result_expr=str(d.get("cross_verify_result_expr", "")),
             cross_verify_max_nodes=int(d.get("cross_verify_max_nodes", 30)),
-            sympy_invariant=str(d.get("sympy_invariant", "")),
+            invariant=str(d.get("invariant", "")),
             affected_inputs=list(d.get("affected_inputs") or []),
         )
 
@@ -135,7 +138,7 @@ class TransformVerifyResult:
     forbidden_names: List[str]
     numerical_ratio_ok: Optional[bool]
     numerical_samples: int
-    sympy_check: Optional[str]
+    invariant_check: Optional[str]   # "verified" | "counterexample: ..." | "skipped_*"
     error: Optional[str] = None
 
     def summary(self) -> str:
@@ -143,7 +146,7 @@ class TransformVerifyResult:
             f"ast_nodes={self.ast_node_count}/{self.max_allowed_nodes}",
             f"forbidden={self.forbidden_names or 'none'}",
             f"numerical={'ok' if self.numerical_ratio_ok else 'FAIL' if self.numerical_ratio_ok is False else 'skip'}",
-            f"sympy={self.sympy_check or 'skip'}",
+            f"invariant={self.invariant_check or 'skip'}",
         ]
         return f"[result_postprocess {'PASS' if self.passed else 'FAIL'}] " + " | ".join(parts)
 
@@ -157,7 +160,7 @@ class CodePatchVerifyResult:
     cross_verify_ok: Optional[bool] # patched_code ≈ cross_verify_expr?
     cross_verify_max_delta: Optional[float]  # max abs deviation across samples
     numerical_samples: int
-    sympy_check: Optional[str]
+    invariant_check: Optional[str]  # "verified" | "counterexample: ..." | "skipped_*"
     error: Optional[str] = None
 
     def summary(self) -> str:
@@ -166,7 +169,7 @@ class CodePatchVerifyResult:
             f"ast_diff={self.ast_changed_nodes}/{self.max_changed_nodes}",
             f"cross_verify={'ok' if self.cross_verify_ok else 'FAIL' if self.cross_verify_ok is False else 'skip'}",
             f"max_delta={self.cross_verify_max_delta:.2e}" if self.cross_verify_max_delta is not None else "max_delta=n/a",
-            f"sympy={self.sympy_check or 'skip'}",
+            f"invariant={self.invariant_check or 'skip'}",
         ]
         return f"[code_patch {'PASS' if self.passed else 'FAIL'}] " + " | ".join(parts)
 
@@ -199,7 +202,6 @@ def _shallow_node_key(node: ast.AST) -> str:
         if isinstance(field_value, ast.AST):
             continue
         if isinstance(field_value, list):
-            # Check if it's a list of AST nodes; if so, skip.
             if any(isinstance(v, ast.AST) for v in field_value):
                 continue
             parts.append(f"{field_name}={field_value!r}")
@@ -262,8 +264,7 @@ def audit_expr_safety(
 def audit_patched_code_safety(patched_code: str, original_code: str) -> List[str]:
     """Return list of safety violations introduced by the patch.
 
-    Checks: no new `import` statements, no new `__dunder__` name references,
-    no new `exec` / `eval` / `open` / `os` calls.
+    Checks: no new `import` statements, no new dangerous calls.
     """
     _FORBIDDEN_IN_PATCH = {"__import__", "exec", "eval", "open", "os",
                             "subprocess", "sys", "shutil", "importlib"}
@@ -275,17 +276,73 @@ def audit_patched_code_safety(patched_code: str, original_code: str) -> List[str
         if new_dangerous:
             violations.append(f"new dangerous calls: {sorted(new_dangerous)}")
 
-        # Check for new import nodes
         orig_imports = {ast.dump(n) for n in ast.walk(ast.parse(original_code))
                         if isinstance(n, (ast.Import, ast.ImportFrom))}
         new_imports = {ast.dump(n) for n in ast.walk(ast.parse(patched_code))
                        if isinstance(n, (ast.Import, ast.ImportFrom))}
-        added_imports = new_imports - orig_imports
-        if added_imports:
-            violations.append(f"new import statements introduced")
+        if new_imports - orig_imports:
+            violations.append("new import statements introduced")
     except SyntaxError as exc:
         violations.append(f"SyntaxError in patched code: {exc}")
     return violations
+
+
+# ---------------------------------------------------------------------------
+# Numerical invariant check
+# ---------------------------------------------------------------------------
+
+def _numerical_invariant_check(
+    invariant: str,
+    samples: List[Tuple[Any, Any, Dict[str, Any]]],
+    allowed_input_names: Set[str],
+    *,
+    tol: float = 1e-6,
+) -> str:
+    """Numerically verify the `lhs == rhs` invariant across samples.
+
+    `samples` is a list of (result_old, result_new, inputs) tuples.
+    The invariant is a plain Python equality expression referencing
+    `result_old`, `result_new`, and input names.  Both sides are
+    safety-audited (same whitelist as result_expr) before eval, then
+    compared with a relative tolerance.
+
+    Returns: "verified" | "counterexample: ..." | "skipped_*".
+    """
+    if not invariant:
+        return "skipped_no_invariant"
+    if "==" not in invariant:
+        return "skipped_no_equality"
+
+    lhs_str, rhs_str = invariant.split("==", 1)
+    lhs_str, rhs_str = lhs_str.strip(), rhs_str.strip()
+
+    allowed = {"result_old", "result_new"} | allowed_input_names
+    for side in (lhs_str, rhs_str):
+        _, forbidden = audit_expr_safety(side, allowed)
+        if forbidden:
+            return f"skipped_unsafe: {forbidden}"
+
+    if not samples:
+        return "skipped_no_samples"
+
+    builtins_obj = __builtins__ if isinstance(__builtins__, dict) else vars(__builtins__)
+    safe_builtins = {k: builtins_obj[k] for k in _SAFE_BUILTINS if k in builtins_obj}
+
+    try:
+        for result_old, result_new, inputs in samples:
+            ns: Dict[str, Any] = {
+                "result_old": result_old,
+                "result_new": result_new,
+                "__builtins__": safe_builtins,
+            }
+            ns.update(inputs)
+            lhs = float(eval(lhs_str, ns))  # noqa: S307
+            rhs = float(eval(rhs_str, ns))  # noqa: S307
+            if abs(lhs - rhs) > tol * max(1.0, abs(rhs)):
+                return f"counterexample: lhs={lhs:.6g} rhs={rhs:.6g}"
+        return "verified"
+    except Exception as exc:
+        return f"skipped_error: {exc}"
 
 
 # ---------------------------------------------------------------------------
@@ -378,12 +435,13 @@ def verify_transform(
             passed=False, ast_node_count=node_count,
             max_allowed_nodes=spec.max_expr_nodes,
             forbidden_names=forbidden, numerical_ratio_ok=None,
-            numerical_samples=0, sympy_check=None,
+            numerical_samples=0, invariant_check=None,
             error=f"AST guard failed: nodes={node_count}, forbidden={forbidden}",
         )
 
     numerical_ratio_ok: Optional[bool] = None
     numerical_samples = 0
+    inv_samples: List[Tuple[Any, Any, Dict[str, Any]]] = []
     if sample_inputs and code and entrypoint:
         try:
             for inp in sample_inputs:
@@ -394,6 +452,7 @@ def verify_transform(
                     raise ValueError(f"Non-deterministic: {t1} != {t2}")
                 if not math.isfinite(float(t1)):
                     raise ValueError(f"Non-finite output: {t1}")
+                inv_samples.append((original, t1, inp))
                 numerical_samples += 1
             numerical_ratio_ok = True
         except Exception as exc:
@@ -401,20 +460,21 @@ def verify_transform(
                 passed=False, ast_node_count=node_count,
                 max_allowed_nodes=spec.max_expr_nodes,
                 forbidden_names=forbidden, numerical_ratio_ok=False,
-                numerical_samples=numerical_samples, sympy_check=None,
+                numerical_samples=numerical_samples, invariant_check=None,
                 error=f"Numerical check error: {exc}",
             )
 
-    sympy_check: Optional[str] = None
-    if sympy is not None and spec.sympy_invariant:
-        sympy_check = _sympy_audit_postprocess(spec)
+    invariant_check = _numerical_invariant_check(
+        spec.invariant, inv_samples, fic_input_names
+    )
 
-    passed = ast_ok and (numerical_ratio_ok is not False)
+    invariant_failed = invariant_check.startswith("counterexample")
+    passed = ast_ok and (numerical_ratio_ok is not False) and not invariant_failed
     return TransformVerifyResult(
         passed=passed, ast_node_count=node_count,
         max_allowed_nodes=spec.max_expr_nodes,
         forbidden_names=forbidden, numerical_ratio_ok=numerical_ratio_ok,
-        numerical_samples=numerical_samples, sympy_check=sympy_check,
+        numerical_samples=numerical_samples, invariant_check=invariant_check,
     )
 
 
@@ -427,12 +487,11 @@ def verify_code_patch(
 ) -> CodePatchVerifyResult:
     """Verify a code_patch spec against FIC core.
 
-    Three-layer verification:
     1. Occurrence guard: target_pattern appears exactly once.
-    2. AST diff guard: changed nodes ≤ max_changed_nodes.
-       Also checks no new dangerous calls / imports.
+    2. AST diff guard: changed nodes ≤ max_changed_nodes; no new
+       dangerous calls / imports.
     3. Cross-verify: patched_code output ≈ cross_verify_result_expr output.
-       This is the mathematical proof layer.
+    4. Numerical invariant check on the declared `invariant`.
     """
     code = fic_core.get("execution", {}).get("code", "")
     entrypoint = fic_core.get("execution", {}).get("entrypoint", "")
@@ -449,7 +508,7 @@ def verify_code_patch(
             cross_verify_ok=None,
             cross_verify_max_delta=None,
             numerical_samples=0,
-            sympy_check=None,
+            invariant_check=None,
             error=(
                 f"target_pattern {spec.target_pattern!r} must appear exactly once; "
                 f"found {occurrence_count}."
@@ -463,7 +522,7 @@ def verify_code_patch(
             passed=False, occurrence_count=occurrence_count,
             ast_changed_nodes=-1, max_changed_nodes=spec.max_changed_nodes,
             cross_verify_ok=None, cross_verify_max_delta=None,
-            numerical_samples=0, sympy_check=None, error=str(exc),
+            numerical_samples=0, invariant_check=None, error=str(exc),
         )
 
     # --- 2. AST diff guard ---
@@ -481,7 +540,7 @@ def verify_code_patch(
             ast_changed_nodes=changed_nodes,
             max_changed_nodes=spec.max_changed_nodes,
             cross_verify_ok=None, cross_verify_max_delta=None,
-            numerical_samples=0, sympy_check=None,
+            numerical_samples=0, invariant_check=None,
             error=(
                 f"AST diff guard failed: changed={changed_nodes} (max={spec.max_changed_nodes}), "
                 f"safety violations: {safety_violations}"
@@ -492,9 +551,9 @@ def verify_code_patch(
     cross_verify_ok: Optional[bool] = None
     cross_verify_max_delta: Optional[float] = None
     numerical_samples = 0
+    inv_samples: List[Tuple[Any, Any, Dict[str, Any]]] = []
 
     if sample_inputs and code and entrypoint and spec.cross_verify_result_expr:
-        # Audit the cross_verify_result_expr for safety too.
         allowed_names = {"result"} | fic_input_names
         cv_node_count, cv_forbidden = audit_expr_safety(
             spec.cross_verify_result_expr, allowed_names
@@ -505,7 +564,7 @@ def verify_code_patch(
                 ast_changed_nodes=changed_nodes,
                 max_changed_nodes=spec.max_changed_nodes,
                 cross_verify_ok=False, cross_verify_max_delta=None,
-                numerical_samples=0, sympy_check=None,
+                numerical_samples=0, invariant_check=None,
                 error=(
                     f"cross_verify_result_expr safety check failed: "
                     f"nodes={cv_node_count}, forbidden={cv_forbidden}"
@@ -525,9 +584,9 @@ def verify_code_patch(
                 ns: Dict[str, Any] = {"result": original_result, "__builtins__": safe_builtins}
                 ns.update(inp)
                 expected = eval(spec.cross_verify_result_expr, ns)  # noqa: S307
-                # Check they agree.
                 delta = abs(float(patched_result) - float(expected))
                 deltas.append(delta)
+                inv_samples.append((original_result, patched_result, inp))
                 numerical_samples += 1
 
             cross_verify_max_delta = max(deltas) if deltas else 0.0
@@ -540,16 +599,17 @@ def verify_code_patch(
                 max_changed_nodes=spec.max_changed_nodes,
                 cross_verify_ok=False,
                 cross_verify_max_delta=None,
-                numerical_samples=numerical_samples, sympy_check=None,
+                numerical_samples=numerical_samples, invariant_check=None,
                 error=f"Cross-verify error: {exc}",
             )
 
-    # --- 4. Optional SymPy audit on cross_verify invariant ---
-    sympy_check: Optional[str] = None
-    if sympy is not None and spec.sympy_invariant:
-        sympy_check = _sympy_audit_code_patch(spec, fic_input_names)
+    # --- 4. Numerical invariant check ---
+    invariant_check = _numerical_invariant_check(
+        spec.invariant, inv_samples, fic_input_names
+    )
+    invariant_failed = invariant_check.startswith("counterexample")
 
-    passed = ast_ok and (cross_verify_ok is not False)
+    passed = ast_ok and (cross_verify_ok is not False) and not invariant_failed
     return CodePatchVerifyResult(
         passed=passed, occurrence_count=occurrence_count,
         ast_changed_nodes=changed_nodes,
@@ -557,63 +617,8 @@ def verify_code_patch(
         cross_verify_ok=cross_verify_ok,
         cross_verify_max_delta=cross_verify_max_delta,
         numerical_samples=numerical_samples,
-        sympy_check=sympy_check,
+        invariant_check=invariant_check,
     )
-
-
-# ---------------------------------------------------------------------------
-# SymPy audit helpers
-# ---------------------------------------------------------------------------
-
-def _sympy_audit_postprocess(spec: TransformSpec) -> str:
-    if sympy is None:
-        return "skipped_no_sympy"
-    try:
-        invariant = spec.sympy_invariant
-        result_old, result_new = sympy.symbols("result_old result_new", positive=True)
-        local_syms: Dict[str, Any] = {
-            name: sympy.Symbol(name, positive=True)
-            for name in spec.affected_inputs
-        }
-        local_syms.update({"result_old": result_old, "result_new": result_new})
-        result_expr_sym = sympy.sympify(
-            spec.result_expr.replace("result", "result_old"), locals=local_syms
-        )
-        if "==" in invariant:
-            lhs_str, rhs_str = invariant.split("==", 1)
-            lhs = sympy.sympify(lhs_str.strip(), locals=local_syms)
-            rhs = sympy.sympify(rhs_str.strip(), locals=local_syms)
-            diff = sympy.simplify(lhs.subs(result_new, result_expr_sym) - rhs)
-            return "verified" if diff == 0 else f"counterexample: {diff}"
-        return "skipped_no_equality"
-    except Exception as exc:
-        return f"skipped_error: {exc}"
-
-
-def _sympy_audit_code_patch(spec: CodePatchSpec, fic_input_names: Set[str]) -> str:
-    if sympy is None:
-        return "skipped_no_sympy"
-    try:
-        local_syms: Dict[str, Any] = {
-            name: sympy.Symbol(name, positive=True)
-            for name in spec.affected_inputs
-        }
-        result_old, result_new = sympy.symbols("result_old result_new", positive=True)
-        local_syms.update({"result_old": result_old, "result_new": result_new})
-        cv_expr_sym = sympy.sympify(
-            spec.cross_verify_result_expr.replace("result", "result_old"),
-            locals=local_syms,
-        )
-        invariant = spec.sympy_invariant
-        if "==" in invariant:
-            lhs_str, rhs_str = invariant.split("==", 1)
-            lhs = sympy.sympify(lhs_str.strip(), locals=local_syms)
-            rhs = sympy.sympify(rhs_str.strip(), locals=local_syms)
-            diff = sympy.simplify(lhs.subs(result_new, cv_expr_sym) - rhs)
-            return "verified" if diff == 0 else f"counterexample: {diff}"
-        return "skipped_no_equality"
-    except Exception as exc:
-        return f"skipped_error: {exc}"
 
 
 # ---------------------------------------------------------------------------

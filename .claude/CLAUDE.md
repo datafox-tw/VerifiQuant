@@ -67,8 +67,9 @@ docs/archive/  docs/results/  docs/environment-setup.md  scratch/
 - **repair**: `diagnostic_check_id, suggested_fix, ui_action`; I-class rules also carry `repair_action.transform_map`
 
 ### Transform specs (`stage_transform.py`)
-- `TransformSpec` (`patch_type="result_postprocess"`): `result_expr`, `max_expr_nodes`, `sympy_invariant`, `affected_inputs`
-- `CodePatchSpec` (`patch_type="code_patch"`): `target_pattern`, `replacement`, `max_changed_nodes`, `cross_verify_result_expr`, `cross_verify_max_nodes`, `sympy_invariant`, `affected_inputs`
+- `TransformSpec` (`patch_type="result_postprocess"`): `result_expr`, `max_expr_nodes`, `invariant`, `affected_inputs`
+- `CodePatchSpec` (`patch_type="code_patch"`): `target_pattern`, `replacement`, `max_changed_nodes`, `cross_verify_result_expr`, `cross_verify_max_nodes`, `invariant`, `affected_inputs`
+- `invariant` is a plain Python `lhs == rhs` equation (over `result_old`/`result_new`/input names), safety-audited then verified numerically. No SymPy.
 - `patch_spec_from_dict()` routes by `patch_type`. `get_transform_spec_for_choice(repair_rule, value)` pulls the spec for a user's clarification choice.
 
 ---
@@ -91,8 +92,8 @@ This binds a free-form code edit to a declared algebraic identity. Buggy math,
 oversized AST diffs, sneaked imports/`__dunder__`, multi-occurrence patterns → rejected.
 
 **Verification layers:**
-- `result_postprocess`: AST node-count ≤ bound · safe-name whitelist · numerical determinism/finiteness · SymPy static audit
-- `code_patch`: occurrence==1 · shallow AST-diff ≤ `max_changed_nodes` · no new dangerous calls/imports · numerical cross-verify · SymPy audit
+- `result_postprocess`: AST node-count ≤ bound · safe-name whitelist · numerical determinism/finiteness · numerical invariant check
+- `code_patch`: occurrence==1 · shallow AST-diff ≤ `max_changed_nodes` · no new dangerous calls/imports · numerical cross-verify · numerical invariant check
 
 `_shallow_node_key()` hashes only a node's own primitive fields (not child subtrees), so `start=1`→`start=0` counts as **1** changed node, not the whole parent chain.
 

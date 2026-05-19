@@ -102,7 +102,7 @@ MOCK_FIC = {
                             "- initial_investment"
                         ),
                         "cross_verify_max_nodes": 25,
-                        "sympy_invariant": (
+                        "invariant": (
                             "result_new + initial_investment == "
                             "(result_old + initial_investment) * (1 + discount_rate)"
                         ),
@@ -228,7 +228,7 @@ print(f"  ast_changed_nodes       : {result.ast_changed_nodes} / {result.max_cha
 print(f"  cross_verify_ok         : {result.cross_verify_ok}")
 print(f"  cross_verify_max_delta  : {result.cross_verify_max_delta:.2e}" if result.cross_verify_max_delta is not None else "  cross_verify_max_delta  : n/a")
 print(f"  numerical_samples       : {result.numerical_samples}")
-print(f"  sympy_check             : {result.sympy_check}")
+print(f"  invariant_check         : {result.invariant_check}")
 print(f"  error                   : {result.error}")
 
 # ═══════════════════════════════════════════════════════════════════
@@ -282,7 +282,7 @@ rp_spec = TransformSpec(
     patch_type="result_postprocess",
     result_expr="(result + initial_investment) * (1 + discount_rate) - initial_investment",
     max_expr_nodes=25,
-    sympy_invariant="result_new + initial_investment == (result_old + initial_investment) * (1 + discount_rate)",
+    invariant="result_new + initial_investment == (result_old + initial_investment) * (1 + discount_rate)",
     affected_inputs=["discount_rate", "initial_investment"],
 )
 rp_result = verify_transform(rp_spec, MOCK_FIC, SAMPLE_INPUTS)
