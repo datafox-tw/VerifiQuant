@@ -89,10 +89,36 @@ Diagnostic rules policy:
   - ambiguity_type
   - trigger_signal
   - clarification_question
-  - options
+  - options  ← NOW STRUCTURED (see below)
   - i_level (hard|soft)
   - assumption_if_not_clarified
   - impact_scope (input_binding|output_interpretation|directionality)
+
+Semantic hint options policy (IMPORTANT — options are now objects, not strings):
+Each option must be:
+  {{ "label": "...", "value": "...", "is_default": true/false, "transform_spec": null | <spec> }}
+
+- Exactly one option must have is_default=true (the baseline the FIC code already implements).
+- Non-default options MUST include a transform_spec describing how to adjust the result.
+- transform_spec schema:
+  {{
+    "patch_type": "result_postprocess",
+    "result_expr": "<Python expression using `result` and any input variable names>",
+    "max_expr_nodes": <int, expected AST node count of result_expr>,
+    "invariant": "<a Python `lhs == rhs` equality over result_old / result_new / input names, e.g. result_new == result_old * (1 + discount_rate)>",
+    "affected_inputs": ["<list of input names referenced in result_expr / invariant>"]
+  }}
+- result_expr rules:
+  * Use only `result` (the output of the original execution) and names that appear in the FIC inputs.
+  * No function calls, no imports, no side effects. Pure arithmetic expression only.
+  * Examples:
+    - annuity-due (ordinary → due):  "result * (1 + discount_rate)"
+    - FX direction flip:             "1.0 / result"
+    - sign convention inversion:     "-result"
+    - monthly-to-annual compounding: "result ** 12 - 1"
+- max_expr_nodes: count the AST nodes in result_expr:
+  * "result * (1 + r)" → 7 nodes. "-result" → 2 nodes. "1.0 / result" → 3 nodes.
+  * This is the blast radius bound — the verifier will reject transforms that add more nodes.
 
 Input case:
 <DEFINITION_JSON>
@@ -113,6 +139,37 @@ SEMANTIC_HINT_MAX = 6
 def stage_core_schema() -> Any:
     if genai_types is None:
         return None
+
+    transform_spec_schema = genai_types.Schema(
+        type=genai_types.Type.OBJECT,
+        properties={
+            "patch_type": genai_types.Schema(
+                type=genai_types.Type.STRING,
+                enum=["result_postprocess"],
+            ),
+            "result_expr": genai_types.Schema(type=genai_types.Type.STRING),
+            "max_expr_nodes": genai_types.Schema(type=genai_types.Type.INTEGER),
+            "invariant": genai_types.Schema(type=genai_types.Type.STRING),
+            "affected_inputs": genai_types.Schema(
+                type=genai_types.Type.ARRAY,
+                items=genai_types.Schema(type=genai_types.Type.STRING),
+            ),
+        },
+        required=["patch_type", "result_expr", "max_expr_nodes", "invariant", "affected_inputs"],
+    )
+
+    hint_option_schema = genai_types.Schema(
+        type=genai_types.Type.OBJECT,
+        properties={
+            "label": genai_types.Schema(type=genai_types.Type.STRING),
+            "value": genai_types.Schema(type=genai_types.Type.STRING),
+            "is_default": genai_types.Schema(type=genai_types.Type.BOOLEAN),
+            # transform_spec is omitted from required; null for default option.
+            "transform_spec": transform_spec_schema,
+        },
+        required=["label", "value", "is_default"],
+    )
+
     semantic_hint = genai_types.Schema(
         type=genai_types.Type.OBJECT,
         properties={
@@ -122,7 +179,7 @@ def stage_core_schema() -> Any:
             "clarification_question": genai_types.Schema(type=genai_types.Type.STRING),
             "options": genai_types.Schema(
                 type=genai_types.Type.ARRAY,
-                items=genai_types.Schema(type=genai_types.Type.STRING),
+                items=hint_option_schema,
             ),
             "i_level": genai_types.Schema(
                 type=genai_types.Type.STRING,
@@ -360,12 +417,54 @@ def _norm_str_list(items: Any) -> List[str]:
     return out
 
 
+def _normalize_hint_option(opt: Any) -> Any:
+    """Normalize one semantic hint option.
+
+    Accepts both legacy string format and new structured dict format.
+    For dicts, preserves transform_spec so stage_repair._global_i_rules()
+    can embed it into the repair rule's transform_map.
+    """
+    if isinstance(opt, str):
+        text = opt.strip()
+        return text if text else None
+    if not isinstance(opt, dict):
+        return None
+    label = str(opt.get("label", "") or "").strip()
+    value = str(opt.get("value", "") or "").strip() or label
+    if not value:
+        return None
+    out: Dict[str, Any] = {
+        "label": label or value,
+        "value": value,
+        "is_default": bool(opt.get("is_default", False)),
+    }
+    spec = opt.get("transform_spec")
+    if isinstance(spec, dict) and spec:
+        out["transform_spec"] = spec
+    return out
+
+
+def _normalize_hint_options(raw: Any) -> List[Any]:
+    """Normalize the full options list for a semantic hint.
+
+    Returns a mixed list: strings (legacy) or dicts (new structured format).
+    Falls back to two placeholder strings if nothing valid comes through.
+    """
+    if not isinstance(raw, list):
+        return ["Confirm intended interpretation", "Use default assumption"]
+    out = [_normalize_hint_option(o) for o in raw]
+    out = [o for o in out if o is not None]
+    if not out:
+        return ["Confirm intended interpretation", "Use default assumption"]
+    return out
+
+
 def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
     hint_id = normalize_label(item.get("id", "")) or f"semantic_hint_{idx}"
     ambiguity_type = normalize_label(item.get("ambiguity_type", "")) or "generic_ambiguity"
     trigger_signal = str(item.get("trigger_signal", "") or "").strip()
     clarification_question = str(item.get("clarification_question", "") or "").strip()
-    options = _norm_str_list(item.get("options", []))
+    options = _normalize_hint_options(item.get("options", []))
     i_level = normalize_label(item.get("i_level", "")) or "soft"
     if i_level not in {"hard", "soft"}:
         i_level = "soft"
@@ -375,8 +474,6 @@ def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
         impact_scope = "output_interpretation"
     if not clarification_question:
         clarification_question = "Please clarify the intended financial interpretation."
-    if not options:
-        options = ["Confirm intended interpretation", "Use default assumption"]
     if not assumption_if_not_clarified:
         assumption_if_not_clarified = "Proceed with default interpretation inferred from context."
     return {
