@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout *)",
+      "Bash(pip show *)",
+      "Bash(/Users/blackwingedkite/Desktop/verifiquant-update/.venv/bin/python -c \"import langgraph; print\\(langgraph.__version__\\)\")",
+      "Bash(/Users/blackwingedkite/Desktop/verifiquant-update/.venv/bin/python -c \"from langgraph.graph import StateGraph; print\\('ok'\\)\")",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d[k] for k in ['case_id','question','context','ground_truth'] if k in d}, ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d.get\\(k,''\\) for k in ['case_id','question','context','ground_truth']}, ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(.venv/bin/python preprocessing/visualize_lg_pipeline.py --ascii)",
+      "Bash(open /Users/blackwingedkite/Desktop/verifiquant-update/docs/pipeline_dag.html)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(.venv/bin/python preprocessing/visualize_lg_pipeline.py)",
+      "Bash(open docs/pipeline_dag.html)"
+    ]
+  }
+}

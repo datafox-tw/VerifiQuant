@@ -89,10 +89,171 @@ Diagnostic rules policy:
   - ambiguity_type
   - trigger_signal
   - clarification_question
-  - options
+  - options  ← NOW STRUCTURED (see below)
   - i_level (hard|soft)
   - assumption_if_not_clarified
   - impact_scope (input_binding|output_interpretation|directionality)
+
+Semantic hint options policy (IMPORTANT — options are now objects, not strings):
+Each option must be:
+  {{ "label": "...", "value": "...", "is_default": true/false, "transform_spec": null | <spec> }}
+
+- Exactly one option must have is_default=true (the baseline the FIC code already implements).
+- The DEFAULT option's transform_spec MUST be null. The FIC code IS the default — no
+  post-processing is needed for the baseline interpretation. Do not write a trivial
+  identity transform like `result_expr: "result"` for the default.
+- A non-default option MAY include a transform_spec ONLY IF the alternative interpretation
+  has a pure-arithmetic relationship to the default output. If no such algebraic relationship
+  exists (e.g. the alternative would require choosing a different input source, rescaling
+  an INPUT before computation, or recomputing from scratch), the option MUST have
+  transform_spec=null.
+- result_expr is a PURE ARITHMETIC EXPRESSION. It MUST NOT contain function calls of any
+  kind — no compute(), no exp/log/sin/cos, no min/max, no abs. Only arithmetic operators
+  (+, -, *, /, **) over `result` and input names. If the only way to express the
+  alternative is via a function call, set transform_spec=null.
+- Reference inputs by BARE NAME ONLY. Write `discount_rate`, not `inputs['discount_rate']`.
+  Write `initial_investment`, not `inputs["initial_investment"]`. Subscript notation will
+  be REJECTED by the verifier.
+- ONLY use names that actually appear in this FIC's `inputs` list. If you need a quantity
+  that is not in the inputs (e.g. `inflation_rate` for a real-rate transform on a FIC that
+  only has nominal-rate inputs), set transform_spec=null — do NOT fabricate input names.
+- result_expr MUST reference `result`. It is a transformation OF the original output, not
+  a recomputation of the formula. If the alternative requires recomputing from scratch
+  (rather than adjusting `result`), set transform_spec=null.
+- transform_spec schema:
+  {{
+    "patch_type": "result_postprocess",
+    "result_expr": "<Python expression using `result` and any input variable names>",
+    "max_expr_nodes": <int, expected AST node count of result_expr>,
+    "invariant": "<a Python `lhs == rhs` equality over result_old / result_new / input names>",
+    "affected_inputs": ["<list of input names referenced in result_expr / invariant>"]
+  }}
+- result_expr rules:
+  * Use only `result` (the output of the original execution) and names that appear in the FIC inputs.
+  * No function calls, no imports, no side effects. Pure arithmetic expression only.
+
+WHEN TO USE transform_spec — domain-driven guidance.
+Pick the ambiguity that genuinely applies to THIS FIC's domain/inputs. Do NOT copy patterns
+from unrelated domains. The hint must be traceable to the FIC's function/inputs.
+
+| FIC domain / topic family                | Typical I-class ambiguity            | result_expr pattern                                  |
+|------------------------------------------|--------------------------------------|------------------------------------------------------|
+| time_value_money / annuity / NPV / PV    | end vs beginning of period (annuity) | `(result + initial_investment) * (1 + r) - initial_investment` |
+| time_value_money / compounding           | discrete vs continuous compounding   | depends on formula; often `result * exp(r) / (1+r)`  |
+| interest_rates / yield                   | nominal APR ↔ effective APY          | `(1 + result/n) ** n - 1`                            |
+| interest_rates / rate conversion         | monthly ↔ annual rate                | `(1 + result) ** 12 - 1` or `(1 + result) ** (1/12) - 1` |
+| any rate output                          | percent vs decimal scale             | `result / 100.0` or `result * 100.0`                 |
+| fx / foreign_exchange                    | direct vs indirect quote             | `1.0 / result`                                       |
+| cash_flow / valuation                    | inflow-positive vs outflow-positive  | `-result`                                            |
+| returns / performance                    | pre-tax vs post-tax                  | `result * (1 - tax_rate)`                            |
+| returns / performance                    | nominal vs real                      | `(1 + result) / (1 + inflation_rate) - 1`            |
+| risk / volatility                        | period vol vs annualized             | `result * (252 ** 0.5)` or `result * (12 ** 0.5)`    |
+| statistics / dispersion                  | sample vs population variance        | `result * (n - 1) / n`                               |
+| bonds                                    | clean vs dirty price                 | `result + accrued_interest`                          |
+
+If THIS FIC's domain is not in the table above, do NOT invent a forced transform_spec —
+prefer transform_spec=null and let the system fall back to clarification-only.
+
+ANTI-PATTERNS — set transform_spec=null in these cases:
+1. The ambiguity is about WHICH INPUT to use (e.g. "use WACC vs cost of equity" for
+   discount_rate, "use S&P 500 vs Treasury" for benchmark). No post-processing can fix
+   input choice — the user must rerun with the right input.
+2. The alternative interpretation requires re-running the formula with a structurally
+   different input (e.g. "use only operating cash flows vs all cash flows").
+3. The ambiguity is purely semantic categorization (e.g. "is this a hurdle rate or
+   required return?") with no numerical adjustment.
+4. The mapping would need to change loop logic or formula shape (not a closed-form
+   post-process of `result`). Leave it null; future work will support code_patch.
+
+WORKED EXAMPLE 1 — NPV / annuity-due (time_value_money):
+{{
+  "id": "payment_timing",
+  "ambiguity_type": "time_basis",
+  "trigger_signal": "payment period not explicitly stated as end-of-period",
+  "clarification_question": "Are cash flows paid at END of each period (ordinary annuity) or BEGINNING (annuity-due)?",
+  "i_level": "soft",
+  "assumption_if_not_clarified": "End of period (ordinary annuity)",
+  "impact_scope": "output_interpretation",
+  "options": [
+    {{ "label": "End of period — DEFAULT", "value": "end_of_period", "is_default": true,  "transform_spec": null }},
+    {{
+      "label": "Beginning of period (annuity-due)", "value": "beginning_of_period", "is_default": false,
+      "transform_spec": {{
+        "patch_type": "result_postprocess",
+        "result_expr": "(result + initial_investment) * (1 + discount_rate) - initial_investment",
+        "max_expr_nodes": 15,
+        "invariant": "result_new + initial_investment == (result_old + initial_investment) * (1 + discount_rate)",
+        "affected_inputs": ["discount_rate", "initial_investment"]
+      }}
+    }}
+  ]
+}}
+
+WORKED EXAMPLE 2 — monthly ↔ annual rate (interest_rates):
+{{
+  "id": "rate_period_basis",
+  "ambiguity_type": "rate_period",
+  "trigger_signal": "rate may be quoted monthly or annually",
+  "clarification_question": "Is the rate of return quoted on a monthly or annual basis?",
+  "i_level": "soft",
+  "assumption_if_not_clarified": "Annual rate",
+  "impact_scope": "output_interpretation",
+  "options": [
+    {{ "label": "Annual — DEFAULT", "value": "annual", "is_default": true, "transform_spec": null }},
+    {{
+      "label": "Monthly (annualize via compounding)", "value": "monthly", "is_default": false,
+      "transform_spec": {{
+        "patch_type": "result_postprocess",
+        "result_expr": "(1 + result) ** 12 - 1",
+        "max_expr_nodes": 7,
+        "invariant": "result_new == (1 + result_old) ** 12 - 1",
+        "affected_inputs": []
+      }}
+    }}
+  ]
+}}
+
+WORKED EXAMPLE 3 — percent vs decimal output (any rate-returning FIC):
+{{
+  "id": "output_scale",
+  "ambiguity_type": "unit_scale",
+  "trigger_signal": "question asks for percentage, FIC outputs decimal (or vice versa)",
+  "clarification_question": "Should the answer be expressed as a decimal (0.08) or percent (8.0)?",
+  "i_level": "soft",
+  "assumption_if_not_clarified": "Decimal",
+  "impact_scope": "output_interpretation",
+  "options": [
+    {{ "label": "Decimal — DEFAULT", "value": "decimal", "is_default": true, "transform_spec": null }},
+    {{
+      "label": "Percent", "value": "percent", "is_default": false,
+      "transform_spec": {{
+        "patch_type": "result_postprocess",
+        "result_expr": "result * 100.0",
+        "max_expr_nodes": 3,
+        "invariant": "result_new == result_old * 100.0",
+        "affected_inputs": []
+      }}
+    }}
+  ]
+}}
+
+WORKED EXAMPLE 4 — ANTI-PATTERN (benchmark choice, transform_spec MUST be null):
+{{
+  "id": "benchmark_source",
+  "ambiguity_type": "input_binding",
+  "trigger_signal": "benchmark return source not explicitly named",
+  "clarification_question": "Is the benchmark return based on the S&P 500, a sector ETF, or the risk-free rate?",
+  "i_level": "soft",
+  "assumption_if_not_clarified": "Market benchmark provided in inputs",
+  "impact_scope": "input_binding",
+  "options": [
+    {{ "label": "Use given benchmark_return as-is — DEFAULT", "value": "as_given", "is_default": true, "transform_spec": null }},
+    {{ "label": "Reconsider with alternative benchmark", "value": "alternative_benchmark", "is_default": false, "transform_spec": null }}
+  ]
+}}
+(Why transform_spec is null here: choosing a different benchmark means re-running the formula
+with different input values — there is no closed-form expression mapping `result` from one
+benchmark to another.)
 
 Input case:
 <DEFINITION_JSON>
@@ -113,6 +274,37 @@ SEMANTIC_HINT_MAX = 6
 def stage_core_schema() -> Any:
     if genai_types is None:
         return None
+
+    transform_spec_schema = genai_types.Schema(
+        type=genai_types.Type.OBJECT,
+        properties={
+            "patch_type": genai_types.Schema(
+                type=genai_types.Type.STRING,
+                enum=["result_postprocess"],
+            ),
+            "result_expr": genai_types.Schema(type=genai_types.Type.STRING),
+            "max_expr_nodes": genai_types.Schema(type=genai_types.Type.INTEGER),
+            "invariant": genai_types.Schema(type=genai_types.Type.STRING),
+            "affected_inputs": genai_types.Schema(
+                type=genai_types.Type.ARRAY,
+                items=genai_types.Schema(type=genai_types.Type.STRING),
+            ),
+        },
+        required=["patch_type", "result_expr", "max_expr_nodes", "invariant", "affected_inputs"],
+    )
+
+    hint_option_schema = genai_types.Schema(
+        type=genai_types.Type.OBJECT,
+        properties={
+            "label": genai_types.Schema(type=genai_types.Type.STRING),
+            "value": genai_types.Schema(type=genai_types.Type.STRING),
+            "is_default": genai_types.Schema(type=genai_types.Type.BOOLEAN),
+            # transform_spec is omitted from required; null for default option.
+            "transform_spec": transform_spec_schema,
+        },
+        required=["label", "value", "is_default"],
+    )
+
     semantic_hint = genai_types.Schema(
         type=genai_types.Type.OBJECT,
         properties={
@@ -122,7 +314,7 @@ def stage_core_schema() -> Any:
             "clarification_question": genai_types.Schema(type=genai_types.Type.STRING),
             "options": genai_types.Schema(
                 type=genai_types.Type.ARRAY,
-                items=genai_types.Schema(type=genai_types.Type.STRING),
+                items=hint_option_schema,
             ),
             "i_level": genai_types.Schema(
                 type=genai_types.Type.STRING,
@@ -360,12 +552,82 @@ def _norm_str_list(items: Any) -> List[str]:
     return out
 
 
+def _normalize_hint_option(opt: Any) -> Any:
+    """Normalize one semantic hint option.
+
+    Accepts both legacy string format and new structured dict format.
+    For dicts, preserves transform_spec so stage_repair._global_i_rules()
+    can embed it into the repair rule's transform_map.
+    """
+    if isinstance(opt, str):
+        text = opt.strip()
+        return text if text else None
+    if not isinstance(opt, dict):
+        return None
+    label = str(opt.get("label", "") or "").strip()
+    value = str(opt.get("value", "") or "").strip() or label
+    if not value:
+        return None
+    out: Dict[str, Any] = {
+        "label": label or value,
+        "value": value,
+        "is_default": bool(opt.get("is_default", False)),
+    }
+    spec = opt.get("transform_spec")
+    # Default options must never carry a transform_spec: the FIC code IS the default.
+    # Strip trivial identity transforms and any spec on default options to keep the
+    # downstream transform_map clean (stage_repair already filters by is_default).
+    if out["is_default"]:
+        return out
+    if isinstance(spec, dict) and spec:
+        spec = dict(spec)
+        result_expr = (spec.get("result_expr") or "").strip()
+        # Drop trivial identity (Gemini sometimes emits this for non-default options too).
+        if result_expr in ("", "result"):
+            return out
+        # Reject subscript-style references (`inputs['name']`) — verifier will fail them.
+        if "inputs[" in result_expr or "inputs ['" in result_expr:
+            return out
+        # result_expr must reference `result`. If it doesn't, it's a recomputation,
+        # not a post-process — drop it.
+        try:
+            import ast as _ast
+            tree = _ast.parse(result_expr, mode="eval")
+            # Reject any function calls (e.g. round(), exp(), compute()).
+            if any(isinstance(n, _ast.Call) for n in _ast.walk(tree)):
+                return out
+            names_used = {n.id for n in _ast.walk(tree) if isinstance(n, _ast.Name)}
+            if "result" not in names_used:
+                return out
+            actual_nodes = sum(1 for _ in _ast.walk(tree))
+            spec["max_expr_nodes"] = actual_nodes
+        except SyntaxError:
+            return out
+        out["transform_spec"] = spec
+    return out
+
+
+def _normalize_hint_options(raw: Any) -> List[Any]:
+    """Normalize the full options list for a semantic hint.
+
+    Returns a mixed list: strings (legacy) or dicts (new structured format).
+    Falls back to two placeholder strings if nothing valid comes through.
+    """
+    if not isinstance(raw, list):
+        return ["Confirm intended interpretation", "Use default assumption"]
+    out = [_normalize_hint_option(o) for o in raw]
+    out = [o for o in out if o is not None]
+    if not out:
+        return ["Confirm intended interpretation", "Use default assumption"]
+    return out
+
+
 def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
     hint_id = normalize_label(item.get("id", "")) or f"semantic_hint_{idx}"
     ambiguity_type = normalize_label(item.get("ambiguity_type", "")) or "generic_ambiguity"
     trigger_signal = str(item.get("trigger_signal", "") or "").strip()
     clarification_question = str(item.get("clarification_question", "") or "").strip()
-    options = _norm_str_list(item.get("options", []))
+    options = _normalize_hint_options(item.get("options", []))
     i_level = normalize_label(item.get("i_level", "")) or "soft"
     if i_level not in {"hard", "soft"}:
         i_level = "soft"
@@ -375,8 +637,6 @@ def _normalize_semantic_hint(item: Dict[str, Any], idx: int) -> Dict[str, Any]:
         impact_scope = "output_interpretation"
     if not clarification_question:
         clarification_question = "Please clarify the intended financial interpretation."
-    if not options:
-        options = ["Confirm intended interpretation", "Use default assumption"]
     if not assumption_if_not_clarified:
         assumption_if_not_clarified = "Proceed with default interpretation inferred from context."
     return {

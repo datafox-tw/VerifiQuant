@@ -312,6 +312,42 @@ def _i_rule_id_from_hint_id(hint_id: str) -> str:
     return f"i_{h}"
 
 
+def _parse_hint_options(
+    raw_options: List[Any],
+) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Return (ui_options, transform_map).
+
+    ui_options: list of {value, label} dicts for ask_user_for.
+    transform_map: {option_value: transform_spec | None} for all non-default choices.
+    Backward-compatible: if options are plain strings, transform_map will be empty.
+    """
+    ui_options: List[Dict[str, Any]] = []
+    transform_map: Dict[str, Any] = {}
+
+    for opt in raw_options:
+        if isinstance(opt, str):
+            # Legacy format — plain string, no transform_spec
+            text = opt.strip()
+            if text:
+                ui_options.append({"value": text, "label": text})
+        elif isinstance(opt, dict):
+            label = str(opt.get("label", "")).strip()
+            value = str(opt.get("value", "")).strip() or label
+            if not value:
+                continue
+            ui_options.append({"value": value, "label": label or value})
+            spec = opt.get("transform_spec")
+            if spec and isinstance(spec, dict) and not opt.get("is_default", False):
+                transform_map[value] = spec
+
+    if not ui_options:
+        ui_options = [
+            {"value": "confirm_intended_interpretation", "label": "Confirm intended interpretation"},
+            {"value": "use_default_assumption", "label": "Use default assumption"},
+        ]
+    return ui_options, transform_map
+
+
 def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
     semantic_hints = [x for x in (core.get("semantic_hints") or []) if isinstance(x, dict)]
     out: List[Dict[str, Any]] = []
@@ -326,16 +362,8 @@ def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
         assumption = str(hint.get("assumption_if_not_clarified", "")).strip()
         clarification_question = str(hint.get("clarification_question", "")).strip()
 
-        i_options: List[Dict[str, str]] = []
-        for opt in hint.get("options", []):
-            text = str(opt).strip()
-            if text:
-                i_options.append({"value": text, "label": text})
-        if not i_options:
-            i_options = [
-                {"value": "confirm_intended_interpretation", "label": "Confirm intended interpretation"},
-                {"value": "use_default_assumption", "label": "Use default assumption"},
-            ]
+        i_options, transform_map = _parse_hint_options(hint.get("options", []))
+
         if not clarification_question:
             clarification_question = "Please clarify the intended financial interpretation."
         if not assumption:
@@ -349,6 +377,15 @@ def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
             f"Semantic hint '{hint_id or 'semantic_hint'}' triggered. "
             f"Default assumption if unresolved: {assumption}"
         )
+
+        # repair_action includes transform_map so the executor can apply the
+        # chosen option's transform_spec without re-reading the core card.
+        repair_action: Dict[str, Any] = {
+            "type": "present_clarification_options",
+            "target": hint_id or "semantic_hints",
+        }
+        if transform_map:
+            repair_action["transform_map"] = transform_map
 
         out.append(
             {
@@ -368,10 +405,7 @@ def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
                         "options": i_options,
                     }
                 ],
-                "repair_action": {
-                    "type": "present_clarification_options",
-                    "target": hint_id or "semantic_hints",
-                },
+                "repair_action": repair_action,
                 "allowed_next_steps": ["ask_followup", "rerun_same_fic"],
             }
         )
