@@ -144,6 +144,17 @@ The `invariant` field is a plain Python `lhs == rhs` equation over `result_old` 
 
 The **cross-verification** is the mathematical guarantee: a code change is only accepted if its numerical effect provably equals a declared algebraic relationship. A malicious or buggy patch (wrong math, sneaked import, oversized diff) is rejected. See `test_transform_poc.py` for the end-to-end NPV annuity-due demonstration.
 
+**Scope of Gemini-generated `transform_spec` (production cards).** The prompt in
+`stage_core.py` includes a domain → typical-ambiguity table (TVM, interest rates, FX,
+returns, volatility, bonds, statistics) and four worked few-shot examples: NPV
+annuity-due, monthly↔annual rate conversion, percent↔decimal output, and one
+**anti-pattern** (benchmark choice → `transform_spec=null`). Gemini occasionally still
+emits malformed specs (subscript syntax, function calls, identity transforms on
+default options); `_normalize_hint_option()` in `stage_core.py` is the hard gate that
+strips these post-LLM so bad specs never reach the verifier. `code_patch` (the more
+powerful patch type used in the PoC) is intentionally NOT exposed to Gemini yet — only
+`result_postprocess` is generated automatically; `code_patch` requires hand-authoring.
+
 ### Pipeline (`run_error_classification_pipeline.py`, ~2100 lines)
 
 BM25 retrieval → LLM selector (M/N) → LLM extractor (F) → deterministic E-checks → Critic agent (I) → deterministic Python execution (C). Exposed as `ErrorClassificationAPI` (used by `app.py` and eval scripts).
@@ -190,7 +201,8 @@ Flask app wrapping `ErrorClassificationAPI`. Returns the full diagnostic report 
 | Broader baselines (GPT-4 / DeepSeek direct CoT) | Only JPMorgan paper number + Gemini CoT compared |
 | SymPy symbolic *math engine* | Not built, and SymPy was removed entirely. The old vision assumed prompt→SymPy formalization; the current design verifies transforms numerically instead (no symbolic dependency) |
 | PDF/RAG over financial documents | Not implemented; system uses structured JSONL inputs |
-| `transform_spec` auto-generation in production cards | Schema + pipeline wired (`stage_core` → `stage_repair` → `stage_transform`); not yet validated on a full Gemini card-build run |
+| `transform_spec` auto-generation (full card-build run) | **Validated 2026-05-20 on testing_5Q.jsonl with Gemini 2.5 Flash.** Generates correct specs for NPV annuity-due, percent↔decimal scaling, sign convention. Anti-patterns (benchmark choice, input rescaling) correctly emit `transform_spec=null`. A normalization safety net (`_normalize_hint_option` in `stage_core.py`) catches Gemini's residual mistakes: subscript syntax (`inputs['x']`), function calls (`round`, `exp`), identity transforms on default options, missing `result` reference, and unparseable expressions. **Not yet validated on the full 50Q card build.** |
+| `code_patch` auto-generation by Gemini | Only `result_postprocess` is in the `stage_core` schema enum. `code_patch` is supported by `stage_transform` and demonstrated in `test_transform_poc.py`, but Gemini does not yet generate `code_patch` specs in production cards — they must be hand-authored. |
 
 ---
 
