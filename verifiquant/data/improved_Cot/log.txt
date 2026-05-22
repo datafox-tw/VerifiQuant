@@ -1,0 +1,162 @@
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_verifiquant_lite_cot_self_improve_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --output /verifiquant/data/improved_cot/vq_cot.jsonl \
+  --summary-output /verifiquant/data/improved_cot/vq_cot_summary.json \
+  --max-records 50 \
+  --max-turns 3
+[verifiquant-lite-cot-self-improve] processing test-1697
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1264
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1470
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=False
+[verifiquant-lite-cot-self-improve] processing test-1084
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1504
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1710
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1673
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=M is_correct=True
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1028
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1920
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1708
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1031
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1833
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1005
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1009
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1426
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1442
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1604
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1106
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1832
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1114
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=None
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1134
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1460
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1944
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1925
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1045
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=M is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1593
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1881
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1001
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1553
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=F is_correct=None
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1577
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1270
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1490
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1738
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=False
+[verifiquant-lite-cot-self-improve] processing test-1979
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1109
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1951
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1012
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1810
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1065
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1842
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=None
+[verifiquant-lite-cot-self-improve] processing test-1570
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1008
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1890
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=None
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=I is_correct=None
+  -> VerifiQuant-lite CoT Turn 3: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1625
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1707
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1825
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1457
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1880
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=I is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1896
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=none is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+[verifiquant-lite-cot-self-improve] processing test-1666
+  -> VerifiQuant-lite CoT Turn 1: diagnostic=I is_correct=False
+  -> VerifiQuant-lite CoT Turn 2: diagnostic=none is_correct=True
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/verifiquant/data/improved_cot'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/verifiquant/data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/preprocessing/run_verifiquant_lite_cot_self_improve_pipeline.py", line 12, in <module>
+    main()
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/pipeline/run_verifiquant_lite_cot_self_improve_pipeline.py", line 317, in main
+    _dump_records(args.output, out_rows)
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/pipeline/run_cot_self_improve_pipeline.py", line 37, in _dump_records
+    path.parent.mkdir(parents=True, exist_ok=True)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/pathlib.py", line 1315, in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/pathlib.py", line 1315, in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+OSError: [Errno 30] Read-only file system: '/verifiquant'
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % 

@@ -321,6 +321,16 @@ python3 preprocessing/run_iterative_agents_pipeline.py \
   --max-turns 3
 ```
 
+5-4:cot improved
+
+python3 preprocessing/run_verifiquant_lite_cot_self_improve_pipeline.py \
+  --input verifiquant/data/medium_config_50_0408.jsonl \
+  --output /Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/improved_Cot/vq_cot.jsonl \
+  --summary-output /Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/improved_Cot/vq_cot_summary.json \
+  --max-records 50 \
+  --max-turns 3
+
+
 ## 6. Pipeline 6: 視覺化與指標
 
 用途：把 `expanded input` 與 `run output` 對齊，產出 summary + dashboard。
