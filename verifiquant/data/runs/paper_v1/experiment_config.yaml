@@ -1,0 +1,173 @@
+experiment:
+  created_at: '2026-05-26T22:53:24.909156'
+  version: paper_v1
+  description: FinNLP 2026 main experiment — 50Q stratified random from FinanceReasoning
+    medium
+sampling:
+  source: FinanceReasoning/data/FinanceReasoning/medium.json
+  n: 50
+  seed: 42
+  method: stratified_random_by_difficulty_quartile
+  filter: has_function AND has_ground_truth
+  difficulty_stats:
+    min: 2.4849
+    max: 4.0254
+    mean: 3.0211
+    median: 2.9957
+  question_ids:
+  - test-1028
+  - test-1035
+  - test-1561
+  - test-1443
+  - test-1008
+  - test-1023
+  - test-1668
+  - test-1926
+  - test-1652
+  - test-1545
+  - test-1891
+  - test-1437
+  - test-1699
+  - test-1664
+  - test-1062
+  - test-1590
+  - test-1026
+  - test-1070
+  - test-1108
+  - test-1442
+  - test-1591
+  - test-1845
+  - test-1606
+  - test-1006
+  - test-1578
+  - test-1237
+  - test-1022
+  - test-1710
+  - test-1922
+  - test-1458
+  - test-1704
+  - test-1865
+  - test-1810
+  - test-1890
+  - test-1969
+  - test-1242
+  - test-1701
+  - test-1801
+  - test-1823
+  - test-1057
+  - test-1866
+  - test-1446
+  - test-1427
+  - test-1789
+  - test-1007
+  - test-1500
+  - test-1805
+  - test-1593
+  - test-1499
+  - test-1474
+  function_ids:
+  - article-571
+  - article-1558
+  - article-1633
+  - article-1217
+  - article-2494
+  - article-1816
+  - article-716
+  - article-1740
+  - article-626
+  - article-1811
+  - article-322
+  - article-440
+  - article-92
+  - article-2281
+  - article-687
+  - article-2793
+  - article-190
+  - article-1167
+  - article-2735
+  - article-1213
+  - article-3041
+  - article-2567
+  - article-2183
+  - article-1885
+  - article-477
+  - article-2824
+  - article-1072
+  - article-1400
+  - article-2250
+  - article-2302
+  - article-2316
+  - article-2749
+  - article-1668
+  - article-91
+  - article-2164
+  - article-701
+  - article-1537
+  - article-2145
+  - article-925
+  - article-500
+  - article-2750
+  - article-1730
+  - article-1745
+  - article-1610
+  - article-2457
+  - article-1280
+  - article-330
+  - article-207
+  - article-72
+  - article-1162
+pipelines:
+  vq_flash:
+    type: verifiquant
+    judge_model: gemini-2.5-flash
+    selector_model: gemini-2.5-flash
+    extractor_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    top_k: 4
+    description: VerifiQuant full pipeline, Flash 2.5, K=3 (oracle corrects ≤2x)
+  vq_pro:
+    type: verifiquant
+    judge_model: gemini-2.5-pro
+    selector_model: gemini-2.5-pro
+    extractor_model: gemini-2.5-pro
+    oracle_model: gemini-2.5-pro
+    max_turns: 3
+    top_k: 4
+    description: VerifiQuant full pipeline, Pro 2.5, K=3
+  cot_single_shot_flash:
+    type: cot
+    cot_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 1
+    description: CoT single-shot, Flash 2.5, no self-improve
+  cot_single_shot_pro:
+    type: cot
+    cot_model: gemini-2.5-pro
+    oracle_model: gemini-2.5-pro
+    max_turns: 1
+    description: CoT single-shot, Pro 2.5, no self-improve
+  cot_basic_oracle_flash:
+    type: cot
+    cot_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    description: CoT + basic oracle self-improve, Flash 2.5, ≤2 corrections
+  cot_vq_funnel_flash:
+    type: cot_vq_funnel
+    cot_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    description: CoT + VQ 6-layer funnel concept in oracle prompt, Flash 2.5
+  cot_vq_funnel_pro:
+    type: cot_vq_funnel
+    cot_model: gemini-2.5-pro
+    oracle_model: gemini-2.5-pro
+    max_turns: 3
+    description: CoT + VQ 6-layer funnel concept in oracle prompt, Pro 2.5
+  jpmorgan:
+    type: jpmorgan_reimpl
+    description: JP Morgan MAS reimplementation — run separately
+    note: See reimplementation-jpmorgan/ directory
+output_jsonl: verifiquant/data/runs/paper_v1/questions_50.jsonl
+run_dir: verifiquant/data/runs/paper_v1
