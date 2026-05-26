@@ -153,18 +153,6 @@ pipelines:
     oracle_model: gemini-2.5-flash
     max_turns: 3
     description: CoT + basic oracle self-improve, Flash 2.5, ≤2 corrections
-  cot_vq_funnel_flash:
-    type: cot_vq_funnel
-    cot_model: gemini-2.5-flash
-    oracle_model: gemini-2.5-flash
-    max_turns: 3
-    description: CoT + VQ 6-layer funnel concept in oracle prompt, Flash 2.5
-  cot_vq_funnel_pro:
-    type: cot_vq_funnel
-    cot_model: gemini-2.5-pro
-    oracle_model: gemini-2.5-pro
-    max_turns: 3
-    description: CoT + VQ 6-layer funnel concept in oracle prompt, Pro 2.5
   jpmorgan:
     type: jpmorgan_reimpl
     description: JP Morgan MAS reimplementation — run separately

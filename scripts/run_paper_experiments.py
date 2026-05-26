@@ -171,7 +171,7 @@ def run_vq(baseline_name: str, params: dict, config: dict, run_dir: str, db_url:
 
 
 def run_cot(baseline_name: str, params: dict, config: dict, run_dir: str, force: bool):
-    """跑 CoT self-improve pipeline（包含 single-shot 和 funnel oracle 變體）。"""
+    """跑 CoT self-improve pipeline（single-shot 和 basic oracle 變體）。"""
     result_dir = os.path.join(run_dir, "results", baseline_name)
     output_jsonl = os.path.join(result_dir, "output.jsonl")
     summary_json = os.path.join(result_dir, "summary.json")
@@ -182,18 +182,9 @@ def run_cot(baseline_name: str, params: dict, config: dict, run_dir: str, force:
 
     Path(result_dir).mkdir(parents=True, exist_ok=True)
 
-    # 選擇哪個 CoT pipeline script
-    # cot_vq_funnel = run_verifiquant_lite_cot_self_improve_pipeline（如果存在）
-    # 否則 = run_cot_self_improve_pipeline
-    pipeline_type = params.get("type", "cot")
-    if pipeline_type == "cot_vq_funnel":
-        # 用 lite 版（funnel-aware oracle prompt）
-        script = "preprocessing/run_verifiquant_lite_cot_self_improve_pipeline.py"
-        if not os.path.exists(script):
-            print(f"  ⚠️  {script} 不存在，改用 run_cot_self_improve_pipeline.py")
-            script = "preprocessing/run_cot_self_improve_pipeline.py"
-    else:
-        script = "preprocessing/run_cot_self_improve_pipeline.py"
+    # 所有 CoT 變體（single-shot / basic oracle）均使用同一 script；
+    # max_turns=1 → single-shot，max_turns>1 → self-improve with basic oracle prompt
+    script = "preprocessing/run_cot_self_improve_pipeline.py"
 
     cmd = [
         "python3", script,
@@ -459,7 +450,7 @@ def main():
 
         if pipeline_type == "verifiquant":
             run_vq(name, params, config, run_dir, db_url, args.force)
-        elif pipeline_type in ("cot", "cot_vq_funnel"):
+        elif pipeline_type == "cot":
             run_cot(name, params, config, run_dir, args.force)
         elif pipeline_type == "jpmorgan_reimpl":
             run_jpmorgan(name, params, config, run_dir, args.force)
