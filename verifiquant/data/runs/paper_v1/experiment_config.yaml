@@ -117,24 +117,50 @@ sampling:
   - article-72
   - article-1162
 pipelines:
-  vq_flash:
+  # --- Canonical VerifiQuant runs (V3 FIC cards = cards_v3.db) ---
+  # These are the numbers reported in the paper main table. db_path pins the
+  # patched V3 card store so the result is reproducible.
+  vq_flash_v3:
     type: verifiquant
+    db_path: fic/cards_v3.db
     judge_model: gemini-2.5-flash
     selector_model: gemini-2.5-flash
     extractor_model: gemini-2.5-flash
     oracle_model: gemini-2.5-flash
     max_turns: 3
     top_k: 4
-    description: VerifiQuant full pipeline, Flash 2.5, K=3 (oracle corrects ≤2x)
-  vq_pro:
+    description: VerifiQuant full pipeline, Flash 2.5, K=3, V3 cards (canonical)
+  vq_pro_v3:
     type: verifiquant
+    db_path: fic/cards_v3.db
     judge_model: gemini-2.5-pro
     selector_model: gemini-2.5-pro
     extractor_model: gemini-2.5-pro
     oracle_model: gemini-2.5-pro
     max_turns: 3
     top_k: 4
-    description: VerifiQuant full pipeline, Pro 2.5, K=3
+    description: VerifiQuant full pipeline, Pro 2.5, K=3, V3 cards (canonical)
+  # --- Supplementary VerifiQuant runs (V1 FIC cards = cards.db, unpatched) ---
+  vq_flash:
+    type: verifiquant
+    db_path: fic/cards.db
+    judge_model: gemini-2.5-flash
+    selector_model: gemini-2.5-flash
+    extractor_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    top_k: 4
+    description: VerifiQuant full pipeline, Flash 2.5, K=3, V1 cards (supplementary)
+  vq_pro:
+    type: verifiquant
+    db_path: fic/cards.db
+    judge_model: gemini-2.5-pro
+    selector_model: gemini-2.5-pro
+    extractor_model: gemini-2.5-pro
+    oracle_model: gemini-2.5-pro
+    max_turns: 3
+    top_k: 4
+    description: VerifiQuant full pipeline, Pro 2.5, K=3, V1 cards (supplementary)
   cot_single_shot_flash:
     type: cot
     cot_model: gemini-2.5-flash

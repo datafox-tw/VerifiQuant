@@ -149,10 +149,20 @@ def run_vq(baseline_name: str, params: dict, config: dict, run_dir: str, db_url:
 
     Path(result_dir).mkdir(parents=True, exist_ok=True)
 
+    # Per-pipeline FIC card-version override. If a pipeline declares `db_path`
+    # (relative to run_dir, e.g. "fic/cards_v3.db"), use it instead of the
+    # globally-built default cards.db. This makes the canonical V3-card results
+    # reproducible and pins each pipeline to an explicit card version.
+    pipeline_db_url = db_url
+    if params.get("db_path"):
+        db_abs = os.path.abspath(os.path.join(run_dir, params["db_path"]))
+        pipeline_db_url = f"sqlite:///{db_abs}"
+        print(f"[{baseline_name}] 使用指定卡片版本 db_path={params['db_path']}")
+
     cmd = [
         "python3", "preprocessing/run_framework_guided_self_improve_pipeline.py",
         "--input", config["output_jsonl"],
-        "--db-url", db_url,
+        "--db-url", pipeline_db_url,
         "--output", output_jsonl,
         "--summary-output", summary_json,
         "--max-turns", str(params.get("max_turns", 3)),

@@ -1,0 +1,28 @@
+{
+  "total_cases": 50,
+  "records_found": 50,
+  "correct_count": 43,
+  "accuracy": 0.86,
+  "pipeline_errors": 2,
+  "wrong_count": 5,
+  "silent_wrong_rate": 0.14,
+  "oracle_used_count": 0,
+  "run_config": {
+    "model": "gemini-2.5-flash",
+    "max_iterations": 5,
+    "max_human_asks": 2,
+    "oracle_mode": "llm_oracle",
+    "pipeline": "jpmorgan_mas_reimpl",
+    "nodes": [
+      "data_summarizer",
+      "question_generator",
+      "finance_expert",
+      "query_refiner",
+      "base_agent",
+      "python_executor",
+      "reflection_agent",
+      "ask_human",
+      "final_answer"
+    ]
+  }
+}
