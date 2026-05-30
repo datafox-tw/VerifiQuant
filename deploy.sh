@@ -42,7 +42,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --timeout 120 \
   --max-instances 3 \
   --min-instances 0 \
-  --set-env-vars "VERIFIQUANT_DEMO_MODE=true,VERIFIQUANT_RATE_LIMIT=20,PORT=8080" \
+  --set-env-vars "VERIFIQUANT_DEMO_MODE=true,VERIFIQUANT_RATE_LIMIT=20" \
   --update-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest"
 
 echo ""
