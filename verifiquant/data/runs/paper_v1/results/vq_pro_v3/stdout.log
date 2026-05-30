@@ -1,0 +1,138 @@
+blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 preprocessing/run_framework_guided_self_improve_pipeline.py \
+    --input verifiquant/data/runs/paper_v1/questions_50.jsonl \
+    --db-url sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/fic/cards_v3.db \
+    --output verifiquant/data/runs/paper_v1/results/vq_pro_v3/output.jsonl \
+    --summary-output verifiquant/data/runs/paper_v1/results/vq_pro_v3/summary.json \
+    --max-turns 3 --top-k 4 \
+    --selector-model gemini-2.5-pro --extractor-model gemini-2.5-pro \
+    --judge-model gemini-2.5-pro --oracle-model gemini-2.5-pro
+
+[framework-guided] processing test-1028
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1035
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1561
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1443
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1008
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1023
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1668
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1926
+  ↳ Turn 1: N
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1652
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1545
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1891
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1437
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1699
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1664
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1062
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1590
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1026
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1070
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1108
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1442
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1591
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1845
+  ↳ Turn 1: E
+  ↳ Turn 2: N
+  ↳ Turn 3: E
+[framework-guided] processing test-1606
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1006
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1578
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1237
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1022
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1710
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1922
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1458
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1704
+  ↳ Turn 1: F
+  ↳ Turn 2: I_HARD
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1865
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1810
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1890
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1969
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1242
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1701
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1801
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1823
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1057
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1866
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1446
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1427
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1789
+  ↳ Turn 1: C
+[framework-guided] processing test-1007
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1500
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1805
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1593
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: I_SOFT_MISMATCH
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1499
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1474
+  ↳ Turn 1: NONE
+Wrote 50 framework-guided records to verifiquant/data/runs/paper_v1/results/vq_pro_v3/output.jsonl
+{
+  "total_cases": 50,
+  "success_count": 45,
+  "success_rate": 0.9,
+  "correct_count": 43,
+  "accuracy": 0.86,
+  "recovery_count": 8,
+  "recovery_rate": 0.16
+}
+blackwingedkite@keyouqideMacBook-Air verifiquant-update % 
