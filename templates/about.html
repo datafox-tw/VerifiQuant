@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}About &mdash; VerifiQuant{% endblock %}
+
+{% block content %}
+<section class="about-section">
+  <div class="about-inner">
+    <h1>About VerifiQuant</h1>
+
+    <div class="about-card">
+      <h2>The Problem</h2>
+      <p>
+        Large Language Models are increasingly used for financial computations, but they fail silently.
+        A wrong NPV, a misinterpreted discount rate, or an invented input can propagate through
+        downstream decisions with no warning. Current approaches focus on making the model "more accurate"
+        &mdash; but accuracy without verifiability is a liability.
+      </p>
+    </div>
+
+    <div class="about-card">
+      <h2>The Approach</h2>
+      <p>
+        VerifiQuant doesn't try to make LLMs better at math. Instead, it builds a <strong>diagnostic funnel</strong>
+        around the computation: six layers (M/N/F/E/I/C) that classify failure modes, intercept broken inferences,
+        and apply <strong>mathematically verified repairs</strong> when possible. The system uses
+        <em>Financial Inference Contracts (FICs)</em> &mdash; pre-built, auditable computation cards with
+        declared invariants, scale checks, and semantic hints.
+      </p>
+    </div>
+
+    <div class="about-card">
+      <h2>Key Ideas</h2>
+      <ul class="about-list">
+        <li><strong>Predictable failure</strong> &mdash; Every failure is classified, not hidden</li>
+        <li><strong>Verifiable transforms</strong> &mdash; I-class repairs are bound by algebraic invariants</li>
+        <li><strong>No SymPy, no magic</strong> &mdash; Pure Python AST analysis + numerical verification</li>
+        <li><strong>Normalization is the hard gate</strong> &mdash; LLM prompts are aspirational; post-processing filters are the real safety net</li>
+        <li><strong>Deterministic layers are the stable part</strong> &mdash; E/F checks don't vary run-to-run</li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <h2>Tech Stack</h2>
+      <div class="tech-grid">
+        <div class="tech-item">
+          <strong>Model</strong>
+          <span>Gemini 2.5 Flash</span>
+        </div>
+        <div class="tech-item">
+          <strong>Backend</strong>
+          <span>Python 3.11 / Flask / SQLAlchemy</span>
+        </div>
+        <div class="tech-item">
+          <strong>FIC Store</strong>
+          <span>SQLite + FTS5</span>
+        </div>
+        <div class="tech-item">
+          <strong>Retrieval</strong>
+          <span>BM25 + Sentence Transformers</span>
+        </div>
+        <div class="tech-item">
+          <strong>Deploy</strong>
+          <span>Google Cloud Run</span>
+        </div>
+        <div class="tech-item">
+          <strong>Verification</strong>
+          <span>AST analysis + numerical checks</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-card about-author">
+      <h2>Author</h2>
+      <p>
+        Built by <strong>Vincent Ke</strong>.
+        For more projects and writings, visit
+        <a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a>.
+      </p>
+      <div class="author-links">
+        <a href="https://datafox.tw" class="btn btn-primary" target="_blank" rel="noopener">datafox.tw &nearr;</a>
+        <a href="https://github.com/blackwingedkite" class="btn btn-outline" target="_blank" rel="noopener">GitHub &nearr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

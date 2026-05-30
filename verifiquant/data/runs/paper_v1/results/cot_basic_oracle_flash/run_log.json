@@ -1,0 +1,29 @@
+{
+  "baseline": "cot_basic_oracle_flash",
+  "ran_at": "2026-05-30T11:28:21.742609",
+  "success": true,
+  "elapsed_seconds": 655.7,
+  "command": [
+    "python3",
+    "preprocessing/run_cot_self_improve_pipeline.py",
+    "--input",
+    "verifiquant/data/runs/paper_v1/questions_50.jsonl",
+    "--output",
+    "verifiquant/data/runs/paper_v1/results/cot_basic_oracle_flash/output.jsonl",
+    "--summary-output",
+    "verifiquant/data/runs/paper_v1/results/cot_basic_oracle_flash/summary.json",
+    "--max-turns",
+    "3",
+    "--cot-model",
+    "gemini-2.5-flash",
+    "--oracle-model",
+    "gemini-2.5-flash"
+  ],
+  "params": {
+    "type": "cot",
+    "cot_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 3,
+    "description": "CoT + basic oracle self-improve, Flash 2.5, ≤2 corrections"
+  }
+}

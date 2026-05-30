@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}VerifiQuant{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <nav class="site-nav">
+      <div class="nav-inner">
+        <a href="/" class="nav-logo">
+          <span class="logo-icon">VQ</span>
+          <span class="logo-text">VerifiQuant</span>
+        </a>
+        <div class="nav-links">
+          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Home</a>
+          <a href="/demo" class="nav-link {% if active_page == 'demo' %}active{% endif %}">Demo</a>
+          <a href="/about" class="nav-link {% if active_page == 'about' %}active{% endif %}">About</a>
+          <a href="https://datafox.tw" class="nav-link external" target="_blank" rel="noopener">datafox.tw &nearr;</a>
+        </div>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="mobile-menu hidden" id="mobile-menu">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/demo" class="nav-link">Demo</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="https://datafox.tw" class="nav-link external" target="_blank" rel="noopener">datafox.tw &nearr;</a>
+      </div>
+    </nav>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; 2026 VerifiQuant &middot; Built by <a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a></p>
+      </div>
+    </footer>
+
+    <script>
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (menuBtn) {
+        menuBtn.addEventListener('click', () => {
+          mobileMenu.classList.toggle('hidden');
+          menuBtn.classList.toggle('open');
+        });
+      }
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

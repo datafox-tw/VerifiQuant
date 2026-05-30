@@ -203,7 +203,7 @@ def _normalize_action(raw_action: str, diagnostic_type: str) -> str:
         return "request_missing_fields"
     if diagnostic_type == "N":
         return "declare_scope_boundary"
-    if diagnostic_type == "I":
+    if diagnostic_type in ("I", "I_HARD", "I_SOFT"):
         return "present_clarification_options"
     if diagnostic_type == "M":
         return "rephrase_task_intent"
@@ -391,7 +391,7 @@ def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
             {
                 "rule_id": rule_id,
                 "fic_id": core["fic_id"],
-                "diagnostic_type": "I",
+                "diagnostic_type": "I_HARD" if i_level == "hard" else "I_SOFT",
                 "severity": "error" if i_level == "hard" else "alert",
                 "title": f"Semantic Clarification: {hint_id or 'semantic_hint'}",
                 "user_message": user_message,
@@ -418,7 +418,7 @@ def _global_i_rules(core: Dict[str, Any]) -> List[Dict[str, Any]]:
         {
             "rule_id": "global_i_semantic_ambiguity",
             "fic_id": core["fic_id"],
-            "diagnostic_type": "I",
+            "diagnostic_type": "I_HARD",
             "severity": "alert",
             "title": "Semantic Ambiguity Clarification",
             "user_message": "A hidden ambiguity was detected; please clarify intended interpretation.",
@@ -456,6 +456,6 @@ def generate_repair_rules(*, client: Any, model: str, core: Dict[str, Any]) -> L
     )
     rules = formalize_repair_payload(raw, core)
     # Replace monolithic global I template with hint-specific I guides.
-    rules = [r for r in rules if str(r.get("diagnostic_type", "")).upper() != "I"]
+    rules = [r for r in rules if str(r.get("diagnostic_type", "")).upper() not in ("I", "I_HARD", "I_SOFT")]
     rules.extend(_global_i_rules(core))
     return rules

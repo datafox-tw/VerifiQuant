@@ -108,6 +108,7 @@ def build_fic_cards(config: dict, run_dir: str, force: bool) -> bool:
         "--validation-report", os.path.join(fic_dir, "validation_report.json"),
         "--seed-report-output", os.path.join(fic_dir, "seed_report.json"),
         "--skip-existing-core",
+        "--checkpoint-every-record",   # crash-safe: saves after each card
     ]
     success, elapsed = run_cmd(cmd, os.path.join(fic_dir, "build_fic.log"), "Building FIC cards")
     return success
@@ -211,6 +212,8 @@ def run_cot(baseline_name: str, params: dict, config: dict, run_dir: str, force:
 # output 格式：JSONL（每筆含 is_correct、pipeline_error 等欄位）
 
 JPM_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "reimplement-jpmogan")
+# JP Morgan has its own venv with langgraph/langchain; use it instead of the system python
+JPM_PYTHON = os.path.join(JPM_DIR, "venv", "bin", "python3")
 
 def run_jpmorgan(baseline_name: str, params: dict, config: dict, run_dir: str, force: bool):
     """跑 JP Morgan MAS reimplementation。"""
@@ -218,79 +221,47 @@ def run_jpmorgan(baseline_name: str, params: dict, config: dict, run_dir: str, f
     output_jsonl = os.path.join(result_dir, "output.jsonl")
     summary_json = os.path.join(result_dir, "summary.json")
 
-    if not force and os.path.exists(output_jsonl):
-        print(f"[{baseline_name}] 已有 output.jsonl，跳過（--force 強制重跑）")
-        # 嘗試計算 summary
-        _compute_jpmorgan_summary(output_jsonl, summary_json, config)
+    if not force and os.path.exists(summary_json):
+        print(f"[{baseline_name}] 已有 summary.json，跳過（--force 強制重跑）")
         return
 
     Path(result_dir).mkdir(parents=True, exist_ok=True)
 
     # JP Morgan pipeline 要從其目錄跑（有相對 import）
-    # 使用絕對路徑的 input
+    # 使用絕對路徑的 input / output / summary
     input_abs = os.path.abspath(config["output_jsonl"])
     output_abs = os.path.abspath(output_jsonl)
+    summary_abs = os.path.abspath(summary_json)
 
+    # Use the JPM venv python so langgraph/langchain are available
+    jpm_python = JPM_PYTHON if os.path.exists(JPM_PYTHON) else "python3"
     cmd = [
-        "python3",
+        jpm_python,
         os.path.join(JPM_DIR, "run_pipeline.py"),
         "--input", input_abs,
         "--output", output_abs,
+        "--summary-output", summary_abs,
     ]
 
     # 切換到 JPM_DIR 跑，否則 relative imports 可能失敗
+    # 繼承 GEMINI_API_KEY 從父進程（避免 JPM .env 過期問題）
+    import dotenv as _dotenv  # type: ignore
+    _dotenv.load_dotenv()     # load main project .env into os.environ first
+    run_env = os.environ.copy()
+
     start = time.time()
     print(f"\n[run] JP Morgan MAS: {baseline_name}")
     print(f"  $ cd {JPM_DIR} && {' '.join(cmd)}")
     Path(output_abs).parent.mkdir(parents=True, exist_ok=True)
     log_path = os.path.join(result_dir, "stdout.log")
     with open(log_path, "w") as logf:
-        result = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT, text=True, cwd=JPM_DIR)
+        result = subprocess.run(cmd, stdout=logf, stderr=subprocess.STDOUT, text=True, cwd=JPM_DIR, env=run_env)
     elapsed = time.time() - start
     success = result.returncode == 0
     status = "✅" if success else "❌"
     print(f"  {status} returncode={result.returncode}  ({elapsed:.1f}s)  log→{log_path}")
 
-    _compute_jpmorgan_summary(output_jsonl, summary_json, config)
     save_run_log(os.path.join(result_dir, "run_log.json"), baseline_name, cmd, success, elapsed, params)
-
-
-def _compute_jpmorgan_summary(output_jsonl: str, summary_json: str, config: dict) -> None:
-    """從 JP Morgan output JSONL 計算 summary（correct / error / total）。"""
-    if not os.path.exists(output_jsonl):
-        return
-    total_expected = config.get("sampling", {}).get("n", 50)
-    correct = 0
-    pipeline_errors = 0
-    records = 0
-    with open(output_jsonl) as f:
-        for line in f:
-            if not line.strip():
-                continue
-            try:
-                rec = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            records += 1
-            if rec.get("is_correct") is True:
-                correct += 1
-            if rec.get("pipeline_error"):
-                pipeline_errors += 1
-
-    summary = {
-        "total_cases": total_expected,
-        "records_found": records,
-        "correct_count": correct,
-        "accuracy": round(correct / total_expected, 4) if total_expected else 0,
-        "pipeline_errors": pipeline_errors,
-        # JP Morgan 無 abstention，wrong = total - correct - pipeline_errors
-        "wrong_count": total_expected - correct - pipeline_errors,
-        # silent_wrong_rate（無 abstention 情況下）
-        "silent_wrong_rate": round((total_expected - correct) / total_expected, 4) if total_expected else 0,
-    }
-    with open(summary_json, "w") as f:
-        json.dump(summary, f, indent=2)
-    print(f"  [jpmorgan] summary → {summary_json}  correct={correct}/{total_expected}")
 
 
 # ── Step 3: Aggregation ───────────────────────────────────────────────────
@@ -362,6 +333,8 @@ def aggregate_results(run_dir: str) -> dict:
                 "model": run_log.get("params", {}).get("judge_model") or run_log.get("params", {}).get("cot_model"),
                 "ran_at": run_log.get("ran_at"),
                 "elapsed_seconds": run_log.get("elapsed_seconds"),
+                # CoT pipelines embed run_config (prompt templates + mode) in summary
+                "run_config": summary.get("run_config"),
             }
         else:
             aggregated[baseline_dir.name] = {"status": "unknown_format", "raw": summary}

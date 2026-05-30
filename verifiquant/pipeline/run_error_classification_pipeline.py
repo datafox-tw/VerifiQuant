@@ -1737,7 +1737,7 @@ def run_case(
             return _finalize({
                 **base,
                 "status": "needs_clarification",
-                "diagnostic_type": "I",
+                "diagnostic_type": "I_HARD",
                 "funnel_layer": "Critic",
                 "gate_action": "critic_intervention",
                 "reason": str(critic.get("reason", "")).strip() or "Hidden semantic ambiguity detected.",

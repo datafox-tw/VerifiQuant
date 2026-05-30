@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}VerifiQuant &mdash; Verifiable Financial Diagnostics{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Open Research Project</div>
+    <h1 class="hero-title">
+      Don't trust the answer.<br/>
+      <span class="gradient-text">Verify the failure.</span>
+    </h1>
+    <p class="hero-subtitle">
+      VerifiQuant is a 6-layer diagnostic pipeline for financial computations.
+      Instead of chasing higher LLM accuracy, it delivers
+      <strong>predictable, verifiable failure behavior</strong> &mdash;
+      intercepting broken inferences at the right layer and applying
+      mathematically verified repairs.
+    </p>
+    <div class="hero-actions">
+      <a href="/demo" class="btn btn-primary">Try the Demo</a>
+      <a href="https://github.com/blackwingedkite" class="btn btn-outline" target="_blank" rel="noopener">GitHub &nearr;</a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="features-inner">
+    <h2 class="section-title">The M/N/F/E/I/C Funnel</h2>
+    <p class="section-subtitle">Six layers of defense. Each gate intercepts a specific class of failure before it reaches the user.</p>
+    <div class="funnel-grid">
+      <div class="funnel-card">
+        <div class="funnel-letter">M</div>
+        <h3>Mismatch</h3>
+        <p>No relevant Financial Inference Contract found. The question is out of scope &mdash; refuse cleanly rather than hallucinate.</p>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-letter">N</div>
+        <h3>Novel / OOD</h3>
+        <p>Question is partially matched but outside the trained distribution. Flag uncertainty instead of guessing.</p>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-letter">F</div>
+        <h3>Field Missing</h3>
+        <p>Required inputs are absent. Ask the user to provide them rather than inventing values.</p>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-letter">E</div>
+        <h3>Execution Error</h3>
+        <p>Code runs but produces invalid results &mdash; scale violations, NaN, infinity. Deterministic checks catch what LLMs miss.</p>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-letter">I</div>
+        <h3>Interpretation Ambiguity</h3>
+        <p>Multiple valid interpretations exist (e.g., annuity-due vs. ordinary). Surface the choice with verifiable transform specs.</p>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-letter">C</div>
+        <h3>Correct</h3>
+        <p>All gates passed. The computation is verified against invariants and delivered with full provenance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="results-section">
+  <div class="results-inner">
+    <h2 class="section-title">Benchmark Results</h2>
+    <p class="section-subtitle">50-question medium-difficulty set, Gemini 2.5 Flash, April 2025</p>
+    <div class="results-table-wrap">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>System</th>
+            <th>Accuracy</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>JPMorgan Multi-Agent (paper)</td>
+            <td><strong>0.46</strong> Pass@1</td>
+            <td>Published baseline</td>
+          </tr>
+          <tr>
+            <td>CoT Self-Improve (no GT)</td>
+            <td><strong>0.90</strong> (45/50)</td>
+            <td>Chain-of-thought with self-correction</td>
+          </tr>
+          <tr class="highlight-row">
+            <td>VerifiQuant Framework-Guided</td>
+            <td><strong>0.88</strong> (44/50)</td>
+            <td>28% recovery rate on initially failed cases</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="results-note">
+      VerifiQuant's advantage is in <em>failure-mode behavior</em> on trap and incomplete questions,
+      not clean-question accuracy. The system knows <em>when</em> and <em>why</em> it fails.
+    </p>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>See it in action</h2>
+    <p>Submit a financial question and watch the 6-layer funnel classify, diagnose, and repair in real time.</p>
+    <a href="/demo" class="btn btn-primary btn-lg">Open Demo Console</a>
+  </div>
+</section>
+{% endblock %}

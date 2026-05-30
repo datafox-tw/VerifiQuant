@@ -138,20 +138,7 @@ def _cot_step(
     question: str,
     context: str,
 ) -> Dict[str, Any]:
-    prompt = f"""
-You are a financial CoT solver with self-improvement hints.
-Solve using the current question/context and return a tentative answer.
-If information is missing/ambiguous, set needs_more_info=true and list missing items.
-IMPORTANT: `answer` must be a numeric string only (for example: "10185.19"), or empty string if you cannot provide one.
-
-Question:
-{question}
-
-Context:
-{context}
-
-Return JSON only.
-"""
+    prompt = _COT_PROMPT_TEMPLATE.format(question=question, context=context)
     return _llm_json(client, model=model, prompt=prompt, schema=_schema_cot_step())
 
 
@@ -165,27 +152,13 @@ def _oracle_rewrite_for_cot(
     cot_step_output: Dict[str, Any],
     is_correct: Optional[bool],
 ) -> Dict[str, str]:
-    prompt = f"""
-You are Oracle-in-the-loop support for a pure CoT baseline.
-There is no VerifiQuant framework in this loop.
-You can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.
-
-Current question:
-{current_question}
-
-Current context:
-{current_context}
-
-Current CoT step output:
-{json.dumps(cot_step_output, ensure_ascii=False, indent=2)}
-
-Current correctness against gold (if available): {is_correct}
-
-Ground-truth code:
-{row.get("code", row.get("python_solution", ""))}
-
-Return JSON only.
-"""
+    prompt = _ORACLE_PROMPT_TEMPLATE.format(
+        current_question=current_question,
+        current_context=current_context,
+        cot_step_output_json=json.dumps(cot_step_output, ensure_ascii=False, indent=2),
+        is_correct=is_correct,
+        ground_truth_code=row.get("code", row.get("python_solution", "")),
+    )
     out = _llm_json(client, model=model, prompt=prompt, schema=_schema_oracle_rewrite())
     return {
         "updated_question": str(out.get("updated_question", "") or current_question).strip() or current_question,
@@ -267,7 +240,43 @@ def _cot_oracle_loop(
     }
 
 
-def _aggregate(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+_COT_PROMPT_TEMPLATE = """\
+You are a financial CoT solver with self-improvement hints.
+Solve using the current question/context and return a tentative answer.
+If information is missing/ambiguous, set needs_more_info=true and list missing items.
+IMPORTANT: `answer` must be a numeric string only (for example: "10185.19"), or empty string if you cannot provide one.
+
+Question:
+{question}
+
+Context:
+{context}
+
+Return JSON only."""
+
+_ORACLE_PROMPT_TEMPLATE = """\
+You are Oracle-in-the-loop support for a pure CoT baseline.
+There is no VerifiQuant framework in this loop.
+You can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.
+
+Current question:
+{current_question}
+
+Current context:
+{current_context}
+
+Current CoT step output:
+{cot_step_output_json}
+
+Current correctness against gold (if available): {is_correct}
+
+Ground-truth code:
+{ground_truth_code}
+
+Return JSON only."""
+
+
+def _aggregate(rows: List[Dict[str, Any]], *, cot_model: str, oracle_model: str, max_turns: int) -> Dict[str, Any]:
     total = len(rows)
     correct = sum(1 for r in rows if r["cot_self_improve"].get("final_is_correct") is True)
     improved = 0
@@ -281,6 +290,15 @@ def _aggregate(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "accuracy": (correct / total) if total else 0.0,
         "improved_count": improved,
         "improved_rate": (improved / total) if total else 0.0,
+        # ── run_config: prompt templates + model metadata for comparison ──
+        "run_config": {
+            "cot_model": cot_model,
+            "oracle_model": oracle_model,
+            "max_turns": max_turns,
+            "mode": "single_shot" if max_turns == 1 else "cot_basic_oracle",
+            "cot_prompt_template": _COT_PROMPT_TEMPLATE,
+            "oracle_prompt_template": _ORACLE_PROMPT_TEMPLATE if max_turns > 1 else None,
+        },
     }
 
 
@@ -330,7 +348,7 @@ def main() -> None:
         )
 
     _dump_records(args.output, out_rows)
-    summary = _aggregate(out_rows)
+    summary = _aggregate(out_rows, cot_model=args.cot_model, oracle_model=args.oracle_model, max_turns=max(1, args.max_turns))
     if args.summary_output:
         args.summary_output.parent.mkdir(parents=True, exist_ok=True)
         args.summary_output.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -1,0 +1,50 @@
+{
+  "ok": false,
+  "error": "Artifact relation validation failed:\n- global repair fic_article_2145/global_i_semantic_ambiguity must use diagnostic_type N or I, got I_HARD",
+  "validation_stats": null,
+  "output": {
+    "core": "verifiquant/data/runs/paper_v1/fic/core.jsonl",
+    "retrieval": "verifiquant/data/runs/paper_v1/fic/retrieval.jsonl",
+    "repair": "verifiquant/data/runs/paper_v1/fic/repair.jsonl"
+  },
+  "counts": {
+    "core": 50,
+    "retrieval": 50,
+    "repair": 388,
+    "skipped_duplicates": 0,
+    "skipped_kernel_duplicates": 0
+  },
+  "kernel_dedup": {
+    "normalization_version": "ast_v1_docstring_strip",
+    "duplicate_hits": []
+  },
+  "execution_smoke": {
+    "failed_count": 6,
+    "failed_cards": [
+      {
+        "fic_id": "fic_article_1217",
+        "error": "Periods must be a positive integer."
+      },
+      {
+        "fic_id": "fic_article_1740",
+        "error": "__import__ not found"
+      },
+      {
+        "fic_id": "fic_article_2749",
+        "error": "float division by zero"
+      },
+      {
+        "fic_id": "fic_article_2750",
+        "error": "float division by zero"
+      },
+      {
+        "fic_id": "fic_article_1610",
+        "error": "__import__ not found"
+      },
+      {
+        "fic_id": "fic_article_72",
+        "error": "Method must be either 'straight_line' or 'double_declining_balance'."
+      }
+    ]
+  }
+}

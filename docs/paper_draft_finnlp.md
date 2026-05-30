@@ -34,9 +34,15 @@
 
 ### §1.2 CoT 的 Faithfulness 危機
 
-一個自然的反問是：既然 CoT 加上 self-improve 已能達到 90% 以上準確率，為何還需要更複雜的架構？關於 LLM 推理 faithfulness 的研究 (Jacovi & Goldberg, 2020) 已建立了「解釋應如實反映實際推理過程」的形式定義。Turpin et al. (NeurIPS 2023) 透過輸入操弄實驗證明，CoT 中間步驟並不必然反映模型實際得到答案的計算路徑——模型可能受隱性偏見影響但 CoT 軌跡卻不揭示此影響。Lanham et al. (2023) 進一步量化了 CoT 步驟與最終答案的因果脫節。Pfau et al. (ICLR 2024) 顯示 CoT tokens 可被無意義填充符號替代而效能不降，暗示 CoT 的表面合理性可能與內部計算無關。近期工作 (Lie to Me, 2026; Ariadne, 2026) 延伸此分析至 reasoning models 與 multi-agent 系統。
+一個自然的反問是：既然 CoT 加上 self-improve 已能達到 90% 以上準確率，為何還需要更複雜的架構？答案在於 CoT 的推理軌跡並不可信——且這個問題隨模型進步而惡化，而非改善。
 
-在金融場景，這意味著即使 CoT 答對了，其產出的推理過程也無法作為審計證據；答錯時更無從定位故障層。**90% 的 CoT 準確率與 88% 的可審計準確率在部署語境下並不可比。** 從 architecture 而非 prompt engineering 著手的理由不僅在於前者的可驗證性更強，更在於 high-stakes 部署中不能將驗證負擔外推給使用者（詳見 §6.4）。
+Jacovi & Goldberg (ACL 2020) 區分了兩個常被混淆的性質：**可信度 (plausibility)**——解釋對人類觀察者是否具有說服力；與 **忠實度 (faithfulness)**——解釋是否精確反映模型內部的真實推理過程。最危險的情境是高可信度、低忠實度的組合：一個聽起來極具說服力的解釋，實際上完全不對應模型的內部決策。
+
+後續實證研究系統性地揭示 CoT 正落入此危險區間。Turpin et al. (NeurIPS 2023) 透過輸入操弄實驗證明，CoT 中間步驟並不必然反映模型實際得到答案的計算路徑——模型可能受隱性偏見影響，但 CoT 軌跡卻不揭示此影響。Lanham et al. (2023) 進一步量化了 CoT 步驟與最終答案的因果脫節，並揭示一個反直覺的 **scaling 趨勢：隨著模型參數規模擴大與能力增強，其生成的推理軌跡反而越不忠實**。換言之，模型越聰明，其偽裝推理軌跡以符合人類期待的能力就越強——這直接否定了「等更強的模型就能解決 faithfulness 問題」的樂觀假設。
+
+Pfau et al. (ICLR 2024) 從機制層面提供了解釋：過去假設 CoT 的有效性來自將複雜任務拆解為人類可讀的離散步驟，但嚴格實驗證明 CoT tokens 提供的是純粹的 **計算深度 (computational depth)**，而不需要包含任何有意義的中間語義資訊——甚至將中間步驟替換為無意義的填充符號也不影響效能。所謂的「逐步推理」本質上是 post-hoc rationalization，表面的推理軌跡與內部計算是解耦的。近期工作 (Lie to Me, 2026; Ariadne, 2026) 將此分析延伸至 reasoning models 與 multi-agent 系統，確認此現象並非早期模型的暫時性缺陷。
+
+三條證據匯合為一個對金融部署致命的結論：CoT 的表面合理性與內部忠實度不僅不相關，**而且隨模型進步會進一步分離**。在金融場景，這意味著即使 CoT 答對了，其產出的推理過程也無法作為審計證據；答錯時更無從定位故障層。**90% 的 CoT 準確率與 88% 的可審計準確率在部署語境下並不可比。** 從 architecture 而非 prompt engineering 著手的理由不僅在於前者的可驗證性更強，更在於模型能力越強、CoT 的偽裝越精密，人類使用者越無能力自行檢驗——將驗證負擔外推給使用者在 high-stakes 部署中是不負責任的（詳見 §6.4）。
 
 ### §1.3 現有解法的光譜與缺口
 
@@ -52,7 +58,7 @@
 
 我們提出 **VerifiQuant**，一個將金融推理拆解為「**先驗證、再計算**」流程的 neuro-symbolic 框架，目標是在準確率與可審計性之間取得平衡而非單邊極致。其三項核心設計為：
 
-1. **M/N/F/E/I/C 六層診斷漏斗**——將失敗模式拆為 Misunderstanding / Not-Supported / Formula-spec / Extraction-boundary / Interception / Calculation 六類，I-gate 進一步分為 I_HARD 與 I_SOFT；每層皆為合法退出點，使「拒答」與「澄清」成為一級結果而非 fallback；
+1. **M/N/F/E/I/C 六層診斷漏斗**——將失敗模式拆為 Misunderstanding / Not-Supported / Formula-spec / Extraction-boundary / Interception / Calculation 六類，其中 I-gate 進一步細分為 I_HARD（阻斷式）與 I_SOFT（警告式），共七個可診斷閘門；每層皆為合法退出點，使「拒答」與「澄清」成為一級結果而非 fallback；
 2. **Financial Inference Contract (FIC)**——每個金融公式對應一份結構化合約（檢索 metadata + deterministic 執行碼 + 不變量 + 語義陷阱描述），LLM 受合約約束選卡、抽欄位、辨歧義，但不執行算術；
 3. **Verifiable Atomic Transforms**——當 I_HARD 攔截到語義歧義，系統僅允許 AST 邊界內的原子轉換，並以數值交叉驗證確保修改前後的代數等價，杜絕 LLM 在修復階段對核心邏輯的自由竄改。
 
@@ -64,7 +70,7 @@
 
 ### §1.6 貢獻
 
-1. 提出 **M/N/F/E/I/C 錯誤分類學**（含 I_HARD/I_SOFT 二分），將金融 LLM 失敗模式從二元正誤擴展為七層可診斷狀態；
+1. 提出 **M/N/F/E/I/C 錯誤分類學**（I-gate 細分為 I_HARD/I_SOFT），將金融 LLM 失敗模式從二元正誤擴展為七個可診斷閘門；
 2. 設計 **FIC 合約 + Verifiable Atomic Transforms**，使修復過程受 AST 與數值不變量雙重約束；
 3. 提出 **Oracle-in-the-Loop (O-ITL)** 評估協議，量測「意圖明確但答案未知」條件下的框架可恢復性；
 4. 在 FinanceReasoning 與其衍生的 trap dataset 上實證：clean cases 上 VerifiQuant 與 CoT 達到可比 selective accuracy，但在 **trap cases (F/E/I variants)** 上 VerifiQuant 顯著降低 silent wrong rate，並提供 CoT 無法產出的結構化審計軌跡。
@@ -79,7 +85,9 @@
 
 ### §2.2 Chain-of-Thought 的 Faithfulness 質疑
 
-一條主流路線是透過 CoT 與其延伸（Self-Refine, Tree-of-Thoughts）讓模型外顯推理過程。然而 NLP faithfulness 文獻對此持系統性質疑：Jacovi & Goldberg (ACL 2020) 確立 faithfulness 的形式定義，Turpin et al. (NeurIPS 2023) 與 Lanham et al. (2023) 透過實驗證據展示 CoT 軌跡可與實際推理脫節，Pfau et al. (ICLR 2024) 進一步顯示 CoT 的表面結構可能與內部計算無關。Lie to Me (2026) 與 Ariadne (2026) 將此分析延伸至 reasoning models 與 multi-agent 系統。在金融部署語境下，這意味著 CoT 軌跡無法作為審計證據。本研究將推理軌跡從 LLM 的自由生成抽離，改由 FIC 合約與 deterministic 執行決定，使軌跡與結果之間具備可驗證的因果關係。
+CoT 及其延伸（Self-Refine, Tree-of-Thoughts）試圖讓模型外顯推理過程，但 faithfulness 文獻對其作為可信推理軌跡的價值提出系統性質疑（詳見 §1.2）。此處聚焦於 VerifiQuant 如何回應這些發現。
+
+現有的應對策略——如 self-consistency (Wang et al., 2023)、process-reward model (Lightman et al., 2023)——仍依賴 LLM 自身的輸出作為信號源，無法從根本上解決軌跡與內部計算解耦的問題。VerifiQuant 選擇不同路線：將推理軌跡從 LLM 的自由生成中抽離，改由 FIC 合約與 deterministic 執行決定。當系統輸出「以 r×(1+i) 調整期末年金為期初年金」，此軌跡是 *程式碼執行的實際記錄* 而非 LLM 的事後敘述，使軌跡與結果之間具備可驗證的因果關係。
 
 ### §2.3 Tool-Augmented 與 Execution-Based Reasoning
 
@@ -87,7 +95,7 @@ PAL (Gao et al., 2023)、Program-of-Thoughts (Chen et al., 2023) 以及金融領
 
 ### §2.4 Neuro-symbolic 與 Formal Verification
 
-為了取得形式保證，Logic-LM (Pan et al., 2023)、VERAFI 等工作嘗試將自然語言題目翻譯為符號邏輯或 SMT 規則交給 solver 處理。NeSy 2025 的近期分析指出此類方法的核心障礙：使用者意圖以非正式的自然語言表達，難以無損地映射為形式規則，使翻譯瓶頸成為系統可靠性的上限。VerifiQuant 採取折衷路線——以 FIC 作為 *中間層合約*，將形式化的負擔集中於離線階段的卡片建構，線上推理只需在已驗證的合約空間內進行 selection 與 binding，避開了 runtime 的形式化翻譯瓶頸。
+為了取得形式保證，Logic-LM (Pan et al., 2023)、VERAFI 等工作嘗試將自然語言題目翻譯為符號邏輯或 SMT 規則交給 solver 處理。然而此類方法的核心障礙在於：使用者意圖以非正式的自然語言表達，難以無損地映射為形式規則，使翻譯瓶頸成為系統可靠性的上限。VerifiQuant 採取折衷路線——以 FIC 作為 *中間層合約*，將形式化的負擔集中於離線階段的卡片建構，線上推理只需在已驗證的合約空間內進行 selection 與 binding，避開了 runtime 的形式化翻譯瓶頸。[**TODO: 補找 neuro-symbolic + NLP 頂會 citation 替代已放棄的 NeSy CoRR 2025**]
 
 ### §2.5 Multi-Agent Systems 與 Self-Reflection
 
@@ -150,7 +158,7 @@ FIC 的設計直接回應 FinanceReasoning (Liu et al., 2025) 所指出的「資
 
 **Oracle 的介面與權限**。Oracle agent 在每一輪讀取 (i) 當前 DiagnosticReport（含 `diagnostic_type`、`status`、binding 細節）與 (ii) 該題的 *ground-truth 計算 code*——但 **不包含最終數值答案**。Code 表達的是「該如何計算」的意圖規格，而非「結果是多少」。Oracle 僅可輸出 `{updated_question, updated_context, notes}` 的 JSON 結構，**不被允許**直接寫入數值答案；其唯一允許的行為是在 ground-truth 計算邏輯的範圍內，將原始 question/context 改寫為更明確的版本。此設計使 O-ITL 成為「*意圖完全明確但答案未知時，框架的可恢復性上界*」的估計器——一種可重播、可比較的 oracle-augmented evaluation protocol，而非與真實用戶互動的 HITL 系統。
 
-**Repair Action 表面**。Repair Card 將 DiagnosticReport 映射至八種結構化動作之一（§3.2），每條 repair rule 並宣告其 `allowed_next_steps` ∈ {`rerun_same_fic`, `select_alternative_fic`, `ask_followup`, `stop_with_refusal`}，限制下一輪的合法狀態轉移。
+**Repair Action 介面**。Repair Card 將 DiagnosticReport 映射至八種結構化動作之一（§3.2），每條 repair rule 並宣告其 `allowed_next_steps` ∈ {`rerun_same_fic`, `select_alternative_fic`, `ask_followup`, `stop_with_refusal`}，限制下一輪的合法狀態轉移。
 
 **迭代與終止**。設定最大輪次 K（實驗中 K=3，即 oracle 最多修正兩次）。完整的迭代序列為：VQ 拋出錯誤 1 → oracle 修正 1 → VQ 拋出錯誤 2 → oracle 修正 2 → VQ 最終回答。終止條件為以下之一：
 - (a) `status = success` 且無 soft-mismatch；
