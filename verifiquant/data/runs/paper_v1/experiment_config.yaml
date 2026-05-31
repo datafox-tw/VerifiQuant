@@ -162,6 +162,38 @@ pipelines:
     max_turns: 2
     top_k: 4
     description: Ablation — VerifiQuant Flash V3 w/ O-ITL x1 (K=2, oracle corrects <=1x)
+  # --- Variance check: canonical VQ Flash V3 config repeated 3x (LLM nondeterminism) ---
+  # Distinct names -> distinct result dirs; the canonical vq_flash_v3 is NOT overwritten.
+  vq_flash_v3_var1:
+    type: verifiquant
+    db_path: fic/cards_v3.db
+    judge_model: gemini-2.5-flash
+    selector_model: gemini-2.5-flash
+    extractor_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    top_k: 4
+    description: Variance run 1 — same config as canonical vq_flash_v3
+  vq_flash_v3_var2:
+    type: verifiquant
+    db_path: fic/cards_v3.db
+    judge_model: gemini-2.5-flash
+    selector_model: gemini-2.5-flash
+    extractor_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    top_k: 4
+    description: Variance run 2 — same config as canonical vq_flash_v3
+  vq_flash_v3_var3:
+    type: verifiquant
+    db_path: fic/cards_v3.db
+    judge_model: gemini-2.5-flash
+    selector_model: gemini-2.5-flash
+    extractor_model: gemini-2.5-flash
+    oracle_model: gemini-2.5-flash
+    max_turns: 3
+    top_k: 4
+    description: Variance run 3 — same config as canonical vq_flash_v3
   # --- Supplementary VerifiQuant runs (V1 FIC cards = cards.db, unpatched) ---
   vq_flash:
     type: verifiquant

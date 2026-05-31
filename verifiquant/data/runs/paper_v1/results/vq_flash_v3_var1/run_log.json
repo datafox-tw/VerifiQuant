@@ -1,0 +1,41 @@
+{
+  "baseline": "vq_flash_v3_var1",
+  "ran_at": "2026-05-31T11:45:45.224642",
+  "success": true,
+  "elapsed_seconds": 1145.8,
+  "command": [
+    "python3",
+    "preprocessing/run_framework_guided_self_improve_pipeline.py",
+    "--input",
+    "verifiquant/data/runs/paper_v1/questions_50.jsonl",
+    "--db-url",
+    "sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/fic/cards_v3.db",
+    "--output",
+    "verifiquant/data/runs/paper_v1/results/vq_flash_v3_var1/output.jsonl",
+    "--summary-output",
+    "verifiquant/data/runs/paper_v1/results/vq_flash_v3_var1/summary.json",
+    "--max-turns",
+    "3",
+    "--top-k",
+    "4",
+    "--selector-model",
+    "gemini-2.5-flash",
+    "--extractor-model",
+    "gemini-2.5-flash",
+    "--judge-model",
+    "gemini-2.5-flash",
+    "--oracle-model",
+    "gemini-2.5-flash"
+  ],
+  "params": {
+    "type": "verifiquant",
+    "db_path": "fic/cards_v3.db",
+    "judge_model": "gemini-2.5-flash",
+    "selector_model": "gemini-2.5-flash",
+    "extractor_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 3,
+    "top_k": 4,
+    "description": "Variance run 1 — same config as canonical vq_flash_v3"
+  }
+}
