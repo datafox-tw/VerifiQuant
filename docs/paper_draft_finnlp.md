@@ -313,7 +313,7 @@ python3 scripts/sample_dataset.py \
 1. **CoT self-improve 對準確率有效**：single-shot (82%) → basic oracle (90%)，提升 +8pp；但無法降低 SWR（仍 10%），因缺乏架構級拒答機制
 2. **Flash vs Pro 在 CoT 上無差異**：41/50 vs 41/50，顯示 medium 難度對模型選擇不敏感
 3. **核心 trade-off（VQ Flash vs CoT+oracle Flash）**：兩者同達 90% 準確率，但 VQ SWR=0% vs CoT+oracle SWR=10%；VQ 以 10% 覆蓋率（5 題 abstain）換取 silent wrong 完全清零——此即 selective prediction 框架下「**以拒答置換 silent wrong**」的結構性保證
-4. **Recovery 貢獻（VQ Flash V3）**：8/50（16%）題目由 oracle 修正後成功。無 oracle（K=1）時 VQ 準確率估計約 37/50 = 74%，oracle 帶來 +16pp 提升
+4. **Recovery 貢獻（VQ Flash V3）**：8/50（16%）題目由 oracle 修正後成功。無 oracle（K=1）時 VQ 準確率為 **36/50 = 72%**（§5.8 ablation 實測，非估計），oracle 帶來 +18pp 提升
 5. **JP Morgan MAS（O-ITL）**：43/50 (86%)，SWR=14%（5 wrong + 2 pipeline error），oracle_used=0（`ask_human` node 從未觸發）。以 O-ITL 條件運行仍無法消除 silent wrong，呼應「**無結構閘門則 oracle 本身不足以保證 SWR=0%**」的核心主張
 6. **⚠️ VQ Pro 在相同卡片版本下仍低於 VQ Flash**：固定 V3 卡片時 VQ Pro 43/50 (86%) < VQ Flash 45/50 (90%)；固定 V1 卡片時 41/50 < 43/50。差距在兩個卡片版本下一致為 2 題，排除「卡片版本混用」這個 confound——這是真實的模型效應，非命名不一致造成。VQ Pro V3 SWR=4% 仍優於全部 CoT 系列（10–18%）與 JP Morgan MAS（14%），但劣於 VQ Flash 的 0%。可能原因：(a) FIC 卡片設計時 prompt 以 Flash 為調試目標；(b) Pro 對結構化輸出 schema 的解讀更嚴格，導致更多 F-class 拒答卻未必轉為正確；(c) 50Q 下的 run variance。本文以 **Flash-to-Flash 為主比較**，Pro 數字提供模型對照。Pro 結果的實際意義：在 VQ 框架下模型越強不保證 accuracy 越高——架構約束（FIC binding、E-check）主導了表現差異
 
