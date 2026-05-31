@@ -1,0 +1,116 @@
+[cot-self-improve] processing F-test-1006
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1008
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1022
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1023
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1026
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1028
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1035
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1057
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1062
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing F-test-1070
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing E-test-1008
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing E-test-1022
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing E-test-1026
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing E-test-1028
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing E-test-1035
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing E-test-1062
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing E-test-1070
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing E-test-1108
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing E-test-1237
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing E-test-1427
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing I-test-1006
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1008
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing I-test-1026
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing I-test-1057
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1062
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1070
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1427
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1442
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing I-test-1443
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing I-test-1446
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing N-test-1006
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1007
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1008
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1022
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1023
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1026
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1028
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1035
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1057
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing N-test-1062
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing M-test-1006
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing M-test-1007
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing M-test-1008
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing M-test-1022
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing M-test-1023
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing M-test-1026
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing M-test-1028
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing M-test-1035
+  ↳ CoT Turn 1: is_correct=None
+[cot-self-improve] processing M-test-1057
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing M-test-1062
+  ↳ CoT Turn 1: is_correct=None
+Wrote 50 cot self-improve records to verifiquant/data/runs/paper_v1/trap/results/cot_single_shot_flash/output.jsonl
+{
+  "total_cases": 50,
+  "correct_count": 12,
+  "accuracy": 0.24,
+  "improved_count": 0,
+  "improved_rate": 0.0,
+  "run_config": {
+    "cot_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 1,
+    "mode": "single_shot",
+    "cot_prompt_template": "You are a financial CoT solver with self-improvement hints.\nSolve using the current question/context and return a tentative answer.\nIf information is missing/ambiguous, set needs_more_info=true and list missing items.\nIMPORTANT: `answer` must be a numeric string only (for example: \"10185.19\"), or empty string if you cannot provide one.\n\nQuestion:\n{question}\n\nContext:\n{context}\n\nReturn JSON only.",
+    "oracle_prompt_template": null
+  }
+}
