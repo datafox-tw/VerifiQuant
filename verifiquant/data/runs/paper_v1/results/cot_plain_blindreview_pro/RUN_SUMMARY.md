@@ -24,8 +24,8 @@ Rounds distribution: {1: 7, 2: 14, 3: 29}
 
 | Case | Final Answer | Rounds | Note |
 |---|---:|---:|---|
-| test-1443 | 19.13 | 3 | CAGR percent/decimal — persistent SW across ALL four configs |
+| test-1443 | 19.13 | 3 | CAGR (gold 19.14); turn2 hit 19.14 then turn3 drifted back to 19.13 — LLM arithmetic non-determinism |
 
 ## Takeaway
 
-The strongest leakage-free configuration: 98% accuracy. **Yet SWR is still 2%** — one silent wrong (test-1443) survives even at this ceiling, persisting through all 3 oracle rounds. This is the headline comparison point: even a GT-blind oracle on the strongest model cannot reach SWR=0%, because the architecture forces a numeric output. VQ reaches SWR=0% via abstention. `broken_count=0`.
+The strongest leakage-free configuration: 98% accuracy. **Yet SWR is still 2%** — one silent wrong (test-1443, CAGR gold=19.14). Notably the model hit the correct 19.14 at turn 2 but drifted back to 19.13 at turn 3: the LLM cannot even reproduce its own correct answer, because it is doing fractional-power arithmetic (`2.4^(1/5)`) by token generation, oscillating across 19.11–19.16. This is the headline comparison point: even a GT-blind oracle on the strongest model cannot reach SWR=0%, because the architecture forces a (non-deterministic) numeric output. VQ executes this step in deterministic Python (exactly 0.19135…→19.14, every time) and reaches SWR=0% via abstention. `broken_count=0`.

@@ -24,7 +24,7 @@ Rounds distribution: {1: 14, 2: 26, 3: 10}
 
 | Case | Final Answer | Rounds | Note |
 |---|---:|---:|---|
-| test-1443 | 19.12 | 3 | CAGR percent/decimal — persistent SW across all configs |
+| test-1443 | 19.12 | 3 | CAGR (gold 19.14); LLM fractional-power arithmetic oscillates 19.11–19.16 (wrong in 3/4 blind configs) |
 | test-1891 | 2388.05 | 2 | residual numeric discrepancy; oracle found no rewriteable ambiguity |
 | test-1969 | 579.93 | 2 | rounding/precision boundary |
 

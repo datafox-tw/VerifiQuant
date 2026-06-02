@@ -25,7 +25,7 @@ Rounds distribution: {1: 37, 2: 9, 3: 4}
 
 | Case | Final Answer | Rounds | Note |
 |---|---:|---:|---|
-| test-1443 | 19.11 | 1 | CAGR percent/decimal — persistent SW across all configs |
+| test-1443 | 19.11 | 1 | CAGR (gold 19.14); LLM fractional-power arithmetic oscillates 19.11–19.16 (wrong in 3/4 blind configs) |
 | test-1891 | 2387.99 | 1 | residual numeric discrepancy |
 | test-1969 | 580.02 | 1 | rounding/precision boundary |
 | test-1789 | 27522.0 | 1 | annuity timing rounding |
