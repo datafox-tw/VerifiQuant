@@ -1,0 +1,173 @@
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % python3 verifiquant/pipeline/run_cot_self_improve_pipeline.py \ 
+  --input verifiquant/data/runs/paper_v1/questions_50.jsonl \
+  --output verifiquant/data/runs/paper_v1/results/cot_plain_blindreview_flash/output.jsonl \
+  --summary-output verifiquant/data/runs/paper_v1/results/cot_plain_blindreview_flash/summary.json \
+  --max-turns 3 --cot-model gemini-2.5-flash --oracle-model gemini-2.5-flash --oracle-mode plain
+
+[cot-self-improve] processing test-1028
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1035
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1561
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1443
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=False
+[cot-self-improve] processing test-1008
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1023
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1668
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1926
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1652
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1545
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1891
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+[cot-self-improve] processing test-1437
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1699
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1664
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1062
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1590
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=None
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1026
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1070
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1108
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1442
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1591
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1845
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1606
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1006
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1578
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1237
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1022
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1710
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1922
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1458
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1704
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1865
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1810
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1890
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1969
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+[cot-self-improve] processing test-1242
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=None
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1701
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1801
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1823
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1057
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1866
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1446
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1427
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1789
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1007
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1500
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1805
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1593
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1499
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1474
+  ↳ CoT Turn 1: is_correct=True
+Wrote 50 cot self-improve records to verifiquant/data/runs/paper_v1/results/cot_plain_blindreview_flash/output.jsonl
+{
+  "total_cases": 50,
+  "correct_count": 47,
+  "accuracy": 0.94,
+  "improved_count": 6,
+  "improved_rate": 0.12,
+  "broken_count": 0,
+  "broken_rate": 0.0,
+  "run_config": {
+    "cot_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 3,
+    "mode": "cot_basic_oracle",
+    "oracle_mode": "plain",
+    "oracle_entry_policy": "blind_review_every_turn",
+    "cot_prompt_template": "You are a financial CoT solver with self-improvement hints.\nSolve using the current question/context and return a tentative answer.\nIf information is missing/ambiguous, set needs_more_info=true and list missing items.\nIMPORTANT: `answer` must be a numeric string only (for example: \"10185.19\"), or empty string if you cannot provide one.\n\nQuestion:\n{question}\n\nContext:\n{context}\n\nReturn JSON only.",
+    "oracle_prompt_template": "You are Oracle-in-the-loop support for a pure CoT baseline.\nThere is no VerifiQuant framework in this loop.\nYou can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.\n\nCurrent question:\n{current_question}\n\nCurrent context:\n{current_context}\n\nCurrent CoT step output:\n{cot_step_output_json}\n\nGround-truth code:\n{ground_truth_code}\n\nReturn JSON only."
+  }
+}
+(.venv) blackwingedkite@keyouqideMacBook-Air verifiquant-update % 

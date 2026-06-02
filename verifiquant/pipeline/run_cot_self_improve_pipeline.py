@@ -150,13 +150,11 @@ def _oracle_rewrite_for_cot(
     current_question: str,
     current_context: str,
     cot_step_output: Dict[str, Any],
-    is_correct: Optional[bool],
 ) -> Dict[str, str]:
     prompt = _ORACLE_PROMPT_TEMPLATE.format(
         current_question=current_question,
         current_context=current_context,
         cot_step_output_json=json.dumps(cot_step_output, ensure_ascii=False, indent=2),
-        is_correct=is_correct,
         ground_truth_code=row.get("code", row.get("python_solution", "")),
     )
     out = _llm_json(client, model=model, prompt=prompt, schema=_schema_oracle_rewrite())
@@ -175,13 +173,11 @@ def _oracle_rewrite_for_cot_funnel_guided(
     current_question: str,
     current_context: str,
     cot_step_output: Dict[str, Any],
-    is_correct: Optional[bool],
 ) -> Dict[str, str]:
     prompt = _ORACLE_PROMPT_TEMPLATE_FUNNEL_GUIDED.format(
         current_question=current_question,
         current_context=current_context,
         cot_step_output_json=json.dumps(cot_step_output, ensure_ascii=False, indent=2),
-        is_correct=is_correct,
         ground_truth_code=row.get("code", row.get("python_solution", "")),
     )
     out = _llm_json(client, model=model, prompt=prompt, schema=_schema_oracle_rewrite())
@@ -237,9 +233,13 @@ def _cot_oracle_loop(
 
         print(f"  \u21b3 CoT Turn {turn}: is_correct={is_correct}")
 
-        needs_more = bool(step.get("needs_more_info"))
-        should_iterate = needs_more or (is_correct is False)
-        if not should_iterate or turn >= max_turns:
+        # Option A (blind review): the oracle reviews EVERY turn regardless of
+        # correctness. We intentionally do NOT gate iteration on is_correct, because
+        # gating on ground truth would (a) leak "this answer is wrong" through the
+        # oracle's entry itself, and (b) only ever rescue wrong answers while never
+        # risking a correct one, biasing accuracy upward. Natural termination is:
+        # max_turns reached, or the oracle returns question/context unchanged (below).
+        if turn >= max_turns:
             break
 
         if oracle_mode == "funnel-guided":
@@ -250,7 +250,6 @@ def _cot_oracle_loop(
                 current_question=question,
                 current_context=context,
                 cot_step_output=step,
-                is_correct=is_correct,
             )
         else:
             rewrite = _oracle_rewrite_for_cot(
@@ -260,7 +259,6 @@ def _cot_oracle_loop(
                 current_question=question,
                 current_context=context,
                 cot_step_output=step,
-                is_correct=is_correct,
             )
         history[-1]["oracle_rewrite"] = rewrite
         new_q = rewrite["updated_question"] or str(step.get("revised_question", "")).strip() or question
@@ -306,8 +304,6 @@ Current context:
 Current CoT step output:
 {cot_step_output_json}
 
-Current correctness against gold (if available): {is_correct}
-
 Ground-truth code:
 {ground_truth_code}
 
@@ -352,8 +348,6 @@ Current context:
 Current CoT step output:
 {cot_step_output_json}
 
-Current correctness against gold (if available): {is_correct}
-
 Ground-truth code (for reference; do NOT use final numeric result):
 {ground_truth_code}
 
@@ -381,16 +375,23 @@ def _aggregate(
     mode = "single_shot"
     if max_turns > 1:
         mode = "cot_basic_oracle" if oracle_mode == "plain" else "cot_funnel_guided_oracle"
+    broken = 0
     for r in rows:
         h = r["cot_self_improve"].get("history", [])
-        if len(h) >= 2 and h[0].get("is_correct") is False and r["cot_self_improve"].get("final_is_correct") is True:
+        final_ok = r["cot_self_improve"].get("final_is_correct") is True
+        if len(h) >= 2 and h[0].get("is_correct") is False and final_ok:
             improved += 1
+        # Blind review can also turn an initially-correct answer wrong.
+        if len(h) >= 2 and h[0].get("is_correct") is True and not final_ok:
+            broken += 1
     return {
         "total_cases": total,
         "correct_count": correct,
         "accuracy": (correct / total) if total else 0.0,
         "improved_count": improved,
         "improved_rate": (improved / total) if total else 0.0,
+        "broken_count": broken,
+        "broken_rate": (broken / total) if total else 0.0,
         # ── run_config: prompt templates + model metadata for comparison ──
         "run_config": {
             "cot_model": cot_model,
@@ -398,6 +399,7 @@ def _aggregate(
             "max_turns": max_turns,
             "mode": mode,
             "oracle_mode": oracle_mode,
+            "oracle_entry_policy": "blind_review_every_turn",
             "cot_prompt_template": _COT_PROMPT_TEMPLATE,
             "oracle_prompt_template": (
                 _ORACLE_PROMPT_TEMPLATE_FUNNEL_GUIDED
