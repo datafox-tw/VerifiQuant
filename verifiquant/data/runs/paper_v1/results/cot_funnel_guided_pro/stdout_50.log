@@ -1,0 +1,140 @@
+blackwingedkite@keyouqideAir verifiquant-update % python3 preprocessing/run_cot_self_improve_pipeline.py \
+  --input verifiquant/data/runs/paper_v1/questions_50.jsonl \
+  --output verifiquant/data/runs/paper_v1/results/cot_funnel_guided_pro/cot_funnel_guided_50_pro.jsonl \
+  --summary-output verifiquant/data/runs/paper_v1/results/cot_funnel_guided_pro/cot_funnel_guided_50_pro_summary.json \
+  --oracle-mode funnel-guided \
+  --max-turns 3 \
+  --cot-model gemini-2.5-pro \  
+  --oracle-model gemini-2.5-pro  
+
+[cot-self-improve] processing test-1028
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1035
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1561
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1443
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1008
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1023
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1668
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1926
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1652
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1545
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1891
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1437
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1699
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1664
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1062
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1590
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1026
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1070
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1108
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1442
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1591
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1845
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1606
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1006
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1578
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1237
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1022
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1710
+  ↳ CoT Turn 1: is_correct=True
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1922
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1458
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1704
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1865
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=False
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1810
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1890
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1969
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1242
+  ↳ CoT Turn 1: is_correct=None
+  ↳ CoT Turn 2: is_correct=None
+  ↳ CoT Turn 3: is_correct=True
+[cot-self-improve] processing test-1701
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1801
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1823
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1057
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1866
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1446
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1427
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1789
+  ↳ CoT Turn 1: is_correct=False
+[cot-self-improve] processing test-1007
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1500
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1805
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1593
+  ↳ CoT Turn 1: is_correct=False
+  ↳ CoT Turn 2: is_correct=True
+[cot-self-improve] processing test-1499
+  ↳ CoT Turn 1: is_correct=True
+[cot-self-improve] processing test-1474
+  ↳ CoT Turn 1: is_correct=True
+Wrote 50 cot self-improve records to verifiquant/data/runs/paper_v1/results/cot_funnel_guided_flash/output.jsonl
+{
+  "total_cases": 50,
+  "correct_count": 49,
+  "accuracy": 0.98,
+  "improved_count": 6,
+  "improved_rate": 0.12,
+  "run_config": {
+    "cot_model": "gemini-2.5-pro",
+    "oracle_model": "gemini-2.5-pro",
+    "max_turns": 3,
+    "mode": "cot_funnel_guided_oracle",
+    "oracle_mode": "funnel-guided",
+    "cot_prompt_template": "You are a financial CoT solver with self-improvement hints.\nSolve using the current question/context and return a tentative answer.\nIf information is missing/ambiguous, set needs_more_info=true and list missing items.\nIMPORTANT: `answer` must be a numeric string only (for example: \"10185.19\"), or empty string if you cannot provide one.\n\nQuestion:\n{question}\n\nContext:\n{context}\n\nReturn JSON only.",
+    "oracle_prompt_template": "You are Oracle-in-the-loop support for a CoT baseline with structured diagnostic guidance.\nThere is no VerifiQuant execution framework in this loop; you are only providing an oracle rewrite for the CoT baseline.\nYou can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.\n\nWhen reviewing the CoT step output for potential errors or ambiguities, systematically check the following diagnostic layers (M/N/F/E/I/C):\n\n1. M (Intent/Meaning): Does the user's question map unambiguously to a single calculation or formula? Are there multiple valid interpretations of what is being asked?\n   - Example: \"profit on total contract\" could mean profit as a percentage of incurred costs or a fixed fee on total contract value.\n   - If ambiguous, explicitly list the alternative interpretations.\n\n2. N (Scope/Domain): Does the question fall within a well-defined financial domain, such as valuation, cash flow, or bond pricing? Or does it require expertise outside standard finance?\n   - If out-of-scope, note which aspect is unclear or non-standard.\n\n3. F (Fields/Schema): Are all required input fields explicitly provided or inferable from context?\n   - Check the ground-truth code for required parameters. If any are missing, list them.\n   - Example: CAGR requires start_value, end_value, and years. Are all given?\n\n4. E (Execution/Boundary): Do the provided input values satisfy reasonable boundary constraints, such as interest rates > -1 and prices > 0? Would the computation hit numerical errors such as division by zero?\n   - If boundary violations exist, flag them explicitly.\n\n5. I (Interpretation/Ambiguity): Are there hidden semantic conventions or scale conventions that the CoT might have misinterpreted?\n   - I_HARD examples that change computation: period-start vs period-end, decimal (0.05) vs percentage (5%), annualized vs monthly.\n   - I_SOFT examples about representation: returning 0.25 vs 25% for a ratio, or rounding precision.\n   - If CoT chose a convention without declaring it, note the alternative.\n\n6. C (Code Logic): Is the Python code logic consistent with standard financial practice? Does it correctly implement the stated formula?\n   - Use the provided ground-truth code as the reference.\n\nCurrent question:\n{current_question}\n\nCurrent context:\n{current_context}\n\nCurrent CoT step output:\n{cot_step_output_json}\n\nCurrent correctness against gold (if available): {is_correct}\n\nGround-truth code (for reference; do NOT use final numeric result):\n{ground_truth_code}\n\nInstructions:\n1. Work through the six diagnostic layers in priority order: M > N > F > E > I > C.\n2. Identify the highest-priority issue that should be clarified or corrected.\n3. Revise the question/context only enough to address that issue while preserving the original task.\n4. In notes, clearly mark the relevant layer, such as [M], [F], [I_HARD], [I_SOFT], or [C].\n5. If no issue is found, leave the question/context unchanged and explain the checked layer(s) briefly.\n\nReturn JSON only."
+  }
+}
+blackwingedkite@keyouqideAir verifiquant-update % 

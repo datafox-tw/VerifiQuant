@@ -8,11 +8,16 @@ const cardsResult = document.getElementById("cards-result");
 const cardsMeta = document.getElementById("cards-meta");
 const contextEl = document.getElementById("context");
 const questionEl = document.getElementById("question");
+const sampleQuestionEl = document.getElementById("sample-question");
+const sampleMetaEl = document.getElementById("sample-meta");
+const loadSampleBtn = document.getElementById("load-sample");
 
 const tabQa = document.getElementById("tab-qa");
 const tabCards = document.getElementById("tab-cards");
 const panelQa = document.getElementById("panel-qa");
 const panelCards = document.getElementById("panel-cards");
+
+let demoQuestions = [];
 
 /* ── Rate limit display ── */
 async function fetchRateLimit() {
@@ -57,6 +62,52 @@ function statusBadge(status, diagnosticType) {
 
 function toSlotToken(text) {
   return String(text || "").toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function truncateText(text, maxLength = 90) {
+  const value = String(text || "").replace(/\s+/g, " ").trim();
+  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}...` : value;
+}
+
+function formatSampleLabel(item) {
+  const title = item.article_title || item.function_id || item.case_id || `Sample ${item.index}`;
+  return `${String(item.index).padStart(2, "0")} · ${title} · ${truncateText(item.question, 72)}`;
+}
+
+function applySampleQuestion(index) {
+  const item = demoQuestions[index];
+  if (!item) return;
+  questionEl.value = item.question || "";
+  contextEl.value = item.context || "";
+  sampleMetaEl.textContent = [
+    item.case_id ? `case: ${item.case_id}` : "",
+    item.level ? `level: ${item.level}` : "",
+    item.ground_truth !== undefined && item.ground_truth !== null ? `gold: ${item.ground_truth}` : "",
+  ].filter(Boolean).join(" · ");
+}
+
+async function loadDemoQuestionBank() {
+  if (!sampleQuestionEl) return;
+  sampleQuestionEl.innerHTML = `<option value="">Loading latest 50...</option>`;
+  try {
+    const response = await fetch("/api/demo/questions");
+    const data = await response.json();
+    if (data.status !== "ok") throw new Error(data.message || "load sample questions failed");
+    demoQuestions = data.questions || [];
+    sampleQuestionEl.innerHTML = demoQuestions.map((item, idx) =>
+      `<option value="${idx}">${escapeHtml(formatSampleLabel(item))}</option>`
+    ).join("");
+    if (demoQuestions.length) {
+      applySampleQuestion(0);
+      sampleMetaEl.textContent = `${sampleMetaEl.textContent} · source: paper_v1/questions_50.jsonl`;
+    } else {
+      sampleQuestionEl.innerHTML = `<option value="">No samples found</option>`;
+      sampleMetaEl.textContent = "No demo samples found.";
+    }
+  } catch (error) {
+    sampleQuestionEl.innerHTML = `<option value="">Failed to load samples</option>`;
+    sampleMetaEl.textContent = error.message;
+  }
 }
 
 /* ── Repair helpers ── */
@@ -353,8 +404,11 @@ form.addEventListener("submit", async (event) => {
 });
 
 document.getElementById("refresh-cards").addEventListener("click", loadCardsOverview);
+if (loadSampleBtn) loadSampleBtn.addEventListener("click", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
+if (sampleQuestionEl) sampleQuestionEl.addEventListener("change", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
 tabQa.addEventListener("click", () => activateTab("qa"));
 tabCards.addEventListener("click", () => {
   activateTab("cards");
   if (!cardsResult.innerHTML.trim()) loadCardsOverview();
 });
+loadDemoQuestionBank();

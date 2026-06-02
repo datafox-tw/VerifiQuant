@@ -16,6 +16,14 @@
 
   <section id="panel-qa" class="panel active">
     <form id="question-form" class="demo-form">
+      <div class="sample-toolbar">
+        <label>
+          Paper v1 sample fuel
+          <select id="sample-question"></select>
+        </label>
+        <button id="load-sample" type="button" class="btn btn-outline btn-sm">Load Sample</button>
+      </div>
+      <div id="sample-meta" class="sample-meta"></div>
       <label>
         Question
         <textarea id="question" name="question" rows="3" placeholder='e.g. Calculate the NPV of this investment' required></textarea>

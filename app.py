@@ -76,6 +76,10 @@ DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
 DEFAULT_UPLOAD_DIR = os.path.join(ROOT_DIR, "data")
 DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_50q_0415")
+DEFAULT_DEMO_QUESTION_BANK = os.environ.get(
+    "VERIFIQUANT_DEMO_QUESTION_BANK",
+    os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "paper_v1", "questions_50.jsonl"),
+)
 DEMO_MODE = os.environ.get("VERIFIQUANT_DEMO_MODE", "").lower() in ("1", "true", "yes")
 
 
@@ -224,6 +228,45 @@ def create_app() -> Flask:
                 "domain_count": len(grouped),
                 "card_count": len(rows),
                 "grouped": grouped,
+            }
+        )
+
+    @app.get("/api/demo/questions")
+    def demo_questions() -> Any:
+        path_value = _clean_text(request.args.get("path")) or DEFAULT_DEMO_QUESTION_BANK
+        try:
+            rows = _load_records_file(path_value)
+        except Exception as exc:
+            return jsonify({"status": "error", "message": f"failed to load question bank: {exc}"}), 400
+
+        questions: List[Dict[str, Any]] = []
+        for idx, row in enumerate(rows, 1):
+            if not isinstance(row, dict):
+                continue
+            case_id = _clean_text(row.get("case_id") or row.get("question_id") or idx)
+            question = _clean_text(row.get("question"))
+            if not question:
+                continue
+            questions.append(
+                {
+                    "index": idx,
+                    "case_id": case_id,
+                    "question_id": row.get("question_id"),
+                    "article_title": row.get("article_title"),
+                    "function_id": row.get("function_id"),
+                    "level": row.get("level"),
+                    "question": question,
+                    "context": row.get("context") or "",
+                    "ground_truth": row.get("ground_truth"),
+                }
+            )
+
+        return jsonify(
+            {
+                "status": "ok",
+                "path": str(_resolve_local_path(path_value)),
+                "count": len(questions),
+                "questions": questions,
             }
         )
 
