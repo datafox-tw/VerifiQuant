@@ -1,0 +1,21 @@
+{
+  "baseline": "jpmorgan",
+  "ran_at": "2026-05-30T14:14:10.455601",
+  "success": true,
+  "elapsed_seconds": 2340.8,
+  "command": [
+    "/Users/blackwingedkite/Desktop/verifiquant-update/reimplement-jpmogan/venv/bin/python3",
+    "/Users/blackwingedkite/Desktop/verifiquant-update/reimplement-jpmogan/run_pipeline.py",
+    "--input",
+    "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/questions_50.jsonl",
+    "--output",
+    "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/results/jpmorgan/output.jsonl",
+    "--summary-output",
+    "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/results/jpmorgan/summary.json"
+  ],
+  "params": {
+    "type": "jpmorgan_reimpl",
+    "description": "JP Morgan MAS reimplementation — run separately",
+    "note": "See reimplementation-jpmorgan/ directory"
+  }
+}

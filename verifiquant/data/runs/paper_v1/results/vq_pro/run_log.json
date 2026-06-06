@@ -1,0 +1,40 @@
+{
+  "baseline": "vq_pro",
+  "ran_at": "2026-05-30T14:36:03.075263",
+  "success": true,
+  "elapsed_seconds": 2043.0,
+  "command": [
+    "python3",
+    "preprocessing/run_framework_guided_self_improve_pipeline.py",
+    "--input",
+    "verifiquant/data/runs/paper_v1/questions_50.jsonl",
+    "--db-url",
+    "sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/fic/cards.db",
+    "--output",
+    "verifiquant/data/runs/paper_v1/results/vq_pro/output.jsonl",
+    "--summary-output",
+    "verifiquant/data/runs/paper_v1/results/vq_pro/summary.json",
+    "--max-turns",
+    "3",
+    "--top-k",
+    "4",
+    "--selector-model",
+    "gemini-2.5-pro",
+    "--extractor-model",
+    "gemini-2.5-pro",
+    "--judge-model",
+    "gemini-2.5-pro",
+    "--oracle-model",
+    "gemini-2.5-pro"
+  ],
+  "params": {
+    "type": "verifiquant",
+    "judge_model": "gemini-2.5-pro",
+    "selector_model": "gemini-2.5-pro",
+    "extractor_model": "gemini-2.5-pro",
+    "oracle_model": "gemini-2.5-pro",
+    "max_turns": 3,
+    "top_k": 4,
+    "description": "VerifiQuant full pipeline, Pro 2.5, K=3"
+  }
+}

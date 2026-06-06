@@ -101,16 +101,16 @@ def validate_artifact_relations(
 
         if _is_global_v2_rule(rr):
             d_repair = str(rr.get("diagnostic_type", "")).strip().upper()
-            if d_repair not in {"N", "I"}:
+            if d_repair not in {"N", "I", "I_HARD", "I_SOFT"}:
                 errors.append(
-                    f"global repair {fic_id}/{rid} must use diagnostic_type N or I, got {d_repair}"
+                    f"global repair {fic_id}/{rid} must use diagnostic_type N, I, I_HARD, or I_SOFT, got {d_repair}"
                 )
             continue
 
         d_repair = str(rr.get("diagnostic_type", "")).strip().upper()
         # I-class rules are semantic guides generated from semantic_hints and
         # do not require 1:1 mapping to core F/E diagnostic_checks.
-        if d_repair == "I":
+        if d_repair in ("I", "I_HARD", "I_SOFT"):
             continue
 
         if key not in rules_by_key:

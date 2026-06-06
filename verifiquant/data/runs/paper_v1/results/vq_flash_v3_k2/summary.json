@@ -1,0 +1,9 @@
+{
+  "total_cases": 50,
+  "success_count": 45,
+  "success_rate": 0.9,
+  "correct_count": 45,
+  "accuracy": 0.9,
+  "recovery_count": 7,
+  "recovery_rate": 0.14
+}

@@ -152,7 +152,7 @@ def _framework_oracle_loop(
             break
         if turn >= max_turns:
             break
-        if recorded_error not in {"M", "N", "F", "E", "I", "I_SOFT_MISMATCH"}:
+        if recorded_error not in {"M", "N", "F", "E", "I", "I_HARD", "I_SOFT", "I_SOFT_MISMATCH"}:
             break
 
         rewrite = _oracle_rewrite_for_framework(

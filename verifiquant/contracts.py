@@ -4,16 +4,29 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Literal, Optional
 
 
-RefusalCategory = Literal["M", "N", "F", "E", "I", "C", "None", "Unknown"]
+RefusalCategory = Literal[
+    "M", "N", "F", "E", "I", "I_HARD", "I_SOFT", "C", "None", "Unknown"
+]
 DiagnosticStatus = Literal["success", "refusal", "error", "alert", "needs_clarification"]
 Severity = Literal["error", "alert"]
+
+# All RefusalCategory values that belong to the I-class family.
+I_CLASS_TYPES = frozenset({"I", "I_HARD", "I_SOFT"})
+
+
+def is_i_class(diagnostic_type: str) -> bool:
+    """Return True if *diagnostic_type* belongs to the I-class family (I / I_HARD / I_SOFT)."""
+    return diagnostic_type in I_CLASS_TYPES
+
 
 REFUSAL_CATEGORY_DESCRIPTIONS: Dict[str, str] = {
     "M": "Task misunderstanding or ambiguity (semantic mismatch, unclear intent).",
     "N": "Intent is clear, but requested logic is outside current supported FIC scope.",
     "F": "Formula/spec mismatch or missing required specification/inputs.",
     "E": "Input binding, unit, or logical inconsistency detected.",
-    "I": "Hidden semantic ambiguity detected (e.g., FX direction, time basis).",
+    "I": "Hidden semantic ambiguity detected (legacy; prefer I_HARD or I_SOFT).",
+    "I_HARD": "Hidden semantic ambiguity that changes the computation path; requires clarification before execution.",
+    "I_SOFT": "Hidden semantic ambiguity that does not change the computation path; proceed with explicit warning.",
     "C": "Calculation/runtime error (expected to be rare under deterministic engine).",
     "None": "No diagnostic issue; execution completed successfully.",
     "Unknown": "Unclassified diagnostic outcome.",

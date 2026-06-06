@@ -1,0 +1,41 @@
+{
+  "baseline": "vq_flash_v3_k1",
+  "ran_at": "2026-05-31T11:02:22.665968",
+  "success": true,
+  "elapsed_seconds": 732.6,
+  "command": [
+    "python3",
+    "preprocessing/run_framework_guided_self_improve_pipeline.py",
+    "--input",
+    "verifiquant/data/runs/paper_v1/questions_50.jsonl",
+    "--db-url",
+    "sqlite:////Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v1/fic/cards_v3.db",
+    "--output",
+    "verifiquant/data/runs/paper_v1/results/vq_flash_v3_k1/output.jsonl",
+    "--summary-output",
+    "verifiquant/data/runs/paper_v1/results/vq_flash_v3_k1/summary.json",
+    "--max-turns",
+    "1",
+    "--top-k",
+    "4",
+    "--selector-model",
+    "gemini-2.5-flash",
+    "--extractor-model",
+    "gemini-2.5-flash",
+    "--judge-model",
+    "gemini-2.5-flash",
+    "--oracle-model",
+    "gemini-2.5-flash"
+  ],
+  "params": {
+    "type": "verifiquant",
+    "db_path": "fic/cards_v3.db",
+    "judge_model": "gemini-2.5-flash",
+    "selector_model": "gemini-2.5-flash",
+    "extractor_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 1,
+    "top_k": 4,
+    "description": "Ablation — VerifiQuant Flash V3 w/o O-ITL (K=1, no oracle correction)"
+  }
+}

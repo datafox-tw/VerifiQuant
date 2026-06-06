@@ -1,0 +1,110 @@
+[framework-guided] processing F-test-1006
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1008
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1022
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1023
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1026
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1028
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1035
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1057
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1062
+  ↳ Turn 1: F
+[framework-guided] processing F-test-1070
+  ↳ Turn 1: F
+[framework-guided] processing E-test-1008
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1022
+  ↳ Turn 1: NONE
+[framework-guided] processing E-test-1026
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1028
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1035
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1062
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1070
+  ↳ Turn 1: E
+[framework-guided] processing E-test-1108
+  ↳ Turn 1: NONE
+[framework-guided] processing E-test-1237
+  ↳ Turn 1: F
+[framework-guided] processing E-test-1427
+  ↳ Turn 1: E
+[framework-guided] processing I-test-1006
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1008
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1026
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1057
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1062
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1070
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1427
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1442
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1443
+  ↳ Turn 1: NONE
+[framework-guided] processing I-test-1446
+  ↳ Turn 1: NONE
+[framework-guided] processing N-test-1006
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1007
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1008
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1022
+  ↳ Turn 1: M
+[framework-guided] processing N-test-1023
+  ↳ Turn 1: M
+[framework-guided] processing N-test-1026
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1028
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1035
+  ↳ Turn 1: N
+[framework-guided] processing N-test-1057
+  ↳ Turn 1: M
+[framework-guided] processing N-test-1062
+  ↳ Turn 1: N
+[framework-guided] processing M-test-1006
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1007
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1008
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1022
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1023
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1026
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1028
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1035
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1057
+  ↳ Turn 1: NONE
+[framework-guided] processing M-test-1062
+  ↳ Turn 1: NONE
+Wrote 50 framework-guided records to verifiquant/data/runs/paper_v1/trap/results/vq_flash_v3_k1/output.jsonl
+{
+  "total_cases": 50,
+  "success_count": 22,
+  "success_rate": 0.44,
+  "correct_count": 22,
+  "accuracy": 0.44,
+  "recovery_count": 0,
+  "recovery_rate": 0.0
+}

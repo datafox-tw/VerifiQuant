@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import time
+import threading
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -14,6 +17,44 @@ from verifiquant.pipeline.run_error_classification_pipeline import (
     ErrorClassificationAPI,
     create_genai_client_from_env,
 )
+
+
+RATE_LIMIT_PER_HOUR = int(os.environ.get("VERIFIQUANT_RATE_LIMIT", "20"))
+
+
+class _RateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int = 3600):
+        self._max = max_requests
+        self._window = window_seconds
+        self._hits: Dict[str, List[float]] = defaultdict(list)
+        self._lock = threading.Lock()
+
+    def is_allowed(self, key: str) -> bool:
+        now = time.monotonic()
+        with self._lock:
+            times = self._hits[key]
+            times[:] = [t for t in times if now - t < self._window]
+            if len(times) >= self._max:
+                return False
+            times.append(now)
+            return True
+
+    def remaining(self, key: str) -> int:
+        now = time.monotonic()
+        with self._lock:
+            times = self._hits[key]
+            times[:] = [t for t in times if now - t < self._window]
+            return max(0, self._max - len(times))
+
+
+_rate_limiter = _RateLimiter(RATE_LIMIT_PER_HOUR)
+
+
+def _get_client_ip() -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "unknown"
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +76,11 @@ DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
 DEFAULT_UPLOAD_DIR = os.path.join(ROOT_DIR, "data")
 DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "demo_50q_0415")
+DEFAULT_DEMO_QUESTION_BANK = os.environ.get(
+    "VERIFIQUANT_DEMO_QUESTION_BANK",
+    os.path.join(ROOT_DIR, "verifiquant", "data", "runs", "paper_v1", "questions_50.jsonl"),
+)
+DEMO_MODE = os.environ.get("VERIFIQUANT_DEMO_MODE", "").lower() in ("1", "true", "yes")
 
 
 def _clean_text(value: Any) -> str:
@@ -146,7 +192,15 @@ def create_app() -> Flask:
 
     @app.get("/")
     def index() -> str:
-        return render_template("index.html")
+        return render_template("home.html", active_page="home")
+
+    @app.get("/demo")
+    def demo() -> str:
+        return render_template("demo.html", active_page="demo")
+
+    @app.get("/about")
+    def about() -> str:
+        return render_template("about.html", active_page="about")
 
     @app.get("/api/cards/overview")
     def cards_overview() -> Any:
@@ -174,6 +228,45 @@ def create_app() -> Flask:
                 "domain_count": len(grouped),
                 "card_count": len(rows),
                 "grouped": grouped,
+            }
+        )
+
+    @app.get("/api/demo/questions")
+    def demo_questions() -> Any:
+        path_value = _clean_text(request.args.get("path")) or DEFAULT_DEMO_QUESTION_BANK
+        try:
+            rows = _load_records_file(path_value)
+        except Exception as exc:
+            return jsonify({"status": "error", "message": f"failed to load question bank: {exc}"}), 400
+
+        questions: List[Dict[str, Any]] = []
+        for idx, row in enumerate(rows, 1):
+            if not isinstance(row, dict):
+                continue
+            case_id = _clean_text(row.get("case_id") or row.get("question_id") or idx)
+            question = _clean_text(row.get("question"))
+            if not question:
+                continue
+            questions.append(
+                {
+                    "index": idx,
+                    "case_id": case_id,
+                    "question_id": row.get("question_id"),
+                    "article_title": row.get("article_title"),
+                    "function_id": row.get("function_id"),
+                    "level": row.get("level"),
+                    "question": question,
+                    "context": row.get("context") or "",
+                    "ground_truth": row.get("ground_truth"),
+                }
+            )
+
+        return jsonify(
+            {
+                "status": "ok",
+                "path": str(_resolve_local_path(path_value)),
+                "count": len(questions),
+                "questions": questions,
             }
         )
 
@@ -210,6 +303,9 @@ def create_app() -> Flask:
 
     @app.post("/api/files/upload")
     def upload_file() -> Any:
+        if DEMO_MODE:
+            return jsonify({"status": "error", "message": "File upload is disabled in demo mode."}), 403
+
         incoming = request.files.get("file")
         if incoming is None or not incoming.filename:
             return jsonify({"status": "error", "message": "file is required"}), 400
@@ -323,6 +419,14 @@ def create_app() -> Flask:
 
     @app.post("/api/diagnose")
     def diagnose() -> Any:
+        ip = _get_client_ip()
+        if not _rate_limiter.is_allowed(ip):
+            return jsonify({
+                "status": "error",
+                "message": f"Rate limit exceeded. Max {RATE_LIMIT_PER_HOUR} diagnoses per hour.",
+                "remaining": 0,
+            }), 429
+
         payload = request.get_json(silent=True) or {}
         question = _clean_text(payload.get("question"))
         context = str(payload.get("context") or "")
@@ -360,8 +464,25 @@ def create_app() -> Flask:
         result["prompt"] = {"question": question, "context": context}
         return jsonify(result)
 
+    @app.get("/api/rate-limit")
+    def rate_limit_status() -> Any:
+        ip = _get_client_ip()
+        return jsonify({
+            "status": "ok",
+            "remaining": _rate_limiter.remaining(ip),
+            "limit": RATE_LIMIT_PER_HOUR,
+        })
+
     @app.post("/api/diagnose/batch")
     def diagnose_batch() -> Any:
+        ip = _get_client_ip()
+        if not _rate_limiter.is_allowed(ip):
+            return jsonify({
+                "status": "error",
+                "message": f"Rate limit exceeded. Max {RATE_LIMIT_PER_HOUR} diagnoses per hour.",
+                "remaining": 0,
+            }), 429
+
         payload = request.get_json(silent=True) or {}
         input_path = _clean_text(payload.get("input_path"))
         output_path = _clean_text(payload.get("output_path"))

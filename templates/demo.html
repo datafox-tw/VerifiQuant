@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Demo &mdash; VerifiQuant{% endblock %}
+
+{% block content %}
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Diagnostic Console</h1>
+    <p>Submit a financial question with context. The pipeline will classify it through the M/N/F/E/I/C funnel and return a verified diagnostic report.</p>
+    <div class="rate-limit-bar" id="rate-limit-bar"></div>
+  </div>
+
+  <nav class="tab-nav">
+    <button id="tab-qa" class="tab-btn active" type="button">Single Query</button>
+    <button id="tab-cards" class="tab-btn" type="button">FIC Cards</button>
+  </nav>
+
+  <section id="panel-qa" class="panel active">
+    <form id="question-form" class="demo-form">
+      <div class="sample-toolbar">
+        <label>
+          Paper v1 sample fuel
+          <select id="sample-question"></select>
+        </label>
+        <button id="load-sample" type="button" class="btn btn-outline btn-sm">Load Sample</button>
+      </div>
+      <div id="sample-meta" class="sample-meta"></div>
+      <label>
+        Question
+        <textarea id="question" name="question" rows="3" placeholder='e.g. Calculate the NPV of this investment' required></textarea>
+      </label>
+      <label>
+        Context (JSON recommended)
+        <textarea id="context" name="context" rows="5" placeholder='{"initial_investment": 100000, "cash_flows": [30000, 40000, 50000], "discount_rate": 0.1}'></textarea>
+      </label>
+      <div class="inline-row">
+        <label>
+          Domain <span class="optional">(optional)</span>
+          <input id="domain" name="domain" type="text" placeholder="investment_analysis" />
+        </label>
+        <label>
+          Topic <span class="optional">(optional)</span>
+          <input id="topic" name="topic" type="text" placeholder="npv" />
+        </label>
+      </div>
+      <details class="advanced-toggle">
+        <summary>Advanced Parameters</summary>
+        <div class="inline-row">
+          <label>
+            top_k
+            <input id="top-k" name="top_k" type="number" min="1" value="3" />
+          </label>
+          <label>
+            m_min_top_score
+            <input id="m-min-top-score" name="m_min_top_score" type="number" step="0.01" min="0" value="0.05" />
+          </label>
+        </div>
+      </details>
+      <button type="submit" class="btn btn-primary btn-block">Run Diagnosis</button>
+    </form>
+    <div id="loader" class="loader hidden">
+      <div class="spinner"></div>
+      <span>Running diagnostic pipeline...</span>
+    </div>
+    <section id="result" class="result hidden"></section>
+  </section>
+
+  <section id="panel-cards" class="panel">
+    <div class="cards-toolbar">
+      <button id="refresh-cards" type="button" class="btn btn-outline btn-sm">Refresh Cards</button>
+      <span id="cards-meta"></span>
+    </div>
+    <div id="cards-loader" class="loader hidden">
+      <div class="spinner"></div>
+      <span>Loading cards...</span>
+    </div>
+    <section id="cards-result" class="result"></section>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='demo.js') }}"></script>
+{% endblock %}

@@ -483,7 +483,7 @@ def _has_expected_signal(vtype: str, case: CaseRecord, payload: Dict[str, str]) 
         if "月" in comb and "年" in comb:
             return True
         return comb.count("%") < base.count("%")
-    if vtype == "I":
+    if vtype in ("I", "I_HARD", "I_SOFT"):
         return any(
             tok in comb
             for tok in [

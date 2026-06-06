@@ -1,0 +1,19 @@
+{
+  "total_cases": 50,
+  "correct_count": 46,
+  "accuracy": 0.92,
+  "improved_count": 5,
+  "improved_rate": 0.1,
+  "broken_count": 0,
+  "broken_rate": 0.0,
+  "run_config": {
+    "cot_model": "gemini-2.5-flash",
+    "oracle_model": "gemini-2.5-flash",
+    "max_turns": 3,
+    "mode": "cot_funnel_guided_oracle",
+    "oracle_mode": "funnel-guided",
+    "oracle_entry_policy": "blind_review_every_turn",
+    "cot_prompt_template": "You are a financial CoT solver with self-improvement hints.\nSolve using the current question/context and return a tentative answer.\nIf information is missing/ambiguous, set needs_more_info=true and list missing items.\nIMPORTANT: `answer` must be a numeric string only (for example: \"10185.19\"), or empty string if you cannot provide one.\n\nQuestion:\n{question}\n\nContext:\n{context}\n\nReturn JSON only.",
+    "oracle_prompt_template": "You are Oracle-in-the-loop support for a CoT baseline with structured diagnostic guidance.\nThere is no VerifiQuant execution framework in this loop; you are only providing an oracle rewrite for the CoT baseline.\nYou can ONLY use the logic within the ground-truth code to clarify assumptions and revise user question/context. You must NOT rely on the final numeric ground truth result.\n\nWhen reviewing the CoT step output for potential errors or ambiguities, systematically check the following diagnostic layers (M/N/F/E/I/C):\n\n1. M (Intent/Meaning): Does the user's question map unambiguously to a single calculation or formula? Are there multiple valid interpretations of what is being asked?\n   - Example: \"profit on total contract\" could mean profit as a percentage of incurred costs or a fixed fee on total contract value.\n   - If ambiguous, explicitly list the alternative interpretations.\n\n2. N (Scope/Domain): Does the question fall within a well-defined financial domain, such as valuation, cash flow, or bond pricing? Or does it require expertise outside standard finance?\n   - If out-of-scope, note which aspect is unclear or non-standard.\n\n3. F (Fields/Schema): Are all required input fields explicitly provided or inferable from context?\n   - Check the ground-truth code for required parameters. If any are missing, list them.\n   - Example: CAGR requires start_value, end_value, and years. Are all given?\n\n4. E (Execution/Boundary): Do the provided input values satisfy reasonable boundary constraints, such as interest rates > -1 and prices > 0? Would the computation hit numerical errors such as division by zero?\n   - If boundary violations exist, flag them explicitly.\n\n5. I (Interpretation/Ambiguity): Are there hidden semantic conventions or scale conventions that the CoT might have misinterpreted?\n   - I_HARD examples that change computation: period-start vs period-end, decimal (0.05) vs percentage (5%), annualized vs monthly.\n   - I_SOFT examples about representation: returning 0.25 vs 25% for a ratio, or rounding precision.\n   - If CoT chose a convention without declaring it, note the alternative.\n\n6. C (Code Logic): Is the Python code logic consistent with standard financial practice? Does it correctly implement the stated formula?\n   - Use the provided ground-truth code as the reference.\n\nCurrent question:\n{current_question}\n\nCurrent context:\n{current_context}\n\nCurrent CoT step output:\n{cot_step_output_json}\n\nGround-truth code (for reference; do NOT use final numeric result):\n{ground_truth_code}\n\nInstructions:\n1. Work through the six diagnostic layers in priority order: M > N > F > E > I > C.\n2. Identify the highest-priority issue that should be clarified or corrected.\n3. Revise the question/context only enough to address that issue while preserving the original task.\n4. In notes, clearly mark the relevant layer, such as [M], [F], [I_HARD], [I_SOFT], or [C].\n5. If no issue is found, leave the question/context unchanged and explain the checked layer(s) briefly.\n\nReturn JSON only."
+  }
+}

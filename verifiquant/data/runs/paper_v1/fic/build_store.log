@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/preprocessing/build_card_store.py", line 12, in <module>
+    main()
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/card_store.py", line 703, in main
+    stats = build_store_from_files(
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/card_store.py", line 680, in build_store_from_files
+    return store.ingest_artifacts(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/card_store.py", line 219, in ingest_artifacts
+    validate_artifact_relations(
+  File "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/preprocessing/validate_relations.py", line 132, in validate_artifact_relations
+    raise ValueError(
+ValueError: Artifact relation validation failed:
+- global repair fic_article_2145/global_i_semantic_ambiguity must use diagnostic_type N or I, got I_HARD

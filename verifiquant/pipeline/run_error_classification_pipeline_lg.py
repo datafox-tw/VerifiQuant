@@ -516,7 +516,7 @@ def node_i_gate(state: PipelineState, *, deps: PipelineDeps) -> dict:
     }
 
     if is_hard_block:
-        update["exit_gate"] = "I"
+        update["exit_gate"] = "I_HARD"
         update["i_level"] = "hard"
         update["soft_warnings"] = []
     else:
@@ -1023,7 +1023,7 @@ def _route_fe_checks(state: PipelineState) -> str:
     return "i_gate"
 
 def _route_i_gate(state: PipelineState) -> str:
-    return "hitl_i" if state.get("exit_gate") == "I" else "execute"
+    return "hitl_i" if state.get("exit_gate") in ("I", "I_HARD") else "execute"
 
 def _route_execute(state: PipelineState) -> str:
     return "exit_c" if state.get("exit_gate") == "C" else "exit_success"
