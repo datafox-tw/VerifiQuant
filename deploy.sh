@@ -1,58 +1,89 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ── VerifiQuant Cloud Run Deploy ──
-# Prerequisites:
-#   1. gcloud CLI installed & authenticated: gcloud auth login
-#   2. A GCP project with billing enabled
-#   3. GEMINI_API_KEY ready
+# ── VerifiQuant Daily Cloud Run Deploy ──
+# Usage:
+#   export GCP_PROJECT_ID=your-project-id
+#   ./deploy.sh
+#
+# Optional:
+#   GCP_REGION=asia-east1 SERVICE_NAME=verifiquant ./deploy.sh
+#   ./deploy.sh --source   # use Cloud Run source deploy instead of explicit Docker build
 
 PROJECT_ID="${GCP_PROJECT_ID:-}"
 REGION="${GCP_REGION:-asia-east1}"
-SERVICE_NAME="verifiquant"
-IMAGE_NAME="gcr.io/${PROJECT_ID}/${SERVICE_NAME}"
+SERVICE_NAME="${SERVICE_NAME:-verifiquant}"
 
-if [ -z "$PROJECT_ID" ]; then
-  echo "Error: Set GCP_PROJECT_ID environment variable first."
+MEMORY="${CLOUD_RUN_MEMORY:-2Gi}"
+CPU="${CLOUD_RUN_CPU:-2}"
+TIMEOUT="${CLOUD_RUN_TIMEOUT:-120}"
+MAX_INSTANCES="${CLOUD_RUN_MAX_INSTANCES:-3}"
+MIN_INSTANCES="${CLOUD_RUN_MIN_INSTANCES:-0}"
+
+DEMO_MODE="${VERIFIQUANT_DEMO_MODE:-true}"
+RATE_LIMIT="${VERIFIQUANT_RATE_LIMIT:-20}"
+
+USE_SOURCE_DEPLOY=false
+
+if [[ "${1:-}" == "--source" ]]; then
+  USE_SOURCE_DEPLOY=true
+fi
+
+if [[ -z "$PROJECT_ID" ]]; then
+  echo "Error: GCP_PROJECT_ID is not set."
+  echo "Run:"
   echo "  export GCP_PROJECT_ID=your-project-id"
   exit 1
 fi
 
-echo "==> Setting project to ${PROJECT_ID}"
-gcloud config set project "$PROJECT_ID"
+echo "==> Project: ${PROJECT_ID}"
+echo "==> Region: ${REGION}"
+echo "==> Service: ${SERVICE_NAME}"
 
-echo "==> Enabling required APIs..."
-gcloud services enable \
-  cloudbuild.googleapis.com \
-  run.googleapis.com \
-  containerregistry.googleapis.com \
-  artifactregistry.googleapis.com
+gcloud config set project "$PROJECT_ID" >/dev/null
 
-echo "==> Building container image..."
-gcloud builds submit --tag "$IMAGE_NAME" --timeout=1200
+if [[ "$USE_SOURCE_DEPLOY" == true ]]; then
+  echo "==> Deploying from source..."
+  gcloud run deploy "$SERVICE_NAME" \
+    --source . \
+    --region "$REGION" \
+    --platform managed \
+    --allow-unauthenticated \
+    --memory "$MEMORY" \
+    --cpu "$CPU" \
+    --timeout "$TIMEOUT" \
+    --max-instances "$MAX_INSTANCES" \
+    --min-instances "$MIN_INSTANCES" \
+    --set-env-vars "VERIFIQUANT_DEMO_MODE=${DEMO_MODE},VERIFIQUANT_RATE_LIMIT=${RATE_LIMIT}" \
+    --update-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest"
+else
+  IMAGE_NAME="gcr.io/${PROJECT_ID}/${SERVICE_NAME}:$(date +%Y%m%d-%H%M%S)"
 
-echo "==> Deploying to Cloud Run..."
-gcloud run deploy "$SERVICE_NAME" \
-  --image "$IMAGE_NAME" \
+  echo "==> Building image: ${IMAGE_NAME}"
+  gcloud builds submit \
+    --tag "$IMAGE_NAME" \
+    --timeout=1200
+
+  echo "==> Deploying image to Cloud Run..."
+  gcloud run deploy "$SERVICE_NAME" \
+    --image "$IMAGE_NAME" \
+    --region "$REGION" \
+    --platform managed \
+    --allow-unauthenticated \
+    --memory "$MEMORY" \
+    --cpu "$CPU" \
+    --timeout "$TIMEOUT" \
+    --max-instances "$MAX_INSTANCES" \
+    --min-instances "$MIN_INSTANCES" \
+    --set-env-vars "VERIFIQUANT_DEMO_MODE=${DEMO_MODE},VERIFIQUANT_RATE_LIMIT=${RATE_LIMIT}" \
+    --update-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest"
+fi
+
+echo ""
+echo "==> Deployment finished."
+
+URL="$(gcloud run services describe "$SERVICE_NAME" \
   --region "$REGION" \
-  --platform managed \
-  --allow-unauthenticated \
-  --memory 2Gi \
-  --cpu 2 \
-  --timeout 120 \
-  --max-instances 3 \
-  --min-instances 0 \
-  --set-env-vars "VERIFIQUANT_DEMO_MODE=true,VERIFIQUANT_RATE_LIMIT=20" \
-  --update-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest"
+  --format='value(status.url)')"
 
-echo ""
-echo "==> Deployed! Getting service URL..."
-URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='value(status.url)')
-echo "Service URL: $URL"
-echo ""
-echo "==> Next steps:"
-echo "  1. Create the secret (if not done):"
-echo "     echo -n 'your-api-key' | gcloud secrets create GEMINI_API_KEY --data-file=-"
-echo "  2. Map custom domain:"
-echo "     gcloud run domain-mappings create --service=$SERVICE_NAME --domain=verifiquant.com --region=$REGION"
-echo "  3. Set DNS records as shown by the command above (CNAME or A records)"
+echo "Service URL: ${URL}"
