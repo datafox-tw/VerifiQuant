@@ -1,0 +1,15 @@
+{
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "reasoning_effort": null,
+  "refusal_level": 0,
+  "total": 50,
+  "correct": 42,
+  "silent_wrong": 8,
+  "safe_refusal": 0,
+  "accuracy": 0.84,
+  "coverage": 1.0,
+  "selective_accuracy": 0.84,
+  "swr": 0.16,
+  "safe_refusal_rate": 0.0
+}

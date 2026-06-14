@@ -12,10 +12,23 @@ const sampleQuestionEl = document.getElementById("sample-question");
 const sampleMetaEl = document.getElementById("sample-meta");
 const loadSampleBtn = document.getElementById("load-sample");
 
+const tabChat = document.getElementById("tab-chat");
 const tabQa = document.getElementById("tab-qa");
 const tabCards = document.getElementById("tab-cards");
+const panelChat = document.getElementById("panel-chat");
 const panelQa = document.getElementById("panel-qa");
 const panelCards = document.getElementById("panel-cards");
+
+// Shared renderers (defined in diagnostic_render.js, loaded first).
+const {
+  escapeHtml,
+  statusBadge,
+  renderSelectionSummary,
+  renderPipelineTimeline,
+  renderPipelineLogs,
+  renderTraceBlock,
+  renderPythonExecution,
+} = VQRender;
 
 let demoQuestions = [];
 
@@ -43,21 +56,12 @@ function setCardsLoading(isLoading) {
 }
 
 function activateTab(target) {
+  if (tabChat) tabChat.classList.toggle("active", target === "chat");
   tabQa.classList.toggle("active", target === "qa");
   tabCards.classList.toggle("active", target === "cards");
+  if (panelChat) panelChat.classList.toggle("active", target === "chat");
   panelQa.classList.toggle("active", target === "qa");
   panelCards.classList.toggle("active", target === "cards");
-}
-
-function escapeHtml(text) {
-  return String(text || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function statusBadge(status, diagnosticType) {
-  return `<span class="badge badge-${status}">${escapeHtml(status)} / ${escapeHtml(diagnosticType || "Unknown")}</span>`;
 }
 
 function toSlotToken(text) {
@@ -99,7 +103,8 @@ async function loadDemoQuestionBank() {
     ).join("");
     if (demoQuestions.length) {
       applySampleQuestion(0);
-      sampleMetaEl.textContent = `${sampleMetaEl.textContent} · source: paper_v1/questions_50.jsonl`;
+      const source = data.source || "questions";
+      sampleMetaEl.textContent = `${sampleMetaEl.textContent} · source: ${source}`;
     } else {
       sampleQuestionEl.innerHTML = `<option value="">No samples found</option>`;
       sampleMetaEl.textContent = "No demo samples found.";
@@ -193,41 +198,22 @@ function renderRepairHints(repairHints) {
     </section>`;
 }
 
-function renderSelectionSummary(selectionTrace) {
-  if (!selectionTrace || Object.keys(selectionTrace).length === 0) return "";
-  const selector = selectionTrace.selector || {};
-  const candidates = selectionTrace.retrieval_candidates || [];
-  const candidateRows = candidates.map((c) => `
-    <tr>
-      <td><code>${escapeHtml(c.fic_id || "-")}</code></td>
-      <td>${escapeHtml(c.title || "-")}</td>
-      <td>${escapeHtml(c.domain || "-")} / ${escapeHtml(c.topic || "-")}</td>
-      <td>${escapeHtml(c.score)}</td>
-    </tr>`).join("");
-  return `
-    <section class="trace-section">
-      <h3>Card Selection & M/N Decision</h3>
-      <p>Decision: <code>${escapeHtml(selector.decision || "-")}</code></p>
-      <p>Chosen FIC: <code>${escapeHtml(selector.chosen_fic_id || "-")}</code></p>
-      <p>Reason: ${escapeHtml(selector.reason || "-")}</p>
-      ${candidateRows ? `
-        <table class="history-table compact-table">
-          <thead><tr><th>fic_id</th><th>title</th><th>domain/topic</th><th>score</th></tr></thead>
-          <tbody>${candidateRows}</tbody>
-        </table>` : ""}
-    </section>`;
-}
-
 function renderInteractiveAssistant(data) {
   const clarification = data.clarification_request || null;
   const softWarnings = Array.isArray(data.soft_warnings) ? data.soft_warnings : [];
   if (!clarification && !softWarnings.length) return "";
 
+  // Options may be plain strings or structured {label, value} objects.
+  const optionHtml = (opt) => {
+    const label = (opt && typeof opt === "object") ? (opt.label || opt.value || "") : opt;
+    const value = (opt && typeof opt === "object") ? (opt.value || opt.label || "") : opt;
+    return `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`;
+  };
+
   const clarificationCards = clarification
     ? (clarification.questions || []).map((q, idx) => {
         const slot = `clarification_${idx + 1}`;
-        const options = (clarification.options || []).map((opt) =>
-          `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join("");
+        const options = (clarification.options || []).map(optionHtml).join("");
         return `
           <article class="interactive-answer-card" data-slot="${slot}">
             <h4>Clarification ${idx + 1}</h4>
@@ -240,8 +226,7 @@ function renderInteractiveAssistant(data) {
   const softCards = softWarnings.map((w, idx) => {
     const token = toSlotToken(w.hint_id || `i_soft_${idx + 1}`) || `i_soft_${idx + 1}`;
     const slot = `i_soft_${token}`;
-    const options = (w.options || []).map((opt) =>
-      `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join("");
+    const options = (w.options || []).map(optionHtml).join("");
     return `
       <article class="interactive-answer-card" data-slot="${slot}">
         <h4>Soft Warning ${idx + 1}</h4>
@@ -262,44 +247,6 @@ function renderInteractiveAssistant(data) {
         <button id="apply-interactive-btn" type="button" class="btn btn-outline btn-sm">Apply to context</button>
         <button id="rerun-interactive-btn" type="button" class="btn btn-primary btn-sm">Apply & re-diagnose</button>
       </div>
-    </section>`;
-}
-
-function renderPipelineTimeline(timeline) {
-  if (!Array.isArray(timeline) || !timeline.length) return "";
-  const rows = timeline.map((step) => `
-    <article class="timeline-step">
-      <div class="timeline-head">
-        <span class="step-status step-${escapeHtml(step.status || 'pending')}">${escapeHtml(step.status || 'pending')}</span>
-        <strong>${escapeHtml(step.label || step.key || "")}</strong>
-      </div>
-      <p>${escapeHtml(step.detail || "")}</p>
-    </article>`).join("");
-  return `<section class="trace-section"><h3>Pipeline Timeline</h3><div class="timeline-grid">${rows}</div></section>`;
-}
-
-function renderPipelineLogs(logs) {
-  if (!Array.isArray(logs) || !logs.length) return "";
-  const items = logs.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
-  return `<section class="trace-section"><h3>Pipeline Logs</h3><ol class="pipeline-log-list">${items}</ol></section>`;
-}
-
-function renderTraceBlock(title, value) {
-  if (!value || (typeof value === "object" && Object.keys(value).length === 0)) return "";
-  return `<section class="trace-section"><h3>${escapeHtml(title)}</h3><pre>${escapeHtml(JSON.stringify(value, null, 2))}</pre></section>`;
-}
-
-function renderPythonExecution(executionTrace) {
-  if (!executionTrace || Object.keys(executionTrace).length === 0) return "";
-  return `
-    <section class="trace-section">
-      <h3>Python Execution</h3>
-      <p>Engine: <code>${escapeHtml(executionTrace.engine || "-")}</code> | FIC: <code>${escapeHtml(executionTrace.fic_id || "-")}</code></p>
-      <p>Code:</p><pre>${escapeHtml(executionTrace.code || "")}</pre>
-      <p>Input:</p><pre>${escapeHtml(JSON.stringify(executionTrace.inputs || {}, null, 2))}</pre>
-      <p>Output (raw):</p><pre>${escapeHtml(JSON.stringify(executionTrace.raw_output, null, 2))}</pre>
-      <p>Output (parsed): <code>${escapeHtml(executionTrace.parsed_output_value)}</code></p>
-      ${executionTrace.error ? `<p>Error: <code>${escapeHtml(executionTrace.error)}</code></p>` : ""}
     </section>`;
 }
 
@@ -406,6 +353,7 @@ form.addEventListener("submit", async (event) => {
 document.getElementById("refresh-cards").addEventListener("click", loadCardsOverview);
 if (loadSampleBtn) loadSampleBtn.addEventListener("click", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
 if (sampleQuestionEl) sampleQuestionEl.addEventListener("change", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
+if (tabChat) tabChat.addEventListener("click", () => activateTab("chat"));
 tabQa.addEventListener("click", () => activateTab("qa"));
 tabCards.addEventListener("click", () => {
   activateTab("cards");
