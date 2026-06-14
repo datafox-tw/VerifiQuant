@@ -48,3 +48,6 @@
 [19:02:32] STALL at 130/250 (no card in 90s) -> kill pid=62331
 [19:02:32] build pid=62331 exited; cards=130/250; restarting if <250
 [19:02:34] launched build pid=72215 at 130/250
+[19:18:20] STALL at 139/250 (no card in 90s) -> kill pid=72215
+[19:18:20] build pid=72215 exited; cards=139/250; restarting if <250
+[19:18:22] launched build pid=181 at 139/250
