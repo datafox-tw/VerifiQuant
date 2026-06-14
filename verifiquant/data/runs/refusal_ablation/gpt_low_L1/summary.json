@@ -1,0 +1,15 @@
+{
+  "provider": "openai",
+  "model": "gpt-5.2",
+  "reasoning_effort": "low",
+  "refusal_level": 1,
+  "total": 50,
+  "correct": 42,
+  "silent_wrong": 6,
+  "safe_refusal": 2,
+  "accuracy": 0.84,
+  "coverage": 0.96,
+  "selective_accuracy": 0.875,
+  "swr": 0.125,
+  "safe_refusal_rate": 0.04
+}

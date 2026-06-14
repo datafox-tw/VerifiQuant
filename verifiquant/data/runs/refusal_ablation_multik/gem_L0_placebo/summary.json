@@ -1,0 +1,17 @@
+{
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "reasoning_effort": null,
+  "refusal_level": 0,
+  "max_turns": 6,
+  "oracle_mode": "placebo",
+  "total": 50,
+  "correct": 41,
+  "silent_wrong": 9,
+  "safe_refusal": 0,
+  "accuracy": 0.82,
+  "coverage": 1.0,
+  "selective_accuracy": 0.82,
+  "swr": 0.18,
+  "safe_refusal_rate": 0.0
+}

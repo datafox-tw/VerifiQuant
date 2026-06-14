@@ -855,4 +855,251 @@ pre {
   .inline-row { grid-template-columns: 1fr; }
   .sample-toolbar { grid-template-columns: 1fr; }
   .tech-grid { grid-template-columns: 1fr; }
+  .chat-bubble { max-width: 92%; }
 }
+
+/* ── CONVERSATION TAB ── */
+.spinner-sm {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-width: 2px;
+  vertical-align: -2px;
+}
+
+.chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.chat-empty {
+  margin: auto;
+  max-width: 32rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.95rem;
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-bubble.assistant {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-bubble.pending { color: var(--text-muted); }
+
+.chat-text { margin: 0; white-space: pre-wrap; }
+.chat-verdict { margin-bottom: 0.5rem; }
+
+.chat-answer {
+  margin: 0.25rem 0;
+  font-size: 1.05rem;
+}
+.chat-answer strong { color: var(--primary-dark); }
+
+.verified-check {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.chat-derived {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Inline answer widgets inside an assistant bubble */
+.cv-widget {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cv-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.cv-q { margin: 0; font-weight: 600; font-size: 0.9rem; }
+.cv-assumption { margin: 0; font-size: 0.82rem; color: var(--text-muted); }
+
+.cv-select,
+.cv-free {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.cv-submit { align-self: flex-start; }
+
+.cv-soft { display: flex; flex-direction: column; gap: 0.3rem; }
+.cv-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.5rem; }
+.cv-gselect { padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font: inherit; font-size: 0.9rem; }
+.cv-hint-note { margin: 0 0 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
+.cv-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem; }
+.cv-opt { display: inline-flex; align-items: center; gap: 0.4rem; }
+.cv-tag {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #0e7490;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.btn-primary .cv-tag { background: rgba(255,255,255,0.25); color: #fff; }
+
+/* Control-group bar */
+.chat-compare-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+}
+.chat-compare-toggle { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+/* Baseline (raw AI) bubble — visually distinct from VerifiQuant's */
+.chat-bubble.baseline {
+  align-self: flex-start;
+  background: #fff7ed;
+  border: 1px dashed #fdba74;
+}
+.chat-bubble.baseline.pending { color: var(--text-muted); }
+
+/* Ground-truth verdict chips */
+.verdict {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.verdict-ok { background: #dcfce7; color: #15803d; }
+.verdict-bad { background: #fee2e2; color: #b91c1c; }
+
+/* Diagnostic / audit report */
+.chat-bubble.audit { border-left: 3px solid var(--primary); }
+.audit-report {
+  margin: 0.6rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.audit-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-k {
+  flex: 0 0 9.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.audit-v { font-size: 0.9rem; }
+
+/* Per-answer "how this was derived & verified" disclosure */
+.bubble-details {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+  padding-top: 0.5rem;
+}
+.bubble-details > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+.bubble-details-body { margin-top: 0.6rem; }
+.bubble-details-body .trace-section { margin-top: 0.6rem; }
+
+/* Funnel stepper */
+.funnel-stepper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.6rem;
+}
+.funnel-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.funnel-step.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.funnel-arrow { color: var(--text-light); font-size: 0.9rem; }
+.funnel-gate { margin-left: 0.5rem; font-size: 0.82rem; color: var(--text-muted); }
+
+/* Composer */
+.chat-composer { display: flex; flex-direction: column; gap: 0.5rem; }
+.chat-composer-row { display: flex; gap: 0.5rem; align-items: stretch; }
+.chat-composer-row textarea {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  resize: vertical;
+}
+.chat-composer-row .btn { white-space: nowrap; }
+#chat-context textarea,
+#chat-context {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  resize: vertical;
+}
+.chat-hint { margin: 0; font-size: 0.78rem; color: var(--text-light); }

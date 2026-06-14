@@ -1,0 +1,50 @@
+[18:17:41] supervisor start; cards=119/250
+[18:17:41] launched build pid=37372 at 119/250
+[18:20:27] STALL at 120/250 (no card in 90s) -> kill pid=37372
+[18:20:27] build pid=37372 exited; cards=120/250; restarting if <250
+[18:20:29] launched build pid=39402 at 120/250
+[18:22:14] STALL at 120/250 (no card in 90s) -> kill pid=39402
+[18:22:14] build pid=39402 exited; cards=120/250; restarting if <250
+[18:22:16] launched build pid=40766 at 120/250
+[18:24:01] STALL at 120/250 (no card in 90s) -> kill pid=40766
+[18:24:01] build pid=40766 exited; cards=120/250; restarting if <250
+[18:24:03] launched build pid=42063 at 120/250
+[18:25:48] STALL at 120/250 (no card in 90s) -> kill pid=42063
+[18:25:48] build pid=42063 exited; cards=120/250; restarting if <250
+[18:25:50] launched build pid=43366 at 120/250
+[18:27:21] STALL at 120/250 (no card in 90s) -> kill pid=43366
+[18:27:21] build pid=43366 exited; cards=120/250; restarting if <250
+[18:27:23] launched build pid=44470 at 120/250
+[18:29:08] STALL at 120/250 (no card in 90s) -> kill pid=44470
+[18:29:08] build pid=44470 exited; cards=120/250; restarting if <250
+[18:29:10] launched build pid=45776 at 120/250
+[18:30:55] STALL at 120/250 (no card in 90s) -> kill pid=45776
+[18:30:55] build pid=45776 exited; cards=120/250; restarting if <250
+[18:30:57] launched build pid=47061 at 120/250
+[18:32:42] STALL at 120/250 (no card in 90s) -> kill pid=47061
+[18:32:42] build pid=47061 exited; cards=120/250; restarting if <250
+[18:32:44] launched build pid=48364 at 120/250
+[18:34:29] STALL at 120/250 (no card in 90s) -> kill pid=48364
+[18:34:30] build pid=48364 exited; cards=120/250; restarting if <250
+[18:34:32] launched build pid=49686 at 120/250
+[18:36:17] STALL at 120/250 (no card in 90s) -> kill pid=49686
+[18:36:17] build pid=49686 exited; cards=120/250; restarting if <250
+[18:36:19] launched build pid=50983 at 120/250
+[18:38:04] STALL at 120/250 (no card in 90s) -> kill pid=50983
+[18:38:04] build pid=50983 exited; cards=120/250; restarting if <250
+[18:38:06] launched build pid=52290 at 120/250
+[18:39:51] STALL at 120/250 (no card in 90s) -> kill pid=52290
+[18:39:51] build pid=52290 exited; cards=120/250; restarting if <250
+[18:39:53] launched build pid=53651 at 120/250
+[18:41:39] STALL at 120/250 (no card in 90s) -> kill pid=53651
+[18:41:39] build pid=53651 exited; cards=120/250; restarting if <250
+[18:41:41] launched build pid=54928 at 120/250
+[18:46:56] STALL at 122/250 (no card in 90s) -> kill pid=54928
+[18:46:56] build pid=54928 exited; cards=122/250; restarting if <250
+[18:46:58] launched build pid=58716 at 122/250
+[18:51:44] STALL at 124/250 (no card in 90s) -> kill pid=58716
+[18:51:44] build pid=58716 exited; cards=124/250; restarting if <250
+[18:51:46] launched build pid=62331 at 124/250
+[19:02:32] STALL at 130/250 (no card in 90s) -> kill pid=62331
+[19:02:32] build pid=62331 exited; cards=130/250; restarting if <250
+[19:02:34] launched build pid=72215 at 130/250

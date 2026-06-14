@@ -1,0 +1,17 @@
+{
+  "provider": "openai",
+  "model": "gpt-5.2",
+  "reasoning_effort": "medium",
+  "refusal_level": 0,
+  "max_turns": 6,
+  "oracle_mode": "placebo",
+  "total": 50,
+  "correct": 46,
+  "silent_wrong": 4,
+  "safe_refusal": 0,
+  "accuracy": 0.92,
+  "coverage": 1.0,
+  "selective_accuracy": 0.92,
+  "swr": 0.08,
+  "safe_refusal_rate": 0.0
+}

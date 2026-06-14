@@ -17,8 +17,26 @@ verifiquant/data/*.jsonl
 verifiquant/data/*.json
 verifiquant/data/*.yaml
 verifiquant/data/.DS_Store
+# Run artifacts are heavy; ship only the demo run (see VERIFIQUANT_DEMO_RUN in app.py).
+# To add a new demo run, allowlist its cards.db + question bank the same way.
+# Negation requires re-including each parent dir before the nested file.
 verifiquant/data/runs/*
-!verifiquant/data/runs/demo_50q_0415/
+
+# Default demo run: paper_v1 (questions_50 + fic/cards.db, a coherent pair)
+!verifiquant/data/runs/paper_v1
+verifiquant/data/runs/paper_v1/*
+!verifiquant/data/runs/paper_v1/questions_50.jsonl
+!verifiquant/data/runs/paper_v1/demo_showcase.jsonl
+!verifiquant/data/runs/paper_v1/trap
+verifiquant/data/runs/paper_v1/trap/*
+!verifiquant/data/runs/paper_v1/trap/trap_set.jsonl
+!verifiquant/data/runs/paper_v1/fic
+verifiquant/data/runs/paper_v1/fic/*
+!verifiquant/data/runs/paper_v1/fic/cards.db
+
+# Legacy fallback run
+!verifiquant/data/runs/demo_50q_0415
+verifiquant/data/runs/demo_50q_0415/*
 !verifiquant/data/runs/demo_50q_0415/cards.db
 *.db-journal
 .env

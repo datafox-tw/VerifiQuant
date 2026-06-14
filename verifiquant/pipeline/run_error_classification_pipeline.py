@@ -752,20 +752,31 @@ def _select_card_with_llm(client: Any, model: str, question: str, context: str, 
             f"not_applicable_when={r.get('not_applicable_when', [])}\n"
             f"scope_boundaries={r.get('scope_boundaries', [])}"
         )
-# 如果要刻意展現出M類錯誤用這個
-# 1) If one candidate clearly and unambiguously matches the explicitly stated user intent, return decision="select_card" and chosen_fic_id. You MUST strictly evaluate the candidate's selection_hints, applicable_when, not_applicable_when, and scope_boundaries. If the user's intent or scenario violates any of these, or if they are not definitively met, you MUST default to letting the user clarify.
-# 2) If the exact formula or metric (e.g., "NPV", "IRR", "Payback Period", etc.) is NOT explicitly named in the problem AND there is room for multiple valid interpretations (e.g., assessing general "profitability" or "feasibility"), you MUST return decision="abstain_m". DO NOT guess which metric is "most appropriate" or "industry standard", even if the provided variables perfectly match the inputs of a specific formula. If the user's question is vague (e.g., "will it earn money?"), you MUST trigger abstain_m to clarify which metric they want to use.
-
     prompt = f"""
 You are selecting a financial formula card from candidates.
 
-Decision policy:
-1) If one candidate clearly matches user intent, return decision="select_card" and chosen_fic_id.
-2) If intent is ambiguous (e.g., could be NPV vs IRR vs payback) or no candidate fits, return decision="abstain_m".
+Decision policy — judge ONLY the user's INTENT (which metric they want), NOT the quality of the
+input values. Apply in order:
+1) decision="select_card" — if the QUESTION or the CONTEXT explicitly names a specific
+   metric/formula (e.g. "NPV", "Fixed Asset Turnover ratio", "monthly loan payment", "CAGR",
+   "working ratio") and a candidate matches that named metric. This INCLUDES a clarification the
+   user added to the context (e.g. a note like "use NPV" or "the answer is: Net Present Value") —
+   once the user has named the metric, the ambiguity is resolved, so SELECT that card; do NOT
+   abstain_m again. SELECT IT even if the provided numbers look wrong, negative, out of range,
+   missing, or otherwise anomalous — validating input values is handled by later deterministic F/E
+   checks, NOT by you. Do not abstain because the data looks problematic.
+2) decision="abstain_m" — ONLY when the user states a GENERAL GOAL without naming a metric
+   (e.g. "is this project worth it", "will it earn money", "how did this investment perform") AND
+   two or more candidates could each plausibly serve that goal. You MUST abstain_m here even if the
+   variables perfectly fit one candidate; DO NOT guess the "most appropriate"/"best"/"industry-
+   standard" metric or argue others are "less suitable" — that choice belongs to the user. Provide
+   1-3 clarification_questions naming the competing metrics (e.g. "NPV, discounted payback, or ROI?").
+3) decision="abstain_n" — the named metric/logic is genuinely NOT supported by ANY candidate (the
+   library has no card for it), OR the user asks you to invent/derive a new formula. Provide
+   support_gap_reason. A supported metric with bad input values is NOT abstain_n — select it.
 
-3) If intent is clear but current candidate library does not support the requested logic/formula, return decision="abstain_n".
-4) For abstain_m, provide 1-3 clarification_questions and ambiguity_tags.
-5) For abstain_n, provide support_gap_reason; clarification_questions can be empty.
+Reminder: a named metric (even with bad data) → select_card. A vague goal with several fitting
+metrics → abstain_m. Truly unsupported/invented metric → abstain_n.
 
 Question:
 {question}
@@ -1074,6 +1085,36 @@ def _infer_open_critic_i_level(critic: Dict[str, Any]) -> str:
     return "soft"
 
 
+def _normalize_warning_options(raw_options: Any) -> List[Dict[str, Any]]:
+    """Normalize semantic-hint options to structured dicts the UI can act on.
+
+    Hint options may be dicts ({label, value, is_default, transform_spec?}) or plain
+    strings. Emit a uniform shape carrying `has_transform` so the frontend can offer a
+    verifiable atomic transform for options that declare one.
+    """
+    out: List[Dict[str, Any]] = []
+    for opt in (raw_options or []):
+        if isinstance(opt, dict):
+            label = str(opt.get("label", opt.get("value", ""))).strip()
+            value = str(opt.get("value", opt.get("label", ""))).strip()
+            if not (label or value):
+                continue
+            out.append(
+                {
+                    "label": label or value,
+                    "value": value or label,
+                    "is_default": bool(opt.get("is_default", False)),
+                    "has_transform": bool(opt.get("transform_spec")),
+                }
+            )
+        else:
+            text = str(opt).strip()
+            if not text:
+                continue
+            out.append({"label": text, "value": text, "is_default": False, "has_transform": False})
+    return out
+
+
 def _build_soft_warnings(
     *,
     critic: Dict[str, Any],
@@ -1099,7 +1140,7 @@ def _build_soft_warnings(
                         hint.get("assumption_if_not_clarified", "Proceed with default interpretation.")
                     ),
                     "clarification_question": str(hint.get("clarification_question", "")),
-                    "options": [str(x) for x in (hint.get("options") or []) if str(x).strip()],
+                    "options": _normalize_warning_options(hint.get("options")),
                 }
             )
         return warnings
@@ -1114,7 +1155,7 @@ def _build_soft_warnings(
             "clarification_question": "; ".join(
                 [str(x).strip() for x in critic.get("clarification_questions", []) if str(x).strip()]
             ),
-            "options": [str(x).strip() for x in critic.get("clarification_options", []) if str(x).strip()],
+            "options": _normalize_warning_options(critic.get("clarification_options")),
         }
     )
     return warnings
@@ -1721,14 +1762,38 @@ def run_case(
         i_repairs = _summarize_repairs(chosen_fic_id, i_rule_ids, repair_index) if i_rule_ids else []
         if is_hard_block and not i_repairs:
             i_repairs = _summarize_repairs(chosen_fic_id, ["global_i_semantic_ambiguity"], repair_index)
-        options: List[str] = []
+        # Structured options ({label, value, has_transform}) so the UI can offer a
+        # verifiable transform for the chosen interpretation (see _normalize_warning_options).
+        raw_options: List[Any] = []
         if semantic_hints:
             for hint in semantic_hints:
                 if not triggered_hint_ids or str(hint.get("id", "")) in triggered_hint_ids:
-                    options.extend([str(x).strip() for x in hint.get("options", []) if str(x).strip()])
+                    raw_options.extend(hint.get("options", []) or [])
         else:
-            options.extend(model_options)
-        options = list(dict.fromkeys(options))
+            raw_options.extend(model_options)
+        options = []
+        _seen_opt_values = set()
+        for opt in _normalize_warning_options(raw_options):
+            if opt["value"] in _seen_opt_values:
+                continue
+            _seen_opt_values.add(opt["value"])
+            options.append(opt)
+        # Per-question groups so the UI can render one selector per ambiguity (instead of one
+        # flat button row across multiple questions). Each group carries its own options.
+        clar_groups: List[Dict[str, Any]] = []
+        for hid in (triggered_hint_ids or []):
+            hint = hint_by_id.get(hid)
+            if not hint:
+                continue
+            grp_opts = _normalize_warning_options(hint.get("options"))
+            if not grp_opts:
+                continue
+            clar_groups.append({
+                "hint_id": hid,
+                "question": str(hint.get("clarification_question", "")).strip(),
+                "i_level": _semantic_hint_level(hint),
+                "options": grp_opts,
+            })
         if is_hard_block:
             _dbg("early-exit: I_hard (needs clarification)")
             _set_step("ihard_check", "error", "I_hard ambiguity requires user clarification.")
@@ -1748,6 +1813,7 @@ def run_case(
                 "clarification_request": {
                     "questions": clar_qs or ["Please confirm the intended financial interpretation."],
                     "options": options,
+                    "groups": clar_groups,
                     "triggered_hint_ids": triggered_hint_ids,
                     "mode": "hint_oriented" if semantic_hints else "open",
                 },

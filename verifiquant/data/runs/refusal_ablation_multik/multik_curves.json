@@ -1,0 +1,425 @@
+{
+  "max_k": 6,
+  "cells": {
+    "gpt_medium_L0": {
+      "provider": "openai",
+      "model": "gpt-5.2",
+      "effort": "medium",
+      "level": 0,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 43,
+          "silent_wrong": 7,
+          "safe_refusal": 0,
+          "accuracy": 0.86,
+          "swr": 0.14,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 49,
+          "silent_wrong": 1,
+          "safe_refusal": 0,
+          "accuracy": 0.98,
+          "swr": 0.02,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 3,
+          "correct": 48,
+          "silent_wrong": 2,
+          "safe_refusal": 0,
+          "accuracy": 0.96,
+          "swr": 0.04,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 4,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 5,
+          "correct": 49,
+          "silent_wrong": 1,
+          "safe_refusal": 0,
+          "accuracy": 0.98,
+          "swr": 0.02,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 6,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        }
+      ],
+      "avg_rounds": 6.0
+    },
+    "gpt_medium_L1": {
+      "provider": "openai",
+      "model": "gpt-5.2",
+      "effort": "medium",
+      "level": 1,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 43,
+          "silent_wrong": 7,
+          "safe_refusal": 0,
+          "accuracy": 0.86,
+          "swr": 0.14,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 49,
+          "silent_wrong": 1,
+          "safe_refusal": 0,
+          "accuracy": 0.98,
+          "swr": 0.02,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 3,
+          "correct": 48,
+          "silent_wrong": 2,
+          "safe_refusal": 0,
+          "accuracy": 0.96,
+          "swr": 0.04,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 4,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 5,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 6,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        }
+      ],
+      "avg_rounds": 5.96
+    },
+    "gpt_medium_L3": {
+      "provider": "openai",
+      "model": "gpt-5.2",
+      "effort": "medium",
+      "level": 3,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 39,
+          "silent_wrong": 5,
+          "safe_refusal": 6,
+          "accuracy": 0.78,
+          "swr": 0.1136,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 7,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 3,
+          "correct": 48,
+          "silent_wrong": 2,
+          "safe_refusal": 0,
+          "accuracy": 0.96,
+          "swr": 0.04,
+          "recovered_vs_k1": 9,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 4,
+          "correct": 49,
+          "silent_wrong": 1,
+          "safe_refusal": 0,
+          "accuracy": 0.98,
+          "swr": 0.02,
+          "recovered_vs_k1": 10,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 5,
+          "correct": 47,
+          "silent_wrong": 2,
+          "safe_refusal": 1,
+          "accuracy": 0.94,
+          "swr": 0.0408,
+          "recovered_vs_k1": 8,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 6,
+          "correct": 50,
+          "silent_wrong": 0,
+          "safe_refusal": 0,
+          "accuracy": 1.0,
+          "swr": 0.0,
+          "recovered_vs_k1": 11,
+          "broken_vs_k1": 0
+        }
+      ],
+      "avg_rounds": 5.98
+    },
+    "gem_L0": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "effort": "low",
+      "level": 0,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 40,
+          "silent_wrong": 10,
+          "safe_refusal": 0,
+          "accuracy": 0.8,
+          "swr": 0.2,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 44,
+          "silent_wrong": 6,
+          "safe_refusal": 0,
+          "accuracy": 0.88,
+          "swr": 0.12,
+          "recovered_vs_k1": 4,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 3,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 4,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 5,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 6,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 6,
+          "broken_vs_k1": 0
+        }
+      ],
+      "avg_rounds": 1.62
+    },
+    "gem_L1": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "effort": "low",
+      "level": 1,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 43,
+          "silent_wrong": 5,
+          "safe_refusal": 2,
+          "accuracy": 0.86,
+          "swr": 0.1042,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 47,
+          "silent_wrong": 3,
+          "safe_refusal": 0,
+          "accuracy": 0.94,
+          "swr": 0.06,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 3,
+          "correct": 47,
+          "silent_wrong": 3,
+          "safe_refusal": 0,
+          "accuracy": 0.94,
+          "swr": 0.06,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 4,
+          "correct": 47,
+          "silent_wrong": 3,
+          "safe_refusal": 0,
+          "accuracy": 0.94,
+          "swr": 0.06,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 5,
+          "correct": 47,
+          "silent_wrong": 3,
+          "safe_refusal": 0,
+          "accuracy": 0.94,
+          "swr": 0.06,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 1
+        },
+        {
+          "k": 6,
+          "correct": 47,
+          "silent_wrong": 3,
+          "safe_refusal": 0,
+          "accuracy": 0.94,
+          "swr": 0.06,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 1
+        }
+      ],
+      "avg_rounds": 1.6
+    },
+    "gem_L3": {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "effort": "low",
+      "level": 3,
+      "n": 50,
+      "curve": [
+        {
+          "k": 1,
+          "correct": 41,
+          "silent_wrong": 8,
+          "safe_refusal": 1,
+          "accuracy": 0.82,
+          "swr": 0.1633,
+          "recovered_vs_k1": 0,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 2,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 3,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 4,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 5,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 0
+        },
+        {
+          "k": 6,
+          "correct": 46,
+          "silent_wrong": 4,
+          "safe_refusal": 0,
+          "accuracy": 0.92,
+          "swr": 0.08,
+          "recovered_vs_k1": 5,
+          "broken_vs_k1": 0
+        }
+      ],
+      "avg_rounds": 1.48
+    }
+  }
+}

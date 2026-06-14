@@ -10,11 +10,61 @@
   </div>
 
   <nav class="tab-nav">
-    <button id="tab-qa" class="tab-btn active" type="button">Single Query</button>
+    <button id="tab-chat" class="tab-btn active" type="button">Conversation</button>
+    <button id="tab-qa" class="tab-btn" type="button">Single Query</button>
     <button id="tab-cards" class="tab-btn" type="button">FIC Cards</button>
   </nav>
 
-  <section id="panel-qa" class="panel active">
+  <section id="panel-chat" class="panel active">
+    <div class="sample-toolbar">
+      <label>
+        Showcase (one per funnel class)
+        <select id="chat-showcase"></select>
+      </label>
+      <label>
+        Or a sample from the bank
+        <select id="chat-sample"><option value="">Choose a sample…</option></select>
+      </label>
+      <button id="chat-reset" type="button" class="btn btn-outline btn-sm">New conversation</button>
+    </div>
+    <div class="chat-compare-bar">
+      <label class="chat-compare-toggle">
+        <input id="chat-compare" type="checkbox" /> Compare with raw AI (no guardrails)
+      </label>
+      <label>
+        Control model
+        <select id="chat-baseline-model">
+          <option value="gemini">Gemini (gemini-2.5-flash)</option>
+          <option value="gpt">GPT (gpt-5.2)</option>
+        </select>
+      </label>
+    </div>
+    <div id="chat-showcase-note" class="sample-meta"></div>
+    <div id="chat-sample-meta" class="sample-meta"></div>
+
+    <div id="chat-thread" class="chat-thread">
+      <div class="chat-empty">
+        Ask a financial question. The funnel screens, estimates, and solves &mdash; then
+        points out a verified answer or the exact issue, and asks for what it needs.
+      </div>
+    </div>
+
+    <div class="chat-composer">
+      <div id="chat-context-wrap">
+        <details class="advanced-toggle">
+          <summary>Context (JSON or plain text, optional)</summary>
+          <textarea id="chat-context" rows="4" placeholder='{"net_sales": 500000, "beginning_fixed_assets": 200000}'></textarea>
+        </details>
+      </div>
+      <div class="chat-composer-row">
+        <textarea id="chat-input" rows="2" placeholder="Ask a financial question to start a verified diagnosis…"></textarea>
+        <button id="chat-send" type="button" class="btn btn-primary">Send</button>
+      </div>
+      <p class="chat-hint">Press &#8984;/Ctrl + Enter to send.</p>
+    </div>
+  </section>
+
+  <section id="panel-qa" class="panel">
     <form id="question-form" class="demo-form">
       <div class="sample-toolbar">
         <label>
@@ -79,5 +129,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='diagnostic_render.js') }}"></script>
 <script src="{{ url_for('static', filename='demo.js') }}"></script>
+<script src="{{ url_for('static', filename='conversation.js') }}"></script>
 {% endblock %}
