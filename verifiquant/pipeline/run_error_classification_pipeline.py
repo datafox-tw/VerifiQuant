@@ -755,23 +755,28 @@ def _select_card_with_llm(client: Any, model: str, question: str, context: str, 
     prompt = f"""
 You are selecting a financial formula card from candidates.
 
-Decision policy (apply strictly, in order):
-1) decision="select_card" — ONLY if the question EXPLICITLY names the specific metric/formula
-   (e.g. "NPV", "Fixed Asset Turnover ratio", "monthly loan payment", "CAGR") AND exactly one
-   candidate's selection_hints / applicable_when / not_applicable_when / scope_boundaries are all
-   satisfied. If any boundary is violated or not definitively met, do NOT select.
-2) decision="abstain_m" — if the exact metric/formula is NOT explicitly named AND two or more
-   candidates could each plausibly serve the user's general goal (e.g. generic "profitability",
-   "is this project worth it", "will it earn money", "how did this investment perform").
-   You MUST abstain_m even if the provided variables perfectly match one candidate's inputs.
-   DO NOT guess the "most appropriate", "best", or "industry-standard" metric, and do NOT argue
-   that other candidates are "less suitable" — that decision belongs to the user. Provide 1-3
-   clarification_questions that name the competing metrics (e.g. "NPV, discounted payback, or ROI?").
-3) decision="abstain_n" — intent is clear but no candidate supports the requested logic/formula.
-   Provide support_gap_reason; clarification_questions can be empty.
+Decision policy — judge ONLY the user's INTENT (which metric they want), NOT the quality of the
+input values. Apply in order:
+1) decision="select_card" — if the QUESTION or the CONTEXT explicitly names a specific
+   metric/formula (e.g. "NPV", "Fixed Asset Turnover ratio", "monthly loan payment", "CAGR",
+   "working ratio") and a candidate matches that named metric. This INCLUDES a clarification the
+   user added to the context (e.g. a note like "use NPV" or "the answer is: Net Present Value") —
+   once the user has named the metric, the ambiguity is resolved, so SELECT that card; do NOT
+   abstain_m again. SELECT IT even if the provided numbers look wrong, negative, out of range,
+   missing, or otherwise anomalous — validating input values is handled by later deterministic F/E
+   checks, NOT by you. Do not abstain because the data looks problematic.
+2) decision="abstain_m" — ONLY when the user states a GENERAL GOAL without naming a metric
+   (e.g. "is this project worth it", "will it earn money", "how did this investment perform") AND
+   two or more candidates could each plausibly serve that goal. You MUST abstain_m here even if the
+   variables perfectly fit one candidate; DO NOT guess the "most appropriate"/"best"/"industry-
+   standard" metric or argue others are "less suitable" — that choice belongs to the user. Provide
+   1-3 clarification_questions naming the competing metrics (e.g. "NPV, discounted payback, or ROI?").
+3) decision="abstain_n" — the named metric/logic is genuinely NOT supported by ANY candidate (the
+   library has no card for it), OR the user asks you to invent/derive a new formula. Provide
+   support_gap_reason. A supported metric with bad input values is NOT abstain_n — select it.
 
-Tie-break: when a question states only a general goal (not a named metric) and multiple candidates
-fit, PREFER abstain_m. Handing the method choice back to the user is correct behaviour, not a failure.
+Reminder: a named metric (even with bad data) → select_card. A vague goal with several fitting
+metrics → abstain_m. Truly unsupported/invented metric → abstain_n.
 
 Question:
 {question}
@@ -1773,6 +1778,22 @@ def run_case(
                 continue
             _seen_opt_values.add(opt["value"])
             options.append(opt)
+        # Per-question groups so the UI can render one selector per ambiguity (instead of one
+        # flat button row across multiple questions). Each group carries its own options.
+        clar_groups: List[Dict[str, Any]] = []
+        for hid in (triggered_hint_ids or []):
+            hint = hint_by_id.get(hid)
+            if not hint:
+                continue
+            grp_opts = _normalize_warning_options(hint.get("options"))
+            if not grp_opts:
+                continue
+            clar_groups.append({
+                "hint_id": hid,
+                "question": str(hint.get("clarification_question", "")).strip(),
+                "i_level": _semantic_hint_level(hint),
+                "options": grp_opts,
+            })
         if is_hard_block:
             _dbg("early-exit: I_hard (needs clarification)")
             _set_step("ihard_check", "error", "I_hard ambiguity requires user clarification.")
@@ -1792,6 +1813,7 @@ def run_case(
                 "clarification_request": {
                     "questions": clar_qs or ["Please confirm the intended financial interpretation."],
                     "options": options,
+                    "groups": clar_groups,
                     "triggered_hint_ids": triggered_hint_ids,
                     "mode": "hint_oriented" if semantic_hints else "open",
                 },

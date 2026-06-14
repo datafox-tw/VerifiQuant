@@ -30,10 +30,13 @@
   /* ── Conversation state (browser-held, original is immutable) ── */
   let cvOriginalQuestion = "";
   let cvOriginalContext = "";
-  let cvAccumulatedUpdates = {};
+  let cvAccumulatedUpdates = {}; // structured slot fields (e.g. annual_interest_rate)
+  let cvNotes = []; // running transcript of clarification answers (Q→A), never overwritten
+  let cvAnsweredHints = new Set(); // hint_ids the user already answered → don't re-prompt
   let cvShowcase = [];
   let cvActiveGroundTruth = null; // numeric gold for the active showcase/sample, if any
   let cvActiveExpectedClass = null; // expected funnel class (M/N/F/E/I) for trap/showcase cases
+  let cvSeededNew = false; // a dropdown item was staged → next Send starts a fresh question
   let cvStarted = false;
   let cvBusy = false;
   let cvSamples = [];
@@ -183,30 +186,67 @@
 
   // Render an option as a button. Options that declare a verifiable transform trigger
   // /api/transform/apply; others re-diagnose with the choice as a resolving note.
-  function optionButton(o, idx, oi) {
+  function optionButton(o, idx, oi, hintId) {
     const label = optLabel(o);
     const value = optValue(o);
     const hasTransform = typeof o === "object" && o && o.has_transform;
     const cls = hasTransform ? "btn btn-primary btn-sm cv-opt" : "btn btn-outline btn-sm cv-opt";
     const tag = hasTransform ? ' <span class="cv-tag">verified transform</span>' : "";
     return `<button type="button" class="${cls}" data-w="${idx}" data-o="${oi}"
+              data-hint="${escapeHtml(hintId || "")}"
               data-value="${escapeHtml(value)}" data-label="${escapeHtml(label)}"
               data-transform="${hasTransform ? "1" : "0"}">${escapeHtml(label)}${tag}</button>`;
   }
 
-  // I_hard: intercept with NO number. Options become buttons (transform-aware), plus a
-  // free-text fallback. Picking a transform option applies the verified atomic transform.
+  // I_hard: intercept with NO number. Renders ONE selector per ambiguity (group); a single
+  // group keeps the transform-aware option buttons (the loan hero); multiple groups become
+  // dropdowns answered together in one submit. Already-answered hints are not re-shown.
   function hardClarificationWidget(data) {
     const clar = data.clarification_request || null;
-    if (!clar || !(clar.questions || []).length) return "";
+    if (!clar) return "";
+    const hadGroups = (clar.groups || []).length > 0;
+    const groups = (clar.groups || []).filter((g) => g.hint_id && !cvAnsweredHints.has(g.hint_id));
+
+    if (groups.length === 1) {
+      const g = groups[0];
+      const buttons = (g.options || []).map((o, oi) => optionButton(o, 0, oi, g.hint_id)).join("");
+      return `
+        <div class="cv-widget" data-kind="clarification" data-hint="${escapeHtml(g.hint_id)}">
+          <div class="cv-soft" data-hint="${escapeHtml(g.hint_id)}">
+            <p class="cv-q">${escapeHtml(g.question)}</p>
+            <div class="cv-opts">${buttons}</div>
+          </div>
+          <div class="cv-field"><input class="cv-free" type="text" placeholder="or type a precise answer" /></div>
+          <button type="button" class="btn btn-outline btn-sm cv-submit">Submit typed answer</button>
+        </div>`;
+    }
+    if (groups.length > 1) {
+      const blocks = groups.map((g) => {
+        const opts = (g.options || []).map((o) =>
+          `<option value="${escapeHtml(optValue(o))}">${escapeHtml(optLabel(o))}</option>`).join("");
+        return `
+          <div class="cv-group" data-hint="${escapeHtml(g.hint_id)}">
+            <p class="cv-q">${escapeHtml(g.question)}</p>
+            <select class="cv-gselect"><option value="">Choose…</option>${opts}</select>
+          </div>`;
+      }).join("");
+      return `
+        <div class="cv-widget" data-kind="clarification-multi">
+          <p class="cv-hint-note">Answer each question, then submit together.</p>
+          ${blocks}
+          <button type="button" class="btn btn-primary btn-sm cv-multi-submit">Submit answers</button>
+        </div>`;
+    }
+
+    // All structured groups already answered → don't re-prompt via the flat fallback.
+    if (hadGroups) return "";
+    // Open mode (no structured hints) → flat fallback.
+    if (!(clar.questions || []).length) return "";
     const questions = (clar.questions || []).map((q) => `<p class="cv-q">${escapeHtml(q)}</p>`).join("");
     const buttons = (clar.options || []).map((o, oi) => optionButton(o, 0, oi)).join("");
     return `
       <div class="cv-widget" data-kind="clarification">
-        <div class="cv-soft">
-          ${questions}
-          ${buttons ? `<div class="cv-opts">${buttons}</div>` : ""}
-        </div>
+        <div class="cv-soft">${questions}${buttons ? `<div class="cv-opts">${buttons}</div>` : ""}</div>
         <div class="cv-field"><input class="cv-free" type="text" placeholder="or type a precise answer" /></div>
         <button type="button" class="btn btn-outline btn-sm cv-submit">Submit typed answer</button>
       </div>`;
@@ -215,12 +255,13 @@
   // I_soft: each option is a button. Options that declare a verifiable transform
   // trigger /api/transform/apply; others re-diagnose with the choice as a note.
   function softWarningWidget(data) {
-    const soft = Array.isArray(data.soft_warnings) ? data.soft_warnings : [];
+    const soft = (Array.isArray(data.soft_warnings) ? data.soft_warnings : [])
+      .filter((w) => !cvAnsweredHints.has(w.hint_id));
     if (!soft.length) return "";
     const blocks = soft.map((w, idx) => {
-      const buttons = (w.options || []).map((o, oi) => optionButton(o, idx, oi)).join("");
+      const buttons = (w.options || []).map((o, oi) => optionButton(o, idx, oi, w.hint_id)).join("");
       return `
-        <div class="cv-soft" data-w="${idx}">
+        <div class="cv-soft" data-w="${idx}" data-hint="${escapeHtml(w.hint_id || "")}">
           <p class="cv-assumption">Default if unanswered: <em>${escapeHtml(w.assumption_if_not_clarified || "-")}</em></p>
           <p class="cv-q">${escapeHtml(w.clarification_question || "-")}</p>
           <div class="cv-opts">${buttons || "<em>(no options)</em>"}</div>
@@ -257,7 +298,7 @@
   }
 
   function wireBubble(bubble, data) {
-    // Submit-style widgets (hard clarification / repair).
+    // Submit-style widgets (single-group hard clarification / repair, typed answer).
     bubble.querySelectorAll(".cv-widget .cv-submit").forEach((submit) => {
       submit.addEventListener("click", async () => {
         if (cvBusy) return;
@@ -268,22 +309,48 @@
           alert("Please answer at least one field.");
           return;
         }
+        if (widget.dataset.hint) cvAnsweredHints.add(widget.dataset.hint);
         lockWidgets(bubble);
         await runRepairTurn(updates, summary);
       });
     });
 
-    // Soft-warning option buttons (transform or note).
+    // Multi-question hard clarification: collect every group's selection, submit once.
+    bubble.querySelectorAll(".cv-widget .cv-multi-submit").forEach((submit) => {
+      submit.addEventListener("click", async () => {
+        if (cvBusy) return;
+        const widget = submit.closest(".cv-widget");
+        const parts = [];
+        widget.querySelectorAll(".cv-group").forEach((g) => {
+          const sel = g.querySelector(".cv-gselect");
+          const val = sel ? sel.value.trim() : "";
+          if (!val) return;
+          const q = (g.querySelector(".cv-q") || {}).textContent || "";
+          parts.push(`Regarding "${q.trim()}", the answer is: ${val}`);
+          if (g.dataset.hint) cvAnsweredHints.add(g.dataset.hint);
+        });
+        if (!parts.length) { alert("Please answer at least one question."); return; }
+        lockWidgets(bubble);
+        await runRepairTurn({ user_context_note: parts.join(" ; ") }, parts.join(" ; "));
+      });
+    });
+
+    // Option buttons (single-group hard clarification, or soft warnings): transform or note.
     bubble.querySelectorAll(".cv-widget .cv-opt").forEach((btn) => {
       btn.addEventListener("click", async () => {
         if (cvBusy) return;
         const value = btn.dataset.value;
         const label = btn.dataset.label;
+        // Pair the answer with its question so the transcript reads as clear Q→A.
+        const qEl = btn.closest(".cv-soft, .cv-widget").querySelector(".cv-q");
+        const q = qEl ? qEl.textContent.trim() : "";
+        const note = q ? `Regarding "${q}", the answer is: ${label}` : label;
+        if (btn.dataset.hint) cvAnsweredHints.add(btn.dataset.hint);
         lockWidgets(bubble);
         if (btn.dataset.transform === "1") {
           await applyTransform(data, value, label);
         } else {
-          await runRepairTurn({ user_context_note: `${label}` }, label);
+          await runRepairTurn({ user_context_note: note }, label);
         }
       });
     });
@@ -431,6 +498,8 @@
     cvOriginalQuestion = question;
     cvOriginalContext = (contextEl.value || "").trim();
     cvAccumulatedUpdates = {};
+    cvNotes = [];
+    cvAnsweredHints = new Set();
     cvStarted = true;
 
     appendUser(question + (cvOriginalContext ? `\n\ncontext: ${cvOriginalContext}` : ""));
@@ -456,14 +525,26 @@
 
   async function runRepairTurn(updates, summary) {
     cvBusy = true;
-    cvAccumulatedUpdates = { ...cvAccumulatedUpdates, ...updates };
+    // Free-text clarification answers reuse the same key, so APPEND them to a transcript
+    // instead of letting each turn overwrite the last (e.g. "use NPV" then "end of period"
+    // must BOTH stay in context). Structured slot fields keep accumulating by their own key.
+    const incoming = { ...updates };
+    if (incoming.user_context_note) {
+      cvNotes.push(String(incoming.user_context_note));
+      delete incoming.user_context_note;
+    }
+    cvAccumulatedUpdates = { ...cvAccumulatedUpdates, ...incoming };
     appendUser(summary || "(answer provided)");
     const pending = appendStatus("Re-diagnosing with your answer…");
+
+    // Compose original + structured fields + the FULL clarification transcript.
+    const composeUpdates = { ...cvAccumulatedUpdates };
+    if (cvNotes.length) composeUpdates.user_context_note = cvNotes.join(" | ");
 
     let composedContext = cvOriginalContext;
     try {
       // Always recompose from the IMMUTABLE original + ALL accumulated answers.
-      composedContext = await apiCompose(cvOriginalContext, cvAccumulatedUpdates);
+      composedContext = await apiCompose(cvOriginalContext, composeUpdates);
       const data = await apiDiagnose(cvOriginalQuestion, composedContext);
       pending.remove();
       renderAssistant(data);
@@ -489,14 +570,39 @@
   }
 
   function onSend() {
-    if (!cvStarted) runFirstTurn();
+    if (cvSeededNew) sendAsNewQuestion();
+    else if (!cvStarted) runFirstTurn();
     else runFollowUp();
+  }
+
+  // A staged dropdown item is a NEW question: clear the prior thread/state at send-time
+  // (not at click-time), keep the composer values + gold/expected class, then run turn 1.
+  function sendAsNewQuestion() {
+    cvSeededNew = false;
+    const q = inputEl.value;
+    const c = contextEl ? contextEl.value : "";
+    const gt = cvActiveGroundTruth;
+    const ec = cvActiveExpectedClass;
+    threadEl.innerHTML = "";
+    cvOriginalQuestion = "";
+    cvOriginalContext = "";
+    cvAccumulatedUpdates = {};
+    cvNotes = [];
+    cvAnsweredHints = new Set();
+    cvStarted = false;
+    inputEl.value = q;
+    if (contextEl) contextEl.value = c;
+    cvActiveGroundTruth = gt;
+    cvActiveExpectedClass = ec;
+    runFirstTurn();
   }
 
   function resetConversation() {
     cvOriginalQuestion = "";
     cvOriginalContext = "";
     cvAccumulatedUpdates = {};
+    cvNotes = [];
+    cvAnsweredHints = new Set();
     cvActiveGroundTruth = null;
     cvActiveExpectedClass = null;
     cvStarted = false;
@@ -517,11 +623,13 @@
 
   function seedFrom(item, note) {
     if (!item) return;
-    // Fill the composer fields only — do NOT reset the conversation or start a new session.
+    // Fill the composer fields only — do NOT clear the thread now (no disruption on click).
+    // The NEXT Send will start this as a fresh question (see onSend / sendAsNewQuestion).
     inputEl.value = item.question || "";
     if (contextEl) contextEl.value = item.context || "";
     cvActiveGroundTruth = (item.ground_truth === undefined ? null : item.ground_truth);
     cvActiveExpectedClass = item.expected_class || item.expected_diagnostic || null;
+    cvSeededNew = true;
     if (showcaseNoteEl) showcaseNoteEl.textContent = note || "";
     // Make sure the (possibly hidden/collapsed) context field is visible so the seed shows.
     const wrap = document.getElementById("chat-context-wrap");

@@ -966,6 +966,9 @@ pre {
 .cv-submit { align-self: flex-start; }
 
 .cv-soft { display: flex; flex-direction: column; gap: 0.3rem; }
+.cv-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.5rem; }
+.cv-gselect { padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font: inherit; font-size: 0.9rem; }
+.cv-hint-note { margin: 0 0 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
 .cv-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem; }
 .cv-opt { display: inline-flex; align-items: center; gap: 0.4rem; }
 .cv-tag {
