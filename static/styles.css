@@ -581,6 +581,50 @@ textarea:focus, input:focus, select:focus {
   color: var(--text-muted);
 }
 
+.gold-badge {
+  margin-bottom: 0.85rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+}
+
+.chat-context-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.chat-context-panel label {
+  margin-bottom: 0.5rem;
+}
+
+.pdf-attach {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0.25rem 0 0.9rem;
+}
+
+.pdf-attach input[type="file"] {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
+
+.pdf-status {
+  grid-column: 1 / -1;
+  min-height: 1.1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
 .inline-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -854,6 +898,7 @@ pre {
   .funnel-grid { grid-template-columns: 1fr; }
   .inline-row { grid-template-columns: 1fr; }
   .sample-toolbar { grid-template-columns: 1fr; }
+  .pdf-attach { grid-template-columns: 1fr; }
   .tech-grid { grid-template-columns: 1fr; }
   .chat-bubble { max-width: 92%; }
 }

@@ -48,3 +48,794 @@
 [19:02:32] STALL at 130/250 (no card in 90s) -> kill pid=62331
 [19:02:32] build pid=62331 exited; cards=130/250; restarting if <250
 [19:02:34] launched build pid=72215 at 130/250
+[19:40:40] STALL at 154/250 (no card in 90s) -> kill pid=181
+[19:40:40] build pid=181 exited; cards=154/250; restarting if <250
+[19:40:42] launched build pid=16541 at 154/250
+[20:35:17] STALL at 191/250 (no card in 90s) -> kill pid=16541
+[20:35:18] build pid=16541 exited; cards=191/250; restarting if <250
+[20:35:20] launched build pid=73243 at 191/250
+[20:40:50] STALL at 194/250 (no card in 90s) -> kill pid=73243
+[20:40:50] build pid=73243 exited; cards=194/250; restarting if <250
+[20:40:52] launched build pid=2909 at 194/250
+[20:45:38] STALL at 196/250 (no card in 90s) -> kill pid=2909
+[20:45:38] build pid=2909 exited; cards=196/250; restarting if <250
+[20:45:40] launched build pid=27939 at 196/250
+[20:53:55] STALL at 200/250 (no card in 90s) -> kill pid=27939
+[20:53:56] build pid=27939 exited; cards=200/250; restarting if <250
+[20:53:58] launched build pid=69090 at 200/250
+[20:55:43] STALL at 200/250 (no card in 90s) -> kill pid=69090
+[20:55:43] build pid=69090 exited; cards=200/250; restarting if <250
+[20:55:45] launched build pid=77049 at 200/250
+[20:57:30] STALL at 200/250 (no card in 90s) -> kill pid=77049
+[20:57:30] build pid=77049 exited; cards=200/250; restarting if <250
+[20:57:32] launched build pid=84612 at 200/250
+[20:59:17] STALL at 200/250 (no card in 90s) -> kill pid=84612
+[20:59:17] build pid=84612 exited; cards=200/250; restarting if <250
+[20:59:19] launched build pid=92594 at 200/250
+[21:01:04] STALL at 200/250 (no card in 90s) -> kill pid=92594
+[21:01:04] build pid=92594 exited; cards=200/250; restarting if <250
+[21:01:07] launched build pid=409 at 200/250
+[21:02:52] STALL at 200/250 (no card in 90s) -> kill pid=409
+[21:02:52] build pid=409 exited; cards=200/250; restarting if <250
+[21:02:54] launched build pid=8011 at 200/250
+[21:04:39] STALL at 200/250 (no card in 90s) -> kill pid=8011
+[21:04:39] build pid=8011 exited; cards=200/250; restarting if <250
+[21:04:41] launched build pid=16131 at 200/250
+[21:06:26] STALL at 200/250 (no card in 90s) -> kill pid=16131
+[21:06:26] build pid=16131 exited; cards=200/250; restarting if <250
+[21:06:28] launched build pid=23855 at 200/250
+[21:07:59] STALL at 200/250 (no card in 90s) -> kill pid=23855
+[21:07:59] build pid=23855 exited; cards=200/250; restarting if <250
+[21:08:01] launched build pid=30489 at 200/250
+[21:09:46] STALL at 200/250 (no card in 90s) -> kill pid=30489
+[21:09:46] build pid=30489 exited; cards=200/250; restarting if <250
+[21:09:48] launched build pid=38032 at 200/250
+[21:11:33] STALL at 200/250 (no card in 90s) -> kill pid=38032
+[21:11:33] build pid=38032 exited; cards=200/250; restarting if <250
+[21:11:35] launched build pid=45609 at 200/250
+[21:13:20] STALL at 200/250 (no card in 90s) -> kill pid=45609
+[21:13:20] build pid=45609 exited; cards=200/250; restarting if <250
+[21:13:22] launched build pid=54982 at 200/250
+[21:14:53] STALL at 200/250 (no card in 90s) -> kill pid=54982
+[21:14:53] build pid=54982 exited; cards=200/250; restarting if <250
+[21:14:55] launched build pid=63300 at 200/250
+[21:16:40] STALL at 200/250 (no card in 90s) -> kill pid=63300
+[21:16:40] build pid=63300 exited; cards=200/250; restarting if <250
+[21:16:42] launched build pid=72083 at 200/250
+[21:18:27] STALL at 200/250 (no card in 90s) -> kill pid=72083
+[21:18:27] build pid=72083 exited; cards=200/250; restarting if <250
+[21:18:29] launched build pid=79639 at 200/250
+[21:20:14] STALL at 200/250 (no card in 90s) -> kill pid=79639
+[21:20:14] build pid=79639 exited; cards=200/250; restarting if <250
+[21:20:16] launched build pid=87111 at 200/250
+[21:21:47] STALL at 200/250 (no card in 90s) -> kill pid=87111
+[21:21:47] build pid=87111 exited; cards=200/250; restarting if <250
+[21:21:49] launched build pid=93952 at 200/250
+[21:23:34] STALL at 200/250 (no card in 90s) -> kill pid=93952
+[21:23:34] build pid=93952 exited; cards=200/250; restarting if <250
+[21:23:36] launched build pid=1662 at 200/250
+[21:25:21] STALL at 200/250 (no card in 90s) -> kill pid=1662
+[21:25:21] build pid=1662 exited; cards=200/250; restarting if <250
+[21:25:23] launched build pid=9159 at 200/250
+[21:27:08] STALL at 200/250 (no card in 90s) -> kill pid=9159
+[21:27:08] build pid=9159 exited; cards=200/250; restarting if <250
+[21:27:10] launched build pid=16624 at 200/250
+[21:28:55] STALL at 200/250 (no card in 90s) -> kill pid=16624
+[21:28:55] build pid=16624 exited; cards=200/250; restarting if <250
+[21:28:58] launched build pid=24130 at 200/250
+[21:30:43] STALL at 200/250 (no card in 90s) -> kill pid=24130
+[21:30:43] build pid=24130 exited; cards=200/250; restarting if <250
+[21:30:45] launched build pid=31805 at 200/250
+[21:32:30] STALL at 200/250 (no card in 90s) -> kill pid=31805
+[21:32:30] build pid=31805 exited; cards=200/250; restarting if <250
+[21:32:32] launched build pid=39263 at 200/250
+[21:34:17] STALL at 200/250 (no card in 90s) -> kill pid=39263
+[21:34:17] build pid=39263 exited; cards=200/250; restarting if <250
+[21:34:19] launched build pid=46752 at 200/250
+[21:36:05] STALL at 200/250 (no card in 90s) -> kill pid=46752
+[21:36:05] build pid=46752 exited; cards=200/250; restarting if <250
+[21:36:07] launched build pid=54198 at 200/250
+[21:37:52] STALL at 200/250 (no card in 90s) -> kill pid=54198
+[21:37:52] build pid=54198 exited; cards=200/250; restarting if <250
+[21:37:54] launched build pid=61886 at 200/250
+[21:39:39] STALL at 200/250 (no card in 90s) -> kill pid=61886
+[21:39:39] build pid=61886 exited; cards=200/250; restarting if <250
+[21:39:41] launched build pid=69415 at 200/250
+[21:41:26] STALL at 200/250 (no card in 90s) -> kill pid=69415
+[21:41:26] build pid=69415 exited; cards=200/250; restarting if <250
+[21:41:28] launched build pid=76874 at 200/250
+[21:43:14] STALL at 200/250 (no card in 90s) -> kill pid=76874
+[21:43:14] build pid=76874 exited; cards=200/250; restarting if <250
+[21:43:16] launched build pid=84553 at 200/250
+[21:45:01] STALL at 200/250 (no card in 90s) -> kill pid=84553
+[21:45:01] build pid=84553 exited; cards=200/250; restarting if <250
+[21:45:03] launched build pid=92239 at 200/250
+[21:46:48] STALL at 200/250 (no card in 90s) -> kill pid=92239
+[21:46:48] build pid=92239 exited; cards=200/250; restarting if <250
+[21:46:50] launched build pid=99696 at 200/250
+[21:48:35] STALL at 200/250 (no card in 90s) -> kill pid=99696
+[21:48:35] build pid=99696 exited; cards=200/250; restarting if <250
+[21:48:37] launched build pid=7438 at 200/250
+[21:50:08] STALL at 200/250 (no card in 90s) -> kill pid=7438
+[21:50:08] build pid=7438 exited; cards=200/250; restarting if <250
+[21:50:10] launched build pid=13974 at 200/250
+[21:51:55] STALL at 200/250 (no card in 90s) -> kill pid=13974
+[21:51:55] build pid=13974 exited; cards=200/250; restarting if <250
+[21:51:57] launched build pid=21561 at 200/250
+[21:53:42] STALL at 200/250 (no card in 90s) -> kill pid=21561
+[21:53:42] build pid=21561 exited; cards=200/250; restarting if <250
+[21:53:44] launched build pid=29036 at 200/250
+[21:55:29] STALL at 200/250 (no card in 90s) -> kill pid=29036
+[21:55:29] build pid=29036 exited; cards=200/250; restarting if <250
+[21:55:31] launched build pid=36501 at 200/250
+[21:57:02] STALL at 200/250 (no card in 90s) -> kill pid=36501
+[21:57:02] build pid=36501 exited; cards=200/250; restarting if <250
+[21:57:04] launched build pid=43005 at 200/250
+[21:58:49] STALL at 200/250 (no card in 90s) -> kill pid=43005
+[21:58:49] build pid=43005 exited; cards=200/250; restarting if <250
+[21:58:51] launched build pid=50526 at 200/250
+[22:00:36] STALL at 200/250 (no card in 90s) -> kill pid=50526
+[22:00:36] build pid=50526 exited; cards=200/250; restarting if <250
+[22:00:38] launched build pid=57972 at 200/250
+[22:02:23] STALL at 200/250 (no card in 90s) -> kill pid=57972
+[22:02:23] build pid=57972 exited; cards=200/250; restarting if <250
+[22:02:25] launched build pid=65452 at 200/250
+[22:03:56] STALL at 200/250 (no card in 90s) -> kill pid=65452
+[22:03:56] build pid=65452 exited; cards=200/250; restarting if <250
+[22:03:58] launched build pid=71980 at 200/250
+[22:05:43] STALL at 200/250 (no card in 90s) -> kill pid=71980
+[22:05:43] build pid=71980 exited; cards=200/250; restarting if <250
+[22:05:45] launched build pid=79533 at 200/250
+[22:07:30] STALL at 200/250 (no card in 90s) -> kill pid=79533
+[22:07:30] build pid=79533 exited; cards=200/250; restarting if <250
+[22:07:32] launched build pid=87131 at 200/250
+[22:09:17] STALL at 200/250 (no card in 90s) -> kill pid=87131
+[22:09:17] build pid=87131 exited; cards=200/250; restarting if <250
+[22:09:19] launched build pid=94835 at 200/250
+[22:10:50] STALL at 200/250 (no card in 90s) -> kill pid=94835
+[22:10:50] build pid=94835 exited; cards=200/250; restarting if <250
+[22:10:52] launched build pid=1565 at 200/250
+[22:12:37] STALL at 200/250 (no card in 90s) -> kill pid=1565
+[22:12:37] build pid=1565 exited; cards=200/250; restarting if <250
+[22:12:39] launched build pid=9022 at 200/250
+[22:14:24] STALL at 200/250 (no card in 90s) -> kill pid=9022
+[22:14:24] build pid=9022 exited; cards=200/250; restarting if <250
+[22:14:26] launched build pid=16503 at 200/250
+[22:17:42] STALL at 201/250 (no card in 90s) -> kill pid=16503
+[22:17:42] build pid=16503 exited; cards=201/250; restarting if <250
+[22:17:44] launched build pid=30451 at 201/250
+[22:34:01] STALL at 210/250 (no card in 90s) -> kill pid=30451
+[22:34:01] build pid=30451 exited; cards=210/250; restarting if <250
+[22:34:03] launched build pid=99647 at 210/250
+[22:35:48] STALL at 210/250 (no card in 90s) -> kill pid=99647
+[22:35:48] build pid=99647 exited; cards=210/250; restarting if <250
+[22:35:50] launched build pid=7514 at 210/250
+[22:50:52] STALL at 219/250 (no card in 90s) -> kill pid=7514
+[22:50:52] build pid=7514 exited; cards=219/250; restarting if <250
+[22:50:54] launched build pid=71769 at 219/250
+[22:57:55] STALL at 223/250 (no card in 90s) -> kill pid=71769
+[22:57:55] build pid=71769 exited; cards=223/250; restarting if <250
+[22:57:57] launched build pid=2160 at 223/250
+[23:04:27] STALL at 226/250 (no card in 90s) -> kill pid=2160
+[23:04:27] build pid=2160 exited; cards=226/250; restarting if <250
+[23:04:29] launched build pid=29769 at 226/250
+[23:10:15] STALL at 229/250 (no card in 90s) -> kill pid=29769
+[23:10:15] build pid=29769 exited; cards=229/250; restarting if <250
+[23:10:17] launched build pid=54527 at 229/250
+[23:12:02] STALL at 229/250 (no card in 90s) -> kill pid=54527
+[23:12:02] build pid=54527 exited; cards=229/250; restarting if <250
+[23:12:04] launched build pid=61982 at 229/250
+[23:18:20] STALL at 232/250 (no card in 90s) -> kill pid=61982
+[23:18:20] build pid=61982 exited; cards=232/250; restarting if <250
+[23:18:22] launched build pid=88899 at 232/250
+[23:20:08] STALL at 232/250 (no card in 90s) -> kill pid=88899
+[23:20:08] build pid=88899 exited; cards=232/250; restarting if <250
+[23:20:10] launched build pid=96367 at 232/250
+[23:21:55] STALL at 232/250 (no card in 90s) -> kill pid=96367
+[23:21:55] build pid=96367 exited; cards=232/250; restarting if <250
+[23:21:57] launched build pid=4123 at 232/250
+[23:23:42] STALL at 232/250 (no card in 90s) -> kill pid=4123
+[23:23:42] build pid=4123 exited; cards=232/250; restarting if <250
+[23:23:44] launched build pid=11572 at 232/250
+[23:25:29] STALL at 232/250 (no card in 90s) -> kill pid=11572
+[23:25:29] build pid=11572 exited; cards=232/250; restarting if <250
+[23:25:31] launched build pid=19045 at 232/250
+[23:27:17] STALL at 232/250 (no card in 90s) -> kill pid=19045
+[23:27:17] build pid=19045 exited; cards=232/250; restarting if <250
+[23:27:19] launched build pid=26590 at 232/250
+[23:30:34] STALL at 233/250 (no card in 90s) -> kill pid=26590
+[23:30:34] build pid=26590 exited; cards=233/250; restarting if <250
+[23:30:36] launched build pid=40301 at 233/250
+[23:42:07] STALL at 240/250 (no card in 90s) -> kill pid=40301
+[23:42:07] build pid=40301 exited; cards=240/250; restarting if <250
+[23:42:09] launched build pid=91317 at 240/250
+[23:45:25] STALL at 241/250 (no card in 90s) -> kill pid=91317
+[23:45:25] build pid=91317 exited; cards=241/250; restarting if <250
+[23:45:27] launched build pid=4465 at 241/250
+[23:52:13] build pid=4465 exited; cards=246/250; restarting if <250
+[23:52:15] launched build pid=33026 at 246/250
+[23:52:30] build pid=33026 exited; cards=246/250; restarting if <250
+[23:52:32] launched build pid=34087 at 246/250
+[23:52:47] build pid=34087 exited; cards=246/250; restarting if <250
+[23:52:49] launched build pid=35119 at 246/250
+[23:53:04] build pid=35119 exited; cards=246/250; restarting if <250
+[23:53:06] launched build pid=36175 at 246/250
+[23:53:21] build pid=36175 exited; cards=246/250; restarting if <250
+[23:53:23] launched build pid=37413 at 246/250
+[23:53:38] build pid=37413 exited; cards=246/250; restarting if <250
+[23:53:40] launched build pid=38489 at 246/250
+[23:53:55] build pid=38489 exited; cards=246/250; restarting if <250
+[23:53:57] launched build pid=39700 at 246/250
+[23:54:12] build pid=39700 exited; cards=246/250; restarting if <250
+[23:54:14] launched build pid=40729 at 246/250
+[23:54:29] build pid=40729 exited; cards=246/250; restarting if <250
+[23:54:31] launched build pid=41795 at 246/250
+[23:54:46] build pid=41795 exited; cards=246/250; restarting if <250
+[23:54:48] launched build pid=42853 at 246/250
+[23:55:03] build pid=42853 exited; cards=246/250; restarting if <250
+[23:55:06] launched build pid=43923 at 246/250
+[23:55:21] build pid=43923 exited; cards=246/250; restarting if <250
+[23:55:23] launched build pid=44980 at 246/250
+[23:55:38] build pid=44980 exited; cards=246/250; restarting if <250
+[23:55:40] launched build pid=46013 at 246/250
+[23:55:55] build pid=46013 exited; cards=246/250; restarting if <250
+[23:55:57] launched build pid=47069 at 246/250
+[23:56:12] build pid=47069 exited; cards=246/250; restarting if <250
+[23:56:14] launched build pid=47965 at 246/250
+[23:56:29] build pid=47965 exited; cards=246/250; restarting if <250
+[23:56:31] launched build pid=49059 at 246/250
+[23:56:46] build pid=49059 exited; cards=246/250; restarting if <250
+[23:56:48] launched build pid=49944 at 246/250
+[23:57:03] build pid=49944 exited; cards=246/250; restarting if <250
+[23:57:05] launched build pid=50989 at 246/250
+[23:57:20] build pid=50989 exited; cards=246/250; restarting if <250
+[23:57:22] launched build pid=52110 at 246/250
+[23:57:37] build pid=52110 exited; cards=246/250; restarting if <250
+[23:57:39] launched build pid=53103 at 246/250
+[23:57:54] build pid=53103 exited; cards=246/250; restarting if <250
+[23:57:56] launched build pid=54320 at 246/250
+[23:58:11] build pid=54320 exited; cards=246/250; restarting if <250
+[23:58:13] launched build pid=55831 at 246/250
+[23:58:29] build pid=55831 exited; cards=246/250; restarting if <250
+[23:58:31] launched build pid=56803 at 246/250
+[23:58:46] build pid=56803 exited; cards=246/250; restarting if <250
+[23:58:48] launched build pid=57853 at 246/250
+[23:59:03] build pid=57853 exited; cards=246/250; restarting if <250
+[23:59:05] launched build pid=58924 at 246/250
+[23:59:20] build pid=58924 exited; cards=246/250; restarting if <250
+[23:59:22] launched build pid=59998 at 246/250
+[23:59:37] build pid=59998 exited; cards=246/250; restarting if <250
+[23:59:39] launched build pid=61070 at 246/250
+[23:59:54] build pid=61070 exited; cards=246/250; restarting if <250
+[23:59:56] launched build pid=62125 at 246/250
+[00:00:11] build pid=62125 exited; cards=246/250; restarting if <250
+[00:00:13] launched build pid=63169 at 246/250
+[00:00:28] build pid=63169 exited; cards=246/250; restarting if <250
+[00:00:30] launched build pid=64226 at 246/250
+[00:00:45] build pid=64226 exited; cards=246/250; restarting if <250
+[00:00:47] launched build pid=65262 at 246/250
+[00:01:02] build pid=65262 exited; cards=246/250; restarting if <250
+[00:01:04] launched build pid=66293 at 246/250
+[00:01:19] build pid=66293 exited; cards=246/250; restarting if <250
+[00:01:21] launched build pid=67367 at 246/250
+[00:01:36] build pid=67367 exited; cards=246/250; restarting if <250
+[00:01:38] launched build pid=68398 at 246/250
+[00:01:53] build pid=68398 exited; cards=246/250; restarting if <250
+[00:01:56] launched build pid=69462 at 246/250
+[00:02:11] build pid=69462 exited; cards=246/250; restarting if <250
+[00:02:13] launched build pid=70633 at 246/250
+[00:02:28] build pid=70633 exited; cards=246/250; restarting if <250
+[00:02:30] launched build pid=71732 at 246/250
+[00:02:45] build pid=71732 exited; cards=246/250; restarting if <250
+[00:02:47] launched build pid=72763 at 246/250
+[00:03:02] build pid=72763 exited; cards=246/250; restarting if <250
+[00:03:04] launched build pid=73821 at 246/250
+[00:03:19] build pid=73821 exited; cards=246/250; restarting if <250
+[00:03:21] launched build pid=74882 at 246/250
+[00:03:36] build pid=74882 exited; cards=246/250; restarting if <250
+[00:03:38] launched build pid=75939 at 246/250
+[00:03:53] build pid=75939 exited; cards=246/250; restarting if <250
+[00:03:55] launched build pid=77011 at 246/250
+[00:04:10] build pid=77011 exited; cards=246/250; restarting if <250
+[00:04:12] launched build pid=78049 at 246/250
+[00:04:27] build pid=78049 exited; cards=246/250; restarting if <250
+[00:04:29] launched build pid=79193 at 246/250
+[00:04:44] build pid=79193 exited; cards=246/250; restarting if <250
+[00:04:46] launched build pid=80256 at 246/250
+[00:05:01] build pid=80256 exited; cards=246/250; restarting if <250
+[00:05:03] launched build pid=81467 at 246/250
+[00:05:19] build pid=81467 exited; cards=246/250; restarting if <250
+[00:05:21] launched build pid=82548 at 246/250
+[00:05:36] build pid=82548 exited; cards=246/250; restarting if <250
+[00:05:38] launched build pid=83727 at 246/250
+[00:05:53] build pid=83727 exited; cards=246/250; restarting if <250
+[00:05:55] launched build pid=84820 at 246/250
+[00:06:10] build pid=84820 exited; cards=246/250; restarting if <250
+[00:06:12] launched build pid=85997 at 246/250
+[00:06:27] build pid=85997 exited; cards=246/250; restarting if <250
+[00:06:29] launched build pid=87196 at 246/250
+[00:06:44] build pid=87196 exited; cards=246/250; restarting if <250
+[00:06:46] launched build pid=88224 at 246/250
+[00:07:01] build pid=88224 exited; cards=246/250; restarting if <250
+[00:07:03] launched build pid=89285 at 246/250
+[00:07:18] build pid=89285 exited; cards=246/250; restarting if <250
+[00:07:20] launched build pid=90521 at 246/250
+[00:07:35] build pid=90521 exited; cards=246/250; restarting if <250
+[00:07:37] launched build pid=91599 at 246/250
+[00:07:52] build pid=91599 exited; cards=246/250; restarting if <250
+[00:07:54] launched build pid=92849 at 246/250
+[00:08:09] build pid=92849 exited; cards=246/250; restarting if <250
+[00:08:11] launched build pid=93877 at 246/250
+[00:08:27] build pid=93877 exited; cards=246/250; restarting if <250
+[00:08:29] launched build pid=94938 at 246/250
+[00:08:44] build pid=94938 exited; cards=246/250; restarting if <250
+[00:08:46] launched build pid=96114 at 246/250
+[00:09:01] build pid=96114 exited; cards=246/250; restarting if <250
+[00:09:03] launched build pid=97342 at 246/250
+[00:09:18] build pid=97342 exited; cards=246/250; restarting if <250
+[00:09:20] launched build pid=98372 at 246/250
+[00:09:35] build pid=98372 exited; cards=246/250; restarting if <250
+[00:09:37] launched build pid=99434 at 246/250
+[00:09:52] build pid=99434 exited; cards=246/250; restarting if <250
+[00:09:54] launched build pid=690 at 246/250
+[00:10:09] build pid=690 exited; cards=246/250; restarting if <250
+[00:10:11] launched build pid=1752 at 246/250
+[00:10:26] build pid=1752 exited; cards=246/250; restarting if <250
+[00:10:28] launched build pid=2813 at 246/250
+[00:10:43] build pid=2813 exited; cards=246/250; restarting if <250
+[00:10:45] launched build pid=3846 at 246/250
+[00:11:00] build pid=3846 exited; cards=246/250; restarting if <250
+[00:11:02] launched build pid=4910 at 246/250
+[00:11:17] build pid=4910 exited; cards=246/250; restarting if <250
+[00:11:19] launched build pid=6096 at 246/250
+[00:11:34] build pid=6096 exited; cards=246/250; restarting if <250
+[00:11:36] launched build pid=7159 at 246/250
+[00:11:52] build pid=7159 exited; cards=246/250; restarting if <250
+[00:11:54] launched build pid=8218 at 246/250
+[00:12:09] build pid=8218 exited; cards=246/250; restarting if <250
+[00:12:11] launched build pid=9253 at 246/250
+[00:12:26] build pid=9253 exited; cards=246/250; restarting if <250
+[00:12:28] launched build pid=10314 at 246/250
+[00:12:43] build pid=10314 exited; cards=246/250; restarting if <250
+[00:12:45] launched build pid=11345 at 246/250
+[00:13:00] build pid=11345 exited; cards=246/250; restarting if <250
+[00:13:02] launched build pid=12548 at 246/250
+[00:13:17] build pid=12548 exited; cards=246/250; restarting if <250
+[00:13:19] launched build pid=13576 at 246/250
+[00:13:34] build pid=13576 exited; cards=246/250; restarting if <250
+[00:13:36] launched build pid=14634 at 246/250
+[00:13:51] build pid=14634 exited; cards=246/250; restarting if <250
+[00:13:53] launched build pid=15693 at 246/250
+[00:14:08] build pid=15693 exited; cards=246/250; restarting if <250
+[00:14:10] launched build pid=16725 at 246/250
+[00:14:25] build pid=16725 exited; cards=246/250; restarting if <250
+[00:14:27] launched build pid=17787 at 246/250
+[00:14:42] build pid=17787 exited; cards=246/250; restarting if <250
+[00:14:44] launched build pid=18816 at 246/250
+[00:14:59] build pid=18816 exited; cards=246/250; restarting if <250
+[00:15:01] launched build pid=20015 at 246/250
+[00:15:16] build pid=20015 exited; cards=246/250; restarting if <250
+[00:15:18] launched build pid=21200 at 246/250
+[00:15:34] build pid=21200 exited; cards=246/250; restarting if <250
+[00:15:36] launched build pid=22265 at 246/250
+[00:15:51] build pid=22265 exited; cards=246/250; restarting if <250
+[00:15:53] launched build pid=23321 at 246/250
+[00:16:08] build pid=23321 exited; cards=246/250; restarting if <250
+[00:16:10] launched build pid=24353 at 246/250
+[00:16:25] build pid=24353 exited; cards=246/250; restarting if <250
+[00:16:27] launched build pid=25412 at 246/250
+[00:16:42] build pid=25412 exited; cards=246/250; restarting if <250
+[00:16:44] launched build pid=26441 at 246/250
+[00:16:59] build pid=26441 exited; cards=246/250; restarting if <250
+[00:17:01] launched build pid=27645 at 246/250
+[00:17:16] build pid=27645 exited; cards=246/250; restarting if <250
+[00:17:18] launched build pid=28690 at 246/250
+[00:17:33] build pid=28690 exited; cards=246/250; restarting if <250
+[00:17:35] launched build pid=29922 at 246/250
+[00:17:50] build pid=29922 exited; cards=246/250; restarting if <250
+[00:17:52] launched build pid=30989 at 246/250
+[00:18:07] build pid=30989 exited; cards=246/250; restarting if <250
+[00:18:09] launched build pid=32016 at 246/250
+[00:18:24] build pid=32016 exited; cards=246/250; restarting if <250
+[00:18:26] launched build pid=33073 at 246/250
+[00:18:41] build pid=33073 exited; cards=246/250; restarting if <250
+[00:18:43] launched build pid=34105 at 246/250
+[00:18:58] build pid=34105 exited; cards=246/250; restarting if <250
+[00:19:00] launched build pid=35167 at 246/250
+[00:19:16] build pid=35167 exited; cards=246/250; restarting if <250
+[00:19:18] launched build pid=36195 at 246/250
+[00:19:33] build pid=36195 exited; cards=246/250; restarting if <250
+[00:19:35] launched build pid=37254 at 246/250
+[00:19:50] build pid=37254 exited; cards=246/250; restarting if <250
+[00:19:52] launched build pid=38284 at 246/250
+[00:20:07] build pid=38284 exited; cards=246/250; restarting if <250
+[00:20:09] launched build pid=39483 at 246/250
+[00:20:24] build pid=39483 exited; cards=246/250; restarting if <250
+[00:20:26] launched build pid=40684 at 246/250
+[00:20:41] build pid=40684 exited; cards=246/250; restarting if <250
+[00:20:43] launched build pid=41863 at 246/250
+[00:20:58] build pid=41863 exited; cards=246/250; restarting if <250
+[00:21:00] launched build pid=42922 at 246/250
+[00:21:15] build pid=42922 exited; cards=246/250; restarting if <250
+[00:21:17] launched build pid=44009 at 246/250
+[00:21:32] build pid=44009 exited; cards=246/250; restarting if <250
+[00:21:34] launched build pid=45067 at 246/250
+[00:21:49] build pid=45067 exited; cards=246/250; restarting if <250
+[00:21:51] launched build pid=46248 at 246/250
+[00:22:06] build pid=46248 exited; cards=246/250; restarting if <250
+[00:22:08] launched build pid=47454 at 246/250
+[00:22:23] build pid=47454 exited; cards=246/250; restarting if <250
+[00:22:26] launched build pid=48515 at 246/250
+[00:22:41] build pid=48515 exited; cards=246/250; restarting if <250
+[00:22:43] launched build pid=49544 at 246/250
+[00:22:58] build pid=49544 exited; cards=246/250; restarting if <250
+[00:23:00] launched build pid=50602 at 246/250
+[00:23:15] build pid=50602 exited; cards=246/250; restarting if <250
+[00:23:17] launched build pid=51636 at 246/250
+[00:23:32] build pid=51636 exited; cards=246/250; restarting if <250
+[00:23:34] launched build pid=52839 at 246/250
+[00:23:49] build pid=52839 exited; cards=246/250; restarting if <250
+[00:23:51] launched build pid=53866 at 246/250
+[00:24:06] build pid=53866 exited; cards=246/250; restarting if <250
+[00:24:08] launched build pid=55064 at 246/250
+[00:24:23] build pid=55064 exited; cards=246/250; restarting if <250
+[00:24:25] launched build pid=56122 at 246/250
+[00:24:40] build pid=56122 exited; cards=246/250; restarting if <250
+[00:24:42] launched build pid=57298 at 246/250
+[00:24:57] build pid=57298 exited; cards=246/250; restarting if <250
+[00:24:59] launched build pid=58356 at 246/250
+[00:25:14] build pid=58356 exited; cards=246/250; restarting if <250
+[00:25:16] launched build pid=59387 at 246/250
+[00:25:31] build pid=59387 exited; cards=246/250; restarting if <250
+[00:25:33] launched build pid=60446 at 246/250
+[00:25:48] build pid=60446 exited; cards=246/250; restarting if <250
+[00:25:50] launched build pid=61616 at 246/250
+[00:26:06] build pid=61616 exited; cards=246/250; restarting if <250
+[00:26:08] launched build pid=62819 at 246/250
+[00:26:23] build pid=62819 exited; cards=246/250; restarting if <250
+[00:26:25] launched build pid=63877 at 246/250
+[00:26:40] build pid=63877 exited; cards=246/250; restarting if <250
+[00:26:42] launched build pid=64909 at 246/250
+[00:26:57] build pid=64909 exited; cards=246/250; restarting if <250
+[00:26:59] launched build pid=66117 at 246/250
+[00:27:14] build pid=66117 exited; cards=246/250; restarting if <250
+[00:27:16] launched build pid=67324 at 246/250
+[00:27:31] build pid=67324 exited; cards=246/250; restarting if <250
+[00:27:33] launched build pid=68549 at 246/250
+[00:27:48] build pid=68549 exited; cards=246/250; restarting if <250
+[00:27:50] launched build pid=69740 at 246/250
+[00:28:05] build pid=69740 exited; cards=246/250; restarting if <250
+[00:28:07] launched build pid=70803 at 246/250
+[00:28:22] build pid=70803 exited; cards=246/250; restarting if <250
+[00:28:24] launched build pid=72005 at 246/250
+[00:28:39] build pid=72005 exited; cards=246/250; restarting if <250
+[00:28:41] launched build pid=73033 at 246/250
+[00:28:56] build pid=73033 exited; cards=246/250; restarting if <250
+[00:28:58] launched build pid=74235 at 246/250
+[00:29:13] build pid=74235 exited; cards=246/250; restarting if <250
+[00:29:15] launched build pid=75270 at 246/250
+[00:29:31] build pid=75270 exited; cards=246/250; restarting if <250
+[00:29:33] launched build pid=76492 at 246/250
+[00:29:48] build pid=76492 exited; cards=246/250; restarting if <250
+[00:29:50] launched build pid=77533 at 246/250
+[00:30:05] build pid=77533 exited; cards=246/250; restarting if <250
+[00:30:07] launched build pid=78653 at 246/250
+[00:30:22] build pid=78653 exited; cards=246/250; restarting if <250
+[00:30:24] launched build pid=79722 at 246/250
+[00:30:39] build pid=79722 exited; cards=246/250; restarting if <250
+[00:30:41] launched build pid=80755 at 246/250
+[00:30:56] build pid=80755 exited; cards=246/250; restarting if <250
+[00:30:58] launched build pid=81815 at 246/250
+[00:31:13] build pid=81815 exited; cards=246/250; restarting if <250
+[00:31:15] launched build pid=82857 at 246/250
+[00:31:30] build pid=82857 exited; cards=246/250; restarting if <250
+[00:31:32] launched build pid=83924 at 246/250
+[00:31:47] build pid=83924 exited; cards=246/250; restarting if <250
+[00:31:49] launched build pid=84970 at 246/250
+[00:32:04] build pid=84970 exited; cards=246/250; restarting if <250
+[00:32:06] launched build pid=86180 at 246/250
+[00:32:21] build pid=86180 exited; cards=246/250; restarting if <250
+[00:32:23] launched build pid=87236 at 246/250
+[00:32:38] build pid=87236 exited; cards=246/250; restarting if <250
+[00:32:40] launched build pid=88264 at 246/250
+[00:32:55] build pid=88264 exited; cards=246/250; restarting if <250
+[00:32:58] launched build pid=89322 at 246/250
+[00:33:13] build pid=89322 exited; cards=246/250; restarting if <250
+[00:33:15] launched build pid=90361 at 246/250
+[00:33:30] build pid=90361 exited; cards=246/250; restarting if <250
+[00:33:32] launched build pid=91596 at 246/250
+[00:33:47] build pid=91596 exited; cards=246/250; restarting if <250
+[00:33:49] launched build pid=92802 at 246/250
+[00:34:04] build pid=92802 exited; cards=246/250; restarting if <250
+[00:34:06] launched build pid=93858 at 246/250
+[00:34:21] build pid=93858 exited; cards=246/250; restarting if <250
+[00:34:23] launched build pid=94886 at 246/250
+[00:34:38] build pid=94886 exited; cards=246/250; restarting if <250
+[00:34:40] launched build pid=95962 at 246/250
+[00:34:55] build pid=95962 exited; cards=246/250; restarting if <250
+[00:34:57] launched build pid=97040 at 246/250
+[00:35:12] build pid=97040 exited; cards=246/250; restarting if <250
+[00:35:14] launched build pid=98071 at 246/250
+[00:35:29] build pid=98071 exited; cards=246/250; restarting if <250
+[00:35:31] launched build pid=99130 at 246/250
+[00:35:46] build pid=99130 exited; cards=246/250; restarting if <250
+[00:35:48] launched build pid=469 at 246/250
+[00:36:03] build pid=469 exited; cards=246/250; restarting if <250
+[00:36:05] launched build pid=1605 at 246/250
+[00:36:20] build pid=1605 exited; cards=246/250; restarting if <250
+[00:36:22] launched build pid=2643 at 246/250
+[00:36:38] build pid=2643 exited; cards=246/250; restarting if <250
+[00:36:40] launched build pid=3849 at 246/250
+[00:36:55] build pid=3849 exited; cards=246/250; restarting if <250
+[00:36:57] launched build pid=4911 at 246/250
+[00:37:12] build pid=4911 exited; cards=246/250; restarting if <250
+[00:37:14] launched build pid=5948 at 246/250
+[00:37:29] build pid=5948 exited; cards=246/250; restarting if <250
+[00:37:31] launched build pid=7068 at 246/250
+[00:37:46] build pid=7068 exited; cards=246/250; restarting if <250
+[00:37:48] launched build pid=8241 at 246/250
+[00:38:03] build pid=8241 exited; cards=246/250; restarting if <250
+[00:38:05] launched build pid=9474 at 246/250
+[00:38:20] build pid=9474 exited; cards=246/250; restarting if <250
+[00:38:22] launched build pid=10650 at 246/250
+[00:38:37] build pid=10650 exited; cards=246/250; restarting if <250
+[00:38:39] launched build pid=11709 at 246/250
+[00:38:54] build pid=11709 exited; cards=246/250; restarting if <250
+[00:38:56] launched build pid=12767 at 246/250
+[00:39:11] build pid=12767 exited; cards=246/250; restarting if <250
+[00:39:13] launched build pid=13941 at 246/250
+[00:39:28] build pid=13941 exited; cards=246/250; restarting if <250
+[00:39:30] launched build pid=15002 at 246/250
+[00:39:45] build pid=15002 exited; cards=246/250; restarting if <250
+[00:39:47] launched build pid=16083 at 246/250
+[00:40:03] build pid=16083 exited; cards=246/250; restarting if <250
+[00:40:05] launched build pid=17286 at 246/250
+[00:40:20] build pid=17286 exited; cards=246/250; restarting if <250
+[00:40:22] launched build pid=18735 at 246/250
+[00:40:37] build pid=18735 exited; cards=246/250; restarting if <250
+[00:40:39] launched build pid=20846 at 246/250
+[00:40:54] build pid=20846 exited; cards=246/250; restarting if <250
+[00:40:56] launched build pid=22429 at 246/250
+[00:41:11] build pid=22429 exited; cards=246/250; restarting if <250
+[00:41:13] launched build pid=23605 at 246/250
+[00:41:28] build pid=23605 exited; cards=246/250; restarting if <250
+[00:41:30] launched build pid=24664 at 246/250
+[00:41:45] build pid=24664 exited; cards=246/250; restarting if <250
+[00:41:47] launched build pid=25693 at 246/250
+[00:42:02] build pid=25693 exited; cards=246/250; restarting if <250
+[00:42:04] launched build pid=27295 at 246/250
+[00:42:19] build pid=27295 exited; cards=246/250; restarting if <250
+[00:42:21] launched build pid=28511 at 246/250
+[00:42:36] build pid=28511 exited; cards=246/250; restarting if <250
+[00:42:38] launched build pid=29595 at 246/250
+[00:42:53] build pid=29595 exited; cards=246/250; restarting if <250
+[00:42:55] launched build pid=30691 at 246/250
+[00:43:10] build pid=30691 exited; cards=246/250; restarting if <250
+[00:43:12] launched build pid=31753 at 246/250
+[00:43:28] build pid=31753 exited; cards=246/250; restarting if <250
+[00:43:30] launched build pid=33304 at 246/250
+[00:43:45] build pid=33304 exited; cards=246/250; restarting if <250
+[00:43:47] launched build pid=34485 at 246/250
+[00:44:02] build pid=34485 exited; cards=246/250; restarting if <250
+[00:44:04] launched build pid=35772 at 246/250
+[00:44:19] build pid=35772 exited; cards=246/250; restarting if <250
+[00:44:21] launched build pid=36947 at 246/250
+[00:44:36] build pid=36947 exited; cards=246/250; restarting if <250
+[00:44:38] launched build pid=38685 at 246/250
+[00:44:53] build pid=38685 exited; cards=246/250; restarting if <250
+[00:44:55] launched build pid=40446 at 246/250
+[00:45:10] build pid=40446 exited; cards=246/250; restarting if <250
+[00:45:12] launched build pid=42600 at 246/250
+[00:45:27] build pid=42600 exited; cards=246/250; restarting if <250
+[00:45:29] launched build pid=43687 at 246/250
+[00:45:44] build pid=43687 exited; cards=246/250; restarting if <250
+[00:45:46] launched build pid=44831 at 246/250
+[00:46:02] build pid=44831 exited; cards=246/250; restarting if <250
+[00:46:04] launched build pid=46103 at 246/250
+[00:46:19] build pid=46103 exited; cards=246/250; restarting if <250
+[00:46:21] launched build pid=47206 at 246/250
+[00:46:36] build pid=47206 exited; cards=246/250; restarting if <250
+[00:46:38] launched build pid=48300 at 246/250
+[00:46:53] build pid=48300 exited; cards=246/250; restarting if <250
+[00:46:55] launched build pid=49553 at 246/250
+[00:47:10] build pid=49553 exited; cards=246/250; restarting if <250
+[00:47:12] launched build pid=50808 at 246/250
+[00:47:27] build pid=50808 exited; cards=246/250; restarting if <250
+[00:47:29] launched build pid=53687 at 246/250
+[00:47:44] build pid=53687 exited; cards=246/250; restarting if <250
+[00:47:46] launched build pid=56041 at 246/250
+[00:48:01] build pid=56041 exited; cards=246/250; restarting if <250
+[00:48:03] launched build pid=57827 at 246/250
+[00:48:18] build pid=57827 exited; cards=246/250; restarting if <250
+[00:48:20] launched build pid=58998 at 246/250
+[00:48:36] build pid=58998 exited; cards=246/250; restarting if <250
+[00:48:38] launched build pid=60065 at 246/250
+[00:48:53] build pid=60065 exited; cards=246/250; restarting if <250
+[00:48:55] launched build pid=61559 at 246/250
+[00:49:10] build pid=61559 exited; cards=246/250; restarting if <250
+[00:49:12] launched build pid=63370 at 246/250
+[00:49:27] build pid=63370 exited; cards=246/250; restarting if <250
+[00:49:29] launched build pid=65532 at 246/250
+[00:49:44] build pid=65532 exited; cards=246/250; restarting if <250
+[00:49:46] launched build pid=67593 at 246/250
+[00:50:02] build pid=67593 exited; cards=246/250; restarting if <250
+[00:50:04] launched build pid=68733 at 246/250
+[00:50:19] build pid=68733 exited; cards=246/250; restarting if <250
+[00:50:21] launched build pid=69909 at 246/250
+[00:50:36] build pid=69909 exited; cards=246/250; restarting if <250
+[00:50:38] launched build pid=70967 at 246/250
+[00:50:53] build pid=70967 exited; cards=246/250; restarting if <250
+[00:50:55] launched build pid=72116 at 246/250
+[00:51:10] build pid=72116 exited; cards=246/250; restarting if <250
+[00:51:12] launched build pid=73488 at 246/250
+[00:51:27] build pid=73488 exited; cards=246/250; restarting if <250
+[00:51:29] launched build pid=75208 at 246/250
+[00:51:44] build pid=75208 exited; cards=246/250; restarting if <250
+[00:51:46] launched build pid=77149 at 246/250
+[00:52:01] build pid=77149 exited; cards=246/250; restarting if <250
+[00:52:03] launched build pid=79273 at 246/250
+[00:52:18] build pid=79273 exited; cards=246/250; restarting if <250
+[00:52:20] launched build pid=80840 at 246/250
+[00:52:36] build pid=80840 exited; cards=246/250; restarting if <250
+[00:52:38] launched build pid=82833 at 246/250
+[00:52:53] build pid=82833 exited; cards=246/250; restarting if <250
+[00:52:55] launched build pid=84935 at 246/250
+[00:53:10] build pid=84935 exited; cards=246/250; restarting if <250
+[00:53:12] launched build pid=86049 at 246/250
+[00:53:42] build pid=86049 exited; cards=246/250; restarting if <250
+[00:53:44] launched build pid=87766 at 246/250
+[00:53:59] build pid=87766 exited; cards=246/250; restarting if <250
+[00:54:01] launched build pid=88969 at 246/250
+[00:54:16] build pid=88969 exited; cards=246/250; restarting if <250
+[00:54:18] launched build pid=90004 at 246/250
+[00:54:33] build pid=90004 exited; cards=246/250; restarting if <250
+[00:54:35] launched build pid=91091 at 246/250
+[00:54:50] build pid=91091 exited; cards=246/250; restarting if <250
+[00:54:52] launched build pid=92137 at 246/250
+[00:55:08] build pid=92137 exited; cards=246/250; restarting if <250
+[00:55:10] launched build pid=93193 at 246/250
+[00:55:25] build pid=93193 exited; cards=246/250; restarting if <250
+[00:55:27] launched build pid=94249 at 246/250
+[00:55:42] build pid=94249 exited; cards=246/250; restarting if <250
+[00:55:44] launched build pid=95279 at 246/250
+[00:55:59] build pid=95279 exited; cards=246/250; restarting if <250
+[00:56:01] launched build pid=96334 at 246/250
+[00:56:16] build pid=96334 exited; cards=246/250; restarting if <250
+[00:56:18] launched build pid=97362 at 246/250
+[00:56:33] build pid=97362 exited; cards=246/250; restarting if <250
+[00:56:35] launched build pid=98419 at 246/250
+[00:56:50] build pid=98419 exited; cards=246/250; restarting if <250
+[00:56:52] launched build pid=99449 at 246/250
+[00:57:07] build pid=99449 exited; cards=246/250; restarting if <250
+[00:57:09] launched build pid=193 at 246/250
+[00:57:24] build pid=193 exited; cards=246/250; restarting if <250
+[00:57:26] launched build pid=942 at 246/250
+[00:57:41] build pid=942 exited; cards=246/250; restarting if <250
+[00:57:43] launched build pid=1595 at 246/250
+[00:57:58] build pid=1595 exited; cards=246/250; restarting if <250
+[00:58:00] launched build pid=2238 at 246/250
+[00:58:15] build pid=2238 exited; cards=246/250; restarting if <250
+[00:58:17] launched build pid=2854 at 246/250
+[00:58:33] build pid=2854 exited; cards=246/250; restarting if <250
+[00:58:35] launched build pid=3497 at 246/250
+[00:58:50] build pid=3497 exited; cards=246/250; restarting if <250
+[00:58:52] launched build pid=4110 at 246/250
+[00:59:07] build pid=4110 exited; cards=246/250; restarting if <250
+[00:59:09] launched build pid=4647 at 246/250
+[00:59:24] build pid=4647 exited; cards=246/250; restarting if <250
+[00:59:26] launched build pid=5067 at 246/250
+[00:59:41] build pid=5067 exited; cards=246/250; restarting if <250
+[00:59:43] launched build pid=5527 at 246/250
+[00:59:58] build pid=5527 exited; cards=246/250; restarting if <250
+[01:00:00] launched build pid=5972 at 246/250
+[01:00:15] build pid=5972 exited; cards=246/250; restarting if <250
+[01:00:17] launched build pid=6544 at 246/250
+[01:00:32] build pid=6544 exited; cards=246/250; restarting if <250
+[01:00:34] launched build pid=7610 at 246/250
+[01:00:49] build pid=7610 exited; cards=246/250; restarting if <250
+[01:00:51] launched build pid=8648 at 246/250
+[01:01:06] build pid=8648 exited; cards=246/250; restarting if <250
+[01:01:08] launched build pid=9711 at 246/250
+[01:01:23] build pid=9711 exited; cards=246/250; restarting if <250
+[01:01:25] launched build pid=10890 at 246/250
+[01:01:40] build pid=10890 exited; cards=246/250; restarting if <250
+[01:01:42] launched build pid=11948 at 246/250
+[01:01:57] build pid=11948 exited; cards=246/250; restarting if <250
+[01:01:59] launched build pid=13006 at 246/250
+[01:02:15] build pid=13006 exited; cards=246/250; restarting if <250
+[01:02:17] launched build pid=14036 at 246/250
+[01:02:32] build pid=14036 exited; cards=246/250; restarting if <250
+[01:02:34] launched build pid=15093 at 246/250
+[01:02:49] build pid=15093 exited; cards=246/250; restarting if <250
+[01:02:51] launched build pid=16121 at 246/250
+[01:03:06] build pid=16121 exited; cards=246/250; restarting if <250
+[01:03:08] launched build pid=17178 at 246/250
+[01:03:23] build pid=17178 exited; cards=246/250; restarting if <250
+[01:03:25] launched build pid=18211 at 246/250
+[01:03:40] build pid=18211 exited; cards=246/250; restarting if <250
+[01:03:42] launched build pid=19270 at 246/250
+[01:03:57] build pid=19270 exited; cards=246/250; restarting if <250
+[01:03:59] launched build pid=20326 at 246/250
+[01:04:14] build pid=20326 exited; cards=246/250; restarting if <250
+[01:04:16] launched build pid=21360 at 246/250
+[01:04:31] build pid=21360 exited; cards=246/250; restarting if <250
+[01:04:33] launched build pid=22493 at 246/250
+[01:04:48] build pid=22493 exited; cards=246/250; restarting if <250
+[01:04:50] launched build pid=23106 at 246/250
+[01:05:05] build pid=23106 exited; cards=246/250; restarting if <250
+[01:05:07] launched build pid=23838 at 246/250
+[01:05:22] build pid=23838 exited; cards=246/250; restarting if <250
+[01:05:24] launched build pid=24450 at 246/250
+[01:05:40] build pid=24450 exited; cards=246/250; restarting if <250
+[01:05:42] launched build pid=25094 at 246/250
+[01:05:57] build pid=25094 exited; cards=246/250; restarting if <250
+[01:05:59] launched build pid=25992 at 246/250
+[01:07:22] build pid=27914 exited; cards=246/250; restarting if <250
+[01:07:24] launched build pid=28841 at 246/250
+[01:07:39] build pid=28841 exited; cards=246/250; restarting if <250
+[01:07:41] launched build pid=29817 at 246/250
+[01:07:56] build pid=29817 exited; cards=246/250; restarting if <250
+[01:07:58] launched build pid=30980 at 246/250
+[01:08:13] build pid=30980 exited; cards=246/250; restarting if <250
+[01:08:15] launched build pid=32008 at 246/250
+[01:08:30] build pid=32008 exited; cards=246/250; restarting if <250
+[01:08:32] launched build pid=33065 at 246/250
+[01:08:47] build pid=33065 exited; cards=246/250; restarting if <250
+[01:08:50] launched build pid=34112 at 246/250
+[01:09:05] build pid=34112 exited; cards=246/250; restarting if <250
+[01:09:07] launched build pid=34754 at 246/250
+[01:09:22] build pid=34754 exited; cards=246/250; restarting if <250
+[01:09:24] launched build pid=35270 at 246/250
+[01:09:39] build pid=35270 exited; cards=246/250; restarting if <250
+[01:09:41] launched build pid=36302 at 246/250
+[01:09:56] build pid=36302 exited; cards=246/250; restarting if <250
+[01:09:58] launched build pid=36888 at 246/250
+[01:10:13] build pid=36888 exited; cards=246/250; restarting if <250
+[01:10:15] launched build pid=37504 at 246/250
+[01:10:30] build pid=37504 exited; cards=246/250; restarting if <250
+[01:10:32] launched build pid=38657 at 246/250
+[01:10:47] build pid=38657 exited; cards=246/250; restarting if <250
+[01:10:49] launched build pid=39541 at 246/250
+[01:11:04] build pid=39541 exited; cards=246/250; restarting if <250
+[01:11:06] launched build pid=40598 at 246/250
+[01:11:22] build pid=40598 exited; cards=246/250; restarting if <250
+[01:11:24] launched build pid=41355 at 246/250
+[01:11:54] build pid=41355 exited; cards=246/250; restarting if <250
+[01:11:57] launched build pid=42864 at 246/250
+[01:12:12] build pid=42864 exited; cards=246/250; restarting if <250
+[01:12:14] launched build pid=43749 at 246/250
+[01:12:45] build pid=43749 exited; cards=246/250; restarting if <250
+[01:12:48] launched build pid=45472 at 246/250
+[01:13:19] build pid=45472 exited; cards=246/250; restarting if <250
+[01:13:21] launched build pid=47231 at 246/250
+[01:13:51] build pid=47231 exited; cards=246/250; restarting if <250
+[01:13:53] launched build pid=48839 at 246/250
+[01:14:09] build pid=48839 exited; cards=246/250; restarting if <250
+[01:14:11] launched build pid=49758 at 246/250
+[01:14:26] build pid=49758 exited; cards=246/250; restarting if <250
+[01:14:28] launched build pid=50643 at 246/250
+[01:14:43] build pid=50643 exited; cards=246/250; restarting if <250
+[01:14:45] launched build pid=51404 at 246/250
+[01:15:00] build pid=51404 exited; cards=246/250; restarting if <250
+[01:15:02] launched build pid=52371 at 246/250
+[01:16:33] STALL at 246/250 (no card in 90s) -> kill pid=52371
+[01:16:33] build pid=52371 exited; cards=246/250; restarting if <250
+[01:16:35] launched build pid=58075 at 246/250
+[01:18:20] STALL at 246/250 (no card in 90s) -> kill pid=58075
+[01:18:20] build pid=58075 exited; cards=246/250; restarting if <250
+[01:18:23] launched build pid=64490 at 246/250
+[01:20:08] STALL at 246/250 (no card in 90s) -> kill pid=64490
+[01:20:08] build pid=64490 exited; cards=246/250; restarting if <250
+[01:20:10] launched build pid=70956 at 246/250
+[01:21:41] STALL at 246/250 (no card in 90s) -> kill pid=70956
+[01:21:41] build pid=70956 exited; cards=246/250; restarting if <250
+[01:21:43] launched build pid=76113 at 246/250
+[01:23:14] STALL at 246/250 (no card in 90s) -> kill pid=76113
+[01:23:14] build pid=76113 exited; cards=246/250; restarting if <250
+[01:23:16] launched build pid=81402 at 246/250
+[01:24:47] STALL at 246/250 (no card in 90s) -> kill pid=81402
+[01:24:47] build pid=81402 exited; cards=246/250; restarting if <250
+[01:24:49] launched build pid=87364 at 246/250
+[01:30:20] build pid=87364 exited; cards=250/250; restarting if <250
+[01:30:22] DONE 250/250
+[01:30:22] supervisor exit; cards=250/250

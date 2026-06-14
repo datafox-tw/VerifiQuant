@@ -171,6 +171,47 @@ async function applyInteractiveAdjustments() {
   await composeAndApplyUpdates(collectInteractiveUpdates());
 }
 
+/* ── PDF context attachment ── */
+function appendContextBlock(targetEl, block) {
+  const current = targetEl.value.trim();
+  targetEl.value = current ? `${current}\n\n${block}` : block;
+  targetEl.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function setupPdfAttachment({ fileId, buttonId, statusId, targetId }) {
+  const fileEl = document.getElementById(fileId);
+  const buttonEl = document.getElementById(buttonId);
+  const statusEl = document.getElementById(statusId);
+  const targetEl = document.getElementById(targetId);
+  if (!fileEl || !buttonEl || !statusEl || !targetEl) return;
+
+  buttonEl.addEventListener("click", async () => {
+    const file = fileEl.files && fileEl.files[0];
+    if (!file) {
+      statusEl.textContent = "Choose a PDF first.";
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    buttonEl.disabled = true;
+    statusEl.textContent = "Extracting...";
+    try {
+      const response = await fetch("/api/pdf/extract", { method: "POST", body: formData });
+      const data = await response.json();
+      if (data.status !== "ok") throw new Error(data.message || "PDF extraction failed");
+      appendContextBlock(targetEl, data.context_block);
+      const clipped = data.truncated ? " · truncated" : "";
+      statusEl.textContent = `Attached ${data.pages_read}/${data.pages_total} pages, ${data.text_chars} chars${clipped}`;
+    } catch (error) {
+      statusEl.textContent = error.message;
+    } finally {
+      buttonEl.disabled = false;
+    }
+  });
+}
+
+window.VQPdf = { setupPdfAttachment };
+
 /* ── Render functions ── */
 function renderRepairHints(repairHints) {
   if (!repairHints?.length) return "";
@@ -358,5 +399,17 @@ tabQa.addEventListener("click", () => activateTab("qa"));
 tabCards.addEventListener("click", () => {
   activateTab("cards");
   if (!cardsResult.innerHTML.trim()) loadCardsOverview();
+});
+setupPdfAttachment({
+  fileId: "qa-pdf-file",
+  buttonId: "qa-pdf-attach",
+  statusId: "qa-pdf-status",
+  targetId: "context",
+});
+setupPdfAttachment({
+  fileId: "chat-pdf-file",
+  buttonId: "chat-pdf-attach",
+  statusId: "chat-pdf-status",
+  targetId: "chat-context",
 });
 loadDemoQuestionBank();

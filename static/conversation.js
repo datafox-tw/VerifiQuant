@@ -594,6 +594,7 @@
     if (contextEl) contextEl.value = c;
     cvActiveGroundTruth = gt;
     cvActiveExpectedClass = ec;
+    renderGoldBadge();
     runFirstTurn();
   }
 
@@ -605,6 +606,7 @@
     cvAnsweredHints = new Set();
     cvActiveGroundTruth = null;
     cvActiveExpectedClass = null;
+    renderGoldBadge();
     cvStarted = false;
     threadEl.innerHTML = "";
     if (contextEl) contextEl.value = "";
@@ -621,6 +623,22 @@
       : "Ask a financial question to start a verified diagnosis…";
   }
 
+  // Upfront gold display: when a showcase/sample case has a numeric ground truth,
+  // show it BEFORE the answer so a demo can frame "this question has a correct
+  // answer — CoT may miss it, the verified pipeline lands it."
+  function renderGoldBadge() {
+    const el = document.getElementById("chat-gold-badge");
+    if (!el) return;
+    const gold = Number(cvActiveGroundTruth);
+    if (cvActiveGroundTruth === null || cvActiveGroundTruth === undefined || !Number.isFinite(gold)) {
+      el.style.display = "none";
+      el.textContent = "";
+      return;
+    }
+    el.style.display = "";
+    el.innerHTML = `✦ 此題有正確答案 (correct answer): <strong>${escapeHtml(cvActiveGroundTruth)}</strong>`;
+  }
+
   function seedFrom(item, note) {
     if (!item) return;
     // Fill the composer fields only — do NOT clear the thread now (no disruption on click).
@@ -631,6 +649,7 @@
     cvActiveExpectedClass = item.expected_class || item.expected_diagnostic || null;
     cvSeededNew = true;
     if (showcaseNoteEl) showcaseNoteEl.textContent = note || "";
+    renderGoldBadge();
     // Make sure the (possibly hidden/collapsed) context field is visible so the seed shows.
     const wrap = document.getElementById("chat-context-wrap");
     if (wrap) wrap.style.display = "";
@@ -735,8 +754,8 @@
   if (sampleEl) sampleEl.addEventListener("change", applySample);
   if (showcaseEl) showcaseEl.addEventListener("change", applyShowcase);
   // Manual editing of the seed invalidates the loaded gold / expected class.
-  inputEl.addEventListener("input", () => { cvActiveGroundTruth = null; cvActiveExpectedClass = null; });
-  if (contextEl) contextEl.addEventListener("input", () => { cvActiveGroundTruth = null; cvActiveExpectedClass = null; });
+  inputEl.addEventListener("input", () => { cvActiveGroundTruth = null; cvActiveExpectedClass = null; renderGoldBadge(); });
+  if (contextEl) contextEl.addEventListener("input", () => { cvActiveGroundTruth = null; cvActiveExpectedClass = null; renderGoldBadge(); });
 
   loadSamples();
   loadShowcase();

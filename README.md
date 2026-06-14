@@ -167,7 +167,7 @@ BM25 retrieval → LLM selector (M/N) → LLM extractor (F) → deterministic E-
 
 ### Web App (`app.py`)
 
-Flask app wrapping `ErrorClassificationAPI`. Returns the full diagnostic report with funnel layer, findings, and suggested repair actions.
+Flask app wrapping `ErrorClassificationAPI`. Returns the full diagnostic report with funnel layer, findings, and suggested repair actions. The demo UI also accepts small PDF uploads, extracts selectable text into the context field, and can optionally persist original PDFs to a short-lived Cloud Storage bucket.
 
 ---
 
@@ -200,7 +200,7 @@ Flask app wrapping `ErrorClassificationAPI`. Returns the full diagnostic report 
 | Silent Wrong Rate measurement | Needs ground truth on trap cases |
 | Broader baselines (GPT-4 / DeepSeek direct CoT) | Only JPMorgan paper number + Gemini CoT compared |
 | SymPy symbolic *math engine* | Not built, and SymPy was removed entirely. The old vision assumed prompt→SymPy formalization; the current design verifies transforms numerically instead (no symbolic dependency) |
-| PDF/RAG over financial documents | Not implemented; system uses structured JSONL inputs |
+| PDF/RAG over financial documents | Partial: demo PDF text extraction is implemented for context injection; full document RAG is not implemented |
 | `transform_spec` auto-generation (full card-build run) | **Validated 2026-05-20 on testing_5Q.jsonl with Gemini 2.5 Flash.** Generates correct specs for NPV annuity-due, percent↔decimal scaling, sign convention. Anti-patterns (benchmark choice, input rescaling) correctly emit `transform_spec=null`. A normalization safety net (`_normalize_hint_option` in `stage_core.py`) catches Gemini's residual mistakes: subscript syntax (`inputs['x']`), function calls (`round`, `exp`), identity transforms on default options, missing `result` reference, and unparseable expressions. **Not yet validated on the full 50Q card build.** |
 | `code_patch` auto-generation by Gemini | Only `result_postprocess` is in the `stage_core` schema enum. `code_patch` is supported by `stage_transform` and demonstrated in `test_transform_poc.py`, but Gemini does not yet generate `code_patch` specs in production cards — they must be hand-authored. |
 

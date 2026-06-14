@@ -1,3 +1,10 @@
+# Controls what `gcloud builds submit` / `gcloud run deploy --source` uploads as
+# the build context. WITHOUT this file gcloud falls back to .gitignore, which does
+# not exclude the untracked sibling repos (.venv, FinanceReasoning/, etc.), so the
+# source tarball ballooned to ~1.2 GiB. .dockerignore does NOT affect this upload.
+#
+# Mirror the .dockerignore data rules so the demo run still ships.
+
 .git
 .github
 .claude
@@ -5,26 +12,34 @@
 __pycache__
 *.pyc
 *.egg-info
+*.so
+.DS_Store
+
+# Heavy sibling repos / eval scaffolding — not part of the web image
 scratch/
 docs/
+scripts/
 reimplement-jpmogan/
 FinanceReasoning/
 finchain/
 preprocessing/
 !verifiquant/preprocessing
 !verifiquant/preprocessing/**
-scripts/
-data/
-verifiquant/data/*.jsonl
-verifiquant/data/*.json
-verifiquant/data/*.yaml
-verifiquant/data/.DS_Store
-# Run artifacts are heavy; ship only the demo run (see VERIFIQUANT_DEMO_RUN in app.py).
-# To add a new demo run, allowlist its cards.db + question bank the same way.
-# Negation requires re-including each parent dir before the nested file.
-verifiquant/data/runs/*
 
-# Default demo run: paper_v1 (questions_50 + fic/cards.db, a coherent pair)
+# Secrets and local-only files
+.env
+.env.*
+test_*.py
+deploy.sh
+*.db-journal
+
+# Large datasets not needed by the web demo (financial_documents.json is 95 MiB)
+verifiquant/data/*.json
+verifiquant/data/*.jsonl
+verifiquant/data/*.yaml
+
+# Run artifacts are heavy; ship only the demo run (see VERIFIQUANT_DEMO_RUN in app.py).
+verifiquant/data/runs/*
 !verifiquant/data/runs/paper_v1
 verifiquant/data/runs/paper_v1/*
 !verifiquant/data/runs/paper_v1/questions_50.jsonl
@@ -40,8 +55,3 @@ verifiquant/data/runs/paper_v1/fic/*
 !verifiquant/data/runs/demo_50q_0415
 verifiquant/data/runs/demo_50q_0415/*
 !verifiquant/data/runs/demo_50q_0415/cards.db
-*.db-journal
-.env
-.env.*
-test_*.py
-deploy.sh

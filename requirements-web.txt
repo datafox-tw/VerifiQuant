@@ -1,0 +1,13 @@
+# Web/demo runtime deps ONLY — used by the Cloud Run image (Dockerfile).
+# The full requirements.txt (torch/transformers/sentence_transformers/bert_score/
+# rouge_score/scikit_learn/scipy/numpy/rank_bm25) is build/eval-time and is NOT
+# imported by app.py or verifiquant/pipeline at runtime. Verified by import test:
+# create_app() succeeds with all of those modules blocked on the import path.
+#
+# Keep this in sync if app.py / the runtime pipeline gains a new top-level import.
+Flask==3.1.3
+SQLAlchemy==2.0.23
+google-genai
+google-cloud-storage>=2.18.0
+openai>=2.0
+pypdf>=5.0.0

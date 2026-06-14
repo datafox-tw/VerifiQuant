@@ -2,12 +2,10 @@ FROM python:3.11-slim AS base
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+# Web image uses requirements-web.txt (no torch/transformers/etc.), so no
+# build toolchain is needed — all wheels are pure-Python or prebuilt.
+COPY requirements-web.txt .
+RUN pip install --no-cache-dir -r requirements-web.txt gunicorn
 
 COPY verifiquant/ verifiquant/
 COPY templates/ templates/

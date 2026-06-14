@@ -14,6 +14,14 @@ from flask import Flask, jsonify, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
 from verifiquant.card_store import SQLAlchemyArtifactStore
+from verifiquant.pdf_ingest import (
+    PdfIngestError,
+    cleanup_local_tmp,
+    config_from_env as pdf_config_from_env,
+    extract_pdf_text,
+    persist_pdf,
+    read_limited_pdf,
+)
 from verifiquant.pipeline.run_error_classification_pipeline import (
     ErrorClassificationAPI,
     create_genai_client_from_env,
@@ -244,6 +252,10 @@ def create_app() -> Flask:
     )
 
     store = SQLAlchemyArtifactStore(DEFAULT_DB_URL)
+    pdf_config = pdf_config_from_env()
+    pdf_rate_limit_per_hour = int(os.environ.get("VERIFIQUANT_PDF_RATE_LIMIT", "10"))
+    pdf_uploads_enabled = os.environ.get("VERIFIQUANT_PDF_UPLOADS_ENABLED", "true").lower() in ("1", "true", "yes")
+    pdf_rate_limiter = _RateLimiter(pdf_rate_limit_per_hour)
     os.makedirs(DEFAULT_UPLOAD_DIR, exist_ok=True)
     os.makedirs(DEFAULT_OUTPUT_DIR, exist_ok=True)
 
@@ -412,6 +424,59 @@ def create_app() -> Flask:
                 "filename": saved_name,
                 "saved_path": save_path,
                 "relative_path": os.path.relpath(save_path, ROOT_DIR),
+            }
+        )
+
+    @app.post("/api/pdf/extract")
+    def pdf_extract() -> Any:
+        if not pdf_uploads_enabled:
+            return jsonify({"status": "error", "message": "PDF upload is disabled."}), 403
+
+        ip = _get_client_ip()
+        if not pdf_rate_limiter.is_allowed(ip):
+            return jsonify({
+                "status": "error",
+                "message": f"PDF rate limit exceeded. Max {pdf_rate_limit_per_hour} uploads per hour.",
+                "remaining": 0,
+            }), 429
+
+        incoming = request.files.get("file")
+        if incoming is None or not incoming.filename:
+            return jsonify({"status": "error", "message": "file is required"}), 400
+
+        try:
+            data = read_limited_pdf(incoming.stream, incoming.filename, pdf_config.max_bytes)
+            extraction = extract_pdf_text(
+                data,
+                incoming.filename,
+                max_pages=pdf_config.max_pages,
+                max_chars=pdf_config.max_chars,
+            )
+            storage_uri, storage_backend = persist_pdf(data, incoming.filename, pdf_config)
+            cleanup_local_tmp(pdf_config)
+        except PdfIngestError as exc:
+            return jsonify({"status": "error", "message": str(exc)}), 400
+        except Exception as exc:
+            return jsonify({"status": "error", "message": f"PDF processing failed: {exc}"}), 500
+
+        return jsonify(
+            {
+                "status": "ok",
+                "filename": extraction.filename,
+                "text": extraction.text,
+                "context_block": extraction.context_block,
+                "size_bytes": extraction.size_bytes,
+                "pages_total": extraction.pages_total,
+                "pages_read": extraction.pages_read,
+                "text_chars": extraction.text_chars,
+                "truncated": extraction.truncated,
+                "storage_uri": storage_uri,
+                "storage_backend": storage_backend,
+                "limits": {
+                    "max_bytes": pdf_config.max_bytes,
+                    "max_pages": pdf_config.max_pages,
+                    "max_chars": pdf_config.max_chars,
+                },
             }
         )
 
