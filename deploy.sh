@@ -9,7 +9,7 @@ set -euo pipefail
 # Optional:
 #   GCP_REGION=asia-east1 SERVICE_NAME=verifiquant ./deploy.sh
 #   ./deploy.sh --source   # use Cloud Run source deploy instead of explicit Docker build
-
+START_TIME=$(date +%s)
 PROJECT_ID="${GCP_PROJECT_ID:-}"
 REGION="${GCP_REGION:-asia-east1}"
 SERVICE_NAME="${SERVICE_NAME:-verifiquant}"
@@ -98,3 +98,5 @@ URL="$(gcloud run services describe "$SERVICE_NAME" \
   --format='value(status.url)')"
 
 echo "Service URL: ${URL}"
+END_TIME=$(date +%s)
+echo "Deployment time: $((END_TIME - START_TIME)) seconds"

@@ -22,6 +22,7 @@ except ImportError:  # pragma: no cover
     genai_types = None
 
 from verifiquant.preprocessing.validate_relations import validate_artifact_relations
+from verifiquant.preprocessing.lint_echecks import ECHECK_SAFE_BUILTINS
 from verifiquant.preprocessing.stage_repair import GLOBAL_N_NOT_SUPPORTED_RULE, GLOBAL_SCOPE_FIC_ID
 from verifiquant.card_store import SQLAlchemyArtifactStore
 
@@ -443,28 +444,13 @@ def _safe_eval_rule(
         # Generator / comprehension expressions look up free variables in the
         # *globals* dict, NOT in the calling frame's locals.  Placing all
         # helpers here ensures they are visible inside generator bodies too.
+        #
+        # The safe-name set is owned by verifiquant.preprocessing.lint_echecks
+        # (ECHECK_SAFE_BUILTINS) so the build-time E-check linter and this
+        # runtime evaluator can never drift apart.
         "__builtins__": {},
         "inputs": inputs_obj,
-        "abs": abs,
-        "min": min,
-        "max": max,
-        "len": len,
-        "sum": sum,
-        "all": all,
-        "any": any,
-        "isinstance": isinstance,
-        "float": float,
-        "int": int,
-        "bool": bool,
-        "str": str,
-        "list": list,
-        "tuple": tuple,
-        "dict": dict,
-        "set": set,
-        "range": range,
-        "zip": zip,
-        "enumerate": enumerate,
-        "math": math,
+        **ECHECK_SAFE_BUILTINS,
     }
     # Flatten input values into the env so expressions can reference them
     # directly (e.g. ``discount_rate < 0`` instead of ``inputs['discount_rate'] < 0``).

@@ -16,6 +16,7 @@ from verifiquant.preprocessing.common import (
     to_conversion_input,
 )
 from verifiquant.preprocessing.stage_core import generate_core
+from verifiquant.preprocessing.lint_echecks import lint_core_card
 from verifiquant.preprocessing.stage_repair import generate_repair_rules
 from verifiquant.preprocessing.stage_retrieval import generate_retrieval
 from verifiquant.preprocessing.seed_builder import build_seed_rows_from_config
@@ -389,6 +390,17 @@ def run_pipeline(
             source_meta["duplicate_of"] = None
             ast_hash_to_fic_id.setdefault(ast_exact_hash, str(core["fic_id"]))
 
+        # Post-generation E-check gate: auto-fix assignment-form expressions
+        # (`result = compute(inputs); ...` -> inline `compute(inputs)`) and flag
+        # any expression that still references unknown names for manual review.
+        echeck_summary = lint_core_card(core, autofix=True)
+        if echeck_summary["fixed_count"] or echeck_summary["unresolved_count"]:
+            print(
+                "[fic-pipeline] e-check lint "
+                f"{core.get('fic_id')}: fixed={echeck_summary['fixed_count']}, "
+                f"unresolved={echeck_summary['unresolved_count']}"
+            )
+
         retrieval = generate_retrieval(
             client=client,
             model=stage2_model,
@@ -662,6 +674,24 @@ def main() -> None:
     if smoke_failures:
         print(f"[fic-pipeline] execution smoke failed on {len(smoke_failures)} core card(s).")
 
+    # Aggregate the per-card E-check lint results (stamped on source_meta during
+    # generation) for the validation report.
+    echeck_fixed = 0
+    echeck_unresolved: List[Dict[str, Any]] = []
+    for row in result["core"]:
+        meta = row.get("source_meta")
+        lint = meta.get("echeck_lint") if isinstance(meta, dict) else None
+        if not isinstance(lint, dict):
+            continue
+        echeck_fixed += int(lint.get("fixed_count", 0))
+        for rid in lint.get("unresolved_rule_ids", []) or []:
+            echeck_unresolved.append({"fic_id": str(row.get("fic_id", "")), "rule_id": rid})
+    if echeck_fixed or echeck_unresolved:
+        print(
+            f"[fic-pipeline] e-check lint: auto-fixed {echeck_fixed} expression(s); "
+            f"{len(echeck_unresolved)} need manual review."
+        )
+
     validation_stats: Dict[str, Any] | None = None
     validation_error: str | None = None
     try:
@@ -713,6 +743,11 @@ def main() -> None:
             "execution_smoke": {
                 "failed_count": len(smoke_failures),
                 "failed_cards": smoke_failures,
+            },
+            "echeck_lint": {
+                "auto_fixed_count": echeck_fixed,
+                "unresolved_count": len(echeck_unresolved),
+                "unresolved": echeck_unresolved,
             },
         }
         args.validation_report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

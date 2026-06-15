@@ -1,0 +1,129 @@
+{
+  "cards_total": 250,
+  "cards_with_fixes": 5,
+  "cards_with_unresolved": 2,
+  "fixed_count": 6,
+  "unresolved_count": 4,
+  "fixed": [
+    {
+      "fic_id": "fic_article_2302",
+      "rule_id": "plausible_alpha_range",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "result = compute(inputs); not (-100 <= result <= 100)",
+      "fixed": "not -100 <= compute(inputs) <= 100",
+      "problems": []
+    },
+    {
+      "fic_id": "fic_article_1739",
+      "rule_id": "u4_rate_bounds",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "result = compute(inputs); result < 0 or result > 100",
+      "fixed": "compute(inputs) < 0 or compute(inputs) > 100",
+      "problems": []
+    },
+    {
+      "fic_id": "fic_article_2198",
+      "rule_id": "gini_range",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "result = compute(inputs); result < 0 or result > 1",
+      "fixed": "compute(inputs) < 0 or compute(inputs) > 1",
+      "problems": []
+    },
+    {
+      "fic_id": "fic_article_1091",
+      "rule_id": "hdi_output_range",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "result = compute(inputs); not (0 <= result <= 1.000000001)",
+      "fixed": "not 0 <= compute(inputs) <= 1.000000001",
+      "problems": []
+    },
+    {
+      "fic_id": "fic_article_2303",
+      "rule_id": "amt_brackets_rates_range_e",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "import json; brackets_dict = json.loads(inputs['brackets']); any(not (0 <= rate <= 1) for rate in brackets_dict.values())",
+      "fixed": "any((not 0 <= rate <= 1 for rate in json.loads(inputs['brackets']).values()))",
+      "problems": []
+    },
+    {
+      "fic_id": "fic_article_2303",
+      "rule_id": "amt_brackets_zero_threshold_e",
+      "diagnostic_type": "E",
+      "check_type": "deterministic",
+      "runtime_evaluated": true,
+      "status": "autofixed",
+      "original": "import json; brackets_dict = json.loads(inputs['brackets']); (0 not in brackets_dict.keys()) and ('0' not in brackets_dict.keys())",
+      "fixed": "0 not in json.loads(inputs['brackets']).keys() and '0' not in json.loads(inputs['brackets']).keys()",
+      "problems": []
+    }
+  ],
+  "unresolved": [
+    {
+      "fic_id": "fic_article_365",
+      "rule_id": "iso_grant_date_format",
+      "diagnostic_type": "F",
+      "check_type": "normalization",
+      "runtime_evaluated": false,
+      "status": "syntax_error",
+      "original": "try: datetime.strptime(inputs['grant_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "fixed": null,
+      "problems": [
+        "unparseable: invalid syntax"
+      ]
+    },
+    {
+      "fic_id": "fic_article_365",
+      "rule_id": "iso_exercise_date_format",
+      "diagnostic_type": "F",
+      "check_type": "normalization",
+      "runtime_evaluated": false,
+      "status": "syntax_error",
+      "original": "try: datetime.strptime(inputs['exercise_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "fixed": null,
+      "problems": [
+        "unparseable: invalid syntax"
+      ]
+    },
+    {
+      "fic_id": "fic_article_365",
+      "rule_id": "iso_sale_date_format",
+      "diagnostic_type": "F",
+      "check_type": "normalization",
+      "runtime_evaluated": false,
+      "status": "syntax_error",
+      "original": "try: datetime.strptime(inputs['sale_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "fixed": null,
+      "problems": [
+        "unparseable: invalid syntax"
+      ]
+    },
+    {
+      "fic_id": "fic_article_2303",
+      "rule_id": "amt_brackets_format_f",
+      "diagnostic_type": "F",
+      "check_type": "normalization",
+      "runtime_evaluated": false,
+      "status": "syntax_error",
+      "original": "try: import json; b = json.loads(inputs['brackets']); return isinstance(b, dict) and all(isinstance(k, (int, float, str)) and isinstance(v, (int, float)) for k,v in b.items()) and all(float(k) >= 0 for k in b.keys()) except (json.JSONDecodeError, TypeError, ValueError): return False",
+      "fixed": null,
+      "problems": [
+        "unparseable: invalid syntax"
+      ]
+    }
+  ]
+}
