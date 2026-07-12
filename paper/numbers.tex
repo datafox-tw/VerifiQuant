@@ -1,0 +1,56 @@
+% numbers.tex — single source of truth for result numbers that may still change.
+% ⚠ VQ 250Q values below are from run1 (pre scalar-fix cards). When the repaired-card
+%   rerun lands, update ONLY this file. Provenance: docs/2026-07-12_experiment_record_master.md
+
+% ── VerifiQuant, 250Q, K=3 (Flash) ──
+\newcommand{\vqCorrectAll}{231}
+\newcommand{\vqAccAll}{92.4\%}
+\newcommand{\vqSWAll}{10}
+\newcommand{\vqAbstainAll}{9}
+\newcommand{\vqCovAll}{96.4\%}
+\newcommand{\vqSelAccAll}{95.9\%}
+\newcommand{\vqSWRAll}{4.0\%}
+\newcommand{\vqCorrectMed}{172}
+\newcommand{\vqSWMed}{3}
+\newcommand{\vqAbstainMed}{5}
+\newcommand{\vqSWRMed}{1.7\%}
+\newcommand{\vqSelAccMed}{98.3\%}
+\newcommand{\vqCorrectHard}{59}
+\newcommand{\vqSWHard}{7}
+\newcommand{\vqAbstainHard}{4}
+\newcommand{\vqSWRHard}{10.0\%}
+\newcommand{\vqSelAccHard}{89.4\%}
+% SWR improvement ratios vs CoT single-shot (13.9 / 28.6 / 18.0)
+\newcommand{\vqSWRatioMed}{8.2$\times$}
+\newcommand{\vqSWRatioHard}{2.9$\times$}
+\newcommand{\vqSWRatioAll}{4.5$\times$}
+% residual-failure attribution counts (class A already repaired in canonical run)
+\newcommand{\swResidual}{10}
+\newcommand{\swClassA}{3}
+\newcommand{\swClassB}{2}
+\newcommand{\swClassC}{2}
+\newcommand{\swClassD}{3}
+
+% ── CoT single-shot, 250Q (honest ternary accounting) ──
+\newcommand{\cotCorrectAll}{194}
+\newcommand{\cotAccAll}{77.6\%}
+\newcommand{\cotSWAll}{45}
+\newcommand{\cotAbstainAll}{11}
+\newcommand{\cotSWRAll}{18.0\%}
+\newcommand{\cotSelAccAll}{81.2\%}
+\newcommand{\cotSWRMed}{13.9\%}
+\newcommand{\cotSWRHard}{28.6\%}
+\newcommand{\cotCorrectMed}{148}\newcommand{\cotSWMed}{25}\newcommand{\cotAbstainMed}{7}
+\newcommand{\cotCorrectHard}{46}\newcommand{\cotSWHard}{20}\newcommand{\cotAbstainHard}{4}
+
+% ── CoT + GT-blind oracle (K=3), 250Q ──
+\newcommand{\cotoCorrectAll}{205}
+\newcommand{\cotoAccAll}{82.0\%}
+\newcommand{\cotoSWAll}{37}
+\newcommand{\cotoAbstainAll}{8}
+\newcommand{\cotoSWRAll}{14.8\%}
+\newcommand{\cotoSelAccAll}{84.7\%}
+\newcommand{\cotoSWRMed}{11.1\%}
+\newcommand{\cotoSWRHard}{24.3\%}
+\newcommand{\cotoCorrectMed}{157}\newcommand{\cotoSWMed}{20}\newcommand{\cotoAbstainMed}{3}
+\newcommand{\cotoCorrectHard}{48}\newcommand{\cotoSWHard}{17}\newcommand{\cotoAbstainHard}{5}
