@@ -23,6 +23,7 @@ except ImportError:  # pragma: no cover
 
 from verifiquant.preprocessing.validate_relations import validate_artifact_relations
 from verifiquant.preprocessing.lint_echecks import ECHECK_SAFE_BUILTINS
+from verifiquant.preprocessing.common import safe_fic_import
 from verifiquant.preprocessing.stage_repair import GLOBAL_N_NOT_SUPPORTED_RULE, GLOBAL_SCOPE_FIC_ID
 from verifiquant.card_store import SQLAlchemyArtifactStore
 
@@ -205,6 +206,44 @@ def _parse_nested_list(raw_value: Any, *, percent_as_decimal: bool = True) -> Op
     return None  # flat list — caller decides
 
 
+def _parse_json_object(raw_value: Any) -> Optional[Any]:
+    if raw_value is None:
+        return None
+    if isinstance(raw_value, (dict, list)):
+        return raw_value
+    if isinstance(raw_value, str):
+        s = raw_value.strip()
+        if not s:
+            return None
+        try:
+            return json.loads(s)
+        except Exception:
+            return None
+    return None
+
+
+def _coerce_numeric_dict(raw_value: Any, *, percent_as_decimal: bool = True) -> Optional[Dict[str, float]]:
+    parsed = _parse_json_object(raw_value)
+    if not isinstance(parsed, dict):
+        return None
+    out: Dict[str, float] = {}
+    for key, value in parsed.items():
+        n = _parse_number(value, percent_as_decimal=percent_as_decimal)
+        if n is None:
+            return None
+        out[str(key)] = n
+    return out
+
+
+def _coerce_object_list(raw_value: Any) -> Optional[List[Dict[str, Any]]]:
+    parsed = _parse_json_object(raw_value)
+    if not isinstance(parsed, list):
+        return None
+    if not all(isinstance(item, dict) for item in parsed):
+        return None
+    return [dict(item) for item in parsed]
+
+
 def _parse_typed_value(
     raw_value: Any,
     declared_type: str,
@@ -298,7 +337,25 @@ def coerce_input(
     # ------------------------------------------------------------------
     # Parse by declared_type.
     # ------------------------------------------------------------------
+    if "dict" in dt or "object" == dt:
+        if "number" in dt:
+            obj = _coerce_numeric_dict(raw_value, percent_as_decimal=percent_as_decimal)
+        else:
+            obj = _parse_json_object(raw_value)
+        return InputCoercionResult(
+            value=obj,
+            confidence=confidence,
+            note=" ".join(note_parts) if note_parts else f"Parsed as JSON object ({declared_type}).",
+        )
+
     if "array" in dt or "list" in dt:
+        if "object" in dt:
+            obj_list = _coerce_object_list(raw_value)
+            return InputCoercionResult(
+                value=obj_list,
+                confidence=confidence,
+                note=" ".join(note_parts) if note_parts else f"Parsed as list of objects ({declared_type}).",
+            )
         is_nested = (
             ("array" in dt and any(tok in dt for tok in ("array[", "tuple", "list[")))
             or ("list" in dt and any(tok in dt for tok in ("list[", "tuple", "array[")))
@@ -340,6 +397,14 @@ def coerce_input(
             value=val,
             confidence="explicit",
             note="Parsed as boolean.",
+        )
+
+    if "str" in dt or "string" in dt or "text" in dt:
+        val = str(raw_value).strip() if raw_value is not None else ""
+        return InputCoercionResult(
+            value=val or None,
+            confidence=confidence,
+            note="Parsed as string.",
         )
 
     # Default: scalar number.
@@ -807,6 +872,11 @@ Type contract for `value`:
 - type "array[array[number]]" or nested array types:
     JSON array-of-arrays, e.g. "[[50, 240], [80, 220]]".
     Do NOT flatten nested arrays into a single list.
+- type "dict[string,number]": JSON object string with string keys and numeric
+  values, e.g. "{{\"Sales\": 3000, \"R&D\": 5000}}".
+- type "array[object]": JSON array of objects, e.g.
+  "[{{\"quantity\": 100, \"price\": 50}}, {{\"quantity\": 50, \"price\": 48}}]".
+- type "object": JSON object or array string matching the input description.
 - unit "decimal" or "decimal_rate": convert % to decimal (15% → 0.15).
 - unit "%" or "percent": keep as percentage points (15% → 15).
 
@@ -953,13 +1023,16 @@ def _evaluate_execution(
         "set": set,
         "zip": zip,
         "enumerate": enumerate,
+        "sorted": sorted,
         "ValueError": ValueError,
         "TypeError": TypeError,
         "Exception": Exception,
+        "__import__": safe_fic_import,
+        "math": math,
     }
-    local_env: Dict[str, Any] = {}
+    local_env: Dict[str, Any] = {"__builtins__": safe_builtins}
     try:
-        exec(code, {"__builtins__": safe_builtins}, local_env)
+        exec(code, local_env, local_env)
         fn = local_env.get("compute")
         if not callable(fn):
             trace["error"] = "compute function missing after exec"
@@ -1551,12 +1624,14 @@ def run_case(
             "str": str, "float": float, "int": int, "pow": pow, "round": round,
             "range": range, "list": list, "dict": dict, "tuple": tuple,
             "set": set, "zip": zip, "enumerate": enumerate,
+            "sorted": sorted,
             "ValueError": ValueError, "TypeError": TypeError, "Exception": Exception,
+            "__import__": safe_fic_import,
             "math": math,
         }
         try:
-            _exec_env: Dict[str, Any] = {}
-            exec(_fic_code, {"__builtins__": _safe_builtins_exec}, _exec_env)  # noqa: S102
+            _exec_env: Dict[str, Any] = {"__builtins__": _safe_builtins_exec}
+            exec(_fic_code, _exec_env, _exec_env)  # noqa: S102
             _fic_compute_fn = _exec_env.get("compute")
         except Exception:
             pass  # SyntaxError or other issue — will surface at C-execution stage

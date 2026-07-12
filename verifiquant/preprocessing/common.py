@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
+import statistics as _statistics
 import sys
+import datetime as _datetime
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
@@ -53,6 +56,39 @@ def dump_records(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")
         return
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def safe_fic_import(name: str, globals=None, locals=None, fromlist=(), level: int = 0):  # type: ignore[no-untyped-def]
+    """Import hook for deterministic FIC execution sandboxes.
+
+    The allowlist covers stdlib helpers plus project-pinned numerical
+    dependencies used by finance formulas.  It intentionally remains
+    root-package based and does not install packages at execution time.
+    """
+    if level != 0:
+        raise ImportError("relative imports are disabled in FIC execution")
+    root = name.split(".", 1)[0]
+    allowed = {
+        "_strptime": None,
+        "datetime": _datetime,
+        "json": json,
+        "math": math,
+        "numpy": None,
+        "scipy": None,
+        "statistics": _statistics,
+    }
+    if root not in allowed:
+        raise ImportError(f"import of '{name}' is not allowed in FIC execution")
+    try:
+        return __import__(name, globals, locals, fromlist, level)
+    except ModuleNotFoundError as exc:
+        missing = str(getattr(exc, "name", "") or root)
+        if missing == root or missing.startswith(root + "."):
+            raise ModuleNotFoundError(
+                f"Allowed FIC dependency '{missing}' is not installed; "
+                "install the pinned project requirements before running experiments."
+            ) from exc
+        raise
 
 
 def to_conversion_input(record: Dict[str, Any]) -> ConversionInput:
@@ -111,13 +147,49 @@ def normalize_input_type(raw: str) -> str:
         "array_number": "array[number]",
         "array_float": "array[number]",
         "array_int": "array[number]",
+        "array_array": "array[array[number]]",
+        "array_array_number": "array[array[number]]",
+        "array_list_number": "array[array[number]]",
+        "list_array_number": "array[array[number]]",
+        "list_list_number": "array[array[number]]",
+        "matrix": "array[array[number]]",
+        "correlation_matrix": "array[array[number]]",
+        "dict": "dict[string,number]",
+        "dict_string_number": "dict[string,number]",
+        "dict_str_number": "dict[string,number]",
+        "dictionary_string_number": "dict[string,number]",
+        "map_string_number": "dict[string,number]",
+        "dictionary": "dict[string,number]",
+        "mapping": "dict[string,number]",
+        "object": "object",
+        "json": "object",
+        "list_dict": "array[object]",
+        "list_object": "array[object]",
+        "array_dict": "array[object]",
+        "array_object": "array[object]",
         "bool": "boolean",
         "str": "string",
     }
     if t in aliases:
         return aliases[t]
-    if t in {"number", "integer", "boolean", "string", "array[number]"}:
+    if t in {
+        "number",
+        "integer",
+        "boolean",
+        "string",
+        "array[number]",
+        "array[array[number]]",
+        "array[object]",
+        "dict[string,number]",
+        "object",
+    }:
         return t
+    if "dict" in t or "dictionary" in t or "mapping" in t:
+        return "dict[string,number]"
+    if ("object" in t or "json" in t) and ("array" in t or "list" in t):
+        return "array[object]"
+    if ("matrix" in t) or (("array" in t or "list" in t) and any(x in t for x in ("nested", "2d", "array_array", "list_list"))):
+        return "array[array[number]]"
     if "array" in t or "list" in t:
         return "array[number]"
     return "number"
@@ -127,6 +199,10 @@ def require_compute_code(code: str) -> str:
     c = str(code or "").strip()
     if "def compute(inputs)" not in c:
         raise ValueError("execution.code must define compute(inputs)")
+    try:
+        compile(c, "<fic-compute>", "exec")
+    except SyntaxError as exc:
+        raise ValueError(f"execution.code must be valid Python: {exc}") from exc
     return c
 
 

@@ -14,6 +14,7 @@ from verifiquant.preprocessing.common import (
     optional_str,
     require_compute_code,
     safe_id,
+    safe_fic_import,
 )
 from verifiquant.taxonomy import TAXONOMY, taxonomy_json, validate_domain_topic
 
@@ -42,6 +43,19 @@ Critical rules:
 3) Do not hardcode case-specific constants into execution; use inputs.
 4) Use `article_content_excerpt` as supporting context to generate higher-quality `semantic_hints`.
 5) If a diagnostic rule expression needs to validate the formula's output, you MUST call `compute(inputs)` to obtain the output value. You CANNOT access output variables directly from the `inputs` dictionary.
+
+Input/output type policy:
+- Allowed input types: `number`, `integer`, `boolean`, `string`, `array[number]`,
+  `array[array[number]]`, `array[object]`, `dict[string,number]`, and `object`.
+- Use `dict[string,number]` for mappings such as department square footage or
+  credit-rating proportions.
+- Use `array[object]` for lists of structured records such as orders with
+  `quantity` and `price` keys.
+- Use `array[array[number]]` for numeric matrices such as correlation matrices.
+- Outputs MUST be scalar for now (`number`, `integer`, `boolean`, or `string`).
+  If the source function returns a dictionary but the question asks for one
+  field, make `compute(inputs)` return that requested scalar field directly.
+  Do NOT emit nested dictionary outputs unless the runtime contract is extended.
 
 Taxonomy policy:
 - Domain MUST be one of taxonomy domains.
@@ -655,15 +669,45 @@ def _dummy_input_value(input_type: str, name: str) -> Any:
     t = str(input_type or "").strip().lower()
     n = str(name or "").strip().lower()
     if t == "integer":
-        if "year" in n:
+        if n == "year" or n.endswith("_year"):
             return 2000
+        if "year" in n or "period" in n or "term" in n:
+            return 2
         return 1
     if t == "boolean":
         return True
     if t == "string":
+        if "option_type" in n or n == "option":
+            return "call"
+        if "date" in n:
+            return "2020-01-01"
+        if "bracket" in n:
+            return json.dumps({"0": 0.26, "100000": 0.28})
         return "x"
     if t == "array[number]":
-        return [1.0, 2.0]
+        return [1.0, 2.0, 3.0, 4.0, 5.0]
+    if t == "array[array[number]]":
+        return [[1.0, 0.0], [0.0, 1.0]]
+    if t == "array[object]":
+        if "buy" in n or "bid" in n:
+            return [{"quantity": 100, "price": 50}, {"quantity": 50, "price": 48}]
+        if "sell" in n or "ask" in n:
+            return [{"quantity": 80, "price": 49}, {"quantity": 70, "price": 50}]
+        return [{"value": 1.0}, {"value": 2.0}]
+    if t == "dict[string,number]":
+        if "rating" in n and "map" in n:
+            return {"AAA": 1.0, "AA": 2.0, "BBB": 4.0}
+        if "rating" in n or "proportion" in n:
+            return {"AAA": 0.5, "BBB": 0.5}
+        if "square" in n or "department" in n:
+            return {"Sales": 3000.0, "R&D": 5000.0, "Administration": 2000.0}
+        if "limit" in n:
+            return {"2015": 5500.0, "2016": 5500.0}
+        if "contribution" in n:
+            return {"2015": 6000.0, "2016": 7500.0}
+        return {"A": 1.0, "B": 2.0}
+    if t == "object":
+        return {"value": 1.0}
     if "rate" in n or "yield" in n or "ratio" in n:
         return 0.1
     return 1.0
@@ -886,6 +930,12 @@ def _extract_field_constraints(
         expr = str(chk.get("expression", "") or "")
         if not expr:
             continue
+        # Only harvest constraints from simple guard expressions.  Reversing
+        # each comparator inside a compound predicate such as
+        # ``x > 0 and compute(inputs) < threshold`` is not logically valid and
+        # can create dummy inputs that intentionally violate formula preconditions.
+        if any(token in expr for token in (" and ", " or ", "compute(")):
+            continue
         mode = str(chk.get("predicate_mode", "")).strip().lower()
         if mode not in {"violation", "validity"}:
             mode = "violation"
@@ -912,6 +962,8 @@ def _apply_constraints_to_dummy(
     input_type: str,
     constraints: List[tuple[str, float]],
 ) -> Any:
+    if isinstance(value, bool):
+        return value
     if not isinstance(value, (int, float)):
         return value
     is_int = str(input_type or "").strip().lower() == "integer"
@@ -949,6 +1001,63 @@ def _build_smart_dummy_inputs(
         for inp in inputs
         if str(inp.get("name", "")).strip()
     }
+    for name in list(dummy_inputs):
+        if name.startswith("initial_"):
+            final_name = "final_" + name[len("initial_"):]
+            if final_name in dummy_inputs and dummy_inputs[final_name] == dummy_inputs[name]:
+                dummy_inputs[final_name] = 2.0
+    if "weights" in dummy_inputs and isinstance(dummy_inputs["weights"], list):
+        n = max(1, len(dummy_inputs["weights"]))
+        dummy_inputs["weights"] = [1.0 / n for _ in range(n)]
+    if "prices" in dummy_inputs and "weights" in dummy_inputs:
+        if isinstance(dummy_inputs["prices"], list) and isinstance(dummy_inputs["weights"], list):
+            n = min(len(dummy_inputs["prices"]), len(dummy_inputs["weights"])) or 1
+            dummy_inputs["prices"] = dummy_inputs["prices"][:n]
+            dummy_inputs["weights"] = [1.0 / n for _ in range(n)]
+    if "factor_returns" in dummy_inputs and "betas" in dummy_inputs:
+        if isinstance(dummy_inputs["factor_returns"], list) and isinstance(dummy_inputs["betas"], list):
+            dummy_inputs["betas"] = [0.1 for _ in range(len(dummy_inputs["factor_returns"]) + 1)]
+    if "number" in dummy_inputs and isinstance(dummy_inputs["number"], str):
+        dummy_inputs["number"] = "4532015112830365"
+    if "years" in dummy_inputs:
+        for name, value in list(dummy_inputs.items()):
+            if name != "years" and isinstance(value, list):
+                dummy_inputs["years"] = len(value)
+                break
+    if "target_year" in dummy_inputs and "years" in dummy_inputs:
+        dummy_inputs["target_year"] = 1
+    if "initial_period" in dummy_inputs and "years" in dummy_inputs:
+        try:
+            dummy_inputs["initial_period"] = max(0, int(dummy_inputs["years"]) - 1)
+        except Exception:
+            pass
+    if "shares_outstanding" in dummy_inputs and "shares_reduced" in dummy_inputs:
+        dummy_inputs["shares_outstanding"] = 2
+        dummy_inputs["shares_reduced"] = 1
+    if "par_value" in dummy_inputs and "market_price" in dummy_inputs:
+        dummy_inputs["par_value"] = 2.0
+        dummy_inputs["market_price"] = 1.0
+    if "annual_operating_expenses" in dummy_inputs and "noncash_charges" in dummy_inputs:
+        dummy_inputs["annual_operating_expenses"] = 2.0
+        dummy_inputs["noncash_charges"] = 1.0
+    if "target_department_name" in dummy_inputs and "department_square_footages" in dummy_inputs:
+        dummy_inputs["target_department_name"] = "Sales"
+    if "rating_proportions" in dummy_inputs and "credit_rating_map" in dummy_inputs:
+        dummy_inputs["rating_proportions"] = {"AAA": 0.5, "BBB": 0.5}
+        dummy_inputs["credit_rating_map"] = {"AAA": 1.0, "BBB": 4.0}
+    if "weights" in dummy_inputs and "variances" in dummy_inputs and "correlations" in dummy_inputs:
+        dummy_inputs["weights"] = [0.5, 0.5]
+        dummy_inputs["variances"] = [0.04, 0.09]
+        dummy_inputs["correlations"] = [[1.0, 0.2], [0.2, 1.0]]
+    if {"stock_price", "strike_price"} <= set(dummy_inputs):
+        dummy_inputs["stock_price"] = 100.0
+        dummy_inputs["strike_price"] = 100.0
+    if "time_to_expiration" in dummy_inputs:
+        dummy_inputs["time_to_expiration"] = 1.0
+    if "risk_free_rate" in dummy_inputs:
+        dummy_inputs["risk_free_rate"] = 0.05
+    if "option_market_price" in dummy_inputs:
+        dummy_inputs["option_market_price"] = 10.0
     # Small cross-field heuristic for common depreciation constraints.
     if "cost" in dummy_inputs and "salvage_value" in dummy_inputs:
         dummy_inputs["cost"] = 100.0
@@ -1001,9 +1110,11 @@ def _execution_smoke_test(
         "set": set,
         "zip": zip,
         "enumerate": enumerate,
+        "sorted": sorted,
         "ValueError": ValueError,
         "TypeError": TypeError,
         "Exception": Exception,
+        "__import__": safe_fic_import,
         "math": math,
     }
     lint = _pre_smoke_lint_and_autofix(code, inputs)
@@ -1011,7 +1122,8 @@ def _execution_smoke_test(
     dummy_inputs = _build_smart_dummy_inputs(code=code_to_run, inputs=inputs, checks=checks)
     env: Dict[str, Any] = {}
     try:
-        exec(code_to_run, {"__builtins__": safe_builtins}, env)
+        env["__builtins__"] = safe_builtins
+        exec(code_to_run, env, env)
         fn = env.get("compute")
         if not callable(fn):
             return {
@@ -1099,6 +1211,10 @@ def formalize_core_payload(
     output = _normalize_output(raw.get("output") or {"name": raw.get("output_var")})
     if not output["name"]:
         raise ValueError("output.name is required")
+    if output["type"] not in {"number", "integer", "boolean", "string"}:
+        raise ValueError(
+            f"output.type must be scalar for the current evaluator, got {output['type']!r}"
+        )
 
     execution = dict(raw.get("execution") or {})
     execution["language"] = "python"
@@ -1136,6 +1252,8 @@ def formalize_core_payload(
     execution_smoke = _execution_smoke_test(execution["code"], inputs, output["name"], checks)
     effective_code = str(execution_smoke.get("effective_code", "") or execution["code"])
     execution["code"] = require_compute_code(effective_code)
+    if not execution_smoke.get("ok"):
+        raise ValueError(f"execution smoke failed: {execution_smoke.get('error', 'unknown error')}")
     source_meta_out = dict(source_meta)
     source_meta_out["execution_smoke_ok"] = bool(execution_smoke.get("ok"))
     source_meta_out["execution_autofix_applied"] = bool(execution_smoke.get("autofix_applied"))
@@ -1213,7 +1331,10 @@ def generate_core(
                 "- Ensure domain is from taxonomy.\n"
                 "- Ensure topic is non-empty snake_case.\n"
                 "- Ensure execution.code contains exactly def compute(inputs):\n"
+                "- Ensure execution.code compiles and passes the execution smoke test.\n"
                 "- Ensure diagnostics checks have valid expression and predicate_mode.\n"
+                "- Use richer input types when needed: dict[string,number], array[object], array[array[number]].\n"
+                "- Keep output scalar; if source logic returns a dict, return the requested scalar field directly.\n"
                 f"- This is retry #{attempt} with stricter validation requirements."
             )
 

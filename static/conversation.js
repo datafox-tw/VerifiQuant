@@ -677,11 +677,16 @@
         fetch(`/api/demo/questions?path=${encodeURIComponent(TRAP_PATH)}`).then((r) => r.json()).catch(() => ({})),
       ]);
       cvShowcase = (scRes && scRes.status === "ok") ? (scRes.questions || []) : [];
-      // Surface a couple of E/I trap cases (the gates worth demoing) + a few others.
+      // Surface ONE representative trap per funnel class (M/N/F/E/I) so the dropdown shows the
+      // full "five kinds of falls" set rather than several of the same class.
       const allTrap = (trRes && trRes.status === "ok") ? (trRes.questions || []) : [];
-      const pref = allTrap.filter((q) => /^(E|I)/.test(String(q.expected_diagnostic || "")));
-      const rest = allTrap.filter((q) => !/^(E|I)/.test(String(q.expected_diagnostic || "")));
-      cvTrap = pref.slice(0, 4).concat(rest.slice(0, 2));
+      const order = ["M", "N", "F", "E", "I"];
+      const firstByClass = {};
+      allTrap.forEach((q) => {
+        const cls = String(q.expected_diagnostic || "").trim().toUpperCase().charAt(0);
+        if (order.includes(cls) && !firstByClass[cls]) firstByClass[cls] = q;
+      });
+      cvTrap = order.map((cls) => firstByClass[cls]).filter(Boolean);
 
       let html = `<option value="">Choose a showcase…</option>`;
       if (cvShowcase.length) {

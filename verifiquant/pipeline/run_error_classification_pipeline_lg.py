@@ -46,6 +46,7 @@ from langgraph.types import Command, interrupt
 from typing_extensions import TypedDict
 
 from verifiquant.card_store import SQLAlchemyArtifactStore
+from verifiquant.preprocessing.common import safe_fic_import
 from verifiquant.preprocessing.stage_repair import GLOBAL_N_NOT_SUPPORTED_RULE, GLOBAL_SCOPE_FIC_ID
 from verifiquant.preprocessing.validate_relations import validate_artifact_relations
 
@@ -94,7 +95,9 @@ _SAFE_BUILTINS_EXEC: Dict[str, Any] = {
     "str": str, "float": float, "int": int, "pow": pow, "round": round,
     "range": range, "list": list, "dict": dict, "tuple": tuple,
     "set": set, "zip": zip, "enumerate": enumerate,
+    "sorted": sorted,
     "ValueError": ValueError, "TypeError": TypeError, "Exception": Exception,
+    "__import__": safe_fic_import,
     "math": math,
 }
 
@@ -418,8 +421,8 @@ def node_fe_checks(state: PipelineState, *, deps: PipelineDeps) -> dict:
     fic_code = str((core.get("execution") or {}).get("code", ""))
     if "def compute(inputs)" in fic_code:
         try:
-            _env: Dict[str, Any] = {}
-            exec(fic_code, {"__builtins__": _SAFE_BUILTINS_EXEC}, _env)  # noqa: S102
+            _env: Dict[str, Any] = {"__builtins__": _SAFE_BUILTINS_EXEC}
+            exec(fic_code, _env, _env)  # noqa: S102
             fic_compute_fn = _env.get("compute")
         except Exception:
             pass  # surface at C-execution stage
