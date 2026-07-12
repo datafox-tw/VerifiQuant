@@ -161,6 +161,21 @@ VerifiQuant permits exactly two repair forms.
 \emph{code\_patch}: a single-site textual replacement in contract code (e.g., \texttt{start=1} $\rightarrow$ \texttt{start=0}), accepted only if the pattern occurs exactly once, the shallow AST diff is within a declared blast radius, no new imports or dangerous calls appear, and---decisively---\emph{cross-verification}: the patched code's output must equal the declared algebraic identity applied to the original output on multiple sampled inputs.
 \emph{Worked example (annuity timing).} A contract computes an end-of-period annuity (579.98). The user clarifies payments occur at period start. The system applies the pre-declared post-process \emph{and} the code patch, reruns, and compares: both yield 577.10, so the repair is accepted and logged with its invariant. A code change is admissible only when its numerical effect is provable without trusting the LLM that proposed it (C4).
 
+%% [ICAIF-CUT: design-rationale subsection]
+\subsection{Design rationale: alternatives we rejected}\label{sec:rationale}
+Three designs we prototyped or evaluated en route shaped the final architecture; each fails for a reason that clarifies what the controls actually require.
+\emph{(a) One-shot symbolic compilation.}
+Compiling all financial logic up front into a solver-executable policy space (SMT-lib policies over accounting and regulatory rules \cite{akinfaderin2025verafi}, or deterministic rule graphs) yields near-perfect logical consistency \emph{after} translation---but a single error in that one-shot translation poisons every downstream execution, and the rigid policy space resists the heterogeneous phrasing of real questions.
+FICs amortize formalization per formula family instead: each contract is validated independently at build time, a bad card damages only its own family, and selection keeps a natural-language interface.
+\emph{(b) Symbolic-proof transforms.}
+Our first transform design attached a computer-algebra proof to each repair (e.g., $\mathrm{PV}_{\mathrm{due}}=\mathrm{PV}_{\mathrm{ord}}\times(1+r)$, checked with a CAS).
+We dropped the solver: the proof catalog needs manual maintenance, and the natural-language-to-symbolic translation it depends on is itself the dominant failure mode identified in \S\ref{sec:governance}.
+Numerical cross-verification of the declared identity on sampled inputs yields the same accept/reject decision with no symbolic dependency.
+\emph{(c) Probabilistic belief fusion.}
+Reasoning-in-action systems that anchor claims to calibrated confidence scores answer ``how sure are we?''---but a calibrated 0.85 cannot answer \emph{which check failed}, and finance's near-zero error tolerance demands exact attribution, not belief updates.
+The common thread: every rejected design either centralizes a fragile translation step or reports uncertainty without attribution; the funnel decentralizes the former and structurally provides the latter.
+%% [/ICAIF-CUT]
+
 \section{Experimental Protocol}\label{sec:protocol}
 
 \subsection{Datasets}
@@ -168,6 +183,9 @@ VerifiQuant permits exactly two repair forms.
 The hard tier probes governance behavior under difficulty shift.
 A canonical 50-question medium subset supports deep protocol validation (full oracle grid, ablations, variance; \S\ref{sec:fiftyq}).
 FIC cards are auto-generated per question family and validated by build-time gates (execution smoke: 0 failures; E-check lint: 4 statement-form expressions on 2 cards repaired pre-run; cross-artifact relation check: clean); all repairs are logged and none consults gold answers.
+\emph{Contamination control.}
+An early pipeline built cards from each question's reference \emph{solution}---effectively compiling the test set into the knowledge base and mass-producing near-duplicate cards.
+The final protocol generates cards only from the benchmark's independent reference-function corpus (article-level implementations published separately from the questions), never receives gold answers or per-question solution code, and deduplicates formula kernels by AST hashing.
 
 \textbf{Trap set (contract-grounded).} Trap labels guessed from question text are themselves unreliable, so each trap is derived from a clean question plus its FIC by a deterministic operator---the label \emph{is} the operator.
 \textbf{F} removes a required input; \textbf{E} injects a boundary-violating value anchored to a declared E-check predicate; \textbf{I} deletes the disambiguating phrase that re-opens a declared semantic hint (hard/soft per the contract); \textbf{N} swaps in an out-of-scope ask while keeping the original context; \textbf{M} replaces the question with under-specified intent.
@@ -266,6 +284,9 @@ The 50Q medium subset carries the full baseline grid (Table~\ref{tab:fifty}).
 Three findings transfer.
 (1)~\emph{Oracle strength does not eliminate silent wrongs}: the strongest leak-free configuration (plain oracle, Pro) reaches 98\% accuracy yet keeps SWR $\geq2\%$; its surviving error is architectural---LLM arithmetic on $2.4^{1/5}$ oscillates across turns (19.11--19.16), which no clarification can fix and deterministic execution computes exactly.
 (2)~\emph{A multi-agent system with a human-escalation node never uses it}: the MAS baseline answered all 50 questions without once triggering \texttt{ask\_human} (SWR 14\%)---possessing a checkpoint is not executing one.
+%% [ICAIF-CUT: MAS failure color]
+Its failure modes, observed during reimplementation, are instructive: after several rounds of inter-agent chatter the base agent starts ignoring provided variables---in one loan case it dropped the stated five-year term entirely; in a Qstick case it \emph{fabricated} input prices from a remembered template instead of parsing the ten values in context---and adding our funnel taxonomy as reflection prompts raised accuracy but induced base--reflection loops rather than escalation to the human node.
+%% [/ICAIF-CUT]
 (3)~\emph{Iteration is safe under the funnel} (Table~\ref{tab:ablation}): clarification converts abstentions to correct answers but cannot cross a deterministic gate, so oracle budget buys accuracy while the funnel owns safety.
 Four independent reruns leave accuracy and SWR bit-identical (C5); only the recovery path varies (4--8 oracle triggers).
 
