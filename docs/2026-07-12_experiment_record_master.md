@@ -151,6 +151,23 @@ overall **231/250 = 92.4%**，10 SW，9 abstain，SelAcc 95.9%，**SWR 4.0%**（
 5. SW 清單（歸因調查用）：med×3 = test-1004, test-1890, test-1777；
    hard×7 = test-2149, test-2021, test-2137, test-2009, test-2019, test-2080, test-2104。
 
+### SW 逐題歸因與修復裁決（2026-07-12 case study）
+
+| 類 | 題數 | 案例 | 裁決 |
+|---|---:|---|---|
+| **A** 違反 scalar-output 政策（數學正確） | 3 | NVI(2149)/VPT(2019)/VWAP(2080)，全 hard | ✅ **已修**：政策稽核（f7fd111 預先宣告），全 250 卡動態重放+靜態掃描，修 4（含 Share Repurchase dict）、needs_review 2、誤報 3。無 gold 介入。重跑中 |
+| **B** 選卡錯位 | 2 | 2137/2104：「total interest」→「Lifetime Cost」卡（差值=本金） | ❌ 不修：M/selection frontier，誠實寫入 |
+| **C** binding/抽取失誤 | 2 | 1777（period_days 360≠90）、2009（carry trade 方向） | ❌ 不修：input-provenance 缺口（§6.4 既有敘事）＋ Swiss-cheese |
+| **D** convention 歧義 | 3 | 1004（每股/總額）、2021（稅前後+scale）、1890（inclusion） | ❌ 不修，但**重新定性**（見下） |
+
+**D 類關鍵發現（2026-07-12）**：三張卡的 semantic_hints **全部已宣告**正確的歧義——
+`fic_article_1407.option_premium_unit`（選項文字即 "$3 per share"）、`fic_article_91.change_input_convention`、
+`fic_article_2452.output_scale`。失敗不在宣告層（contract 覆蓋 3/3），而在 **I-gate critic 的 recall**（觸發 0/3）：
+LLM critic 未把宣告的 hint 對上題面線索，靜默採用 DEFAULT 選項。
+→ 論文定性從「I-gate 覆蓋缺口」改為「**declared-hint recall 是 LLM-dependent zone 的量測邊界**」（§6.2 敘事強化）；
+→ 導出的機制化方向：hint 級**確定性觸發詞**（build-time 宣告 "per share"→ fire `option_premium_unit`），把 recall 從
+LLM 判斷遷入 deterministic 層——典型的 verifiability frontier 擴張，列 future work（deadline 前不動 critic，避免 churn）。
+
 ### Pipeline 修復（2026-07-12）
 
 `run_cot_self_improve_pipeline.py` 首跑 250Q 在 ~20 題處死於 `_llm_json`：Gemini 回傳空 candidate

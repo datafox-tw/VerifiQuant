@@ -923,6 +923,58 @@ def _semantic_echeck_with_llm(
     )
 
 
+# ── Deterministic hint triggers (experimental; VQ_HINT_TRIGGERS=1 to enable) ──
+# Moves declared-hint *recall* from LLM judgment into the deterministic layer:
+# if a convention-signal phrase appears verbatim in the question/context AND the
+# selected card declares a matching semantic hint, the hint is force-triggered at
+# its declared i_level. The lexicon is system-level (uniform across all cards and
+# questions); per-card machine-readable trigger_keywords are future stage_core work.
+_HINT_TRIGGERS_ENABLED = str(os.environ.get("VQ_HINT_TRIGGERS", "")).strip().lower() in {"1", "true", "yes"}
+
+_HINT_TRIGGER_LEXICON: List[Tuple[List[str], List[str]]] = [
+    # (phrases searched in question+context, keywords required in hint id/options text)
+    (["per share", "per-share"], ["per share", "unit"]),
+    (["as a percentage", "as a percent", "in percent", "expressed as a percentage"], ["percent", "scale"]),
+    (["as a decimal", "in decimal form"], ["decimal", "scale"]),
+    (["increase in", "decrease in", "increased by", "decreased by", "grew by", "rose by", "fell by"], ["change", "convention"]),
+    (["beginning of each", "at the beginning of"], ["begin", "start", "timing"]),
+    (["end of each", "at the end of"], ["end", "timing"]),
+    (["pre-tax", "before tax", "before-tax"], ["tax"]),
+    (["after-tax", "after tax"], ["tax"]),
+]
+
+
+def _lexical_hint_triggers(
+    question: str,
+    context: str,
+    semantic_hints: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Deterministically match declared semantic hints against the case text."""
+    text = f"{question}\n{context}".lower()
+    hits: List[Dict[str, Any]] = []
+    for hint in semantic_hints:
+        hid = str(hint.get("id", "")).strip()
+        if not hid:
+            continue
+        hint_blob = " ".join([
+            hid,
+            json.dumps(hint.get("options", []) or [], ensure_ascii=False),
+            str(hint.get("clarification_question", "")),
+        ]).lower()
+        for phrases, hint_keys in _HINT_TRIGGER_LEXICON:
+            phrase = next((p for p in phrases if p in text), None)
+            if phrase is None:
+                continue
+            if any(k in hint_blob for k in hint_keys):
+                hits.append({
+                    "hint_id": hid,
+                    "matched_phrase": phrase,
+                    "i_level": _semantic_hint_level(hint),
+                })
+                break
+    return hits
+
+
 def _critic_check_with_llm(
     client: Any,
     model: str,
@@ -1790,6 +1842,21 @@ def run_case(
         "semantic_hints_count": len(semantic_hints),
         "raw_critic": critic,
     }
+    if _HINT_TRIGGERS_ENABLED:
+        det_hits = _lexical_hint_triggers(q, c, semantic_hints)
+        if det_hits:
+            llm_ids = [str(x).strip() for x in critic.get("triggered_hint_ids", []) if str(x).strip()]
+            det_ids = [h["hint_id"] for h in det_hits]
+            critic_trace["deterministic_hint_triggers"] = det_hits
+            critic_trace["critic_recall_misses"] = [hid for hid in det_ids if hid not in llm_ids]
+            critic["triggered_hint_ids"] = list(dict.fromkeys(llm_ids + det_ids))
+            if not critic.get("needs_clarification"):
+                critic["needs_clarification"] = True
+                critic["reason"] = (
+                    str(critic.get("reason", "") or "").strip()
+                    or "Deterministic hint trigger: declared convention phrase present in question/context."
+                )
+            _dbg(f"hint-triggers: det={det_hits}, recall_misses={critic_trace['critic_recall_misses']}")
     needs_clarification = bool(critic.get("needs_clarification"))
     soft_warnings: List[Dict[str, Any]] = []
     if needs_clarification:
