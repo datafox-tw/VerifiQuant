@@ -2,34 +2,39 @@
 % ⚠ VQ 250Q values below are from run1 (pre scalar-fix cards). When the repaired-card
 %   rerun lands, update ONLY this file. Provenance: docs/2026-07-12_experiment_record_master.md
 
-% ── VerifiQuant, 250Q, K=3 (Flash) ──
-\newcommand{\vqCorrectAll}{231}
-\newcommand{\vqAccAll}{92.4\%}
-\newcommand{\vqSWAll}{10}
-\newcommand{\vqAbstainAll}{9}
-\newcommand{\vqCovAll}{96.4\%}
-\newcommand{\vqSelAccAll}{95.9\%}
-\newcommand{\vqSWRAll}{4.0\%}
-\newcommand{\vqCorrectMed}{172}
-\newcommand{\vqSWMed}{3}
-\newcommand{\vqAbstainMed}{5}
-\newcommand{\vqSWRMed}{1.7\%}
-\newcommand{\vqSelAccMed}{98.3\%}
-\newcommand{\vqCorrectHard}{59}
-\newcommand{\vqSWHard}{7}
+% ── VerifiQuant, 250Q, K=3 (Flash) — canonical run on type-audited cards (2026-07-12) ──
+\newcommand{\vqCorrectAll}{234}
+\newcommand{\vqAccAll}{93.6\%}
+\newcommand{\vqSWAll}{8}
+\newcommand{\vqAbstainAll}{8}
+\newcommand{\vqCovAll}{96.8\%}
+\newcommand{\vqSelAccAll}{96.7\%}
+\newcommand{\vqSWRAll}{3.2\%}
+\newcommand{\vqCorrectMed}{171}
+\newcommand{\vqSWMed}{5}
+\newcommand{\vqAbstainMed}{4}
+\newcommand{\vqSWRMed}{2.8\%}
+\newcommand{\vqSelAccMed}{97.2\%}
+\newcommand{\vqCorrectHard}{63}
+\newcommand{\vqSWHard}{3}
 \newcommand{\vqAbstainHard}{4}
-\newcommand{\vqSWRHard}{10.0\%}
-\newcommand{\vqSelAccHard}{89.4\%}
+\newcommand{\vqSWRHard}{4.3\%}
+\newcommand{\vqSelAccHard}{95.5\%}
 % SWR improvement ratios vs CoT single-shot (13.9 / 28.6 / 18.0)
-\newcommand{\vqSWRatioMed}{8.2$\times$}
-\newcommand{\vqSWRatioHard}{2.9$\times$}
-\newcommand{\vqSWRatioAll}{4.5$\times$}
-% residual-failure attribution counts (class A already repaired in canonical run)
+\newcommand{\vqSWRatioMed}{5.0$\times$}
+\newcommand{\vqSWRatioHard}{6.7$\times$}
+\newcommand{\vqSWRatioAll}{5.6$\times$}
+% residual-failure attribution: initial (pre-audit) run decomposition
 \newcommand{\swResidual}{10}
 \newcommand{\swClassA}{3}
 \newcommand{\swClassB}{2}
 \newcommand{\swClassC}{2}
 \newcommand{\swClassD}{3}
+% canonical (post-audit) run residuals: B=selection, C=binding, D=convention
+\newcommand{\swResidualCanon}{8}
+\newcommand{\swCanonB}{3}
+\newcommand{\swCanonC}{2}
+\newcommand{\swCanonD}{3}
 
 % ── CoT single-shot, 250Q (honest ternary accounting) ──
 \newcommand{\cotCorrectAll}{194}

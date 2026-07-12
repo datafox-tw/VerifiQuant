@@ -206,18 +206,22 @@ CoT + blind oracle ($K{=}3$) & medium & 180 & \cotoCorrectMed{} & \cotoSWMed{} &
 
 \textbf{Difficulty shift is a governance stress test.}
 Moving from medium to hard \emph{doubles} CoT's silent-wrong rate (\cotSWRMed{}$\rightarrow$\cotSWRHard{} single-shot; \cotoSWRMed{}$\rightarrow$\cotoSWRHard{} with oracle): harder questions convert directly into more confident wrong numbers, with no signal.
-VerifiQuant's SWR also rises (\vqSWRMed{}$\rightarrow$\vqSWRHard{}) but stays \vqSWRatioMed{} below CoT on medium and \vqSWRatioHard{} on hard---and, unlike CoT, every residual failure is attributable (\S\ref{sec:attribution}).
+VerifiQuant's SWR stays in a narrow band (\vqSWRMed{}$\rightarrow$\vqSWRHard{}): the contract gates and abstention absorb most of the shift, so the advantage over CoT \emph{widens} with difficulty---\vqSWRatioMed{} on medium, \vqSWRatioHard{} on hard---and, unlike CoT, every residual failure is attributable (\S\ref{sec:attribution}).
 
 \subsection{Residual-failure attribution and the audit loop}\label{sec:attribution}
 Fifty-question pilots of this framework achieved SWR $=0\%$; at 250 questions with a hard tier, silent wrongs appear.
 We attribute \emph{every} one.
 The \swResidual{} silent wrongs of the initial 250Q run decompose into four classes.
+(The canonical numbers in Table~\ref{tab:main} are from the post-audit rerun described under class~A below; we narrate the initial run first because the audit is part of the result.)
 \textbf{(A) Output-policy violations (\swClassA{}, all hard).} Three time-series indicator cards (NVI, VPT, VWAP) compute the correct value series but return the whole list, violating the pre-declared scalar-output policy; the runtime surfaced the first element while the series-final value matches gold.
 Because the policy predates the run, this is detectable \emph{without gold answers}: a type audit of all 250 cards (dynamic replay of every card--input pair used in the run, plus a static AST scan) found exactly these plus one dict-returning card, auto-repaired all four with logged diffs, flagged two deliberately-array cards for review, and cleared three false positives.
 This audit-repair cycle is governance-by-execution applied to the system itself: the failure was localized to specific contract lines, repaired under a pre-declared policy, and both runs are preserved.
 \textbf{(B) Selection mismatch (\swClassB{}).} Two ``total interest'' questions were routed to an internally-correct ``lifetime cost'' card (outputs differ by exactly the principal): an M-layer frontier failure, not a computation error.
 \textbf{(C) Binding slips (\swClassC{}).} The extractor bound a wrong-but-legal value (e.g., the annualization base 360 where the 90-day tenor was required): the input-provenance gap of \S\ref{sec:limitations}.
 \textbf{(D) Declared-but-unrecalled ambiguities (\swClassD{}).} Most instructive: in all three cases the selected card \emph{already declares} the exact ambiguity as a semantic hint (per-share vs.\ total premium; percent vs.\ decimal output; sign convention of working-capital changes), yet the LLM critic failed to trigger it---declaration coverage 3/3, recall 0/3 (\S\ref{sec:recall}).
+
+After the class-A repair, the canonical rerun (Table~\ref{tab:main}) has \swResidualCanon{} silent wrongs---all from the \emph{same three frontier families} (\swCanonB{} selection, \swCanonC{} binding, \swCanonD{} convention), with zero unattributed: five persist from the initial run and three are sampling-variant instances of the same families (two of the initial convention cases resolve correctly under resampling, confirming that class~D behaves as an unflagged coin flip---precisely what I\textsubscript{SOFT} disclosure exists to prevent).
+On the canonical 50-question subset the audited cards score 50/0/0.
 
 \subsection{Protocol validation on the canonical 50Q subset}\label{sec:fiftyq}
 The 50Q medium subset carries the full baseline grid (Table~\ref{tab:fifty}).
@@ -226,7 +230,7 @@ Three findings transfer.
 (2)~\emph{A multi-agent system with a human-escalation node never uses it}: the MAS baseline answered all 50 questions without once triggering \texttt{ask\_human} (SWR 14\%)---possessing a checkpoint is not executing one.
 (3)~\emph{Iteration is safe under the funnel}: truncating VerifiQuant's canonical run at $K{=}1/2/3$ yields 74\%/84\%/90\% accuracy with SWR $=0\%$ at every $K$; clarification converts abstentions to correct answers but cannot cross a deterministic gate, so oracle budget buys accuracy while the funnel owns safety.
 Four independent reruns leave accuracy and SWR bit-identical (C5); only the recovery path varies.
-\emph{Card-generation confound, disclosed:} the 50Q pilot used hand-repaired contracts; on the current auto-generated cards the same 50 questions score 49/1/0 (the sole silent wrong is the class-D sign-convention case), so contract quality---not model choice---is the first-order variable.
+\emph{Card-generation confound, disclosed:} the 50Q pilot used hand-repaired contracts; on the auto-generated cards the same 50 questions scored 49/1/0 before the type audit and 50/0/0 after it, so contract quality---not model choice---is the first-order variable.
 
 \begin{table}[t]
 \caption{Canonical 50Q (medium) protocol validation. Blind-review oracles; ternary accounting as \S\ref{sec:protocol} (the single informal no-answer, the same question in three configurations, is footnoted as abstention).}
@@ -313,7 +317,7 @@ Notably the weaker model does not fail here (Flash binds the literal value): cap
 The roadmap is input-provenance checking: every bound value must trace to a literal context span.
 
 \section{Limitations}\label{sec:limitations}
-\textbf{Silent wrongs are reduced and attributed, not eliminated.} \vqSWAll{} of 250 answers were unflagged wrong numbers before the output-policy audit; the surviving classes (selection mismatch, binding slips, hint recall) are named frontier gaps with designed mechanisms, but they are gaps.
+\textbf{Silent wrongs are reduced and attributed, not eliminated.} \swResidual{} of 250 answers were unflagged wrong numbers before the output-policy audit and \swResidualCanon{} after it; the surviving classes (selection mismatch, binding slips, convention recall) are named frontier gaps with designed mechanisms, but they are gaps.
 \textbf{The funnel's guarantee is conditional on faithful input binding} (\S\ref{sec:binding}); provenance checking is designed, not implemented.
 \textbf{Contracts are LLM-generated at build time}; build-time gates (smoke, lint, type audit) catch the mechanical failure classes without gold answers, but semantic contract errors can survive---the 50Q pilot required repairing 5 of 50 cards, all from execution signals alone.
 \textbf{The trap M-operator does not isolate intent ambiguity}; M results are excluded from claims pending redesign.

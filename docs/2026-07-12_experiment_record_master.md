@@ -168,6 +168,25 @@ LLM critic 未把宣告的 hint 對上題面線索，靜默採用 DEFAULT 選項
 → 導出的機制化方向：hint 級**確定性觸發詞**（build-time 宣告 "per share"→ fire `option_premium_unit`），把 recall 從
 LLM 判斷遷入 deterministic 層——典型的 verifiability frontier 擴張，列 future work（deadline 前不動 critic，避免 churn）。
 
+### A2-run2 結果：VQ Flash K=3 250Q，type-audit 修復卡（canonical，2026-07-12 晚）
+
+overall **234/250 = 93.6%**，8 SW，8 abstain，SelAcc 96.7%，**SWR 3.2%**：
+
+| tier | Correct | SW | Abstain | SWR | CoT single-shot 對照（倍率）|
+|---|---:|---:|---:|---:|---|
+| medium (180) | 171 | 5 | 4 | **2.8%** | 13.9%（5.0×）|
+| hard (70) | 63 | 3 | 4 | **4.3%** | 28.6%（**6.7×**）|
+| all (250) | 234 | 8 | 8 | **3.2%** | 18.0%（5.6×）|
+
+- **A 類 3 題（2149/2019/2080）全數翻正**；hard SWR 10.0%→4.3%。**優勢隨難度擴大**（5.0×→6.7×）。
+- **Canonical-50 子集 = 50/0/0**（稽核前 49/1/0）。
+- run2 的 8 SW 全數歸因、零無法解釋：**B×3**（2137、2104、新增 1702=回傳利息而非 FV）、
+  **C×2**（1777、2009）、**D×3**（1004、新增 1063=decline 符號、新增 1771=alpha 計不計入）。
+  5 題延續 run1；3 題為同家族的取樣變體。**run1 的 D 類 1890/2021 本輪自行翻正**——證實 D 類
+  是「無 flag 的擲硬幣」，正是 I_SOFT 揭露機制要防的行為。
+- medium 2 題淨增（1.7%→2.8%）為 run 間變異；論文以 run2 為 canonical（修復卡）。
+- 論文 numbers.tex 已同步（234/8/8、比率 5.0/6.7/5.6×）。
+
 ### Pipeline 修復（2026-07-12）
 
 `run_cot_self_improve_pipeline.py` 首跑 250Q 在 ~20 題處死於 `_llm_json`：Gemini 回傳空 candidate

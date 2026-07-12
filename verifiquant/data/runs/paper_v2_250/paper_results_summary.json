@@ -53,6 +53,23 @@
   },
   "vq_flash": {
     "total": 250,
+    "correct": 234,
+    "silent_wrong": 8,
+    "abstain": 8,
+    "accuracy": 0.936,
+    "coverage": 0.968,
+    "selective_accuracy": 0.9669,
+    "silent_wrong_rate": 0.032,
+    "recovery_count": 35,
+    "recovery_rate": 0.14,
+    "correct_one_shot": null,
+    "model": "gemini-2.5-flash",
+    "ran_at": "2026-07-12T20:36:04.678431",
+    "elapsed_seconds": 4321.1,
+    "run_config": null
+  },
+  "vq_flash_run1_prescalarfix": {
+    "total": 250,
     "correct": 231,
     "silent_wrong": 10,
     "abstain": 9,
