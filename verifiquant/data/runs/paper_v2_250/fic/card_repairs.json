@@ -1,0 +1,31 @@
+{
+  "repaired_at": "2026-07-12T09:02:27.606748",
+  "stage": "pre-run lint gate (build-time, no gold answers involved)",
+  "reason": "statement-form E-check expressions (try/except, import) are un-evaluable by runtime eval(); detected by lint_echecks standalone pass",
+  "repairs": [
+    {
+      "fic_id": "fic_article_365",
+      "field": "grant_date",
+      "old": "try: datetime.strptime(inputs['grant_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "new": "isinstance(inputs['grant_date'], str) and len(inputs['grant_date']) == 10 and inputs['grant_date'][4] == '-' and inputs['grant_date'][7] == '-' and inputs['grant_date'][:4].isdigit() and inputs['grant_date'][5:7].isdigit() and inputs['grant_date'][8:10].isdigit()"
+    },
+    {
+      "fic_id": "fic_article_365",
+      "field": "exercise_date",
+      "old": "try: datetime.strptime(inputs['exercise_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "new": "isinstance(inputs['exercise_date'], str) and len(inputs['exercise_date']) == 10 and inputs['exercise_date'][4] == '-' and inputs['exercise_date'][7] == '-' and inputs['exercise_date'][:4].isdigit() and inputs['exercise_date'][5:7].isdigit() and inputs['exercise_date'][8:10].isdigit()"
+    },
+    {
+      "fic_id": "fic_article_365",
+      "field": "sale_date",
+      "old": "try: datetime.strptime(inputs['sale_date'], '%Y-%m-%d'); True; except ValueError: False",
+      "new": "isinstance(inputs['sale_date'], str) and len(inputs['sale_date']) == 10 and inputs['sale_date'][4] == '-' and inputs['sale_date'][7] == '-' and inputs['sale_date'][:4].isdigit() and inputs['sale_date'][5:7].isdigit() and inputs['sale_date'][8:10].isdigit()"
+    },
+    {
+      "fic_id": "fic_article_2303",
+      "field": "brackets",
+      "old": "try: import json; b = json.loads(inputs['brackets']); return isinstance(b, dict) and all(isinstance(k, (int, float, str)) and isinstance(v, (int, float)) for k,v in b.items()) and all(float(k) >= 0 for k in b.keys()) except (json.JSONDecodeError, TypeError, ValueError): return False",
+      "new": "isinstance(json.loads(inputs['brackets']), dict) and all(isinstance(v, (int, float)) for v in json.loads(inputs['brackets']).values()) and all(str(k).lstrip('-').replace('.', '', 1).isdigit() and float(k) >= 0 for k in json.loads(inputs['brackets']).keys())"
+    }
+  ]
+}
