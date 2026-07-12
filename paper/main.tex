@@ -7,6 +7,8 @@
 %% Numbers that may still change live in numbers.tex.
 \documentclass[sigconf,review,anonymous]{acmart}
 \usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \input{numbers}
 
 \settopmatter{printacmref=false}
@@ -140,7 +142,7 @@ Figure~\ref{fig:pipeline} annotates each gate with the control it executes.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{figures/fig1_pipeline}
+\includegraphics[width=\textwidth]{figures/fig1_pipeline.pdf}
 \caption{The VerifiQuant pipeline. LLM components (orange) only map into contracts; all financially consequential computation is deterministic (blue). Five of seven gates are structured exits (red); repairs go through verified atomic transforms (purple). Badges C1--C6 reference Table~\ref{tab:spine}.}
 \label{fig:pipeline}
 \end{figure*}
@@ -214,7 +216,35 @@ CoT + blind oracle ($K{=}3$) & medium & 180 & \cotoCorrectMed{} & \cotoSWMed{} &
 
 \textbf{Difficulty shift is a governance stress test.}
 Moving from medium to hard \emph{doubles} CoT's silent-wrong rate (\cotSWRMed{}$\rightarrow$\cotSWRHard{} single-shot; \cotoSWRMed{}$\rightarrow$\cotoSWRHard{} with oracle): harder questions convert directly into more confident wrong numbers, with no signal.
-VerifiQuant's SWR stays in a narrow band (\vqSWRMed{}$\rightarrow$\vqSWRHard{}): the contract gates and abstention absorb most of the shift, so the advantage over CoT \emph{widens} with difficulty---\vqSWRatioMed{} on medium, \vqSWRatioHard{} on hard---and, unlike CoT, every residual failure is attributable (\S\ref{sec:attribution}).
+VerifiQuant's SWR stays in a narrow band (\vqSWRMed{}$\rightarrow$\vqSWRHard{}): the contract gates and abstention absorb most of the shift, so the advantage over CoT \emph{widens} with difficulty---\vqSWRatioMed{} on medium, \vqSWRatioHard{} on hard (Figure~\ref{fig:tiers})---and, unlike CoT, every residual failure is attributable (\S\ref{sec:attribution}).
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=9pt,
+  width=\columnwidth, height=4.6cm,
+  ymin=0, ymax=33,
+  ylabel={Silent-wrong rate (\%)},
+  ylabel near ticks,
+  symbolic x coords={Medium (180Q), Hard (70Q)},
+  xtick=data,
+  enlarge x limits=0.45,
+  legend style={at={(0.02,0.98)}, anchor=north west, font=\scriptsize, draw=none, fill=none},
+  nodes near coords, nodes near coords style={font=\scriptsize},
+  tick label style={font=\small},
+  label style={font=\small},
+  axis lines*=left, ymajorgrids, grid style={gray!20},
+]
+\addplot+[ybar, fill=gray!65, draw=gray!65] coordinates {(Medium (180Q),13.9) (Hard (70Q),28.6)};
+\addplot+[ybar, fill=gray!35, draw=gray!35] coordinates {(Medium (180Q),11.1) (Hard (70Q),24.3)};
+\addplot+[ybar, fill=blue!60!cyan, draw=blue!60!cyan] coordinates {(Medium (180Q),2.8) (Hard (70Q),4.3)};
+\legend{CoT single-shot, CoT + blind oracle, VerifiQuant}
+\end{axis}
+\end{tikzpicture}
+\caption{Difficulty shift as a governance stress test. Hard-tier questions roughly double CoT's silent-wrong rate under both configurations; VerifiQuant's stays in a narrow band, so its advantage widens from \vqSWRatioMed{} to \vqSWRatioHard{}.}
+\label{fig:tiers}
+\end{figure}
 
 \subsection{Residual-failure attribution and the audit loop}\label{sec:attribution}
 Fifty-question pilots of this framework achieved SWR $=0\%$; at 250 questions with a hard tier, silent wrongs appear.
@@ -379,6 +409,26 @@ With a stronger underlying model (Pro), VerifiQuant produced silent wrongs shari
 The result is positive, plausible, and passes every E-check: the funnel validates bound inputs and outputs, not whether a given value was rewritten during binding.
 Notably the weaker model does not fail here (Flash binds the literal value): capability increases exploitation of whichever step is left unconstrained, so reliability tracks the constraint set, not model scale.
 The roadmap is input-provenance checking: every bound value must trace to a literal context span.
+
+\section{Deployment Considerations}\label{sec:deployment}
+We do not claim this architecture achieves regulatory compliance---compliance involves organizational and process factors beyond any architecture---but its first-class properties directly answer the core technical demands of the three regimes in Table~\ref{tab:spine}.
+
+\emph{Model risk management (SR 11-7)} \cite{fed2011sr117} requires that a model identify its failure regimes and enforce output boundaries rather than extrapolate.
+The M/N gates are an architectural output floor: when a question's semantics or scope exceeds the contract library, the system exits structurally instead of extrapolating.
+The contrast in \S\ref{sec:fiftyq} is the operational argument: a multi-agent baseline running under the same oracle conditions delivered 14\% SWR and never once escalated to its own human node---without an executed boundary control, even a system \emph{designed} with an escalation path answers everything.
+
+\emph{EU AI Act, Articles 12--13} \cite{euaiact2024} require record-keeping sufficient to trace any output back to its inputs, reproducibly.
+The DiagnosticReport five-tuple traces every answer to the selected contract, the bound inputs, and the invariant checks it passed, and \S\ref{sec:fiftyq}'s four bit-identical reruns show the trace is reproducible in the only sense that matters for audit.
+A sampled CoT trace cannot serve as a compliance log: the same input can yield a different ``reasoning process'' on the next draw, so the log does not testify to the computation that actually produced the number.
+
+\emph{FINRA supervisory expectations} \cite{finra2020ai} call for explicit human checkpoints where the system cannot autonomously resolve ambiguity.
+I\textsubscript{HARD} is that checkpoint as an architectural fact: in our experiments it is answered by the constrained oracle, and in deployment the same interface is answered by a human reviewer---the clarification request, its contract-declared options, and the verified transform that implements the chosen resolution are already structured for exactly that hand-off.
+The $K$-bounded iteration gives the supervisory loop a natural budget.
+
+%% [ICAIF-CUT: scope-of-claim caveat list]
+Outside this architecture's scope: responsibility for the contract-construction process itself, cross-jurisdictional differences, businesses we do not cover (algorithmic trading, market making), and vendor-level compliance (training data, model transparency).
+These are organizational and policy questions; the architecture's role is to give the deployment-layer compliance argument something executable to stand on.
+%% [/ICAIF-CUT]
 
 \section{Limitations}\label{sec:limitations}
 \textbf{Silent wrongs are reduced and attributed, not eliminated.} \swResidual{} of 250 answers were unflagged wrong numbers before the output-policy audit and \swResidualCanon{} after it; the surviving classes (selection mismatch, binding slips, convention recall) are named frontier gaps with designed mechanisms, but they are gaps.
