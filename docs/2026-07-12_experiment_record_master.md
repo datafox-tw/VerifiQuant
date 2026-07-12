@@ -187,6 +187,19 @@ overall **234/250 = 93.6%**，8 SW，8 abstain，SelAcc 96.7%，**SWR 3.2%**：
 - medium 2 題淨增（1.7%→2.8%）為 run 間變異；論文以 run2 為 canonical（修復卡）。
 - 論文 numbers.tex 已同步（234/8/8、比率 5.0/6.7/5.6×）。
 
+### 平行實驗：deterministic hint triggers（VQ_HINT_TRIGGERS=1）
+
+| Run | 結果 | 出處 |
+|---|---|---|
+| 50Q 驗證（canonical 50 × 修復卡 × triggers ON） | ✅ **50/0/0 零 regression**；19 次觸發/18 案例，其中 **16 次為 critic recall miss（84%）**；test-1890 hard 觸發 → I_HARD 澄清 → 正確 | `paper_v2_250/results/vq_flash_50q_triggers/` |
+| 250Q 對照（triggers ON vs canonical OFF） | 🔄 執行中 | `results/vq_flash_250q_triggers/` |
+
+**判讀**：宣告 hint 的 lexical 觸發在 50Q 上以零準確率成本回收 84% 的 critic recall 失誤。
+soft 觸發（output_scale 系為主）加掛警告不影響結果；hard 觸發正確路由到澄清。
+250Q 對照看點：D 類 SW（1004/1063/1771）是否轉正或轉 flagged；I_HARD/abstention 是否暴增。
+機制實作：`run_error_classification_pipeline.py` `_lexical_hint_triggers`（commit 0a87018），
+trace 記錄 `deterministic_hint_triggers` + `critic_recall_misses`。
+
 ### Pipeline 修復（2026-07-12）
 
 `run_cot_self_improve_pipeline.py` 首跑 250Q 在 ~20 題處死於 `_llm_json`：Gemini 回傳空 candidate

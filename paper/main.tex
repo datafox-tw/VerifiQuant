@@ -368,7 +368,9 @@ VerifiQuant & 45 & 0 & 5 & 0\% & n/a (structured) \\
 The class-D failures of \S\ref{sec:attribution} sharpen the standard ``LLM-dependent zone'' story with a measurement: on all three convention failures the contract had already declared the exact ambiguity---one card's option text even reads ``\$3 per share''---yet the LLM critic triggered none of them (declared 3/3, recalled 0/3), silently adopting the default.
 The contracts did their job; the binding constraint is \emph{declared-hint recall}.
 This is mechanizable: we prototype a deterministic trigger pre-pass---if a convention-signal phrase (``per share'', ``as a percentage'', ``increased by'') appears verbatim in the question and the selected card declares a matching hint, the hint fires at its declared level without consulting the critic.
-On the three recall failures the pre-pass fires all three at their declared levels while a clean-question control fires none; hard triggers route to clarification and soft triggers convert silent wrongs into flagged ones.
+On the three recall failures the pre-pass fires all three at their declared levels while a clean-question control fires none.
+Enabled end-to-end on the canonical 50Q set, the pre-pass fires on 18 of 50 cases---the LLM critic had independently recalled only 3 of those 19 declared-hint matches, an 84\% recall-miss rate---while accuracy is unchanged at 50/50 and zero regressions occur: hard triggers route through clarification (the sign-convention case resolves correctly) and soft triggers attach warnings.
+Recall moves into the deterministic layer at no accuracy cost.
 Moving hint recall from LLM judgment into the deterministic layer is exactly the frontier expansion the architecture is designed for; contract-declared machine-readable trigger keywords are the natural build-time extension.
 
 \subsection{Where the guarantee ends: input binding}\label{sec:binding}
