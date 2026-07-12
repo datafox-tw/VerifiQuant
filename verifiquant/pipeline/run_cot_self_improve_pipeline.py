@@ -6,6 +6,7 @@ import math
 import os
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -114,17 +115,61 @@ def _schema_cot_step() -> Any:
     )
 
 
-def _llm_json(client: Any, *, model: str, prompt: str, schema: Any) -> Dict[str, Any]:
+def _llm_json(
+    client: Any,
+    *,
+    model: str,
+    prompt: str,
+    schema: Any,
+    fallback: Optional[Dict[str, Any]] = None,
+    max_attempts: int = 3,
+) -> Dict[str, Any]:
     config = genai_types.GenerateContentConfig(
         response_mime_type="application/json",
         response_schema=schema,
     )
-    resp = client.models.generate_content(
-        model=model,
-        contents=prompt,
-        config=config,
-    )
-    return json.loads(resp.text)
+    last_err: Optional[Exception] = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            resp = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=config,
+            )
+            # Gemini can return an empty candidate (resp.text is None) on
+            # safety blocks or transient server issues; treat as retryable.
+            if resp.text is None:
+                raise ValueError("empty response text from model")
+            return json.loads(resp.text)
+        except Exception as exc:  # noqa: BLE001 — retry any transient failure
+            last_err = exc
+            print(f"  ⚠ _llm_json attempt {attempt}/{max_attempts} failed: {exc}")
+            if attempt < max_attempts:
+                time.sleep(2 * attempt)
+    if fallback is not None:
+        print(f"  ⚠ _llm_json exhausted retries; using fallback ({last_err})")
+        return dict(fallback)
+    raise RuntimeError(f"_llm_json failed after {max_attempts} attempts: {last_err}")
+
+
+_ORACLE_REWRITE_FALLBACK: Dict[str, Any] = {
+    # No-op rewrite: callers use `rewrite["updated_question"] or <previous>`,
+    # so empty strings degrade to "leave question/context unchanged".
+    "updated_question": "",
+    "updated_context": "",
+    "notes": "llm_empty_response_fallback",
+}
+
+_COT_STEP_FALLBACK: Dict[str, Any] = {
+    # Recorded as a no-answer turn rather than crashing the whole run.
+    "answer": "",
+    "needs_more_info": True,
+    "missing_information": ["llm_empty_response_fallback"],
+    "confidence": 0.0,
+    "revised_question": "",
+    "revised_context": "",
+    "reasoning_note": "llm_empty_response_fallback",
+}
 
 
 def _gold_value(row: Dict[str, Any]) -> Any:
@@ -139,7 +184,10 @@ def _cot_step(
     context: str,
 ) -> Dict[str, Any]:
     prompt = _COT_PROMPT_TEMPLATE.format(question=question, context=context)
-    return _llm_json(client, model=model, prompt=prompt, schema=_schema_cot_step())
+    return _llm_json(
+        client, model=model, prompt=prompt,
+        schema=_schema_cot_step(), fallback=_COT_STEP_FALLBACK,
+    )
 
 
 def _oracle_rewrite_for_cot(
@@ -157,7 +205,10 @@ def _oracle_rewrite_for_cot(
         cot_step_output_json=json.dumps(cot_step_output, ensure_ascii=False, indent=2),
         ground_truth_code=row.get("code", row.get("python_solution", "")),
     )
-    out = _llm_json(client, model=model, prompt=prompt, schema=_schema_oracle_rewrite())
+    out = _llm_json(
+        client, model=model, prompt=prompt,
+        schema=_schema_oracle_rewrite(), fallback=_ORACLE_REWRITE_FALLBACK,
+    )
     return {
         "updated_question": str(out.get("updated_question", "") or current_question).strip() or current_question,
         "updated_context": str(out.get("updated_context", "") or current_context).strip() or current_context,
@@ -180,7 +231,10 @@ def _oracle_rewrite_for_cot_funnel_guided(
         cot_step_output_json=json.dumps(cot_step_output, ensure_ascii=False, indent=2),
         ground_truth_code=row.get("code", row.get("python_solution", "")),
     )
-    out = _llm_json(client, model=model, prompt=prompt, schema=_schema_oracle_rewrite())
+    out = _llm_json(
+        client, model=model, prompt=prompt,
+        schema=_schema_oracle_rewrite(), fallback=_ORACLE_REWRITE_FALLBACK,
+    )
     return {
         "updated_question": str(out.get("updated_question", "") or current_question).strip() or current_question,
         "updated_context": str(out.get("updated_context", "") or current_context).strip() or current_context,
