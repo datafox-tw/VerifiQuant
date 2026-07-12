@@ -192,7 +192,12 @@ overall **234/250 = 93.6%**，8 SW，8 abstain，SelAcc 96.7%，**SWR 3.2%**：
 | Run | 結果 | 出處 |
 |---|---|---|
 | 50Q 驗證（canonical 50 × 修復卡 × triggers ON） | ✅ **50/0/0 零 regression**；19 次觸發/18 案例，其中 **16 次為 critic recall miss（84%）**；test-1890 hard 觸發 → I_HARD 澄清 → 正確 | `paper_v2_250/results/vq_flash_50q_triggers/` |
-| 250Q 對照（triggers ON vs canonical OFF） | 🔄 執行中 | `results/vq_flash_250q_triggers/` |
+| 250Q 對照（triggers ON vs canonical OFF） | ✅ **完成**：235/3/12（SWR **1.2%**，medium **0.0%**）vs canonical 234/8/8（3.2%/2.8%）。5 題 SW→correct（含 D 類全部三題，皆觸發+soft flag）；4 題 regression 全為 correct→**abstain**（安全失敗，3 題與 hard trigger 相關）；119 fires/98 cases，recall miss 81%；hard tier 不變（B/C 類不在射程） | `results/vq_flash_250q_triggers/` + `tier_breakdown.json` |
+
+**Canonical 裁決（2026-07-12）**：**不換主表 canonical**（lexicon 設計時點在 D 類失敗之後，
+放 headline 有「事後補丁」攻擊面）；改為 **Table 2 增列第四系統「+ hint triggers」** + §6.4 完整量化
+（50Q 先驗證 → 250Q 全量 → SWR 3.2→1.2%、medium 歸零、代價 +1.6pp abstention 顯式呈現）。
+敘事閉環：定位 frontier（§5.2）→ 機制化（§6.4）→ 量級改善 at declared cost。
 
 **判讀**：宣告 hint 的 lexical 觸發在 50Q 上以零準確率成本回收 84% 的 critic recall 失誤。
 soft 觸發（output_scale 系為主）加掛警告不影響結果；hard 觸發正確路由到澄清。

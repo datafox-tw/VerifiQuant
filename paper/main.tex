@@ -31,7 +31,8 @@ We present \textbf{VerifiQuant}, a framework that compiles these governance cont
 Each financial formula family is represented as a \emph{Financial Inference Contract} (FIC)---retrieval metadata, deterministic executable code, invariants, and declared semantic ambiguities---and every query passes through a six-layer diagnostic funnel in which each layer (M, N, F, E, I, C) is a legitimate, auditable exit.
 Semantic repairs are restricted to \emph{verifiable atomic transforms} whose numerical effect is cross-checked against a declared algebraic identity before acceptance.
 On 250 FinanceReasoning questions spanning medium and hard tiers, VerifiQuant reaches \vqAccAll{} accuracy with a silent-wrong rate of \vqSWRAll{}, dominating chain-of-thought baselines on \emph{both} axes simultaneously: the strongest CoT+oracle configuration reaches \cotoAccAll{} accuracy with \cotoSWRAll{} SWR, and the gap widens with difficulty (\vqSWRatioMed{} lower SWR on the medium tier, \vqSWRatioHard{} on hard).
-Every residual VerifiQuant failure is attributed to one of three named frontier gaps, and on contract-grounded adversarial traps the funnel cuts silent-wrong rates from 90\% to 20\% (boundary violations) and 100\% to 10\% (ambiguity).
+Every residual VerifiQuant failure is attributed to one of three named frontier gaps---and mechanizing one of them (declared-hint recall) already cuts overall SWR to 1.2\% and the medium tier to 0\%, at an explicit 1.6-point coverage cost.
+On contract-grounded adversarial traps the funnel cuts silent-wrong rates from 90\% to 20\% (boundary violations) and 100\% to 10\% (ambiguity).
 Critically, governance does not transfer through prompts: injecting the complete diagnostic taxonomy into oracle prompts \emph{degrades} accuracy under blind review, and prompted refusal misfires on the wrong questions.
 Governance must be executed by architecture, not described in context.
 \end{abstract}
@@ -228,6 +229,10 @@ CoT + blind oracle ($K{=}3$) & medium & 180 & \cotoCorrectMed{} & \cotoSWMed{} &
 \textbf{VerifiQuant ($K{=}3$)} & medium & 180 & \vqCorrectMed{} & \vqSWMed{} & \vqAbstainMed{} & \vqSelAccMed{} & \textbf{\vqSWRMed{}} \\
  & hard & 70 & \vqCorrectHard{} & \vqSWHard{} & \vqAbstainHard{} & \vqSelAccHard{} & \textbf{\vqSWRHard{}} \\
  & all & 250 & \vqCorrectAll{} & \vqSWAll{} & \vqAbstainAll{} & \vqSelAccAll{} & \textbf{\vqSWRAll{}} \\
+\midrule
+\quad + hint triggers (\S\ref{sec:recall}) & medium & 180 & \vqtCorrectMed{} & \vqtSWMed{} & \vqtAbstainMed{} & \vqtSelAccMed{} & \textbf{\vqtSWRMed{}} \\
+ & hard & 70 & \vqtCorrectHard{} & \vqtSWHard{} & \vqtAbstainHard{} & \vqtSelAccHard{} & \vqtSWRHard{} \\
+ & all & 250 & \vqtCorrectAll{} & \vqtSWAll{} & \vqtAbstainAll{} & \vqtSelAccAll{} & \textbf{\vqtSWRAll{}} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -420,8 +425,9 @@ The class-D failures of \S\ref{sec:attribution} sharpen the standard ``LLM-depen
 The contracts did their job; the binding constraint is \emph{declared-hint recall}.
 This is mechanizable: we prototype a deterministic trigger pre-pass---if a convention-signal phrase (``per share'', ``as a percentage'', ``increased by'') appears verbatim in the question and the selected card declares a matching hint, the hint fires at its declared level without consulting the critic.
 On the three recall failures the pre-pass fires all three at their declared levels while a clean-question control fires none.
-Enabled end-to-end on the canonical 50Q set, the pre-pass fires on 18 of 50 cases---the LLM critic had independently recalled only 3 of those 19 declared-hint matches, an 84\% recall-miss rate---while accuracy is unchanged at 50/50 and zero regressions occur: hard triggers route through clarification (the sign-convention case resolves correctly) and soft triggers attach warnings.
-Recall moves into the deterministic layer at no accuracy cost.
+Validated regression-free on the canonical 50Q set first (accuracy unchanged at 50/50; the critic had independently recalled only 3 of 19 fired matches, an 84\% miss rate), the pre-pass was then enabled on the full 250 questions: it fires on 98 of 250 cases (critic recall-miss rate 81\%), converts all five medium-tier silent wrongs---including every class-D case---into correct, soft-flagged answers, and cuts overall SWR from \vqSWRAll{} to \textbf{\vqtSWRAll{}} with the medium tier at \textbf{\vqtSWRMed{}} (Table~\ref{tab:main}, last block).
+The price is explicit and safe: four previously-correct cases now end in \emph{structured abstention} (hard triggers whose clarification did not converge), never in new silent wrongs; the three remaining hard-tier failures are selection and binding cases outside any hint's reach.
+Locating a frontier gap (\S\ref{sec:attribution}), mechanizing it, and buying an order-of-magnitude SWR reduction at a declared coverage cost is the frontier-expansion loop this architecture is designed around.
 Moving hint recall from LLM judgment into the deterministic layer is exactly the frontier expansion the architecture is designed for; contract-declared machine-readable trigger keywords are the natural build-time extension.
 
 \subsection{Where the guarantee ends: input binding}\label{sec:binding}
