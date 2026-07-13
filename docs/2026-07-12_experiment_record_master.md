@@ -151,6 +151,60 @@ overall **231/250 = 92.4%**，10 SW，9 abstain，SelAcc 95.9%，**SWR 4.0%**（
 5. SW 清單（歸因調查用）：med×3 = test-1004, test-1890, test-1777；
    hard×7 = test-2149, test-2021, test-2137, test-2009, test-2019, test-2080, test-2104。
 
+### SW 逐題歸因與修復裁決（2026-07-12 case study）
+
+| 類 | 題數 | 案例 | 裁決 |
+|---|---:|---|---|
+| **A** 違反 scalar-output 政策（數學正確） | 3 | NVI(2149)/VPT(2019)/VWAP(2080)，全 hard | ✅ **已修**：政策稽核（f7fd111 預先宣告），全 250 卡動態重放+靜態掃描，修 4（含 Share Repurchase dict）、needs_review 2、誤報 3。無 gold 介入。重跑中 |
+| **B** 選卡錯位 | 2 | 2137/2104：「total interest」→「Lifetime Cost」卡（差值=本金） | ❌ 不修：M/selection frontier，誠實寫入 |
+| **C** binding/抽取失誤 | 2 | 1777（period_days 360≠90）、2009（carry trade 方向） | ❌ 不修：input-provenance 缺口（§6.4 既有敘事）＋ Swiss-cheese |
+| **D** convention 歧義 | 3 | 1004（每股/總額）、2021（稅前後+scale）、1890（inclusion） | ❌ 不修，但**重新定性**（見下） |
+
+**D 類關鍵發現（2026-07-12）**：三張卡的 semantic_hints **全部已宣告**正確的歧義——
+`fic_article_1407.option_premium_unit`（選項文字即 "$3 per share"）、`fic_article_91.change_input_convention`、
+`fic_article_2452.output_scale`。失敗不在宣告層（contract 覆蓋 3/3），而在 **I-gate critic 的 recall**（觸發 0/3）：
+LLM critic 未把宣告的 hint 對上題面線索，靜默採用 DEFAULT 選項。
+→ 論文定性從「I-gate 覆蓋缺口」改為「**declared-hint recall 是 LLM-dependent zone 的量測邊界**」（§6.2 敘事強化）；
+→ 導出的機制化方向：hint 級**確定性觸發詞**（build-time 宣告 "per share"→ fire `option_premium_unit`），把 recall 從
+LLM 判斷遷入 deterministic 層——典型的 verifiability frontier 擴張，列 future work（deadline 前不動 critic，避免 churn）。
+
+### A2-run2 結果：VQ Flash K=3 250Q，type-audit 修復卡（canonical，2026-07-12 晚）
+
+overall **234/250 = 93.6%**，8 SW，8 abstain，SelAcc 96.7%，**SWR 3.2%**：
+
+| tier | Correct | SW | Abstain | SWR | CoT single-shot 對照（倍率）|
+|---|---:|---:|---:|---:|---|
+| medium (180) | 171 | 5 | 4 | **2.8%** | 13.9%（5.0×）|
+| hard (70) | 63 | 3 | 4 | **4.3%** | 28.6%（**6.7×**）|
+| all (250) | 234 | 8 | 8 | **3.2%** | 18.0%（5.6×）|
+
+- **A 類 3 題（2149/2019/2080）全數翻正**；hard SWR 10.0%→4.3%。**優勢隨難度擴大**（5.0×→6.7×）。
+- **Canonical-50 子集 = 50/0/0**（稽核前 49/1/0）。
+- run2 的 8 SW 全數歸因、零無法解釋：**B×3**（2137、2104、新增 1702=回傳利息而非 FV）、
+  **C×2**（1777、2009）、**D×3**（1004、新增 1063=decline 符號、新增 1771=alpha 計不計入）。
+  5 題延續 run1；3 題為同家族的取樣變體。**run1 的 D 類 1890/2021 本輪自行翻正**——證實 D 類
+  是「無 flag 的擲硬幣」，正是 I_SOFT 揭露機制要防的行為。
+- medium 2 題淨增（1.7%→2.8%）為 run 間變異；論文以 run2 為 canonical（修復卡）。
+- 論文 numbers.tex 已同步（234/8/8、比率 5.0/6.7/5.6×）。
+
+### 平行實驗：deterministic hint triggers（VQ_HINT_TRIGGERS=1）
+
+| Run | 結果 | 出處 |
+|---|---|---|
+| 50Q 驗證（canonical 50 × 修復卡 × triggers ON） | ✅ **50/0/0 零 regression**；19 次觸發/18 案例，其中 **16 次為 critic recall miss（84%）**；test-1890 hard 觸發 → I_HARD 澄清 → 正確 | `paper_v2_250/results/vq_flash_50q_triggers/` |
+| 250Q 對照（triggers ON vs canonical OFF） | ✅ **完成**：235/3/12（SWR **1.2%**，medium **0.0%**）vs canonical 234/8/8（3.2%/2.8%）。5 題 SW→correct（含 D 類全部三題，皆觸發+soft flag）；4 題 regression 全為 correct→**abstain**（安全失敗，3 題與 hard trigger 相關）；119 fires/98 cases，recall miss 81%；hard tier 不變（B/C 類不在射程） | `results/vq_flash_250q_triggers/` + `tier_breakdown.json` |
+
+**Canonical 裁決（2026-07-12）**：**不換主表 canonical**（lexicon 設計時點在 D 類失敗之後，
+放 headline 有「事後補丁」攻擊面）；改為 **Table 2 增列第四系統「+ hint triggers」** + §6.4 完整量化
+（50Q 先驗證 → 250Q 全量 → SWR 3.2→1.2%、medium 歸零、代價 +1.6pp abstention 顯式呈現）。
+敘事閉環：定位 frontier（§5.2）→ 機制化（§6.4）→ 量級改善 at declared cost。
+
+**判讀**：宣告 hint 的 lexical 觸發在 50Q 上以零準確率成本回收 84% 的 critic recall 失誤。
+soft 觸發（output_scale 系為主）加掛警告不影響結果；hard 觸發正確路由到澄清。
+250Q 對照看點：D 類 SW（1004/1063/1771）是否轉正或轉 flagged；I_HARD/abstention 是否暴增。
+機制實作：`run_error_classification_pipeline.py` `_lexical_hint_triggers`（commit 0a87018），
+trace 記錄 `deterministic_hint_triggers` + `critic_recall_misses`。
+
 ### Pipeline 修復（2026-07-12）
 
 `run_cot_self_improve_pipeline.py` 首跑 250Q 在 ~20 題處死於 `_llm_json`：Gemini 回傳空 candidate

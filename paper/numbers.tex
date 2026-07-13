@@ -1,0 +1,73 @@
+% numbers.tex — single source of truth for result numbers that may still change.
+% ⚠ VQ 250Q values below are from run1 (pre scalar-fix cards). When the repaired-card
+%   rerun lands, update ONLY this file. Provenance: docs/2026-07-12_experiment_record_master.md
+
+% ── VerifiQuant, 250Q, K=3 (Flash) — canonical run on type-audited cards (2026-07-12) ──
+\newcommand{\vqCorrectAll}{234}
+\newcommand{\vqAccAll}{93.6\%}
+\newcommand{\vqSWAll}{8}
+\newcommand{\vqAbstainAll}{8}
+\newcommand{\vqCovAll}{96.8\%}
+\newcommand{\vqSelAccAll}{96.7\%}
+\newcommand{\vqSWRAll}{3.2\%}
+\newcommand{\vqCorrectMed}{171}
+\newcommand{\vqSWMed}{5}
+\newcommand{\vqAbstainMed}{4}
+\newcommand{\vqSWRMed}{2.8\%}
+\newcommand{\vqSelAccMed}{97.2\%}
+\newcommand{\vqCorrectHard}{63}
+\newcommand{\vqSWHard}{3}
+\newcommand{\vqAbstainHard}{4}
+\newcommand{\vqSWRHard}{4.3\%}
+\newcommand{\vqSelAccHard}{95.5\%}
+% SWR improvement ratios vs CoT single-shot (13.9 / 28.6 / 18.0)
+\newcommand{\vqSWRatioMed}{5.0$\times$}
+\newcommand{\vqSWRatioHard}{6.7$\times$}
+\newcommand{\vqSWRatioAll}{5.6$\times$}
+% residual-failure attribution: initial (pre-audit) run decomposition
+\newcommand{\swResidual}{10}
+\newcommand{\swClassA}{3}
+\newcommand{\swClassB}{2}
+\newcommand{\swClassC}{2}
+\newcommand{\swClassD}{3}
+% canonical (post-audit) run residuals: B=selection, C=binding, D=convention
+\newcommand{\swResidualCanon}{8}
+\newcommand{\swCanonB}{3}
+\newcommand{\swCanonC}{2}
+\newcommand{\swCanonD}{3}
+
+% ── VerifiQuant + deterministic hint triggers, 250Q (VQ_HINT_TRIGGERS=1) ──
+\newcommand{\vqtCorrectAll}{235}
+\newcommand{\vqtAccAll}{94.0\%}
+\newcommand{\vqtSWAll}{3}
+\newcommand{\vqtAbstainAll}{12}
+\newcommand{\vqtSWRAll}{1.2\%}
+\newcommand{\vqtSelAccAll}{98.7\%}
+\newcommand{\vqtCorrectMed}{174}\newcommand{\vqtSWMed}{0}\newcommand{\vqtAbstainMed}{6}
+\newcommand{\vqtSWRMed}{0.0\%}\newcommand{\vqtSelAccMed}{100\%}
+\newcommand{\vqtCorrectHard}{61}\newcommand{\vqtSWHard}{3}\newcommand{\vqtAbstainHard}{6}
+\newcommand{\vqtSWRHard}{4.3\%}\newcommand{\vqtSelAccHard}{95.3\%}
+
+% ── CoT single-shot, 250Q (honest ternary accounting) ──
+\newcommand{\cotCorrectAll}{194}
+\newcommand{\cotAccAll}{77.6\%}
+\newcommand{\cotSWAll}{45}
+\newcommand{\cotAbstainAll}{11}
+\newcommand{\cotSWRAll}{18.0\%}
+\newcommand{\cotSelAccAll}{81.2\%}
+\newcommand{\cotSWRMed}{13.9\%}
+\newcommand{\cotSWRHard}{28.6\%}
+\newcommand{\cotCorrectMed}{148}\newcommand{\cotSWMed}{25}\newcommand{\cotAbstainMed}{7}
+\newcommand{\cotCorrectHard}{46}\newcommand{\cotSWHard}{20}\newcommand{\cotAbstainHard}{4}
+
+% ── CoT + GT-blind oracle (K=3), 250Q ──
+\newcommand{\cotoCorrectAll}{205}
+\newcommand{\cotoAccAll}{82.0\%}
+\newcommand{\cotoSWAll}{37}
+\newcommand{\cotoAbstainAll}{8}
+\newcommand{\cotoSWRAll}{14.8\%}
+\newcommand{\cotoSelAccAll}{84.7\%}
+\newcommand{\cotoSWRMed}{11.1\%}
+\newcommand{\cotoSWRHard}{24.3\%}
+\newcommand{\cotoCorrectMed}{157}\newcommand{\cotoSWMed}{20}\newcommand{\cotoAbstainMed}{3}
+\newcommand{\cotoCorrectHard}{48}\newcommand{\cotoSWHard}{17}\newcommand{\cotoAbstainHard}{5}

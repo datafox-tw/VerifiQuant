@@ -1,8 +1,8 @@
 {
   "baseline": "vq_flash",
-  "ran_at": "2026-07-12T10:57:49.010681",
+  "ran_at": "2026-07-12T20:36:04.678431",
   "success": true,
-  "elapsed_seconds": 4396.3,
+  "elapsed_seconds": 4321.1,
   "command": [
     "python3",
     "preprocessing/run_framework_guided_self_improve_pipeline.py",

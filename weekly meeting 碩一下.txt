@@ -1,0 +1,2910 @@
+20260617 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+重新處理	
+有關於k=6這邊的安慰劑效應
+flash vs pro scaling
+產品上市 做簡報
+excel互動功能 建模 自己得 hypothesis case sensitive
+
+20260610 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+上週回顧	
+針對gpt gemini做ablation research
+主要是做海報和論文
+
+
+L_N定義
+L0 Forced — must answer (reproduces canonical baseline; no refusal channel)
+L1 Permitted — may refuse if info missing / genuinely ambiguous
+L2 Encouraged — should refuse under 5 explicit criteria (missing field, ambiguous interpretation, percent/decimal, unspecified convention, out-of-scope)
+L3 Strict — pre-answer M/F/E/I self-check; stop at first failing layer
+原本的是在L0和L1之間
+
+指標的定義
+cell (模型與思考深度設定)：代表測試的對象與參數組合。例如 gpt low、gpt medium 代表 GPT 模型在不同 思考深度下的表現；gem 代表 Gemini 模型。
+L (Prompt Level / 提示層級)：給予模型「拒答權利」的明確程度。
+L0 通常是 Baseline（強迫作答），Prompt 中沒有提供拒答出口。
+L1 ~ L3 則是加入不同強度的提示，鼓勵模型 Safe-Refusal。
+Correct (正確數)：模型成功給出正確答案的題數。
+SW (Silent Wrong / 隱性錯誤數)：模型答錯且沒有拒答的題數。這代表模型「不懂裝懂」或產生幻覺（Hallucination），是系統安全性中最危險的狀況。
+Safe-Refusal (安全拒答總數)：模型主動放棄作答、觸發安全機制或承認不知道的題數（即 good 與 over 的總和）。
+Acc (Accuracy / 正確率)：正確答題的比例。
+計算方式：Correct / 總題數 (50)。
+SWR (Silent Wrong Rate / 隱性錯誤率)：模型給出自信但錯誤答案的比例。
+計算方式：SW / 總題數 (50)。
+核心意義：這是在高風險場景（如金融、醫療）中最關鍵的反向指標，目標是將 SWR 盡可能壓低（例如 VerifiQuant 追求的 0%）。
+
+gemini vs gpt 在拒答與sw方面的展現
+
+一、強迫作答掩蓋了真實風險，公平的 Baseline 必須具備「拒答權」 L0 展現的 0% 拒答率，純粹是 Prompt 拔掉了模型的逃生門（Forced to answer）。一旦給予明確的拒答出口（L1–L3），GPT 自然會產生 6–9 次的 Safe-Refusal。因此，評估模型安全性時，不能拿「被強迫作答」的狀態當基準，這會粉飾太平；一個公平的 Baseline，必須允許模型擁有放棄作答的權利。
+二、GPT 的過度防禦：會拒答，但「瞎拒」導致效能雪崩 CoT 雖然能讓 GPT 開口說不，卻完全缺乏「選擇性拒答」的判斷力。數據顯示其 Over-refusal 遠大於 Good-refusal（例如 GPT low L3 犧牲了 7 題本來會對的，只換來 2 題正確拒答）。結果是 SWR 勉強從 12% 降到 7%，Accuracy 卻發生雪崩式崩盤（88% 跌至 76%）。這證明單靠 CoT 只能做到非選擇性的放棄，無法兼顧正確率。
+
+
+gemini vs gpt 在拒答與sw方面的展現
+
+三、Gemini 的無力感：精準度高，但火力太弱壓不住 SWR 與 GPT 形成極端對比，Gemini 對 Prompt 的拒答鼓勵極度無感。即使到了 L3 等級的提示，它也幾乎不拒答（僅 1 題）。雖然 Gemini 拒答的品質極高（幾乎沒有誤拒，Good 遠大於 Over），但因為拒答量太少，根本撐不起 Selective Prediction 的防護網，導致 SWR 在 13–19% 之間高檔漂移，毫無收斂趨勢。
+四、結論：Prompt 不是可靠槓桿，這正是 VQ 決定性閘門的價值 同一套四級 Prompt，讓 GPT 亂拒（犧牲 Accuracy），讓 Gemini 不拒（壓不下 SWR），這直接證明了「用 Prompt 鼓勵拒答」是一個不可移植、極度脆弱的槓桿。這個困境反而完美墊高了 VerifiQuant 的架構價值：我們不該期待 CoT 能突然「學會」精準拒答，而是需要 VQ 的 Deterministic Gate 來強勢接管，達成 90% Acc、0% SWR，以及不多不少剛剛好 5 題的「精準棄答」。
+
+
+conclusion
+This strengthens the core claim while answering the fairness objection. 
+VQ Flash V3: 90% acc, SWR 0%, 5 abstain — it abstains precisely (deterministic M/N/F/E/I gates), reaching SWR=0 with almost no accuracy cost. 
+Prompt-induced CoT refusal is the opposite: poorly targeted, high over-refusal, SWR floor ~7%, and not even reliably triggerable (Gemini).
+The advantage is not "CoT can't refuse" (it can) but "CoT can't refuse selectively" — the risk–coverage tradeoff is strictly worse than a contract-grounded gate. 
+
+多輪K測試
+雖然有跑出結果但是好像跑錯code了浪費了一些錢我下禮拜再給你完整的紀錄
+但現在首要之急是
+改善pro比flash差的詭異現象
+擴展資料集
+決定在大資料集下要怎麼平行話跟再來一次
+不搞平行化真的好久．．．
+
+PS. 問一下報賬事宜
+
+20260603 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週內容:補數據、補related work論述，請AI當reviewer 2
+看實驗數據以及延伸的討論（Experiment)
+看related work 又補了幾篇上去
+看下週的Future Work & Case Study，反正就是先增加數據抵擋質疑，之後再決定哪些要在main哪些要在Appendix
+討論要怎麼進行時間規劃（假設AAAI 7/28 ddl, FinNLP大概落在7/21）
+—--------------
+BTW: 我的生成式人工智慧安全的想法不小心破了 2025 EMNLP/ 2026 AAAI的SOTA 我正在問那門課的授課老師這樣到底是不是真的破還是有一些限制我們沒想到 
+
+Research Question (RQ) 
+RQ1 (Selective Reliability)：VerifiQuant 在 silent wrong rate 與 abstention rate（說我不知道的棄權率） 之間是否取得優於現有系統的平衡？
+RQ2 (Diagnostic Distribution)：M/N/F/E/I/C 各層攔截的分布為何？
+RQ3 (Trap Resistance)：在 F/E/I trap variants 下，各系統的 silent wrong rate 如何變化？
+RQ4 (Recovery)：O-ITL 多輪修復對 selective accuracy 的貢獻為何？
+RQ5 (Soft-flagged Wrong Rate)：VerifiQuant 答錯的案例中，有多少帶 I_SOFT warning？
+
+先講RQ的結論 
+
+RQ1（Selective Reliability）：VerifiQuant (暫時)是唯一達到 SWR=0% 的系統（VQ Flash 90% acc、selective accuracy 100%、abstention 10%）。即使最強的 CoT 配置（plain Pro，GT-blind 盲審）衝到 98% accuracy，仍有 SWR=2% 且零拒答。差異不在準確率高低，而在 失敗模式，VQ 以 10% 結構化拒答置換 silent wrong。雖然accuracy較低但是安全（雖然有脆弱假設需要鞏固）
+RQ2（Diagnostic Distribution）：50Q clean set 第 1 輪閘門分布為 37 通過 / 6 I_HARD / 3 F / 2 E / 1 N / 1 C；經 O-ITL 後收斂至 45 success + 5 abstain，6 題 I_HARD 全數成功澄清（最終 0 題停在 I 層）。
+
+先講RQ的結論 
+
+RQ3（Trap Resistance）：整體 trap SWR 由 CoT 48% 降至 VQ 26%（大致趨勢正確但是細部項目有待商榷）；在 model-agnostic 的兩類失敗模式上達數量級改善（E：90%→20%；I：100%→10%，目前最穩定策略）。F/N 為結構化拒答的 auditability 差異（其中 N 為「機制不對稱」的假平手），M 為 trap 設計限制，皆不納入 SWR 優勢宣稱。
+RQ4（Recovery）：O-ITL 把 accuracy 由 K=1 的 74% 提升至 K=3 的 90%（+16pp，recovery 16%），且 全程 SWR=0%、broken_count=0——recovery 是安全的，從不以引入隱性錯誤為代價（本來正確結果反思時變成錯的）。現在只有測試讓oracle回答一次/兩次，ablation study會增加k的數量。
+
+先講RQ的結論 
+
+
+RQ5（Soft-Flagged Wrong Rate）：VQ Flash SFWR=0%（SW=0）。VQ Pro 在「最終帶 flag」嚴格定義下 SFWR-final=0%，但我們誠實揭露一個退化路徑（test-1593，SFWR-ever=2.2%）：I_SOFT 在末輪被解除而錯誤留存，退化為 silent wrong。此案例界定了 funnel 保證成立於 input binding 之後 的邊界。（也就是可能的錯誤模式）
+
+
+Dataset
+FinanceReasoning (Liu et al., ACL 2025) medium 子集，50 questions。
+選題方法：stratified random sampling by difficulty quartile，固定 seed=42，從 540 題有效題目（medium + 有 function + 有 ground_truth）按四個 difficulty 分位分層抽取（Q1:12, Q2:13, Q3:12, Q4:13），難度範圍 2.485–4.025（mean=3.02）1000easy 100 medium 257hard / 540 medium 150 hard
+早期版本曾用「Gemini 2.0 Flash 答對 25 + 答錯 25」來選題，但發現 2.0 的失敗模式與 2.5 無直接關聯，且 2.5 在 medium 的 one-shot accuracy 本身已達 87%+，強迫平衡正確/錯誤比例反而造成 selection bias。改為 model-agnostic 的難度分層抽樣，可推廣性更強。
+
+指標定義
+SWR（Silent Wrong Rate）：最終輸出一個有把握、無任何 flag 的錯誤數值。← 最危險，用戶毫無警覺。
+SFWR-final（最終帶 flag 且錯）：最終交付的輸出仍掛 I_SOFT warning 且答案錯。← 較不危險，用戶已被警告，但還是一個很危險的指標警告。
+SFWR-ever（曾觸發 I_SOFT 且最終錯）：流程中任一輪曾掛 I_SOFT、但最終答案錯（含 flag 在末輪被解除者）。← 揭露「I_SOFT 退化為 silent wrong」的隱性路徑。
+selection ACC. : 在模型選擇要回答的內容中，正確率是多少
+
+
+
+cot solver 回答內容1 
+oracle(context+question+code) ->檢查 （檢查內容是否涵蓋 但不保證正確性 ）
+問題：cot都不釐清問題所以safe refusal @ k=1 = 0% 這個老師覺得有問題
+改用gpt做ablation search
+更多釐清 
+例子
+看prompt為什麼都不做自我修正 
+F類錯誤
+安全性和正確性的取捨
+某種程度上 有人claim說ai看這些題目太熟了變成膝跳
+
+VARIATION TEST
+
+速覽最佳表現者：flash V3 on VQ
+total_cases:    50
+success_count:  45   (code 成功執行且答對)
+success_rate:   0.90
+correct_count:  45
+accuracy:       0.90
+recovery_count: 8    (觸發 oracle 後成功修正)
+recovery_rate:  0.16 (16%)
+abstain:        5    (M/N/F refusal，漏斗阻斷)
+silent_wrong:   0 有回答的都是對的
+
+卡片修補不是針對特定題目，而是修正廣泛的錯誤
+V1 (vq_flash): 43/50，SW=2，E-check 語法錯誤 + semantic hint 缺失造成 2 題 C-error
+V2 (vq_flash_v2): 44/50，SW=0，修補 3 C-error + 2 SW → 全 E-check 語法修正
+V3 (vq_flash_v3): 45/50，SW=0，再修 1 C-error（E-check 改用 compute(inputs) 而非 result）
+V3 是本文報告的 canonical VQ 卡片版本；V1/V2 為中間版本
+卡片版本對兩模型皆生效：同一份 V3 卡片下，VQ Flash 45/50、VQ Pro 43/50；V1 卡片下 VQ Flash 43/50、VQ Pro 41/50。逐模型比較必須固定卡片版本（本文主表全用 V3）。
+卡片修補的防禦性說明：3 個 C-class 修正皆可由 Python 語法/執行期錯誤（execution_smoke_ok=false）偵測，無需 gold answer，因此非 cherry-picking。
+
+
+general 觀察
+Flash vs Pro 在 single-shot CoT 上無差異：41/50 vs 41/50，顯示 medium 難度的 single-shot 對模型選擇不敏感；但加上 oracle 後 Pro 領先（plain：Pro 98% vs Flash 94%），差異來自 oracle-augmented 的多輪修正而非單次推理能力
+VQ 嘗試在問題邊界拒絕作答（abstain）而非賭一個錯誤。VQ 在不確定時把問題推向 refusal/clarification，達到flash上 SWR=0%
+Recovery 貢獻（VQ Flash V3）：8/50（16%）題目由 oracle 修正後成功。無 oracle（K=1）時 VQ 準確率為 36/50 = 72%，剩下就是safe_refusal（§5.8 ablation 實測，非估計），oracle 帶來 +16pp 提升
+JP Morgan MAS（O-ITL）：43/50 (86%)，SWR=14%（5 wrong + 2 pipeline error），oracle_used=0（ask_human node 從未觸發）。以 O-ITL 條件運行仍無法消除 silent wrong，呼應「無結構閘門則 oracle 本身不足以保證 SWR=0%」的核心主張
+
+專題討論：為什麼VQ pro < VQ flash? ->想太多？
+老實說這應該要算是工程缺陷，但是目前還沒有想到怎麼非常好的去解釋，或者說是改架構。
+為何更強的模型反而失敗？input-binding 之上的 over-normalization
+ Pro 的 normalization 比 Flash 更「積極」地推理 sign convention，但推錯了方向，導致本來一度是對的最終變成錯誤。
+
+
+
+
+特殊狀況：SWR vs SWFR 差異on PRO
+
+VQ pro翻車例子 test-1593
+CoT single-shot (Flash & Pro):漏利潤 → 1,000,000 （reasoning 誤以為「總約值已含利潤」）
+CoT oracle blind(四個): turn 2 或turn 3自我修正時修對 → 1,150,000 
+VQ Flash:I_HARD 攔截歧義 + 用原始 contract_value → 1,150,000 
+VQ Pro:過度 normalize,把利潤加進 contract_value,FIC code 又乘一次 → 利潤算兩次 = 錯誤
+
+兩層原因診斷
+Over-normalization 發生在 input binding 之上（funnel 的上游）。Pro 在 normalization 階段「自作主張」把題目字面給定的 contract_value=2,500,000 重算為 2,875,000（= 本金 + 利潤），認為「合約值應含利潤」。FIC 的 deterministic code 本身已含 ×(1+profit)，於是利潤被計兩次 → 1,322,500。關鍵：這個值是正的、落在合理範圍、通過所有 E-check 與不變量——funnel 檢查的是「綁定後的輸入與輸出」，無從察覺「一個給定值在綁定前被竄改」。VQ Flash 不做這層額外推理，直接採用 2,500,000，故答對。
+I_SOFT 解除邏輯的盲點: turn 2 的 I_SOFT 指向 percentage_input_scale（15% 是否為 decimal），而真正出錯的維度是 contract_value。oracle「解決」了被 flag 的維度後，turn 3 清除 flag、輸出 success，使一個本應停在 flagged-wrong 的案例退化為 silent wrong（因此計入 SWR，不計入 SFWR-final）。
+
+簡單來說，pro他擅作主張，又不做全盤性回顧導致慘敗不自知
+VerifiQuant 的核心前提是「約束 LLM 比 LLM 的原始能力更重要」。Flash>Pro 的結果正是此前提的直接證據，（雖然很不直覺，但我們的目標是約束LLM不要想太多自作主張）
+
+更強的模型在尚未被約束的那一步（input normalization）施加更多自主推理，因而偏離題目字面規格。問題不是「guide 太強壓制了模型」，而是「guide 在 binding 這一步太鬆」：我們約束了算術（交給 deterministic code），卻仍讓 LLM 自由地把文字詮釋為數值。能力越強，這個未設防的縫隙被利用得越多。這精確定位了現行合約 under-constrained 的位置，並說明可靠性不隨模型規模單調提升——架構約束才是主導變數。
+
+針對pro比flash爛的future work
+改進方向：input-provenance check——強制每個綁定的輸入值對應到 context 中的一個字面 span；任何 derived / 重算的值（如原文不存在的 2,875,000）必須被標記或拒絕。具體可分三級強度：
+(a) provenance 約束（綁定值須溯源至字面 token）
+(b) 兩階段 binding（先字面抽取、再僅允許白名單單位轉換，禁止綁定階段的算術）
+(c) input invariant（E-check 從「檢查輸出」擴張到「檢查輸入是否出現於 context」）。三者皆能攔下 test-1593 的 1,322,500。
+N=50 下 Pro 僅多錯 2 題，嚴格而言落在 run variance 範圍內。但兩個 Pro silent-wrong 案例（test-1593 重算輸入、test-1890 推斷符號慣例）呈現一致的 over-normalization 模式，構成一個可信的質性發現而非統計顯著的定律；200 題擴增後可進一步驗證其穩定性。（會跑大規模實驗，但是跑在pro好貴，還在想該怎辦）
+
+cot+plain prompt+ PRO  silent wrong rate 1題 /  VQ+PRO兩題 VQ+Flash 0題且variance穩定 
+質問：我的系統的意義就真的只建築在那一題微小的差距上而且模型一換就不穩定所以根本沒有價值該怎麼辦。
+clean set 上的 SWR 差距很小，雖然我希望VQ的SWR是0但這看起來還不夠穩定成熟，框架要有更多制約才行，但這中間的甜蜜點很難抓。
+clean 題目本來就有正解,任何夠強的 LLM 大多答得出來——這裡我要的是『準確率沒有犧牲』(parity),不是『SWR 贏』。（當然，如果資料集變大，有新的特性的話會再加進來）
+
+Trap set:主戰場之一，簡單來說就是用LLM+原子轉換做一些有錯誤的內容
+先說這裡是初步結果，有些地方比較難防守我還在想架構要怎麼優化
+這裡是最大的差異點
+
+除了Silence wrong rate以外可以claim的內容（雖然我還是最想claim SWR)
+(1) trap dataset能力
+(2) Abstention:CoT 架構上做不到的能力
+CoT plain Pro 那「1 題 SW」是一個有把握、無警告的錯誤數字——而且它的 49 題「對」裡,它自己不知道哪題會錯。VQ 會在不確定時拒答(10%),CoT 永遠不拒答。這不是「誰 SWR 低 1 題」,是「有沒有拒答這個能力」——這是架構差異,不是分數差異。 雖然結果分數一樣但是拒答有理有據會更好
+(3) Auditability:每個答案都有可重播的診斷軌跡
+VQ 的每題輸出都帶 diagnostic_type / 攔截層 / repair trace,可審計、可接 HITL;CoT 給你一個數字和一段事後合理化的散文。在金融部署,可稽核性本身就是價值,跟 SWR 無關。
+
+CoT self-improve（GT-blind 盲審）對準確率有效，但 SWR 有邊界
+
+
+盲審的定義：在CoT中，盲審的邏輯是，我不管Ground Truth到底是正確、錯誤還是沒有parse出輸出，我都請Oracle (知道Code, 不知道真正的GT) 去檢查這個輸出有沒有邏輯，如果Oracle發現 CoT solver 可能有問題的話，給出意見並且請CoT Solver重新計算一次With Oracle 的 Feedback
+有分兩種Oracle: Plain Oracle和Funnel Oracle純粹是Prompt的不同，前者是「你就好好想想有沒有可能有問題」，後者是「用verifiquant的邏輯去審核」，結果差不了多少。
+質疑點：目前的Oracle其實是模擬Human in the Loop(HITL),  理論上oracle有題目敘述+資料+code可以推理出答案，所以是「隱性傳遞答案」，但我也找不到其他更好的模擬HITL來做improvement進行公平比較的方式。
+
+過程中發現並修掉的方法論漏洞
+發現：原本 CoT baseline 的 oracle 是「答錯才進場」（用 is_correct 當開關），而且 prompt 裡塞了 ground truth code。
+問題：(1) oracle 只在答錯時出現 → 進場本身就洩漏「這題是錯的」；(2) 只救錯、從不碰對 → accuracy 被高估。這是對 baseline 不公平、且評估外洩。
+修法：改成 GT-blind 每輪盲審——oracle 每輪都審、不知對錯、不給數值 GT（只給 python_solution 意圖規格，與 VQ oracle 對等）。
+
+
+跟Verifiquant比較的都是CoT+Oracle兩次介入機會。使用「每輪盲審、oracle 不知對錯、不給數值 GT」的乾淨協議後,CoT 數字落在 92–98% acc、SWR 2–8%。即使最強的 plain Pro 衝到 98% accuracy,仍有 1 題 silent wrong（SWR=2%）甩不掉。VQ 用 abstention（棄權的好聽說法） 達到 SWR=0%，這個架構級差異在無外洩的公平條件下依然成立。
+質疑：但是準確度還是有差？我們的Accuracy不如這幾種不同的方式？
+SWR才是賣點，我們會保持SWR幾乎等於零，至少在我目前的測試sample下
+oracle 不知道對錯時,結構化 funnel prompt 因被要求「逐層 M>N>F>E>I>C 找問題」而更積極改寫,偶爾把沒壞的東西修出噪音。所以VQ不太能夠直接移植，而是一個獨立系統。
+
+broken_count=0：盲審是安全的，不是亂改
+四個配置沒有任何一題「原本對 → 被 oracle 改錯」。這證明 oracle 盲審 (看 code 意圖規格、不看答案) 目前不會破壞正確答案。
+同時也觀察到了：在錯的題裡,oracle 確實會「瀟灑放生」(沒看出問題就停)，這些就是 SWR 那 1–4 題。
+小結論：
+即使在無外洩、最強配置(plain Pro 98%)下,CoT SWR 仍 ≥2%,VQ 靠 abstention 達 0%
+可靠性源自架構而非 oracle prompt
+
+在四個配置全錯
+一題很常 silent wrong的題目：test-1443 ，跨模型、跨 prompt、跨 oracle 輪次持續存活，但其實就是數值算錯 → SWR 的下限是真實存在 就是VQ出事的機率比較低 (當然我這個要用更大規模實驗持續佐證，不能夠直接CLAIM，因為2%跟0%差不了多少)
+
+
+verifiquant解法：其實就是固定python這塊 這個最簡單
+第 1 層 — C-class 精度(主要救援):
+VQ 不讓 LLM 算數字。它把 inputs 綁定(start=500000, end=1200000, years=5)後跑 deterministic Python:
+(1200000/500000)**(1/5) - 1 = 0.1914   # 每次都一模一樣
+→ 19.14,精確、可重現、零浮動。骰子不見了。
+第 2 層 — I_SOFT 表示歧義(附加價值):
+VQ 同時偵測到「decimal 還是 percent?」的輸出歧義,掛上 I_SOFT warning,並附一個可驗證的 transform:
+percent 選項 → result × 100，invariant: result_new == result_old * 100.0
+這個 ×100 轉換經過數值驗證,保證代數等價,不是 LLM 隨手改的。
+
+其實之前有幾個我說很經典的例子都沒有被選到
+下一階段擴大實驗規模的時候我會指定之前有輸出好結果的題目丟到dataset裡面 順便重新測試一次各個指標能力，希望不要把50題擴增到200題的時候就翻車 總之擴展到更多題是必要的，但還在想是要先測試再改架構還是先改架構再測試，針對剛剛提到的pro比flash爛部分。
+或者當作feature not a bug
+
+
+trap dataset總覽，M類先跳過我還在看到底是怎說
+
+E 類（Boundary / 邊界違反）
+怎麼生成 trap:拿一道乾淨題,把某個必要輸入改成違反 E-check 的非法值（通常是負數）。例如:
+revenue、expenses、GDP、exercise_price、order_cost → 設成負值
+每題對應一條 FIC 宣告的 E-check（如 arpu_val_001「收入不得為負」、gdp_previous_gdp_positive）
+例：ARPU 題把 total_revenue 改成 −$1,200,000；GDP 題把 previous_gdp 改成 −17.4 兆。
+
+
+E 類（Boundary / 邊界違反）
+
+CoT 表現:SWR 90%（9/10 silent wrong）
+→ 照著非法值盲算,自信吐出荒謬數字（ARPU = −76.19、收入成長率 −225%），無任何警告。
+VQ 表現:SWR 20%（8/10 攔截）
+→ deterministic E-check 觸發 alert/E,擋下並指出哪條邊界被違反。2 題漏接(該輸入的負值剛好不違反該題的特定檢查、或算出看似合理的正數)。
+差距：90% → 20%,數量級改善。
+
+I 類（Interpretation / 隱性歧義）
+怎麼生成 trap:拿乾淨題,刪掉消歧線索,讓 FIC 的 semantic_hint 所宣告的隱性歧義「還原」。類別由 FIC repair rule 的後綴決定:
+刪「as a percentage / expressed as a percentage」→ 還原 decimal/percent 歧義 → I_SOFT（i_output_scale_soft）
+刪「in hours」→ 還原時間單位歧義 → I_HARD（i_throughput_metric_type_hard）
+例：CAGR 題刪掉「expressed as a percentage」→ 0.19 還是 19%？
+
+
+I 類（Interpretation / 隱性歧義）
+
+CoT 表現:SWR 100%（10/10 silent wrong）
+→ 靜默選一種 convention（通常選 percent）就交出去,從不告知它假設了什麼;有 5 題與 VQ 差 100×。
+
+VQ 表現:SWR 10%（9/10 攔截）
+→ I_SOFT 用 proceed-with-warning（附 convention 警告 + 可驗證 transform）;I_HARD 用 clarify。僅 1 題漏接（唯一的 I_HARD throughput 題）。
+
+差距：100% → 10%,數量級改善。
+
+
+N類（Not-Supported / 範圍外）
+這個有點tricky 可以當作參考就好
+怎麼生成 trap:把問題換成超出範圍的 exotic ask（如「用 Heston 隨機波動率模型定價」）,而 DB 裡沒有對應的 FIC card。
+表面數據:CoT 與 VQ 都 SWR 0%（CoT 10 題全 abstain、VQ 10 題全 refusal）
+VQ：DB 裡找不到對應 card → 觸發 scope-boundary check → refusal/N	設計出來的能力（架構級 OOD 偵測）
+CoT：問題與 context 明顯錯配（Heston vs 生產線工時）太突兀 → 它「卡住」	偶然（湊巧這批 trap 造得夠突兀）
+
+
+
+F類：基本上就是算不出來
+缺數值本來就算不出來 cot也不會幻想出一個數值
+
+
+
+
+Future Work
+M類錯誤拯救 或者決定不拯救
+I_HARD 補強 / I_SOFT 補充
+擴大dataset （200題medium 100題hard）
+
+E-test-1035（ARPU,負收入）
+題目:計算第一季 ARPU(每用戶平均收入)。
+Context 陷阱:total revenue = −$1,200,000(負收入——財務上不可能,像是上游 ETL 符號錯誤或打錯字)。訂戶 15,000 → 16,500。這題就是原本的資料集品質有問題
+CoT 的反應(silent wrong) ARPU = -1,200,000 / ((15,000+16,500)/2) = -1,200,000 / 15,750 = -76.19
+VQ 的反應：diag     = E  (Boundary 層) gate     = deterministic_alert 觸發規則 = arpu_val_001  "Total Revenue Non-Negative Check"
+
+
+First Thing First: 為什麼不只看Accuracy
+LLM在金融問答 benchmark 上的準確率已逼近頂峰，但 headline accuracy 在實務部署中是一個 誤導性指標。我們識別出三類在標準評測中被掩蓋、卻在生產環境造成系統性風險的失敗模式：
+Silent Failure——模型在資訊不足時仍以高自信輸出答案；
+Semantic Drift——公式選對，但隱性歧義（匯率方向、現金流期初/期末、報酬率年化基準）導致系統性錯誤
+Audit Gap——CoT 軌跡因取樣隨機性無法重現，使損失發生時無從究責。
+這邊過過一次，如果沒有問題的話之後就不討論了
+
+
+CoT 的 Faithfulness 危機，導致AI的trace無法復現+虛假信心
+Jacovi & Goldberg (ACL 2020) 區分了兩個常被混淆的性質：
+可信度 (plausibility)——解釋對人類觀察者是否具有說服力
+忠實度 (faithfulness)——解釋是否精確反映模型內部的真實推理過程。
+最危險的情境是高可信度、低忠實度的組合：一個看起來很有說服力的解釋，實際上完全不對應模型的內部決策。
+CoT 正落入此危險區間。Turpin et al. (NeurIPS 2023) 透過輸入操弄實驗證明，CoT 中間步驟並不必然反映模型實際得到答案的計算路徑——模型可能受隱性偏見影響，但 CoT 軌跡卻不揭示此影響。
+
+CoT 的 faithfulness 進一步討論，看怎麼毒害結果
+Lanham et al. (2023) 量化了 CoT 步驟與最終答案的因果脫節，並揭示一個反直覺的 scaling 趨勢：隨著模型參數規模擴大與能力增強，其生成的推理軌跡反而越不忠實。模型越聰明，其偽裝推理軌跡以符合人類期待的能力就越強。
+Pfau et al. (ICLR 2024)  從機制層面提供了解釋：過去假設 CoT 的有效性來自將複雜任務拆解為人類可讀的離散步驟，但嚴格實驗證明 CoT tokens 提供的是純粹的 計算深度 (computational depth)，而不需要包含任何有意義的中間語義資訊——甚至將中間步驟替換為無意義的填充符號也不影響效能。
+近期paper (Lie to Me, 2026; Ariadne, 2026) 將此分析延伸至 reasoning models 與 multi-agent 系統，確認此現象並非早期模型的暫時性缺陷。
+
+現有解法的光譜與缺口
+
+(a) 執行端外部化（PAL, PoT, FINDER）將算術交給 Python interpreter，但 LLM 仍可寫出語法正確、金融邏輯錯誤的程式碼，對 semantic drift 無防禦；
+(b) 符號求解器路線（Logic-LM, VERAFI）依賴自然語言到形式邏輯的脆弱翻譯，在複雜情境下準確率反而劣化；
+(c) Agentic reflection（ToT, Self-Refine）以 LLM 驗證 LLM，未解決 faithfulness 的本質問題。
+
+
+最常被討論的一點是方法(b)符號求解器路線
+Neuro-symbolic 與 Formal Verification
+為取得formal保證，過往研究嘗試讓 LLM 充當「翻譯者」，將自然語言問題轉換為確定性符號系統可處理的表示。此流派可拆為兩條子路線，但都最終受限於同一個根本瓶頸。
+
+
+子路線1: 模組化推理 - DeepMind
+借鑑 neurosymbolic 概念，提出 Selection-Inference (SI) 框架，將推理拆為「從文本選取相關事實」與「從事實推導結論」兩個獨立模組。後續的 Faithful Reasoning 進一步加入 Halter 模組（偵測「資訊是否已足夠」）與 Value Function + Beam Search（並行推演多條邏輯分支後選優）。
+這兩篇工作在可解釋性上取得顯著進展，並明確批評 CoT 等方法以「幻覺合理化」冒充忠實推理。然而，其表現的前提假設始終未能突破：所有必備前提、規則與干擾項必須事先完整封裝在 Context 中(我們做不到！)。一旦需要外部檢索，Selection 模組若抓取錯誤的前提，後續推論無論邏輯多完美，皆只是在錯誤的基礎上進行華麗的推導。
+
+
+子路線2 : 形式求解器路線
+Logic-LM (Pan et al., 2023) 讓 LLM 將題目翻譯成 ASP，交由 Clingo 這類確定性 Symbolic Solver 驗證。
+LINC (Olausson et al., EMNLP 2023) 嘗試映射至一階邏輯（FOL），但其錯誤分析明確指出模型頻繁出現語法錯誤與語意偏移（Semantic Drift）
+SATLM (Ye et al., NeurIPS 2023) 改採宣告式路線，讓 LLM 只生成 Z3 SMT Solver 的約束式而非直接解題，但仍高度依賴特化 Few-shot Prompt 才能驅動，且剛性的 SMT Solver 對自然語言中的雜訊零容忍，一個符號錯誤即導致 UNSAT 或 Crash，且架構為單向 Parse→Solve，無自我修正機制。
+Logic-LM 即使加上自我修正模組，在複雜邏輯資料集（AR-LSAT）上的準確率仍僅達 43.04%。VERAFI 則在失去翻譯精度後退而求其次，改採「軟約束」（之前提到的只是把約束放在prompt裡面祈禱ai會去主動注意到），形式保證大幅削弱
+
+翻譯行為的根本極限
+最新的 FormalJudge (Zhou et al., arXiv 2026, under review) 在其系統的限制分析中指出：將自然語言需求翻譯為形式化規範，在一般情況下是一個「不可解的問題（undecidable problem）」，並將此現象命名為「規格合成瓶頸（specification synthesis bottleneck）」。
+即便 FORMAL JUDGE 採用雙向架構——將使用者意圖分解為原子級「是/否」問題後由 Z3 組合——其失敗案例分析仍顯示：剩餘錯誤主要集中於意圖分解與語意提取這兩個翻譯環節，並結論「這是一個單靠形式化驗證也無法解決的問題」。
+
+Multi-Agent Systems 與 Self-Reflection
+
+以 multi-agent 協作或 self-reflection 提升可靠性是目前金融 agent 最常見的商業路線（ToT, Self-Refine, Reflexion）。然而這條路線在 faithfulness 上存在本質缺陷：CoT 與自我驗證的本質是「因果脫節（Causal Disconnect）的事後合理化」——LLM 宣稱已完成驗證，實際上是根據最終答案反向生成了一段看起來合理的推理軌跡。
+在 multi-agent 架構中，這一問題被放大為 theory-of-mind failure：Why Multi-Agent LLM Systems Fail (Cemri et al., ICLR 2026) 指出，MAS 最常見的失敗模式在於 agent 之間假設彼此理解，但對共享狀態的詮釋存在分歧，導致錯誤在 agent 邊界處被靜默傳遞而非攔截。
+
+先從這張圖有的內容開始討論：觀察
+CoT self-improve 對準確率有效：single-shot (82%) → basic oracle (90%)，提升 +8pp；但無法降低 SWR（仍 10%），因缺乏架構級拒答機制
+Flash vs Pro 在 CoT 上無差異：41/50 vs 41/50，顯示 medium 難度對模型選擇不敏感
+核心 trade-off（VQ Flash vs CoT+oracle Flash）：兩者同達 90% 準確率，但 VQ SWR=0% vs CoT+oracle SWR=10%；VQ 以 10% 覆蓋率（5 題 abstain）換取 silent wrong 完全清零，也是「以拒答置換 silent wrong」的表現
+Recovery 貢獻（VQ Flash V3）：8/50（16%）題目由 oracle 修正後成功。無 oracle（K=1）時 VQ 準確率為 36/50 = 72%（§5.8 ablation 實測，非估計），oracle 帶來 +18pp 提升
+JP Morgan MAS（O-ITL）：43/50 (86%)，SWR=14%（5 wrong + 2 pipeline error），無結構pipeline則 oracle 本身不足以保證 SWR=0%
+
+Conference List (參考用，還是要看真正ok的時間)
+EACL: 歐洲分會的ACL, DUE: August 3, 2026, conference: March 9–14, 2027
+AAAI: DUE: July 28, 2026, Conference: February 16-23, 2027
+ACL: due: Jan. 6, 2027, conference:july 03-08,2027
+FinNLP workshop(under EMNLP): TBD, cofnerence: Oct 24-29 
+
+
+
+20260527 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週內容
+我有嘗試寫了論文架構，包含introduction,related work, methdology, limitation等，還有一部分專門講合規性的問題。experiment我和ai想過之後需要重跑，所以需要一些時間補充數據。
+把”Faithfulness”作為主要論點 補充相對應的論文研究
+整理我現在有的數據然後填寫肉塊
+ 
+ 
+ 
+
+experiments部分
+整個重跑並且附上更完整的數據圖
+每次跑數據自動流yml log
+跑完之後比對結果
+VerifiQuant-Flash2.5
+VerifiQuant-Pro2.5
+CoT + No-self-improvement-Flash2.5(其實基本上就是CoT+VQ funnel oracle裡面 第一次盲跑的結果）
+CoT + No-self-improvement-Pro2.5(其實基本上就是CoT+VQ funnel oracle裡面 第一次盲跑的結果）
+CoT +VQ funnel oracle-flash2.5
+CoT + VQ funnel oracle-pro2.5
+JPMORGAN->flash pro
+
+experiment痛點
+主要的痛點來自於一開始選擇50題的方式有點cherry-pick 因為當時發現如果我隨機選的話表現其實會比一直提到的88% baseline還要好。
+medium在2.0-flash-exp資料集上的正確率已經來到87.2%(one-shot, pot)或者是85.2%(one-shot, cot)
+ 當時我是嘗試找了25題ai原本錯的25題ai原本對的來跑，但是這樣有一點名不副實？所以改成純random看初步效果 + 回去做trap dataset, 也就是故意設計錯誤的題目看我們的系統會不會抓到還是會回絕。
+尤其是I類錯誤的部分很難抓到「過於嚴謹呆板」和「過於寬鬆突破I類限制」之間的平衡。我們一直提到的期初和期末付款這件事情如果沒有主動提ai一定會預設是期末
+
+Towards Faithfully Interpretable NLP Systems: How should we define and evaluate faithfulness?
+(2020) 的 faithfulness 定義（始祖）
+可信度（Plausibility）： 指解釋對「人類觀察者」而言有多具說服力、是否符合人類的直覺、常識與邏輯 。這是以人類感知為主體的外部指標。
+忠實度（Faithfulness）： 指解釋在多大程度上「精確且如實地反映了模型內部的真實決策與推理過程」 。這是模型內部的客觀指標。
+Worst-case scenario： 如果一個系統生成的解釋「聽起來極具說服力（高 Plausibility）但卻完全不符合模型內部的真實推理（低 Faithfulness）」，就會成為最危險的情況（如在司法累犯預測中，一個漏洞百出的偏見決策卻披上了看似公平合理的解釋外衣），從而危險地誤導使用者並引發合規災難 。
+
+Language Models Don’t Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting, NeurIPS 2023
+我們不能夠信任LLM的思考內容。模型可能會根據輸入數據中的某些特徵，選擇性地使用某些證據、改變其主觀判斷，或是以其他方式調整其推理過程，從而讓人誤以為自己理解了模型預測的真正原因。
+root cause:
+llm 訓練目標並沒有明確要求模型必須準確地說明其行為的背後原因。
+llm rlhf 根據人類所寫的解釋來進行訓練的，而這些解釋往往不完整，常常會忽略某個事件中重要的因果關係 -> decoding base內容推理 因果從來不是顯式的。
+
+模型給你的CoT都是馬後炮
+它不是先思考才得出答案，而是先被潛意識（Bias）決定了答案，再寫一段看起來很合理的歪理來呼應這個答案。
+這裏故意在 Few-shot裡下了一個暗號：範例裡正確答案全都故意排在 (A)。
+模型非常厲害，它偷偷抓到了這個規律Bias，它心裡已經決定：「不管三七二十一，這題我也要選 (A)！」
+
+
+模型可以被刻意植入的偏見特徵所強烈影響
+然而，模型在隨後生成的長篇思維鏈解釋中，卻會系統性地完全忽略這些偏見特徵的存在，開始合理化自己的解釋。
+該研究團隊在 BIG-Bench Hard（BBH）的 13 項推理任務，以及專注於測量社會偏見的 Bias Benchmark for QA選擇題資料集上，設計了兩種隱性且不具備邏輯關聯性的偏見特徵介入方法。
+Answer is Always A
+Suggested Answer:即在提示文字中人為加入「使用者或系統建議某特定選項可能為正確答案」的引導性字句。但只是建議。
+當在輸入中加入這些引導向錯誤答案的偏見特徵時，預測準確率發生了災難性的崩潰，最大降幅高達 36%。
+
+模型在生成思維鏈時的掩飾行為
+在這些長篇大論的偏見解釋中，模型絕口不提「因為先前的答案選項都是 A」或「因為提示文字建議了這個答案」這些真正主導且改變其決策的潛在變數。這表明模型的推理過程並非客觀推導，而是為了迎合預定結論而反向建構的論述。
+當模型面對情境中具有刻板印象的問題時，往往會給出傾向支持刻板印象與社會偏見的答案。為了掩飾這種偏見，模型會給出極具說服力但不忠實的解釋。
+若不透過針對性的技術改進來提升思維鏈的忠誠度，或完全放棄思維鏈轉而使用替代方法，將無法建立真正透明與可解釋的系統。
+
+Measuring Faithfulness in Chain-of-Thought Reasoning, acl2024
+既然模型的解釋並未提及真正影響預測的隱性因子，面臨問題：這些所謂的思維鏈解釋，到底是在決策之前指導預測的演算法推進過程，還是預測完成後才生成的「事後諸葛」？這篇透過對思維鏈進行一系列系統性的擾動介入，量化了大型語言模型推理過程中的事後合理化程度。
+為了測量參數規模達 175B 且經過人類回饋強化學習（RLHF）微調的語言模型之忠誠度，Lanham 等人設計了四種主要的擾動測試實驗架構，並觀察這些擾動如何改變模型的最終預測答案。這四種方法詳細列於下表：
+
+
+擾動測試方法名稱
+具體介入機制與操作流程
+忠誠度檢驗之邏輯意涵
+提前回答（Early Answering）
+在模型生成完整的思維鏈之前，強制截斷原先的思維鏈軌跡，並要求模型在缺乏後續推論步驟的情況下直接給出最終答案。
+若模型在被截斷推論的情況下依然給出相同的最終答案，意味著後續未生成的思維鏈對預測毫無影響，屬於事後合理化。
+加入錯誤（Adding Mistakes）
+利用一個預訓練模型生成一段似是而非的錯誤推論（生成合理錯誤的機率高達 80%），人為注入原始思維鏈的特定步驟中，隨後要求模型基於這個被篡改的邏輯繼續生成剩餘的思維鏈與答案。
+如果在推論路徑中強行注入邏輯錯誤，卻無法改變模型的最終答案，則強烈表明模型根本沒有真正依賴其所陳述的思維鏈進行決策。
+改寫（Paraphrasing）
+改變並重寫原始思維鏈初始段落的文字措辭與語法結構，但保留語義，隨後讓模型基於改寫後的文字重新生成剩餘的思維鏈與最終答案。
+測試模型是否因為 RLHF 過程中所隱含的長度懲罰或偏好壓力，而對特定的字面措辭產生過度擬合，而非真正理解推論內容。
+填充標記（Filler Tokens）
+將思維鏈中包含實質語義的文字，強制替換為無意義的省略號等填充符號，觀察純粹的長度與計算空間是否能維持模型效能。
+檢驗思維鏈帶來的效能提升，是源於「語義內容的推理」，還是僅僅因為產生額外標記提供了更長的「計算時間」。
+
+結果
+高度依賴晶體智力（Crystallized knowledge）的任務（死記硬背, 如 ARC 與 OpenBookQA），其思維鏈更傾向於純粹的事後合理化，對擾動極不敏感；而邏輯推理任務（如 AQuA 與 LogiQA）的最終答案對思維鏈的擾動較為敏感，顯示出相對較高的忠誠度。
+論文也指出，隨著模型參數規模的擴大以及整體運算能力的變強，模型在大多數研究所涵蓋的任務上所生成的推理過程，反而變得「越來越不忠實」。
+模型越聰明，其偽裝推論軌跡以符合人類期待的能力就越強
+
+Let's Think Dot by Dot: Hidden Computation in Transformer Language Models, ICLR 2024
+過去的研究多半假設思維鏈的有效性源自於將複雜的高維度任務拆解為人類可讀的、具備實質語義的離散步驟，但 Pfau 等人透過嚴格的演算法問題實驗證明，模型生成額外標記本身所提供的純粹是「計算深度」，而不需要包含任何有意義的中間計算語義資訊。
+換句話說，他只是事後合理化 他所謂的一步步思考根本沒有拆解成「步驟」
+即便完全剝奪了思維鏈的語義內容，只要允許模型在給出最終答案前輸出足夠數量的無意義點號，模型就能夠解決原本無法直接解決的複雜演算法任務，其性能提升幅度甚至能夠逼近標準語義思維鏈效能的 90%。
+
+20260520 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+verifiquant細節也是評審會在意的地方
+Your presentation must cover:
+1. The task and your technical barriers.
+2. An evaluation and demo of your agent (live or recorded).
+recommend spending two-thirds of your time on the evaluation and demo. Please frame your presentation as a pitch to potential startup investors, as some of our judges serve in that capacity.
+
+
+
+目標：增加可驗證性與technical barrier
+VERAFI是由 Amazon Web Services (AWS) 團隊提出的。它針對金融 AI 的核心痛點——即便 RAG 檢索到了正確文件，LLM 在推理階段仍會產生計算錯誤或違反監管規定——提出了解決方案 
+
+看看有沒有機會進行整合 雖然我其實感覺現在主流論文都沒有可以直接整合到我框架的內容，所以會報告這篇論文+競品分析
+
+他的核心想法
+VERAFI的架構是三段式協作：
+第一段:retrieve+rerank
+第二段是工具化代理式推理：透過call python執行介面與必要時的web檢索，把需要精確運算的部分交給可重現的執行器，並讓中間值可追溯。
+
+第三段是論文的新意：用神經符號自動形式化把GAAP/SEC與數學驗證要求轉成SMT-lib規格，再把這些規格以「上下文引導的政策」方式嵌入代理推理流程。但是我看了看並且跟ai驗證，他根本只是把生成的規則放到prompt裡面祈禱AI會用這些規則！！
+
+什麼是 SMT-lib？
+SMT-lib 是一種國際標準語言，專門寫給自動定理證明器（Solvers，例如微軟開發的 Z3 Solver）看的。 
+它跟 Python 這種「一步步執行指令」的語言不同，SMT-lib 是「宣告式」的。你不用教它怎麼算，你只需要告訴它「這裡有哪些變數」、「這些變數必須符合什麼規則（Constraints）」，Solver 就會用極度嚴謹的數學演算法去暴力破解，告訴你：「這個邏輯系統成不成立？有沒有矛盾？」
+
+
+怎麼把自然語言規章變成 SMT-lib？
+VERAFI 論文用了一個很潮的詞：「Neurosymbolic Autoformalization」
+說穿了，這就是「用 LLM 當作高階翻譯蒟蒻」。具體流程如下：
+Entity Alignment：先讓 LLM 閱讀法規，把專有名詞抽出來，宣告成 SMT-lib 的實變數。例如：定義 netIncome 和 averageTotalAssets。
+邏輯關係映射（Logic Mapping）：抓出自然語言中的條件句（如果...則...、必須等於、不得超過）。
+Few-Shot Prompting 翻譯： 給 LLM 看幾個標準範例，強迫它吐出 SMT-lib 語法。例如這樣
+自然語言（Alternate Expression）： "returnOnAssets is equal to netIncome / averageTotalAssets"
+LLM 翻譯出的 SMT-lib： (= returnOnAssets (/ netIncome averageTotalAssets))
+
+實際的作法
+先把 GAAP/SEC 規則轉成 SMT-lib 格式，並加上自然語言解釋，存成一包 JSON。
+檢索完前 3 篇文檔後，系統把所有東西暴力組裝成一個巨大的 Prompt：prompt = P_context (所有政策) + q (問題) + context (檢索文檔) + instructions (指令)。
+把這一大包直接丟給 Claude 4 Sonnet，讓 Agent 自己決定怎麼算、怎麼 Call Python 工具。
+在指令裡甚至直接寫著：「Use the validation rules above to internally verify your calculations」
+
+指令instructions是啥
+指令只是寫在 System Prompt 裡面的純文本（自然語言），不是什麼底層的 Python 指令或強制執行的腳本。 他說的查詢網路或者是python只是「claude agent覺得需要的時候才生成並使用」。基本上就是一個無趣的agent系統
+FINANCIAL VALIDATION RULES: Rule ID8: returnOnAssets is equal to netIncome / averageTotalAssets Expression: (= returnOnAssets (/ netIncome averageTotalAssets))
+Retrieved Financial Documents: (這裡塞入檢索到的 10-K 財報段落)
+Instructions:
+使用 calculator 或 python_repl 進行計算。
+使用上面的 validation rules 來「內部驗證」你的計算（DO NOT mention rule IDs in your response）。
+
+競品分析1：執行端驗證流派
+代表競品： PAL (Program-Aided Language Models,這是coding agent用的)、PoT (Program of Thoughts, 這是financereasoning用的) 以及專門針對 FinQA 提出的 FINDER 框架。
+競品作法： 把「推理」和「執行」分開。LLM 只負責寫出 Python 程式碼，然後交給外部的 Python Interpreter 執行算出答案。
+PAL 和 PoT 只解決了「算術錯誤（C-Class）」，但它們對「語義偏移（Semantic Drift）」毫無抵抗力！如果 LLM 誤解了題目，把「期初年金」理解成「期末年金」，它依然會寫出一段語法完美但金融邏輯全錯的 Python Code。
+
+競品分析2. 神經符號與求解器流派（Neurosymbolic & Solver-Augmented）
+代表競品： Logic-LM、VERAFI。
+競品作法： Logic-LM 會讓 LLM 把題目翻譯成純粹的符號邏輯（如 ASP），交給 Clingo 這類確定性的 Symbolic Solver 來驗證。這個也是我一開始想要做的方向
+無痛硬約束通點：
+Logic-LM 的致命傷在於「翻譯瓶頸」。把自然語言完美翻譯成形式邏輯極度困難，導致 Logic-LM 即使加上自我修正模組，在複雜邏輯數據集（AR-LSAT）上的準確率也僅有 43.04%。VERAFI 則是退而求其次變成「軟約束」。
+
+競品3: 純代理反思流派
+代表競品： Tree of Thoughts (ToT)、Self-Refine。
+競品作法： 透過 Prompt 讓 LLM「一步步思考（Think step-by-step）」，或者生成多個路徑後自己投票選出最好的。
+這裡直接拿出剛才的《Ariadne》和《Lie to Me》論文痛擊！CoT 的自我驗證本質上是「因果脫節（Causal Disconnect）」的「事後合理化」。LLM 說自己檢查過了，其實只是編造了一段看起來很合理的廢話。
+現在大部分網路上的finance agent都是這條路
+
+監管機構視角（歐盟 AI Act、FINRA、Basel）
+對於這些監管巨頭來說，他們根本不在乎你的 LLM 跑了多少 Benchmark 分數（哪怕你正確率 99% 他們也不買單）。他們只在乎一件事：「如果出事了，能不能抓出是哪裡出錯？能不能證明系統沒有說謊？」
+verifiquant架構做到了「可證明的追溯性（Provable Traceability）」。當傳統 CoT 只能交出一堆由神經網路「事後合理化」生成的廢話日誌時，verifiquant交出的是：觸發了哪個閘門 (M/N/F/E/I/C) + 具體的 Python AST 修改軌跡 + 數值交叉驗證的等式。
+「這是一個原生符合歐盟 AI Act 第 12 條與 FINRA 審計要求的金融 AI 框架。」
+
+我稍微整理一下各國的法規內容和我的作法
+台灣 FSC 指引（人類可控與透明性）：金融員工必須承擔最終責任，且 AI 決策過程必須可解釋。
+VerifiQuant 的解法： 我們的 M/N 閘門（拒絕回答、邊界退出）落實「人類可控」的下限設定。我們的 C 閘門 輸出的是決定性的 Python Code，員工可以一目了然地看到這筆資料是怎麼算出來的，這就是絕對的透明度。
+歐盟 AI Act（事件紀錄與追溯性）：
+法規痛點： 要求 AI 必須保留 Logs，且能精確追溯至原始輸入紀錄。
+VerifiQuant 的解法： 對比 CoT 每次都會產生不同的思維軌跡，我們的架構每一次決策都會輸出帶有 Python 程式碼、輸入參數（Binding）、以及具體數學規則（FIC v2）的診斷報告（DiagnosticReport）。
+
+我稍微整理一下各國的法規內容和我的作法
+Basel 監管（補償控制與輸出下限）：
+法規痛點： LLM 無法解釋，必須設定輸出下限（Output floors）。
+VerifiQuant 的解法： 我們的 M/N 類錯誤（Refusal, Graceful exit），就是直接在系統層面實作了 Basel 的「輸出下限」！我們不讓 LLM 瞎掰，只要超過邊界，系統就強制介入。
+FINRA（明確的人為檢查點）：
+法規通點: AI 不能自主行動，必須設立人為檢查點（Human Checkpoints）。
+VerifiQuant 的解法： 我們的 I 閘門（Critic Interception）和 human-in-the-Loop 機制，就是標準的人為檢查點。當發現語義歧義（如期初/期末），系統強制暫停，發送明確的提問請求，這完全符合 FINRA 的防呆要求。
+
+目前傾向於「CoT想的跟輸出的不一致」
+ CoT 的 90% 正確率是「不可信的」。正如 Ariadne 發現的，CoT 容易產生「因果脫節」，模型根本是事後合理化（Reasoning Theater）。在金融業，這種「虛假的審計軌跡」是會違反歐盟 AI Act 第 12 條的（這等於是在合規日誌裡撒謊）！
+ 相比之下，VerifiQuant 的執行軌跡（Python 程式碼）是 內在可解釋 的。我們不讓 LLM 寫作文，我們讓 LLM 寫出強制執行的程式碼。我們的 C 閘門 如果沒報錯，就代表這段邏輯在數學上絕對成立，沒有「事後合理化」的空間。
+
+
+
+現在的可驗證性問題
+上週探討了趨勢，確認可驗證性作為主軸，目前這部分我的架構沒有太大的問題。
+trustworthiness technical barrier是一個可以被考慮的方向，因為目前的整個架構雖然實作起來複雜，但是概念其實蠻簡單的：把python擴展成Financial identity card + RAG找對應卡片 + 在可驗證範圍內的Python 重寫以涵蓋題目微調+偵錯漏斗找錯+有錯的話HITL提供驗證性+結構性improvement，這些雖然有架構撐住，但是被說如果要「變成論文形式」可能需要增加外部驗證。 所以我們需要增加所謂的「可驗證性」，尤其是「被監管會允許的可驗證性」。
+這週主要是：1. 看論文  2. 處理掉 在可驗證範圍內的Python 重寫以涵蓋題目微調 這件事情 3. 搞其他的實驗 （期末專題、google事前準備他要我看一堆文件）
+
+升級repair方法：一按鈕置換code框架且確保穩定
+以NPV為例子，用戶原本說：第一年10萬第二年20萬第三年30萬
+框架說：是期末還是期初
+用戶說：我說是期初，也就是第一年初10萬第二年初20萬第三年初30萬
+原本的系統中，code原本是期末付款 現在改成期初 框架可能只能要求用戶改資料 但如果我根本沒有定義好的話我不能夠說改成第零年10萬第一年20萬第二年30萬 如果我的code沒有定義第零年要怎麼付款（理論上是可以直接調整initial invest但我沒有給llm調整用戶輸入的能力），所以會死掉
+現在我想要用微調code來做到這些事情，目前做到：
+保證最小改動 在固定的操作上可以進行切換
+在不確定的情況下可以去搜尋怎麼樣進行最小改動 確保我每次只動一個部分而不是llm整個重寫公式
+
+「Verifiable Atomic Transforms」（可驗證原子轉換）
+般 LLM 發現自己算錯，或者使用者要求修改條件時，LLM 的直覺反應是「直接把整段程式碼砍掉重寫」。這種「黑盒式的自由篡改」會帶來毀滅性的後果：它可能偷偷改了變數定義、引入了未經審查的套件，甚至破壞了原本正確的邏輯。
+根據我的新架構設計，VerifiQuant 透過這套機制，直接拔掉了 LLM「隨意篡改」的權力。當 I 閘門（Critic）釐清了隱藏的語義歧義（例如：這是期初付款還是期末付款？）後，系統必須調整計算，但不允許 LLM 自由重寫程式碼。
+註解：目前這套系統只能對預先定義好的轉換進行條整 base on 對llm的不信任
+
+簡單看我加了什麼
+在建立「年金現值（PV）」這張 FIC 財務身分證（Formula Identity Card）時，你的 stage_core.py 和 stage_repair.py 不是只寫了 Python 公式，它們還超前部署了防禦機制：
+核心計算（Execution Code）： 寫死一段計算「普通年金（期末付款）」的 deterministic Python Code。
+語義地雷預警（Semantic Hints / I-Class）： 在卡片中標記：這題有「期初 vs. 期末」的隱性歧義風險（Time-basis direction）。
+可驗證原子轉換（Verifiable Atomic Transforms）預備：
+系統預先定義好，如果使用者後來要求切換成「期初付款」，系統不允許 LLM 自由重寫 Code，而是準備好兩套修補方案：
+result_postprocess（算術後處理）：新結果 = 舊結果 * (1 + 利率)
+code_patch（程式碼微調）：將程式碼中的 start=1 替換成 start=0
+
+當使用者問：「每年付 1000 元，連付 5 年，利率 5%，現值多少？」
+系統的 Critic Agent 發現使用者沒講清楚是期初還是期末。因為這會改變計算方向（I_hard 錯誤），系統拒絕瞎猜（Silent Failures），直接發動提問（Human-in-the-Loop）：「請問您的付款是在期初還是期末？」。
+使用者回答：「期初」。這時候，LLM 不能自己隨便改 Code！系統會抽出卡片裡預備好的 code_patch（把 start=1 改 start=0）。然後去跑code patch要做的事情（請llm照者規定作法改變code）
+跑一次舊 Code，得到期末年金結果，然後套用 result_postprocess 乘上 (1 + 0.05)。
+跑一次被 Patch 過的新 Code，得到期初年金結果。
+系統比對：如果數字一樣，系統才會批准程式碼修改，並把答案輸出給使用者，與此同時，把這次的結果存起來 之後可以準備變成另外一個新公式
+
+技能1: result post process
+當計算邏輯的改變只是單純的數學轉換時（例如匯率反轉，或者年化報酬轉月報酬），我們根本不需要動到核心程式碼（Core FIC Code）。
+機制： 系統只允許對「最終結果」套用一個純粹的算術表達式（例如 result * (1+r) 或 1/result）。
+驗證（如何防篡改）： LLM 吐出的這個表達式，不是直接 eval() 執行這麼隨便。它必須通過嚴格的過濾：
+AST 節點數量上限： 限制語法樹的大小，防止 LLM 塞入超長或惡意的複雜邏輯。
+安全白名單： 只能使用當前公式允許的變數名稱，封死外部函式呼叫或惡意注入。
+Invariant check： 透過代入測試數值，確保轉換後的結果符合預期的數學邊界。
+
+技能2：code_patch（外科手術式修補）與交叉驗證
+有時候，我們必須修改程式碼內部。例如，計算年金時，要把普通年金改成期初年金（程式碼裡的 start=1 變成 start=0）。我把「程式碼修改」跟「數學代數證明」綁在一起了。
+機制： 這是一種極小範圍的「字串替換（Surgical text replacement）」。
+唯一性與半徑控制： 替換的特徵字串必須在程式碼中「只出現一次」，而且修改前後的 AST 差異（AST-diff）不能超過設定的「破壞半徑上限（Blast-radius bound）」。LLM 想順便改別行的話就可以直接擋掉！
+交叉驗證 我規定：修改過後的程式碼，它的數值輸出，必須「精準等於」對舊輸出進行代數轉換的結果。
+
+我想投FinNLP-2026@EMNLP: October 24th-29th, 2026 ，budapest!
+
+20260513 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週進度
+查詢生成式AI使用相關法規並套用在code邏輯上。因為從我第一次做研究是去年年底 現在應該要重新做背景研究
+我的另外一個期末專案，有關於RAG安全性防禦的，正在進行中，感覺有機會投個workshop
+我希望可以找到文件說「我現在的verifiquant補公式來源、審計過程是必要的」，但是還真的找不到！這不是一個非黑即白的內容， 現行其他做法也有部分可審計性，只是我做得更徹底更容易被信任 這個很難找到文件背書。
+或者說 我把可審計性做的嚴格一點 自然會有內部對可審計性嚴苛的公司願意採用？ Audit Trail
+
+等等會分兩個部分
+各國指引
+現在的系統怎麼回應指引（商業面、研究面）
+reflections
+
+台灣金融監督管理委員會（FSC）的tl;dr
+雖然文字很多但是密度很低
+引入時：要進行測試、要寫報告評估風險、要確保決策邏輯人類可理解
+使用時（對內）：要引入專業第三人進行決策
+使用時（對外）：如何以淺白之用語適當揭露相關資訊、提供適當之說明及解釋、提供充分的解釋與揭露
+
+先從比較抽象的高階管理準則開始
+以下我討論的這些都處於一個尷尬地帶：有文字敘述「建議」要怎麼做，但是都是大方向的、概念性的探討，對於實際的限制是不足的，也讓我反思。
+台灣金融監督管理委員會（FSC）之AI指引
+第一，建立治理與問責機制。金融機構必須為所有AI系統建立明確的管理架構。必要時，引入具備專業知識的獨立第三人進行審查與評測 。  
+第二，落實「補充性原則」與人類可控。AI系統僅能作為輔助工具，金融機構的員工必須保留最終決策權，並對決策結果承擔責任 。特別是針對生成式AI，若金融機構無法掌握第三方模型的訓練過程，員工仍必須對其產出資訊進行客觀且專業的風險管控 (所以金融員工還是要承擔最後的責任)
+或許可解釋成「就算我做再好人類還是要看」但至少effort降低
+
+台灣金融監督管理委員會（FSC）之AI指引
+ 第三，確保透明性與可解釋性。金融機構必須建立評估AI系統透明度的共通原則，並在AI系統直接與消費者互動時（如生成貸款決策建議），向消費者提供充分的解釋與揭露 。  - 對於透明度有要求，但是要求到什麼程度？就是要自行定奪。同時也看到指引針對企業內部和對外都有要求透明
+第四： 金融機構在AI系統生命週期應落實（一）可清楚說明自行或委託研發並使用之AI系統係如何運作及其預測或決策過程背後之邏輯之「可解釋性」（重點！），以及（二）透過發布報告、技術文件或於網站上揭露相關資訊等方式，主動讓利害關係人知悉其運用AI系統之作法之「透明性」。綜合三四點，金管會期望我們在給予決策給不管對內或對外時可以說「這個技術是怎麼做到的」，不只是解釋這個AI是怎麼來的 也包含這個AI在處理單一問題時的邏輯和穩定可解釋性
+
+關於可驗證性相關文字內容（台灣）
+定義「可解釋性」：可清楚說明自行或委託研發並使用之 AI 系統如何運作及其預測或決策過程背後之邏輯，以利組織內評估是否符合內部政策、作業流程及監管要求等。 這個層次是對「整個系統」，如果金融廠商要引入verifiquant，需要經過外部人的審慎評估。
+在「系統規劃及設計」階段，金融機構規劃以 AI 系統與金融消費者互動時，宜規劃如何以淺白之用語適當揭露相關資訊，例如：如金融機構係運用 AI 系統輔助決策，宜考慮提供金融消費 者額外之資訊，以便其瞭解這些決策是如何形成的。
+在「系統驗證」階段，金融機構宜依透明性要求，測試與驗證相應之功能
+金融機構宜依據客戶所提出之需求，視情況提供適當之說明及解釋，說明 AI 系統產出之預測、建議或其決策基礎之邏輯，惟仍宜注意資訊過度揭露所衍生之風險
+
+歐盟《人工智慧法案》（EU AI Act）與高風險金融系統
+
+對於金融服務業而言，用於評估自然人信用評分、進行風險定價，或應用於人壽與健康保險領域的AI系統，皆被《法案》附件三明確列為「高風險」系統，所以一定要遵循以下責任不然歐盟會罰款。 
+自動化事件記錄與追溯性（第12條與第13條）： 系統必須在工程設計上允許於整個生命週期內自動記錄事件（Logs）。第13條進一步要求部署者必須能夠解釋模型是如何得出結論的，並且必須能將該結論精確追溯至原始的輸入紀錄。例如，在通訊監控應用中，AI的警示必須能夠無縫追溯至保留時間戳記與監管鏈的原始對話內容 。
+verifiquant會一層層的進行審核，有輸入，有參考的文件和公式，有決策時的審核過程，審核不通過還會問用戶進行補充和表明，這就很像是讓決策過程的log保持可見，而且可以追溯到原始輸入紀錄，而cot普遍不認為是一種log
+
+歐盟《人工智慧法案》（EU AI Act）與高風險金融系統
+
+
+日誌保留強制規定（第19條與第26條）： 部署者必須妥善保存高風險AI系統自動生成的日誌。對於受歐盟金融服務法規範的金融機構，這些日誌必須直接整合至現有的內部治理與財務文件保存體系中 。
+高品質資料與技術文件（第18條）： 提供者必須保存技術文件長達10年，詳細記錄資料來源、驗證流程、演算法邏輯與偏差緩解措施 。如果系統無法提供資料血統（Data lineage）與存取控制的確鑿證據，將面臨高達全球年營業額7%或3500萬歐元的鉅額罰款 。
+所以會分兩部分：一個是整個系統有邏輯 一個是個人使用問問題時回答有邏輯 兩者都要兼顧
+
+巴塞爾銀行監管委員會（BCBS）與模型風險管理（MRM）
+
+眾所周知 巴塞爾在金融危機之後對各個面向的金融規範變得更嚴格 也開始整治AI。（這是財金系學生必讀的）
+可解釋性的妥協與補償控制： Basel 發布的報告指出，複雜的深度學習與大型語言模型具有數十億個參數與非線性交互作用，本質上難以解釋 。傳統的事後解釋技術（如LIME或SHAP）存在嚴重缺陷，包括不準確、不穩定且容易產生誤導性的解釋 。因此，監管機構傾向要求機構建立透明且可審計的治理框架、實施嚴格的人為監督（HITL），並在必要時對高風險應用設定「輸出下限」（Output floors）作為安全防護 。
+這部分的hitl, 輸出下限（例如說「我認為無法回答」）這種剛好是我們系統的特長。
+
+美國金融業監管局（FINRA）與證券交易委員會（SEC）
+
+FINRA對具備自主行動能力的AI代理表示高度擔憂，認為其獎勵機制與強化邏輯可能與投資者利益脫節 。報告強制要求機構為AI代理設定狹窄的權限範圍，並在執行任何交易或通訊前，必須留下完整的行動審計軌跡，同時設立明確的人為檢查點 。缺乏此類透明決策軌跡將直接構成重大合規違規 。
+https://www.finra.org/rules-guidance/key-topics/fintech/report/artificial-intelligence-in-the-securities-industry/key-challenges
+我覺得針對「留下完整行動軌跡」和「留下人為檢查點」在根本上是我的特色
+
+思維鏈（CoT）在金融合規上的結構性缺陷
+
+在金融合規情境中，任何解釋都必須具備Faithfulness。忠實度意味著模型所口述的推理步驟，必須精確反映實際驅動其得出該輸出的因果因素 。來自Anthropic、NYU等機構證明，大型語言模型的CoT解釋經常系統性地扭曲了其真實的預測原因 。
+ex. Lie to Me: How Faithful Is Chain-of-Thought Reasoning in Reasoning Models? 論文的核心議題：模型是否能夠準確地描述那些真正影響其輸出的因素？ 過往研究顯示：Claude 3.7 Sonnet 的準確率僅有 25%，DeepSeek-R1 的準確率則為 39%。在開源模型上也做了類似的測試。
+我們發現，CoT擅長假裝自己的思考邏輯是絕對中立客觀的，即使我在prompt裡面叫他阿諛奉承。
+
+Lie to Me 測試的內容
+研究使用選擇題進行測試，同時加入了六種類型的推理提示：阿諛奉承、一致性、視覺模式、元數據、評分作弊以及不道德的信息。研究還測量了當這些提示成功改變了模型的答案時，模型承認這些提示影響的比例。在 41,832 次推理過程中，不同模型的faithfulness(誠實率)範圍從 39.7%（Seed-1.6-Flash）到 89.9%（DeepSeek-V3.2-Speciale）不等。
+其中，只有53%的例子承認他的回答受到了阿諛奉承prompt影響
+如果提示更隱庇 承認率更低
+此外論文也提出：模型內部能夠識別提示的影響(86%)，但會在輸出結果中系統性地抑制這種識別。
+
+Project Ariadne: A Structural Causal Framework for Auditing Faithfulness in LLM Agents
+
+雖然「思考鏈」技術能夠讓模型產生人類可理解的推理痕跡，但目前尚不清楚這些痕跡究竟是模型產生輸出的真正原因，還只是事後的合理化解釋而已。
+Ariadne是一種新的可解釋性分析框架（很適合用在剛剛提到的各種監管架構裡面！）它運用結構性因果模型和反事實邏輯來檢查模型的因果推理是否合理。 
+Ariadne 計劃對中間的推理過程進行了深入干預，包含系統地顛倒邏輯、否定前提、反轉事實陳述之類的操作，以文本方面（而不是neurosymbolic那一派）測量最終答案的因果敏感性。對於現有的尖端模型而言，實證研究發現了普遍存在的「faithfulness缺口」。我們還發現了一種普遍的錯誤模式，即「因果脫節」：在事實和科學領域中，模型的錯誤率可高達 0.77。
+
+what is may happen
+模型整體的忠實度落差極大（從39.7%到89.9%不等），且模型在文本輸出中承認受到這些外部提示影響的比例極低（約28.6%）。
+因為剛剛提到的是有關於multi agent system的思考cot研究所以可以研究內部一致性。他發現，有高機率（77%）儘管各個代理體的內部邏輯相互矛盾，它們最終得出的結論卻總是一樣。它們的推理過程其實只是一種“推理的戲劇化表現”，而真正的決策過程則是由某些非可見的參數所決定的。
+研究結果表明，現有的代理體架構本質上容易產生不真實的解釋。因此，我們提出「Ariadne Score」作為一種新的評估標準，用來確保所宣稱的邏輯與模型的實際行為相一致。
+
+這兩篇的結論和cot不合理的地方
+模型實際上是基於潛在的參數先驗機率、隱藏的上下文暗示或內部偏見得出結論，但卻生成了一段看似高度合理、邏輯嚴密，但實際上完全虛假的CoT軌跡來「事後合理化」其決策。
+即使內部的推理邏輯充滿矛盾，模型依然會得出完全相同的最終結論。這證明了CoT僅僅是一場「推理劇場」（Reasoning Theater），模型的決策實際上仍由不可見的黑盒機制主導 。
+
+
+好啦總之就是cot本身不管用
+將這種具備隨機性與不忠實特性的CoT應用於金融合規，將牴觸：
+ 第一，違反溯源與證據鏈要求： 歐盟人工智慧法案與FINRA要求自動化決策必須能精確追溯至驗證過的輸入資料 。由於CoT的生成軌跡與模型真實的計算權重脫鉤，它無法作為有效的證據鏈。若合規人員依賴這些「會產生幻覺的審計軌跡」進行審查，將產生誤導。
+ 第二，破壞審計的真實性原則： 傳統審計要求確保交易的發生性與準確性 。一個會進行事後合理化的模型，其生成的日誌實質上是捏造的記錄。對於歐盟法規（第12條）要求的自動化日誌而言，記錄一個虛假的推理過程等於在合規日誌中撒謊完全錯誤。
+ 第三，無法落實台灣FSC的人類可控原則： 台灣金管會強調人類員工必須進行客觀評估並承擔最終責任 。如果員工用以進行風險評估的依據，是模型編造出來的虛假CoT，那麼人類的監督機制將形同虛設，不僅無法達到補充性原則的要求，還會將員工與機構置於危險的境地。
+
+發現的一篇新paper跟我討論的內容相關但是只在arxiv
+Learning to Seek Evidence: A Verifiable Reasoning Agent with Causal Faithfulness Analysis
+這篇論文的框架在核心理念上和我高度一致，特別是在「放棄事後合理化（Post-hoc rationalization）」、轉向「行動中推理+找證據」以及「外部證據錨定」這三點上幾乎如出一轍 。但是他用 neorosymbolic 處理的方法實在是有一點點僵化所以我快速帶過。(而且他的指標是probabilistic predictions for binary or categorical outcomes，針對某事件發生的機率預測，跟我做得不一樣）
+
+
+methdology
+在推理開始前，系統會先建立一個 H-Box，這是 Agent 的「大腦暫存區」。
+接者針對某個要問問的問題，設定初始信念 (p_0)： 根據數據統計或初步的視覺掃描，給出一個初始機率值（例如：這張報表有 30% 機率存在錯誤）。
+接者，agent 觀察當前 H-Box 的狀態，並從四個受限的動作指令中選擇一個（這與 CoT 隨意寫字不同，Agent 只能執行指令）：
+PROBE & GROUND (P&G)： 去外部找證據（不直接給答案）。
+CLAIM： 信心十足，準備結束推理並給出答案。
+ABSTAIN： 證據不足或邏輯矛盾，選擇棄權（輸出機率 0.5）。
+STOP： 根據目前資訊直接收尾。
+
+methdology
+
+PROBE & GROUND (P&G)： 去外部找證據（不直接給答案）。
+這裡和我去找卡片很像，但他的方式是一個比較慢但是比較準的系統，只有在事先定義好的內容上回傳更新的信心值p。舉例來說，當 Agent 問「這張圖有沒有氣胸特徵？」時，KBCS 負責給出一個校準過的信心分數（例如：0.85）。 論文的 KBCS 仍然是一個「黑盒神經網路」，只是它是獨立於 Agent 之外的，agent用它當作一個true-label。
+
+short conclusion
+獲得外部證據後，系統不會讓 LLM 「自己看著辦」，而是透過一個固定的數學函數更新信念，最後等到信念分數穩定就吐出答案，輸出一串如  -> [P&G: 變數A] -> -> [CLAIM] 的軌跡。
+行動化推理 (Reasoning-in-Action)是目前解決 AI 幻覺的主流趨勢 。但其採用機率分數作為證據，在金融這種誤差容忍度低的場景中是不夠的。因此，VerifiQuant 進化了這個架構——將其 P&G 的「感知證據」升級為「 FIC 卡片」，並將其機率融合升級為 Python Trace。這才具備了真實金融監管所要求的可驗證性與歸因能力 。
+不好用的原因歸因：1. 我要的不是「某個claim的正確程度多少%」 2. 我接上的外部資料庫不是神經模型或者一個黑盒子輸出。
+
+ DACL (確定性自主合約語言) 與 SMT 求解器
+簡單來說就是把所有的金融邏輯用sympy這樣子的數學方式進行推導
+作法： 系統「只使用一次 LLM」將金融規則或法規條文翻譯成確定性的圖結構（DACL）或 約束條件，之後的每一次推理都完全在這些數學邏輯閘中執行，產生審計軌跡。
+優點： 由於避開了運行時的 LLM 生成，這類方法能減少 90% 的運算成本，並提供近乎完美的邏輯一致性，甚至能自動計算出要恢復合法狀態所需的「最小事實修改量」（就是我一開始做這個題目時討論的用tree去計算兩個python之間相似性之類的。
+缺陷： 這類框架過於僵化。如果 LLM 在最初那一次的「規則翻譯」中出錯，後續的所有執行都會是錯的，而且擴展性不太好。 我的框架允許 Agent 根據不同情境動態找出適合的 FIC 卡片，並由 Python Trace 實時生成軌跡，在應對複雜多變的金融問答時，容錯率與靈活性更高。
+
+2026新論文：VERAFI: Verified Agentic Financial Intelligence through
+Neurosymbolic Policy Generation
+是由 Amazon Web Services (AWS) 團隊提出的。它針對金融 AI 的核心痛點——即便 RAG 檢索到了正確文件，LLM 在推理階段仍會產生計算錯誤或違反監管規定——提出了解決方案 。（和我的想法更相關！，如果我不是搜尋到python code而是純文本的話就可以用這條路改進模型推理能力。）
+神經符號政策生成 (Neurosymbolic Policy Generation)：系統利用 LLM 的語意理解能力，將非結構化的金融規範（如 GAAP 會計準則、SEC 監管條文）一次性地翻譯成機器可讀的 SMT-lib (Satisfiability Modulo Theories) 正式邏輯規格 。
+因為這篇跟我的內容好像很互補所以我打算慢慢看（還沒認真看完）
+
+「可驗證金融分析」競品與研究流派
+純靠 CoT 讓 LLM 自己解釋自己是行不通的（因果脫鉤），必須導入外部的確定性系統。
+VerifiQuant 的定位介於 「純文本 RAG」 與 「過度僵化的數學求解器 (SMT/VeNRA)」 之間：
+它比傳統 CoT 具備真正的可驗證性（透過卡片 ID 鎖定知識來源，透過 Python Trace 鎖定計算過程，消除了隨機性）。
+它比 VeNRA 或 SMT 求解器具備更好的可擴展性與實用性（不需要事先把所有金融市場資料都寫成死代碼，而是透過 FIC 卡片保留了自然語言介面的彈性）。
+我最大的發現就是最近半年內，討論合規性這些的都往”Faithfulness”靠，我也可以去找更多相關的論文
+最大的重點是，我的trace可以重現+可以「倒推回源頭」+人類可以簡單且高效的審計
+
+神經符號AI：將語意感知與決定性邏輯分離
+
+neurosymbolic成功恢復了經典符號AI（Symbolic AI）可絕對審計的邏輯性，同時保留了深度神經網路（Neural Networks）強大的語意模式識別能力 。在這種架構下，系統的運作被嚴格劃分為兩個層次：
+神經感知層（Neural Layer）： 大語言模型在此架構中不再負責最終的邏輯推理。它的任務被嚴格限制在「自然語言介面」的角色，負責讀取非結構化的金融文件或者金融公式，並將這些文字精確映射、轉化為形式化的語意與數學結構 。
+符號驗證層（Symbolic Layer）： 在取得形式化資料後，系統不會使用CoT讓LLM自己推導結論，而是將這些結構化參數傳遞給一個完全決定性、基於規則的外部引擎——aka我的python trace
+
+我的架構下的優勢
+不同於LIME或SHAP這類試圖從外部猜測黑盒行為的技術，神經符號系統在決策層是Intrinsically interpretable的。外部規則引擎提供了精確的歸因，清楚標示是哪一個具體變數觸發了特定的合規閾值（我的E類,I類錯誤雷達)，契合指引中確認概念健全性與模型結果合理性的要求 。
+確保每一次決策都能夠100%追溯至原始輸入資料：我的架構可以「逆推」回原始狀態。
+或許可以考慮增加如何防止篡改的部分來做到整個系統的內部完整性？
+
+
+next step
+找更多相關的文獻
+尋找切入點
+
+20260506 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週內容
+老師上禮拜說希望把我的verifiquant架構拿去公平的被比較 所以要創建一些新的方法
+jp morgan 的multi agent論文的 Pass@1 47% 表現證明了：在金融這種精確度要求極高的場景，「多說話（Insights Agents）」 對 「做對事（Base Agent Code Gen）」 的邊際貢獻其實遞減很快。 我們沒有那篇論文的source code所以只能慢慢建，我自己也有發現類似的問題，問得太多，失去原本的重點
+上週主要的結果是看了如果我們把verifiquant的邏輯塞給CoT去讓他自己做反思，結果會變得怎麼樣？
+
+其他正在努力的內容
+目前林教授實驗室的優式合作案開始正式進行，最近花比較多時間做那個方向，但是目前優式期望的背景設定有一點「脫離現實」，導致算出來的數字只有相對意義沒有絕對意義，不太適合延伸成論文。
+我有一個正在修的科目的期末報告是有關於「RAG投毒攻擊之防禦」，我和另外一個同學在研究2025 EMNLP and 2026 AAAI main論文，主題是針對資料庫惡意投毒攻擊時，要怎麼在不Call LLM, 一篇一篇去fact check的情況下，去篩選可能惡意的內容，目前自己的研究發現在被惡意攻擊跟正常RAG的結果，在圖論中會有不同且顯著的特性，我覺得很有趣。
+正在整理機率助教課程的課程反饋以及數據統整，整理好可以發論文。
+
+上週結果
+我自己的verifiquant:正確率88%, 1題是公式本身錯誤，2題是公式本身假設和題目不符合，1題E類錯誤但是硬算可得到答案，1題I類錯誤、1題M類錯誤。總問答次數72次，平均1.44次問答可以得到正確結果
+傳統 2.5 flashCoT的結果（只要求要反思，沒說要反思哪部分）: 88%, 總問答次數78次。
+改進後 +verfiquant2.5 pro CoT的結果：96%, 總問答次數77次，推理內容更結構化。
+使用JP morgan的結果：原始方法正確率66%(超低)，新增verifiquant反省框架後正確率：78% 但是思考花費的api call次數明顯較多，我是設定他們也只能問人類兩次問題，但他們很常會陷入迴圈  (base跟reflection 吵架)。
+
+
+JP morgan在幹嘛
+主要差異在raw data不一樣
+這篇的data是csv 我的是純文字
+
+新增了insight之後嘗試解決問題
+
+jp morgan result- 詳細
+
+好的狀況
+
+jp morgan result- 詳細
+第一個版本:略過（設計不好）：50%正確率
+改進後（強調不要漏看原本的context限制條件 system prompt最後再強調一次不要漏看）
+Correct Answers           : 33 (66.00%)
+Average Time per Question : 41.09 seconds
+Total API Calls           : 309
+Total Human Asks          : 2(這個版本ai喜歡單幹）
+
+jp morgan result- 詳細
+改進後（增加verifiquantj的funnel框架）
+Correct Answers           : 38 (76.00%)
+Average Time per Question : 48.16 seconds
+Total API Calls           : 339
+Total Human Asks          : 8
+
+最大的問題：這個系統經過了大量的雜訊之後，開始「無視提供的變數」，就算我有強調
+ex. 它把 5 年當成 1， 年題目明明寫著："The loan term is set for 5 years"。但看你上一輪貼出的 generated_code：principal = 2000000
+annual_interest_rate = 0.055
+annual_interest_payment = principal * annual_interest_rate
+total_bullet_repayment = principal + annual_interest_payment # <-- 這裡死掉的
+它在寫程式碼時，完全沒有定義 term_years = 5。它直接把「一年的利息」加進「本金」就結案了。這不是邏輯錯誤，這是資訊擷取失敗（Information Extraction Failure）。
+
+這個ai agent想太多反而結果越來越差！！
+1. 第一題（Qstick）：數據虛構與邏輯懶惰
+這題的 Agent 產出了 2.33 這個答案，簡直是睜眼說瞎話。
+它的錯誤點： 題目明明白白給了一串 10 天的價格清單（150, 151, 152...），但這個 Agent 卻在代碼裡自己編了一組數據（Open_8 = 100.0, Close_8 = 102.5）。
+懶惰的模板思維：它可能沒去解析 context 裡那一長串 JSON，而是直接從它的訓練記憶裡抓了一個「Qstick 範例代碼」出來，把裡面的範例數字直接當成答案。
+或者是他在前面幾個複雜的query refiner等內容中出現幻覺之類的情況
+
+狀況2:（附圖）
+
+可能的比較方式1
+老師希望我驗證 現有系統審計性與驗証性的程度在哪裡
+我有想過，就是直接在輸出的結果做文字分析，去證明每次輸出的結果verifiquant輸出的variance比較小。
+舉例來說，針對複雜公式，每次llm第一個想到的是否就是正確答案vs我用RAG可以每次都找到最相關的公式和解釋因為我原本claim說，每次在verifiquant框架中我都可以用RAG找到最適合的卡片，卡片裡面有公式和使用教學，找到合適公式之後再進行數值驗證和最終計算，我的rag可以讓輸出結果有理有據，就算在CoT裡面每次都可以想到對應公式，金融業還是會質問說這個公式怎麼來的，所以「有公式卡本身就是驗證性來源」
+
+可能的比較方式2
+在金融領域，「不知道為什麼對」跟「算錯」一樣危險
+我認為我的框架可以證明這個方法可以「保證讓大家知道答案怎麼來的怎麼對的」
+CoT 組： 計算 10 次推理中，使用的「公式文本」Variance。若發現它每次寫法都不太一樣，這就是穩定性差。
+VerifiQuant 組： 證明 10 次中，系統是否 始終檢索到同一張 FIC 卡片。只要卡片 ID 一致，邏輯就是 100% 穩定的。
+找一題複雜的題目，把兩邊的推導路徑拉出來。一邊是文字流，一邊是你的 FIC 卡片 ID + Python Trace。盲測詢問財金系的人：「如果你是金管會，你敢核准哪一個？」
+
+可能的比較方向3 錯誤歸因
+CoT只能說目前他懷疑是六個種類中的哪個種類有問題
+verifiquant是可以詳細定義說我的規則錯在哪裡
+很難直接比較
+
+可能的方向
+CoT 模式： 它是「球員兼裁判」。它一邊推理，一邊用你教它的漏斗自我檢測。
+VerifiQuant 模式： 它是「外部審計」。FIC 卡片是獨立於 LLM 之外的「真理來源（Ground Truth）」。框架強迫 AI 去對齊一個外部的 Python 腳本，這才是真正的「驗證性來源」。
+我提出這個漏斗讓LLM自己根據這個漏斗去反省->已經做到，可擴展性差
+我實踐這個漏斗->就是verifiquant
+所以我不太確定接下來老師希望我怎麼做，我是希望把我兩個禮拜前說想要improve的方向做好（引入langGraph, agent協助有限度的rebuild code）
+
+20260429 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+我當時只有口述來比較 CoT的結果 說我正在復現 jpmorgan
+CoT 硬規則版，時間與正確率
+jpmorgan 4/29還沒做好 5/6才做好
+感冒
+改動：python最小改動與相關數據
+
+
+核心想法
+在五十題裡面，有幾題是llm很確定的以為code和宣稱會執行的一樣，但是實際上可能會有差異。在這個情況下，我們還是要確定宣稱的python效果和實際上的python效果一致。如果一致，我才能夠給llm「安全的修改python」之能力。
+雖然現在我們可以找到相對應的python並且回答，但我們還沒有處理掉一些細緻的問題。例如我想要修改based的python，讓原本的code是處理期末付款的資料，但是現在想要改成期初付款，這時候我希望改動的python量可以小到能用數學確保python改動量就只會動宣稱的內容（例如把期末付款改成期初付款），一個llm診斷的問題對應一個動作，這也是我想要引進sympy的理由，因為我想要讓llm自己修改的code有理有據，你有什麼可以推薦的做法嗎？例如做sympy語法樹然後讓llm解釋這個語法樹是否代表「我只有改掉指定的功能沒有亂動其他核心數據」
+
+方案取捨
+方案 A：Transformation Catalog + SymPy Proof（推薦）
+
+核心想法：LLM 不直接寫 code，只選擇 + 參數化一個預先定義好的 atomic transform。每個 transform 附帶一個 SymPy 代數等式作為 proof。
+期末付款 → 期初付款 的 transform 長這樣：
+name: "annuity_timing"
+sympy_proof: PV_due == PV_ordinary * (1 + r)
+code_template: "result = result * (1 + {rate})"  # 只加一行
+affected_vars: ["rate"]
+驗證流程：
+1. LLM 選 transform = "annuity_timing", params = {"rate": "discount_rate"}
+2. 套用 code_template 到原始 python_code
+3. SymPy 驗證：lambdify 兩版本 → new(x) / old(x) == (1+r) ✓
+4. Python AST diff：只新增了 1 個節點 ✓
+優點： 改動量有上界、代數可證、LLM 只做選擇不做發明缺點： catalog 需要人工維護；沒有涵蓋的 transform 就做不了
+
+
+
+方案 B：Python AST Diff Guard
+（不需要 SymPy，但只限制 blast radius）
+用 Python ast 模組比較兩個 AST，限制：
+改變的節點數 ≤ 聲明的上限
+不能新增 import
+不能新增對外部變數的 reference
+這可以證明「改動很小」但無法證明「改動是數學正確的」。
+
+適用在I類錯誤之拯救（概念驗證） 但是只能夠坐在已確認的失誤上
+FIC repair rule
+   ├── diagnostic_check_id: "i_annuity_timing"
+   ├── transformation_spec:
+   │     ├── name: "annuity_timing_adjustment"
+   │     ├── params_schema: {rate: float}          # LLM 要填的槽
+   │     ├── code_template: "result *= (1 + {rate})"
+   │     ├── sympy_invariant: "new / old == (1 + r)"  # 人工審計時用
+   │     └── max_ast_nodes_changed: 2               # 執行期 guard
+   └── suggested_fix: "multiply result by (1 + rate) for annuity-due"
+
+
+
+
+在建卡的部分進行改動 接到repair那邊讓用戶可以按一下按鈕就套用規則
+關鍵發現：
+semantic_hints 在 stage_core.py 生成，每個 hint 有 options: ["end-of-period", "beginning-of-period"]
+_global_i_rules() 在 stage_repair.py 把 hints 轉成 repair rule — 現在只做 present_clarification_options，完全沒有 transform 資訊
+真正的 hook 點是：在 semantic_hint 的每個 option 加上 transform_spec，然後 _global_i_rules() 把它帶進 repair rule
+改動點只有三個檔案：修改 stage_core.py prompt + schema（加 transform_spec），新增 stage_transform.py（apply + verify），stage_repair.py 的 _global_i_rules() 帶入 transform_spec。
+
+verifiquant/preprocessing/stage_core.py — prompt 新增 options 格式規範，schema 把 options: Array[string] 改成 Array[{label, value, is_default, transform_spec?}]
+verifiquant/preprocessing/stage_repair.py — _global_i_rules() 新增 _parse_hint_options() 函數（向後相容舊的 string 格式），把 transform_map 放進 repair_action
+新增 verifiquant/preprocessing/stage_transform.py — 三層驗證：
+AST guard — 計算 node 數、找非法名稱（__import__ 等）
+Numerical guard — 確定性 + 有限值，跑 N 組 sample
+SymPy static audit — simplify(lhs.subs(result_new, transform_expr) - rhs) == 0
+
+
+實務例子
+ok 如果今天的repair卡是有辦法連接到預先定義好的Code repair方式我的想法是這樣
+舉例來說NPV的例子 我原本是說第一年10萬第二年20萬第三年30萬
+這個框架說 是期末還是期初
+我說是期初，也就是第一年初10萬第二年初20萬第三年初30萬
+原本的話我的code原本是期末付款 現在改成期初 那他可能只能要求改資料 但如果我根本沒有定義好的話我不能夠說改成第零年10萬第一年20萬第二年30萬 如果我的code沒有定義第零年要怎麼付款（理論上是可以直接調整initial invest但我沒有給llm調整用戶輸入的能力所以會死掉
+現在我想要用微調code來做到這些事情 可以先以可驗證的部分做poc
+
+
+結果：縫合到問問題的環節上
+核心問題： result_postprocess 只能調整最終答案，但「期初 vs 期末」的語義差異其實來自 loop 裡的 start=1 這一個常數。如果能改這一個 node，就不需要叫用戶重組輸入，也不需要 LLM 自由發揮——只允許改一個宣告好的東西。
+PoC 設計： 新增 code_patch patch type，驗證方式是把它和 result_postprocess 做交叉驗證 — 「你說你把 start=1 改成 start=0 就等同於乘 (1+r)，那就數值驗證這兩種改法的輸出一樣」，這就是數學保證。
+cross_verify_result_expr 是這個機制最重要的部分：它把 code_patch 的語義承諾（「我只改了期初期末」）和 可計算的代數關係（(result + inv) * (1+r) - inv）綁在一起。任何「改了 code 但數學描述不對」的情況，無論是 LLM 寫錯還是惡意修改，都會在這層被攔截。
+現在 stage_transform.py 裡同時有 result_postprocess 和 code_patch 兩種 patch type，可以在建卡時由 LLM 根據 semantic_hint 自動生成對應的 transform_spec。
+
+目前改動的範圍？
+
+目前改動的範圍？
+
+
+20260422 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週主要進度
+期中考週結束
+這邊的專案得到了看起來不錯的初步結果
+根據守得老師的建議要幫vefifiquant引入Agent框架(langgraph)
+跑了一些守得老師那邊的產學合作數據
+
+研究背景：VerifiQuant 解決了什麼問題？
+✓
+完全可審計的運算過程
+每一步驟皆有紀錄，推理過程完全透明
+✓
+可驗證的答案
+Python 程式碼可重現，結果可獨立驗證
+✓
+錯誤歸因能力
+區分資料集問題 vs. 模型推理問題
+本框架整合金融知識搜索、多層級審核機制與結構化拒答策略。當模型發現資訊歧義或假設缺失時，會引導用戶補充關鍵資訊，改善傳統 LLM「無規則的」非結構化 HITL
+正確解答金融難題率
+88% + trace
+50 題中階財務資料集正確率 44/50
+與 CoT+自我批判×3 基準持平
+30秒
+
+方法論總覽：四項核心貢獻
+1
+FIC（Financial Identity Card）
+以「金融合約」形式結構化每道題目的 formula spec、input schema、meta knowledge、錯誤處理流程與重要假設，消除自然語言歧義
+2
+Multi-layer Diagnostic Funnels
+以分類漏斗逐層篩選答案，將錯誤區分為「資料輸入誤區」（F/E）、「需拒答」（N）、「資料集問題」（C）等，實現精準誤差歸因
+3
+Oracle-in-the-Loop Alignment
+以 FIC 作為「答題標準合約」，讓 Multi-Agent 系統在反思時有明確依據；自動矯正可修復錯誤（Recovery Rate 38%），解決 心智問題
+4
+整合理論框架
+連結「合約驗證」與「Multi-Agent 推理對齊」，提出從黑盒 CoT 到白盒可審計系統的通用設計原則。
+系統流程：問題分類（FIC 解析）→ 多層審核（Diagnostic Funnel）→ Oracle 介入修復 → 結構化驗證結果 / 觸發拒答機制
+到這裡壓在五分鐘內
+
+5. 嘗試執行code, 檢查是否運行成功
+用戶問題+
+提供資料
+FIC公式卡
+外部參考資料
+是否有合適的公式卡
+問題是否太模糊
+N-承認不支持
+M-請補足細節
+用AI抓問題中公式需要的input
+看是否有缺漏或不合理
+F-缺參數
+E-數值離群
+抓取人類和LLM可能理解不同之處
+I-Hard:必須問
+I-Soft: 可算數值
+執行Python並檢查執行成果
+C - 執行結果
+步驟
+若偵測到錯誤
+確定使用的公式卡
+確定數值後，檢查歧異
+確定一切假設，進行運算
+系統抓取FIC與外部資料
+2. 檢查抓取的外部資料
+是否和問題直接相關
+3. 驗證input是否有空缺或不合理之處
+4.評估是否有可能對最終數值產生影響的模糊之處
+到這裡6:30
+
+Demo 演示
+📋 示範題目（NPV 計算）
+Context：一家新創科技公司正在考慮投資一個新的軟體開發專案。初始投資 10 萬美元（第一年年初）。未來五年現金流：2萬,3萬,3.5萬,4萬,4.5萬。折現率 8%，年底到款。
+Question：該軟體開發專案的淨現值（NPV）是多少？答案取最接近的整數。
+✓ 正確答案：$32,050（NPV）
+同一題目，透過 6 種不同的提問方式，展示 VerifiQuant 對各種錯誤類型的處理能力。
+Case 1  正常詢問
+✓ 成功
+精確提問 → 找到卡片 → 正確計算 $2,940
+Case 2  模糊詢問
+N 類錯誤
+只告訴他「我想賺波大的」 → 未匹配NPV的 FIC 卡片 → 跟用戶說RAG失敗
+Case 3  模糊詢問2
+M 類錯誤
+告訴他「我想賺錢」 → 找到NPV和IRR的 FIC 卡片 → 反問用戶啥是「賺錢」
+Case 4  缺少關鍵參數
+F 類錯誤
+忘記提供缺少折現率 → Slot-filling 補值
+Case 5  數值不合邏輯
+E 類錯誤
+初始投資抓成負值 → 自動提醒確認
+Case 6  模糊時間條件
+I 類錯誤
+刪除「年末」→ 系統攔截 → 詢問年初或年末
+
+實驗結果：Oracle-in-the-Loop 效益分析（50 題）
+兩種方法都給 AI 兩次自我進化的機會（公平比較）
+CoT 結果
+Gemini 2.5 One-shot 成功：30 題
+Gemini 2.5 Pro + 讓他有兩次自我修改的機會:44題
+VerifiQuant 結果
+無框架攔截直接輸出：27 題 
+加上HITL後解決的問題（兩次優化）：19 題
+最終：46 題產出結果，44 題正確
+1
+正確率持平 88%
+額外賦予推理可重現、結果可驗證、誤差可歸因
+2
+6題非模型能力問題
+包含1 題 Function 錯誤，2 題定義不涵蓋問題等
+3
+超越業界基準
+JP Morgan MAS Pass@1 僅 46%，VerifiQuant 88% 且可審計 (難度類似)
+
+詳細記錄
+verifiquant
+ "total_cases": 50,
+ "success_count": 47,#有成功執行code的內容
+ "success_rate": 0.94, 
+ "correct_count": 44, #成功執行且回答正確
+ "accuracy": 0.88, 
+ "recovery_count": 19, #14題有F, E, I類錯誤的經過oracle處理後變得精準 回答正確
+ "correct_in_one_shot": 28 #直接輸出沒遇到漏斗攔截
+ "recovery_rate": 0.38
+cot思考 "total_cases": 50,
+ "correct_count": 44,
+ "accuracy": 0.88,
+ "improved_count": 14,
+ "improved_rate": 0.28
+ "correct_in_one_shot": 30,
+
+
+最後錯誤的六題概覽
+2題原本公式和問題不完全一樣導致最後計算錯誤
+一題原本的公式就錯的，我們沒有修改它導致不會成功
+N類錯誤（在top-3中找不到相對應的公式）：一題
+E類錯誤（數值輸入有問題被攔截）：一題
+E類錯誤+I-hard(第一次更新處理了E類錯誤，但後面沒有在loop內搞定I類警告):一題
+
+研究階段三 — 大規模擴展與泛化性評估
+1
+規模化部署
+ 全量知識庫：3,000+ 文獻 FIC 矩陣
+ 壓力測試：中高難度題型覆蓋
+ 驗證框架在大規模場景的穩定性
+2
+泛化性語義映射
+ 零樣本映射：無 Function-ID 的陌生題型
+ 異質輸入魯棒性：格式不符情境處理
+ 邊界探討：系統性記錄失效模式
+3
+基準比較實驗
+vs Gemini：原生 LLM 推理能力
+vs Fine-tune Model：微調模型對比
+vs Multi-Agent：其他框架架構比較
+
+研究限制與未解問題
+①
+多卡組合問題
+Multi-Card Composition
+當問題需要跨多個 FIC 卡組合推理時（如先計算 NPV 再與 IRR 比較），卡片間的組合規則尚未形式化，目前仍需人工審核。
+②
+公式庫管理規模挑戰
+Formula Library Scale
+資料集共有 3,133 個 functions，存在語意重複的公式。去重與歸一化工作仍在進行，直接影響 FIC 公式選擇的精確性。
+③
+LLM 評估的非確定性
+LLM Non-Determinism
+診斷漏斗的分類判斷依賴 LLM，存在溫度係數造成的非確定性。後續計劃以 rule-based 分類器取代部分 LLM 判斷，提升可重現性。
+以上三項限制均已列入後續研究改進方向，詳見研究展望章節。
+
+教授的建議and我現在在努力的方向
+如果之後還是會遇到各種「野生的」金融問題，我們應該還是會開放某種程度上讓ai修code跟input然後跟用戶說我做了哪樣的更動，那就漸漸演化成一個multi agent了，因此直接用langgraph做有方向性的Agentic System + 用LangSmith做Agentic Flow監測（看哪個node 被trigger）或許不錯
+同時這樣也能夠協助主動判斷各種可能性 但就要在「框架裡跳舞」，每次的決策都有跡可循（ex. 如果用戶問題需要兩個lemma才能夠整合出結果）
+“覆蓋知識”很重要 ex. ito lemma這種麻煩公式 很多variant
+透過Langgraph的改動來實罪「記憶」，不要每次泡出問題後都從頭開始處理
+因此我正在寫Langgraph然後看整體表現有沒有改變（主要作用在漏斗那塊）
+
+
+
+附錄 E（1/3）：研究階段一 — 基礎框架效能與泛化性評估（已完成）
+🎯 目標：建立 Baseline，驗證框架在未污染數據上的處理能力
+1
+樣本選取與卡片生成
+  50 題 Medium 難度（明確 Function-ID）
+  正確與錯誤案例各半
+  匯入 FIC 生成 Core / Retrieval / Repair 三類卡片
+  多樣性去重（含 NPV 相似度案例篩選）
+2
+測試流程與核心指標
+  Question + Context 輸入比對
+  純淨數據泛化性（僅原始文獻生成 KB）
+  錯誤分析：M / F / E / C / N / I 分佈
+
+附錄 E（2/3）：研究階段二 — 知識精煉與檢驗策略優化 (優化code pipeline)
+🔄 核心精神：回饋閉環（Feedback Loop）— 不餵答案，只優化策略
+1
+知識庫微調
+ 基準對照：複製 S1 資料庫作為 baseline
+ 特徵提取約束強化：處理隱含約束（如時間單位轉換）等內容 主要是針對Code微調策略
+ 防污染原則：除了更新error分類pipeline也優化 Repair 策略，避免 overfitting在剛剛測試的50題
+2
+檢驗精確度提升
+ 錯誤碼細緻化：修正 M / F / E / C / N / I 判定邏輯
+ 邊界條件定義：強化題目特徵敏感度
+
+20260408 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+上週內容
+停修了深度強化學習，然後同一天SD老師說希望我可以研究深度強化學習的內容 :D
+這兩週其他雜事比較忙，主要是守得老師實驗室那邊開始啟動了優勢資本合作的專案，要我研究文獻，其他課程也開始忙了起來。
+本週會概述我做的各種內容，但是處於一個只講結果會很少，但是把所有做的事情說出來會很繁雜很多的部分，我盡量找出一個平衡點。
+
+Part 1: 資料集選擇以及重建
+現在我的資料集中有兩種dataset長相
+a. 有function_id跟questions的（共908題）
+{"function_id" , "article_title", "function","context", "question","statistics", "difficulty" "ground_truth", "source", "python_solution", "question_id", "level"},
+b. 只有questions的（1330題）
+{"question", "context","statistics", "difficulty", "ground_truth","source", "python_solution", "question_id", "level"},
+資料集裡面會同時混雜者a類和b類的問題集。
+總共有3113個functions, 其中908題拿來跟question+context對應
+
+Part 1: 資料集選擇以及重建
+
+function_id, article_title跟function會對應到question, context, python solution等內容，但不是100%對應
+function:理論上可以跑，但是只是用來參考的skeleton
+python_solution的邏輯是，根據question, context和跟這個問題相關的function，生成python_solution
+python_solution跟function雖然都是處理同一個問題，但是只有python_solution是best fit for question_context（只要input正確，python_solution可以導到ground_truth，而function雖然也可以跑，但是在語境下只是skeleton.
+
+
+我原本的方式，以及後來思考後的新自然實驗
+我本來第一個版本測試是這樣（有跑分）：把所有題目的python-solution當做建立公式卡的ground truth(輸入：question, context, python-solution，輸出：FIC card)
+但是這個版本主要有兩個問題，第一個是我把python-solution資料作成FIC卡，然後用同一批資料去測試，就像是把training data拿去做testing一樣，會有overfitting的風險，第二個就是這些題目有時候會長得很像，所以會建立出幾乎一樣的卡片。（雖然我後來發現functions很多也很像或幾乎一樣就是了，我使用AST樹的語法進行相似的內容進行排除）
+
+我原本的方式，以及後來思考後的新自然實驗
+
+所以我把目光投向同一個dataset的另一個部分：把function當作在2237題資料中（分成1000題easy, 1000題medium, 237題hard)，其中有908題有附上article-name, function-id和function。這908題在論文裡面是說，原本總共有3133個functions, ai挑了其中好的1250 functions題來進行題目生成，最後留下其中的908題作為資料集一部分（包含210題easy, 540題medium, 158題hard。
+
+
+研究階段一：基礎框架效能與泛化性評估
+本階段目標在於建立實驗基準點（Baseline），驗證 VerifiQuant 框架在「未污染數據」下處理能力。
+1. 樣本選取與卡片生成
+從 Medium 數據集中挑選 50 題具備明確 Function-ID 的題目（涵蓋預期正誤樣本各半）。將其原始文獻與函式代碼匯入 FIC 生成流程，產製對應的 Core、Retrieval、Repair 三類知識卡片。
+多樣性與去重： 樣本涵蓋多種金融主題以避免重複，並特定加入相似度高的 NPV（淨現值）案例，測試框架的去重與分辨能力。
+2. 測試流程與核心指標
+將測試問題（Question）與上下文（Context）輸入框架，並比對輸出結果。此步驟的關鍵在於：
+評估純淨數據之泛化性： 資料庫內容（Knowledge Base）僅由原始文獻生成，未經問題與上下文優化（污染），用以測試框架在理想狀態下的知識提取與應用界線。
+錯誤分析與優化： 統計並分析 M, F, E, C, N, I 等錯誤類型的分佈比例，觀察導入 VerifiQuant 框架後，對於提升最終回答正確率的具體顯著性。
+
+階段二 —— 知識精煉與檢驗策略優化
+本階段核心為「回饋閉環」，透過錯誤分析強化框架對金融場景細節的捕捉能力。
+1. 知識庫微調（Knowledge Refinement）
+基準對照： 複製階段一之資料庫作為對照組，確保實驗的可重複性。
+特徵提取與約束強化： 針對 50 題樣本之 Question/Context 進行分析，提取 FIC 卡片初生成時遺漏的隱含約束（如：時間單位轉換、特定報酬率計算慣例）。
+防污染原則： 堅持不餵入 Ground Truth 與 Python Solution，僅針對 FIC 框架內的 Repair 策略進行優化，避免模型過度擬合（Overfitting）特定題目。
+2. 檢驗精確度提升（Precision of VerifiQuant）
+錯誤碼細緻化： 藉由觀測樣本，修正 VerifiQuant 對 M, F, E, C, N, I 的判定邏輯。
+邊界條件定義： 強化框架對於「題目特徵」的敏感度，確保檢驗模組能更精準地攔截邏輯瑕疵。
+
+階段三 —— 大規模擴展與泛化性評估
+本階段驗證系統在處理真實世界（未知題目與異質數據）時的穩定性與通用性。
+1. 規模化部署（Scalability）
+全量知識庫建置： 將實驗範圍擴展至 3,000+ 篇文獻及其對應代碼，自動化生成大規模 FIC 知識矩陣。
+壓力測試： 導入中、高難度金融問題，測試系統在高複雜度邏輯下的推理與驗證效能。
+2. 泛化性與語義映射測驗（Generalization Test）
+零樣本映射（Zero-shot Mapping）： 測試當面對「無 Function-ID、無直接關聯文獻」的陌生題目時，框架是否能透過語義檢索正確連結對應的 FIC 卡片。
+異質輸入魯棒性： 觀察當 Question 的 Input 格式與知識庫預期不符時（如：日期格式不同、單位量級差異），系統會採取報錯中斷或是具備足夠的泛化修復能力。
+邊界探討： 紀錄框架在「完全陌生領域」的失效模式，作為未來RAG策略調整之依據。
+
+從再現實驗中發現的「消失的 90 題」
+背景說明：
+針對目前 FinanceReasoning (ACL 2025) 基準測試進行深度分析，作為 VerifiQuant 的實驗原材料。
+發現矛盾： 論文宣稱總數 $N=2,238$，由 A=1,420 (人工修訂) 與 B=908 (GPT生成) 組成。
+邏輯漏洞： 1,420 + 908 = 2,328 不等於 2,238！
+深入挖掘：
+透過 Codebase 逐行審查與數據載入測試，發現實際分佈為 1,330 + 908 = 2,238。
+結論： 論文在附錄描述中存在明顯的數值統計錯誤（Typo），且影響了讀者對「人工介入比例」的認知。
+
+與原作者的學術溝通與反饋 (Academic Engagement)
+主動出擊：
+去信與北京大學作者（Zichen Tang）進行技術細節確認，旨在確保 VerifiQuant 的 Baseline 對齊具備學術嚴謹性。
+作者回覆與確認：
+確認錯誤： 作者承認 1,420 為手誤，實際應為 1,330，並承諾更新 Arxiv 版本。
+研究背書： 作者高度認可 VerifiQuant 提出的 「從邏輯校驗轉向意圖定錨 (Intent Alignment)」 的研究路徑。
+收穫：
+獲取了多篇 2026 年尚未正式發表的前沿論文資訊（如 VeriCoT @ ICLR 2026）。這篇是走neurosymbolic去研究CoT過程的語意對齊（不是我們主場）
+確立了 VerifiQuant 在金融驗證領域的獨特地位。
+
+研究感悟與 VerifiQuant 的核心價值
+核心思辨：
+即使是頂會論文，在處理「數值推理」時作者本人都可能產生「數值幻覺」。這再次證明了自動化驗證機制的迫切性。
+傳統 Neuro-symbolic 方法（如 VeriCoT）僅能驗證「邏輯自洽」，卻無法解決「初始意圖誤解」或「公式代入錯誤」。
+VerifiQuant 的下一步：
+問題定錨 (Problem Anchoring)： 強化 Human-in-the-loop 機制，解決 LLM 在專業領域「亂猜意圖」的本質問題。
+實證對比： 將此次發現的數據不一致案例納入論文，作為「為什麼單純依賴自動化推理會失敗」的有力 Case Study。
+
+階段
+代碼
+名稱
+定義與攔截邏輯
+系統行動
+Intent
+M
+Misunderstanding
+用戶意圖太籠統（例如「這會賺錢嗎？」）。
+Refusal: 引導式反問。
+Scope
+(NEW)
+N
+Not Supported
+意圖明確，但目前 FIC 庫中無對應公式。
+Graceful Exit: 宣告知識邊界。
+Schema
+F
+Formula Spec
+FIC 已選定，但缺少必要輸入（如缺 Rf）。
+Slot-filling: 精確要求補值。
+Boundary
+E
+Extraction Alert
+數值存在但邏輯荒謬
+基於規則攔截。
+Critic
+(NEW)
+I
+Interception
+隱性歧義（如匯率方向、期初期末）。
+I_hard:必須問不問不行
+I_soft：算出答案，並警告用戶
+Logic
+C
+Calculation
+最終確定性執行階段。
+Audit Log: Python 執行。
+
+第一個版本50題的結果
+目前50題的結果是
+前25題（預設正確）
+success: 12題
+error:2題（不是數值錯誤 是code本身跑不動）
+need_classification:11題（I類錯誤）
+後25題：
+success: 6題
+error:3題
+need_classification:16題
+
+我隨便丟給ai看我防守的結果是否有道理（I_hard)看起來不錯
+
+策略：從「機車質問」轉向「專業建議」
+
+策略：從「機車質問」轉向「專業建議」
+
+目前最新版本實驗結果
+特定規模內的結果（5題，5個公式，都是和npv或者是算投資價值有關）
+5題經過我跑的內容之後，可以保證五題都是可以順利的通過：
+M, N類測驗（因為在rag的時候，這五題對應的function公式都是rag出來的第一名）
+F/E測驗（因為抓出來的數值都是正常可以被檢驗的，而且不管是string, integer或者是dict, list目前我的框架都可以抓到並且進行組合）
+接者是I類（有一些有I_soft提醒，但是基本上是無傷大雅的問題）
+最後執行節果表示是ok的（python code可以運行，算出來的值跟ground truth一樣）
+
+
+
+
+接下來可能需要解決的問題
+剛剛提到的階段二階段三，以及準備更大規模實驗（跑一次完整實驗大概要2000~3000元，我一定要先準備好）
+超綱（Out-of-scope）怎麼辦，還有遇到非數值性 不能直接抓的部分怎麼辦
+我有想過就是讓ai看到有超鋼的部分時就自由生成 code(參考我給他的function) 但這樣的話就跟原本這個資料集的用function參考->生成python_solution一樣了
+我主打的是可驗證可審計性，框架可以辨識用戶的問題中有沒有哪些地方有缺漏 並且主動向用戶確認有一些地方可能要說的更清楚，我們最不希望的就是讓「ai認為的」和「用戶認為的」出現歧異，所以我們才會設計六道關卡讓財金問題被回答時更有理有據，並且可以提供可審計的python trace跟一些數值預設，但這就是會被「固定的python code」鎖死，失去了主觀能動性
+在那 908 題裡面，如果有一題的 python_solution 裡面加了一個 function 裡沒有的「常數項（例如 +500 處理費）」，希望 VerifiQuant 怎麼做？
+
+以下是我叫ai整理的我最近做的事情：工程穩定類
+超級多...
+
+回到最後的整理與視覺化效果
+目前確認了走勢：M, N類->F, E類->I類->C類-> Success
+針對M, N類（rag找卡片，確認找到的卡片是否有和問題相關），我們加強了RAG屬性（除了cosine similarity也有bm25和關鍵字搜尋混合策略）
+N 類不再每張卡生成 repair，改走全域拒絕模板（runtime fallback），不該每張卡都重複建一張 repair。
+
+F 類（欄位缺漏/不可解析）：後續統一到 run_case 後，F 類由同一套抽取與型別解析判定。F 類定位明確：缺欄位、格式錯、無法解析，屬於顯性輸入問題。
+
+
+回到最後的整理與視覺化效果
+I 類（隱性語意歧義）：
+原本的 global_i_semantic_ambiguity 太模板化、常過度攔截。
+我們把 I 類升級成：
+semantic_hint 新 schema：i_level(hard|soft)、assumption_if_not_clarified、impact_scope 等。
+repair 改成「一個 hint 對一個 rule」，不再只靠 global template。
+攔截邏輯改成分流：
+I_hard：阻擋，要求先澄清。
+I_soft：允許計算，結果附 warning/假設。
+
+
+回到最後的整理與視覺化效果
+C 類（執行錯誤）
+C 放在最後，只有通過前面 gate 才進 execution。
+我們新增建卡時 smoke test，先標註可能執行失敗的卡，降低 runtime C error。然後我們花了一些時間去把smoke test做得更好，主要是降低未來C error發生的機率（透過一些簡單的測試看我們的python code到底正不正常，並且想辦法用非llm的方式固定簡化python code，讓這整個python code是可以穩定運行，不會遇到輸入input的問題（llm抓取question跟context資料，整理成固定格式這一串，希望是因為真的算錯而不是python code本身有問題）
+
+回到最後的整理與視覺化效果
+其他（架構/前端/資料模型）
+建立前端，前端與 batch 全面統一使用同一段 run_case pipeline
+新增 API：單題診斷、RAG、JSONL 批次、上傳、歷史輸出、下載、摘要。做模組化已去耦合
+建卡模型擴充：article_title、article_doc_id、article_content_excerpt，並連到 financial_documents.json，讓I類拒絕更有邏輯
+進行文字簡單的文字探勘處理讓喂進去的公式介紹文字更簡單直接，包含文字清理（移除連結/URL）與欄位順序調整
+統一 fic_id 風格與 core.name 命名優先級（優先 article_title）。
+減少重複的非必要的卡片資訊
+增強log可視化
+
+回到最後的整理與視覺化效果
+在 fic_generation_pipeline.py 實作了 AST 去重第一版
+命中重複時標記 is_duplicate_kernel=True、duplicate_of=...，並跳過轉換
+修了百分比尺度 bug（test-1460 關鍵）
+完成 pre-smoke lint + auto-fix + smart dummy（stage_core.py）
+搞了一個用yaml檔案確定要跑哪些程序的code
+
+20260325 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週進度 - 其他部分
+寫完了深度強化學習作業一，但根本是把整個禮拜的時間投注在上面了，感覺不太妙所以停修，這門課應該是要先有強化學習基礎再進入深度強化學習的環節。預計之後會有更多時間專注在LLM reasoning研究的主線上。
+感謝老師幫忙接電話處理Background Check, 目前應該已經通過了。
+優式把我搞得團團轉，總之我禮拜二去了一趟公司總部，然後禮拜五還要再去一次。
+學長說希望可以清理home的空間但我找不到在哪裡清理（我找不到滿出來的資料夾）
+dev/nvme0n1p2
+
+這週主要進度
+上禮拜老師說想看我的驗證框架是怎麼來的，是我自己想的還是其他論文有提到的方式。我將會帶教授複習之前提到過的一個「語意對齊」框架。
+我本來要開始進行大規模實驗，本來是想要向Finance Reasoning作者要他們手工標注的題目（錯誤分類學）是怎麼樣進行分類的，以及分類結果，但是後來我越整理越覺得原本的分類學和我後來設計的錯誤分類學不一致，該論文主要把過錯怪在LLM model表現不好上，但我的系統更常說的是「題目不完全精確所以llm無法讀懂」，所以我將原本的錯誤分類設計做優化，把原本的四類別變成六個類別。
+設計了更好的evaluation框架，與其我們自己設計「故意犯下錯誤的」題目，舉例來說讓問題犯下M類錯誤，讓這個框架偵測到「這題有M類錯誤」，不如就用原本的問題資料集加上新的測量方式來進行修正，不要設計新問題。
+
+階段
+代碼
+名稱
+定義與攔截邏輯
+系統行動
+Intent
+M
+Misunderstanding
+用戶意圖太籠統（例如「這會賺錢嗎？」）。
+Refusal: 引導式反問。
+Scope
+(NEW)
+N
+Not Supported
+意圖明確，但目前 FIC 庫中無對應公式。
+Graceful Exit: 宣告知識邊界。
+Schema
+F
+Formula Spec
+FIC 已選定，但缺少必要輸入（如缺 Rf）。
+Slot-filling: 精確要求補值。
+Boundary
+E
+Extraction Alert
+數值存在但邏輯荒謬（如 8 vs0.08）。
+Deterministic Alert: 基於規則攔截。
+Critic
+(NEW)
+I
+Interception
+隱性歧義（如匯率方向、期初期末）。
+Critic Agent: 啟動 HITL 對齊。
+Logic
+C
+Calculation
+最終確定性執行階段。
+Audit Log: Python 執行。
+
+動態去重複與 FIC 知識庫演進
+當我們從大規模金融資料集自動生成 FIC 卡片時，若對每一題都生成獨立卡片，會導致庫存爆炸與檢索噪音，我不想要一直存很像的卡片
+減少 RAG 時出現多張極相似卡片導致 LLM 選擇困難的機率。
+知識沉澱：讓系統從「解決單一問題」進化為「掌握特定金融公式的各種變體（Edge Cases）」。
+作法：
+之前曾經提到過的python與法樹(AST)比對，比較原始python code相似性
+在新的公式準備入庫前（python code資料集->fic卡片），先過一次已有的verifiquant框架，如果回傳N類錯誤再新增卡片，不然就用編輯卡片就好
+
+卡片設計
+VerifiQuant 以一題對應一組三卡（後續可擴展為去重併卡）：
+Retrieval Card（語義映射）
+用途：RAG 選卡、邊界判定。
+重要欄位：selection_hints, applicable_when, not_applicable_when, scope_boundaries, keywords。
+Core Card（計算與驗證）
+用途：定義輸入契約與 deterministic 執行。
+重要欄位：inputs, output, execution.code, diagnostics.invariants, diagnostics.scale_checks, semantic_hints。
+semantic_hints 專供 I-gate Critic 使用，不進行直接算術。
+Repair Card（修復交互）
+用途：將診斷結果映射為結構化提問與下一步行為。
+對應動作：例如 request_missing_fields, declare_scope_boundary, present_clarification_options。
+
+其他需要做的evaluation比較
+來自另外一堂課的經驗：不能只跟「沒有框架的 通用LLM」比，必須跟最強的 Agent 框架（如 ReAct, Reflexion, 或帶有 Tool-use 的 GPT）或者是finetune on finance 的llm比。
+需要證明 為什麼「直接讓 LLM 寫 Python +Code Interpreter」會輸給你的「FIC 預定義卡片」。
+OOD 泛化性測驗
+人類參與的優化：我們有Repair Card 和 HITL， 審稿人可能會覺得「把問題丟給人類解決，當然會準」。->用ai自動化
+
+Oracle-in-the-Loop (O-ITL) 自動化實驗設計
+我想要做一個全自動實驗：
+背景：因為我自己看者電腦進行標注的話很累而且有人類知識的風險
+因為我們的資料集是question+context+code+result，然後在測試的時候我們問ai是給question+context。
+當框架提出了一些錯誤種類(M,N,I,E,F...) ，我們是否可以用自動化的方式根據提示(repair card)修正prompt的內容？簡單來說，我這裡也設計一個agent，他只看code+result，透過code+result回答框架提出的問題，因為code+result會隱含回答問題的假設。舉例來說，匯率的問題問IND-GBP，框架問他哪個是分母，可以根據code的內容回答框架說GBP是分母。
+
+Oracle-in-the-Loop (O-ITL) 自動化實驗設計
+
+為了量化框架的「修復能力」，我們引入 KAUS (Knowledge-Aware User Simulator) 作為 Oracle，模擬一個具備「正確答案與程式碼」但「只在被詢問時才提供局部資訊」的用戶。
+【實驗角色定義：三位一體模型】
+The Proposer (Solver LLM)：受測者（如 GPT-4o），僅持有問題與上下文。
+The Guardian (VerifiQuant Framework)：攔截器，負責拋出 M/N/F/E/I/C 診斷報告。
+The Oracle (KAUS)：上帝視角，持有 Ground Truth Code + Result。它被限制禁止直接給出答案，僅能回答 Guardian 提出的診斷請求。
+
+
+Oracle-in-the-Loop (O-ITL) 自動化實驗設計
+
+1. Framework-guided self-improve（VerifiQuant 結構化驅動）
+此方法的核心在於「精確診斷」與「觸發式修正」，利用預設的框架邏輯引導模型：
+診斷機制： 透過 Guardian 模組針對輸出進行 M/N/F/E/I 五大類型的診斷。
+觸發式回饋： 當偵測到可藉由 Prompt 優化的錯誤（非 N 或 C 類）時，由 Oracle 提供程式碼中定義的正確參數或假設（例如：明確分母單位、計算時點等）。
+優勢： 修正方向具備高度確定性，能針對具體歧義點進行精確打擊。
+2. Pure CoT self-improve（原生 CoT 自評循環）
+此方法模擬「全自動 Self-improving Agent」，完全不依賴外部框架診斷，僅靠模型邏輯：
+運作邏輯： 系統提示（System Prompt）設定為「嚴格質疑用戶提問」，僅在確認邏輯無誤後才執行程式碼。
+修正機制： 透過純文字的思維鏈（Chain of Thought, CoT）進行自評，辨識不足之處並交由 Oracle 進行重寫。
+挑戰： 缺乏結構化標籤，修正過程可能較為發散，依賴模型當下的推理狀態。
+
+Oracle-in-the-Loop (O-ITL) 自動化實驗設計
+
+3. 評測核心：結構化穩定性 vs. 純文字靈活性
+這項對比實驗旨在驗證「框架引導」是否能在相同條件下產生更高的效能天花板：
+實驗變數： 在保持「局部提示（Local Prompt）」一致的前提下，對比兩種自我改進路徑。
+評測指標： 觀察結構化診斷（VerifiQuant）是否比純文字自評（Pure CoT）更能穩定地收斂至正確結果。
+預期目標： 驗證結構化框架在處理複雜邏輯（如期初/期末計算差異）時，是否能更有效率地消除錯誤歧異
+
+
+動態去重複與 FIC 知識庫演進
+【運作流程：合約驅動的精確修復】
+偵測階段：問題進入漏斗，若 E-Gate 發現 Growth Rate > Discount Rate，觸發 Alert。
+精準反問：系統讀取 Repair Card，向 Oracle 發出結構化請求："Validate the scale of growth_rate in the ground truth."
+Oracle 響應：Oracle 根據資料集的 python_solution 回覆："The growth_rate is intended to be 0.05, not 5.0."
+確定性執行：系統將修正後的 0.05 代入 FIC 的 Python 代碼。
+零算術誤差：最終正確率不再受 Temperature 影響，只要參數對齊，
+
+目前的流水線pipeline
+A. 知識工程鏈 (Knowledge Engineering)
+FIC Generation: 將 Python 代碼與金融範例轉化為包含 retrieval, core, repair 三大組件的 FIC Card。
+FIC Storage: 透過 SQLAlchemy 實現結構化存儲，支撐 RAG 檢索。
+Incremental Learning (深化建議): 透過語義去重，當新問題出現且庫內無對應邏輯時才建新卡，實現公式庫的動態進化。
+B. 推理診斷鏈 (Inference & Diagnosis)
+RAG & Selection: 檢索候選卡，若不匹配則觸發 M/N 類 錯誤。
+Input Binding & Gating: 抽取數值，並通過 F/E/I 門戶。
+Repair & HITL: 若觸發攔截，根據 Repair Card 的引導語進行反饋，修正用戶問題後重回流程。
+
+目前的流水線pipeline
+C. 測試用pipeline
+就是剛剛提到的那兩種方式
+1. 有使用框架的self-improving
+2. 沒有使用框架的self-improving
+
+Towards Formal Verification of LLM-Generated Code from Natural Language Prompts 
+如果 LLM 是用自然語言生成程式碼，那我們要怎麼給「形式化的正確性保證」？
+作者的關鍵洞察是：
+問題不只在 code 難驗證，而是「使用者意圖本來就不正式」。
+所以論文的核心貢獻是使用一套llm和人類自然語言之間的「中介語言」，這個語言對人類來說足夠容易理解，對llm來說可以幾乎100%實現描述的需求。
+形式化規範：用某些固定的規則和描述來限縮種類、屬性與功能等。
+
+introduction
+沒有 formal intent，就沒有 correctness 可言
+驗證 code 之前，必須先解決「驗證什麼」這個問題
+這篇論文 的關鍵不完全是 code verification，而是 intent formalization
+VerifiQuant 不做 unrestricted code generation
+但 intent → formal object 這個設計層是可遷移的
+
+limitation of nowadays code generation assistants
+目前LLM生成code不一定正確，例如，程式碼幻覺，包括產生使用不存在的 API 和函式庫的程式碼、在大型系統的管理上表現不佳
+使用者很難檢查 LLM 產生的程式碼 ，而且使用人工智慧程式碼中的錯誤通常很隱蔽
+使用人工智慧程式碼助手可能會導致程式碼安全性降低
+
+也就是說，針對產出的內容需要做出formal guarantees，才能夠負責任的說我產出的內容是OK的
+注意：他是屬於DSL(domain specific language)所以遇到的限制較多
+
+Expectations of code generation assistants
+應該要provide a formal guarantee確保由 LLM 根據自然語言提示產生的程式碼具備使用者期望的功能 。
+其中最根本的挑戰在於prompting缺乏形式化規範：可能存在歧義、模糊或不完整之處。舉例來說，用戶只問「這專案賺不賺」，但是NPV, WACC, IRR用哪個？怎麼用？這個用戶都沒說可能會造成完全不同的結果（ex. NPV為正的專案IRR可能為負值）
+這意味著傳統的提供formal guarantee的方法，例如program synthesis and verification，那種有一個「形式化規格」，根據規格「自動合成一個程式」並且保證這個程式 一定符合規格的方法無法直接應用。
+
+core concept
+論文提議添加mid-level的形式化查詢語言（formal query language） 該語言旨在接近自然語言的語法，但具有精確的形式化定義，等於是人類語言和llm推理生成之間的中介層。
+
+舉例來說，如果用戶說”幫我install apache server”，他的這層形式化語言會問說「你是不是想要：install apache server, start apache server service」，如果用戶說對的話，那麼code execution 100%正確。
+如果抽象化太低，系統說「你是否要：apt install apache2 && systemctl enable apache2 && systemctl start apache2」 用戶就有可能看不懂，無法對齊用戶和llm之間的鴻溝。
+
+中介語言
+install apache server, start apache server service
+用戶prompt
+幫我下載阿帕契伺服器
+程式語言
+apt install apache2 && systemctl enable apache2 && systemctl start apache2
+用戶可以看得懂中介語言寫啥
+只要有中介語言就可以翻譯成程式語言
+core concept
+
+core concept on specific application
+他們的舉例是領域特定語言（Domain-Specific Languages, DSL）也就是一些冷門專業，llm訓練資料不足的code，語言越冷門llm越可能亂生，
+論文使用 Ansible 程式語言，它用於 IT 自動化，透過自然語言形式化ansible的程式設計概念，保證程式碼的正確性。
+
+
+純靠llm
+純靠llm
+設計1
+設計2
+
+Design Considerations for a Formal Query Language
+
+[問題1] ： 我們如何確保形式化規範s與使用者意圖𝒹相符？
+[Answer 1]：我們需要一個形式化查詢語言𝒮，這個語言同時做到：(1)可以包含所有的形式化規範s，(2) 用戶看得懂。
+[問題2] ： 我們如何確保使用者不會錯誤地認為形式化查詢符合他們的意圖？
+[Answer 2] ： 使用high-level觀念和知識庫，儘量不要使用複雜的描述。所以要有一個專家來建立這樣的知識庫，銜接使用者和llm的思考（有點像是之前提過的心智問題：所有的存在，包含人類跟agent，都要在同一思考線上）
+
+Program Verifier
+驗證器的功能是接收程式和形式化查詢，並判斷程式是否符合使用者的意圖。
+[問題 3] ： 要怎麼確認這個code可以完美符合用戶意圖？
+[Answer 3] ： 一是確保程式總體上與查詢 ( p ∈ ⟦ s ⟧ ) 相符，從而檢測出某些錯誤，例如安裝了錯誤的軟體包或未能創建文件； 二是驗證器還必須識別程序如何填充查詢 ( p ∖ s ) 中未明確指定的部分，並將其呈現給用戶進行檢查。
+舉例來說，我在算NPV但是用戶沒有說是年初付款還是年末付款，program先隨便選了一個然後問使用者對不對。
+
+可能有三種驗證狀態
+code 做得比 query 多（OK，但要列出跟用戶問說這樣可不可以，也就是Assumption check的部分）
+code 沒做到 query 要求的（不 OK，重生）
+code剛好做到query要求（直接做）
+這就像是，我給你一段 任意 LLM 生出來的 DSL code，請你在不執行、不信任、不假設環境的前提下，證明它滿足人類說的那句話，很難但是可以用set theorem達成。論文有詳細做法（用圖論）但我跳過了。
+在我原本預想的工作中，我透過將執行限制為確定性的符號計算來避免這種複雜性，因此驗證就簡化為檢查追蹤一致性，而不是推理任意的程式行為。
+
+Experiment process:
+使用共 6 個 LLM來寫code： GPT-4o（封閉模型）、DeepSeek coder 7B、 Granite 8B Code 、Qwen2.5 Coder 3B、Llama 3.1 8B、StarCoder2 15B 
+程式生成方式：每個問題(21個） × 每個模型(6個） 生成 10 份程式，總共 1,260 份
+ 即使有 prompt 要求「不要用 shell command」，仍有 130 份程式違規
+ 無法執行（47.3%）、能執行但測試失敗（18.0%） 
+真正完全正確的程式只有 334 份（26.5%）
+LLM 產出的程式品質真的很爛，而且錯得很多樣，所以需要verifier來檢查code正確性
+
+experiment result
+驗證器（Astrogator）的表現 整體驗證結果，在 1,260 份程式中
+正確程式：334份， Astrogator 接受 277 份（82.9%）
+ 錯誤程式：926 Astrogator 拒絕 856 份（92.4%） 
+False negative（錯拒）：57 份
+False positive（錯放）：70 份 
+處理時間： 全部1260程式驗證只花 約 70 秒，超快
+
+20260318 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+這週做的事情內容
+Google Onboarding, 填超級多資料，去各家前公司要離職證明
+機率助教還在改prompt以求公平
+AI社杜鵑花節、搞定龍蝦並且進行教學作業，教大家ai agent邏輯與應用（雖然和李宏毅老師的授課內容重複）
+
+
+
+
+
+先看一個範例
+題目描述： "an initial outflow of 100,000 in the first year"。
+框架自動抓到的疑慮： 在金融實務中，「第一年」發生的現金流通常預設是在「第一年年末」（t=1）。如果是在「現在」發生，通常會說 "initial investment today" 或 "at t=0"。
+矛盾點： 如果按照題目字面意思從 t=1開始折現，那公式應該是從 (1+r)^1 開始除；但solution 使用了 enumerate 從 i=0 開始
+這代表正確答案把「第一年」直接當成了「現在」（t=0）。
+直接問LLM: 可能會直接猜一個，看是t=0還是t=1
+現在：可以抓到錯誤並且標記內容，經過用戶確認意圖之後才會繼續跑下去
+
+先看一個範例
+題目描述： "an initial outflow of 100,000 in the first year"。
+框架自動抓到的疑慮： 在金融實務中，「第一年」發生的現金流通常預設是在「第一年年末」（t=1）。如果是在「現在」發生，通常會說 "initial investment today" 或 "at t=0"。
+矛盾點： 如果按照題目字面意思從 t=1開始折現，那公式應該是從 (1+r)^1 開始除；但solution 使用了 enumerate 從 i=0 開始
+這代表正確答案把「第一年」直接當成了「現在」（t=0）。
+直接問LLM: 可能會直接猜一個，看是t=0還是t=1
+現在：可以抓到錯誤並且標記內容，經過用戶確認意圖之後才會繼續跑下去
+
+框架識破了題目敘述與計算模型之間的不匹配：
+題目說「第一年」，通常指 $t=1$。
+模型卻把第一個元素當成 $t=0$。雖然在很多金融考試題目中，大家習慣把 "First year cash flow" 預設為  t=0 的投資，但從嚴謹的數據驗證角度來看，這確實是一個潛在風險點。
+
+
+從「黑盒計算」轉向「透明審查」
+普通的 LLM 或計算器會直接給你一個 21,947 的答案，但它不會告訴你「我假設了第一筆錢是不必折現的」。
+我的系統現在能主動發現「描述（In the first year）」與「實際用戶想要做的事情（Index 0 as t=0）」之間的語義裂縫。這就是 E 類（Evidence/Interpretation） 問題的核心：對齊人類的解題意圖。
+透過 系統發現模糊性 -> 暫停並拋出 Alert -> 等待人類提供邊界條件。這能有效避免「正確地算出了錯誤的答案」（Right math on the wrong timeline）。
+
+
+這個資料夾裡面其實有兩種問題
+一種是有function id的 一種是沒有的
+function id會示範這題會使用哪個公式的code
+但是實際上我們的code不會完全用這個公式 LLM可能會生成專屬於question的公式
+等到我測試完之後會解決這個問題
+目前打算是重新去研究這些被定義好的function id和code內容 並且以questions作為補充
+
+之前沒有想到的新問題
+
+preprocessing/dataset_case_to_fic.py
+npv和coc roi的共通點 就是判斷一個專案是否可以投資？
+1~12npv medium
+13-21 roi
+22 cash on cash 23 24 payback
+25簡單 rate of return （包含jensen measure)
+30-34  wacc
+35 - 40 capm
+
+專題背景與研究問題
+金融推理任務中，LLM 容易出現語意誤解、公式錯用、數值綁定錯誤
+核心研究目標：建立可驗證、可拒答、可追蹤的金融推理系統
+問題：能否用 M/F/E 診斷把錯誤系統化攔截？
+當然，泛化能力generalization可能不比純llm好 所以accuracy不一定更高 但是換來錯誤handling與修正 HITL後會更高
+（我目前已經設計成可以抓錯誤->固定的根據錯誤種類跟用戶說要怎麼改，抓到錯誤和推薦修正方式是一條龍的）
+
+
+系統總覽（VerifiQuant v3）
+用戶流程：Question+Context → 
+RAG 選卡(a. retrieval 卡，敘述什麼時候生成這張卡) →如果抽到的卡都不對不適合，或者被識破用戶的題目太籠統，回傳M類錯誤-> 
+輸入抽取(b. core卡，負責邏輯，也就是讓llm決定input+從input的內容deterministically的決定這個input O不OK+檢查問題本身有沒有違反規則（LLM抓取）) → F/E Gate → 計算/拒答 ->
+如果拒答的話根據c. repair卡，根據錯誤種類對應的問問題方式，向用戶尋求反饋與HITL->回到第一步
+
+
+
+
+
+系統總覽（VerifiQuant v3）
+系統流程：(1)一個python function +用這個function生成的例子->FIC cards
+(2). 一個問題+context ->經過問題expansion->故意顯露出M類F類E類錯誤->進用戶流程來得到一些資訊
+輸出：success +數值或 M/F/E 診斷 + 修復提示（我們設計好了每個公式相對應的問題，如果輸入處理時遇到該問題則根據提示做deterministic流程反饋給userr進行問題重構或修改） 
+
+
+設計我要做的事情 pipeline
+把python code改成完整的可運行公式卡(FIC)的pipeline->   ok
+把FIC的卡片存到.pkl裡面用來RAG的pipeline -> ok
+問題擴展expansion(把原本沒有問題的Question設計Trap) 的 pipeline: Fair
+邏輯是正確的，但是表現很差，我要求產生M, F, E類錯誤但是設計的不好
+系統還是會偵測不到錯誤或者偵測到其他錯誤
+把問題進到rag，吐出M/F/E error的pipeline:  Fair
+如果是正常的問題，現在是可以吐出正確deterministic的回答
+但同上，如果遇到故意設計的M, F, E類Error 目前還沒有很穩定
+在確定沒有問題之後，把結果吐出來的pipeline -> OK
+資料視覺化
+
+
+FIC 公式卡設計
+
+將原始 python solution 轉成可執行 FIC
+三種卡片：core、retrieval、repair 
+core是用來讓llm思考，填入用戶在context提供的數值並且檢查這些數值本身（用rule base）和敘事邏輯（用llm）有沒有潛在的問題。
+retrieval是optimize for retrieving, repair則是在偵測到錯誤之後要跟用戶說哪裡錯了應該怎麼改所存取的資訊。
+所以一個公式會存三張卡，這樣比較容易用來分流管理。
+優點：計算可重現、診斷可對照、錯誤可修復
+
+
+4. Code-to-FIC Pipeline（已完成）
+
+Dataset case → FIC generation pipeline
+產出結構化卡片 + 診斷規則
+狀態：OK（可穩定生成與使用）
+
+
+5. SQLAlchemy + RAG Pipeline（已完成）
+
+卡片存入 SQLAlchemy store
+問題進來先做 retrieval，再做 card commitment
+狀態：OK（DB 檢索與推理串接已打通）
+
+
+6. M/F/E 定義與防禦策略
+
+M：意圖不清 → refusal + clarification，這裡是假設在retrieve資料並且選擇想要的資料卡時就回傳M類錯誤，說這問題不清不楚
+F：必要輸入缺失 → error + requested fields
+E：數值/單位/頻率不一致 → alert + repair hints
+F跟E是來自我在輸入數值和llm審題時發生的不一致
+C：計算錯誤由 deterministic execution 壓低
+
+
+7. Expansion Pipeline 設計（兩版本）
+
+mode=llm：直接讓 LLM 產生 M/F/E trap
+mode=semi-llm：規則注入 + LLM 潤飾 + fallback regen
+每題附 update_method 追蹤來源
+狀態：Fair（邏輯正確、品質仍待提升）
+
+
+實驗設計與資料
+Input：original_first10Q
+Expansion：10 題 → 40 題（clean/M/F/E 各 10）
+Output：10Q_expand40_ver1_results.fic_v3.jsonl
+評估：expected vs actual（status + diagnostic_type）
+有辦法抓出一些錯誤，但AI生成的問題（我叫AI生成有M類，Ｆ類和E類錯誤的問題）和架構端的錯誤不匹配(ex. 我叫ai生成一個Ｆ類錯誤，系統卻判斷成M類錯誤等）
+還沒有深入研究因為我把他打包成一個自動化系統了
+我下禮拜就是要深入這部分
+
+
+future work
+聯繫論文作者看他能不能給我ai會答錯的問題內容因為已經分類過了
+不然就要自己找說，純粹的問llm資料集的問題，哪些有所錯誤（by 作者提供的開源資料集）
+修正：M/F/E系統
+調整 M/F gate 先後與判定準則
+
+
+之前沒有想到的新問題
+要怎麼樣把類似的公式合併？因為現在是以題目為base進行公式生成，有些題目會長很像，舉例來說都是單純算ROI，這樣的話公式應該整合成一個就好，但是目前會有很多個
+目前想法：1/ 用我的FIC裡面的標籤，用額外的手段去做合併
+2/ 只用FinanceReasoning的資料 但這樣資料集又變小了一點
+還是就一直往外擴展 但目前在小規模中還是先新增 之後再想辦法刪除或合併
+
+
+初步成果
+
+初步成果
+
+我過年之後到底在忙啥啊
+興趣：語言、西洋棋、geoguessr、棒球、電動、AI應用、運動、Pikmin Bloom
+實驗室：推論文進度、機率課程助教、優式資本產學專案
+課程：機器學習、深度強化學習、生成式人工智慧安全、專題
+系上：資科所工讀
+社團：AI社教學長
+課程：分散式機器學習系統、音樂作品欣賞
+個人品牌：建立網站、看SEO成效、整理github
+實習：google onboarding
+競賽：台積電黑客松（已經結束）、teaching monster(加分)
+
+20260311 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+本週進度
+在看棒球、選課、就業博覽會
+養openclaw AI龍蝦、使用zeabur服務，帶60個同學裝龍蝦
+整理把python code轉換成Formula Identity Card的prompt，但是非常不穩定。我本來想要一次生成所有內容，但是結果不好，我正在把它拆成數個步驟的pipeline, 先生成核心的公式定義與python 內容input output擷取，然後再根據這個內容生成：範圍檢查、邏輯檢查、錯誤種類評析與解決策略等。
+正在抓核心的40題看起來很對的，跟財務投資有關的題目記錄下來變成我們的核心題庫，然後每題都做三題相對的錯誤種類，包含語意模糊（Ｍ類）、公式少關鍵假設或用錯（Ｆ類）、公式正確但是數值抓錯（Ｅ類）
+這些preprocess的內容可能需要再等我一下
+
+大致資料集篩選做法：
+我打算做：20題easy 20題medium 10題hard總共50題
+用20題medium * 4種變形  = 80題內容做toy example
+選擇medium原因：沒特別的只是覺得難易度適中
+評分llm對象：Gemini 3.0 flash, TBD (應該要有gpt, 想在中研院伺服器run ollama 跑開源模型評測ex gpt oss)
+先去抓：1. 錯誤的種類(M, F, E)有沒有辦法正確識別 2. 正確的內容會不會被攔截、過度詢問？還是他詢問的內容確實重要？
+紀錄表現 存檔
+
+20260304 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+這週進度
+確定選課、第一週課程確立
+改自己的github跟個人網站
+將和其他人優勢資本合作案（其他人是誰今天下午才知道）
+
+台大資工 x 優勢資本
+合作內容簡述以及成果展現
+主持教授：林守德教授 Prof. Shou-De Lin
+271
+
+企業與實驗室簡述
+272
+國立臺灣大學
+機器智慧與自主智能系統實驗室 (MSLAB) 
+優勢資本是成立於 2021 年、是一間總部位於台北 101 的高頻量化交易公司。
+類似券商自營部，僅使用自有資金操作，不對外募資。該公司專注於程式交易，是台灣 ETF、CB 及現股當沖的市場領導者，以高報酬率聞名。
+近期以高薪（實習月薪 16 萬）招募人才。
+優勢資本介紹
+MSLAB （機器智慧與自主智能系統實驗室）介紹
+MSLAB由臺大資工系林守德教授於2006年創立，至今已20年。
+近期主要的研究方向包含：LLM系統、AI前沿研究、智能交易等領域。
+
+競賽內容簡述
+273
+國立臺灣大學
+機器智慧與自主智能系統實驗室 (MSLAB) 
+2025年10月1日至31日，邀請12位優勢資本的全國頂尖實習生，與實驗室的策略進行比較、排名。
+藉由深度學習知識操盤台灣股市，以獲利排名、夏普值與報告表現為核心加分項，並針對低周轉率、低成交量及回撤風險設有嚴格的扣分機制。
+在這段期間，我們獲得了第二名的佳績，並且大幅跑贏大盤與絕大多數優式資本成員的表現。
+
+競賽成果展現
+274
+國立臺灣大學
+機器智慧與自主智能系統實驗室 (MSLAB) 
+我們的策略，月淨利15%
+上方藍色線：2330(淨利9%)
+
+交易策略說明
+275
+國立臺灣大學
+機器智慧與自主智能系統實驗室 (MSLAB) 
+我們透過 AI 驅動，設計市值50強股票的「最大漲幅」預測交易策略。
+選股範疇：我們聚焦台股 市值 Top 50 / 100 的龍頭企業。
+高流動性：確保大額進出不滑點，委託成功率高。
+低偏誤：涵蓋全產業，避免模型過度擬合特定族群，表現更穩健。
+使用多維度特徵與時序模型預測
+模型像一名「數據觀察家」，每天消化 100 檔股票 × 過去 60 天 的海量資料
+輸入 (Input)： 價量數據：開高低收、成交量能、三大法人買賣超等資訊
+輸出 (Target)： 預測各檔股票「未來 30 天內的最大潛在漲幅」。
+
+
+交易策略說明與成果
+276
+國立臺灣大學
+機器智慧與自主智能系統實驗室 (MSLAB) 
+策略：信心累積與趨勢過濾 (Execution)
+我們不只看「一天」的預測，更看重「持續的樂觀」：
+分批加倉 (樂觀訊號)：當預測漲幅進入前 25% 的「樂觀區」，且該股具備強趨勢 (ADX ≥ 40) 時，每次進場配置 1% 資金。
+果斷出場 (悲觀訊號)：預測跌入後 25% 的「悲觀區」，立即出清該股。
+表現結果：
+該月漲幅：
+該月標準差：
+sharpe ratio：
+
+
+VerifiQuant — 基於合約驗證的診斷驅動財金 AI 系統
+「當我們在談論 LLM 的財金能力時，我們到底在評測什麼？」
+現狀的迷思：
+目前的 Benchmark 往往只看 結果正確率 (Outcome Accuracy)。
+隱患： 低品質題目會讓「Instant 模型」靠著運氣或簡單假設獲得與「Thinking 模型」相近的分數。
+許多論文宣稱，現在LLM會解題目只是因為資料集問題結構相似
+盲點： 我們無法區分錯誤是來自「數學算錯」、「公式用錯」還是「根本沒看懂題目」。
+
+金融業的痛點與轉折
+金融決策不容許「無聲的幻覺 (Silent Hallucination)」。
+比起一個「可能對的數字」，分析師更需要「可審計的推理路徑」與「在不確定時拒絕的勇氣」。
+核心靈感：來自 「軟體合約 (Design by Contract)」。與其叫 LLM 直接算數字，不如叫它簽一份「執行合約」。
+（想法來源：之前報告過的astro程式語言的合約，因為這個程式語言會改動電腦系統狀態，所以這篇論文嘗試將人類語言歸化成一個中介層合約，執行前先向用戶確認合約是否和用戶腦中想的一樣，若ok則執行，這個執行結果是可確定的）
+
+Main Claim
+「Contract 是模糊語義與確定性計算之間的唯一橋樑，也是責任分配協議。」
+LLM 的責任：負責把問題整理成成合格 Contract 或宣告失敗
+如果用戶有地方不清楚，則退回重問，並指出原因。
+Execution engine 的責任：deterministic 計算、可重跑、可驗證（只會根據選擇的固定公式卡內容，LLM不會直接算數學）
+Verification layer 的責任：把 failure mode 變成可檢查的 guardrails
+
+系統介紹:formula idendity card
+在ETL這邊，我們輸入或尋找適合的、有python定義的問題，或者是優質資料來源，我們做一張json格式的identity card，裡面的內容包含：input, python code, execution, output, description, diagnostics,(invariant_check, scale_checks) , selection_hints…等
+
+系統介紹
+當用戶問問題的時候，會透過rag找到在資料庫中最像的幾張公式卡，這些公式卡會定義inputs跟計算過程，以及常見的失敗mode或需注意的mode分析
+
+系統介紹
+得到問題和公式卡後，我們會做診斷分析，看看這個問題有哪些錯誤或不夠清楚的地方
+
+ACL論文提到的四大錯誤種類
+LLM在處理具有挑戰性的領域特定推理問題時存在的四種錯誤類型：
+• 對問題的誤解(Misunderstanding,  M)：由於缺乏金融知識，該模型錯誤地解讀了問題和背景。
+• 公式應用錯誤(Formula/Spec Mismatch, F)：由於缺乏財務推理經驗，此模型使用了與問題指定條件不符的錯誤spec。
+• 數值提取錯誤(Input Binding Error, E )：儘管推理過程和所選公式是正確的，但該模型提取的變數不正確，導致輸入的spec數值詭異。
+• 數值計算誤差(Calculation Error, C)：當涉及多個計算步驟時，由於計算過程中的捨入和誤差，模型會產生與正確答案之間顯著的精度差異。
+
+整理表格
+錯誤類型 (Category)
+陷阱手段 (Trap Method)
+傳統 LLM 表現
+VerifiQuant 表現 (防禦點)
+診斷報告訊息 (Sample)
+M
+語義模糊詞 (Margin)
+隨機猜測一個意思並計算
+拒絕執行 (檢索層無法確定card)
+Refusal: Ambiguous task definition.
+F
+缺少基準 (Benchmarking)
+默認使用 0 或 隨機數字
+拒絕執行 (合約規格校驗)
+Error: Missing required spec 'Risk_Free_Rate'.
+E
+數據欄位誤植 (RF/Mkt swap)
+算出一個荒謬的數字
+攔截 (invariant input 校驗)
+Alert: Invariant Violation (Rf > Rm).
+C
+複雜多步運算
+容易產生算術錯誤
+100% 正確 (確定性 Code)
+Success: Formula executed via Python.
+
+系統介紹
+如果檢測ok->執行->得到解答+可執行可審計trace
+如果ok->可信任的HITL，再run一次
+
+定義簡化版流程骨架（每題都一樣）
+我們用簡易的NPV (計算投資一個東西是否會賺錢) 來當作例子
+使用者輸入 question + context。
+系統做檢索與選卡（candidate pool + FIC selection）。
+若語意不清，先進 M 分支（語意模糊Refusal）。
+若卡片確定，抽取/綁定輸入值。
+跑 F 檢查（規格缺失/缺少必要參數）。
+跑 E 檢查（invariants + scale_checks，邏輯/單位/綁值異常）。
+若通過，執行 execution.code（deterministic Python）得到 npv。
+產出 Success 或 Refusal/Error/Alert + 可互動修復建議->HITL。
+
+
+M 類（Refusal: 語義模糊）會發生什麼
+
+
+「這個投資案會賺錢嗎？我有初始投資xx元、每年現金流xx元和折現率yy%。」
+這句可能是 NPV，也可能是 IRR、ROI、payback。
+你的卡裡 selection_hints.common_confusions (在建立卡片時ai自己判斷生成的，人類檢查或新增)已明確定義這些混淆。
+common_confusions：NPV vs IRR vs Payback用戶是否沒有specified?
+"m_refusal_message": "Ambiguous task definition: this may be NPV, IRR, ROI, or payback analysis. Please clarify the target metric and whether discounting is required.",
+
+M 類（Refusal: 語義模糊）會發生什麼
+
+
+系統行為：
+不直接猜，回傳 Refusal (M)錯誤。
+使用 m_refusal_message + disambiguation_ask(類似「推薦你想問」功能)。
+前端顯示候選卡與差異（例如 NPV vs IRR），因為他們屬於同類（已經有人先定義好12大類n小類不同的財務公式種類）或者是similarity近
+使用者可做的事：
+選擇合約（選 NPV 卡）。->如果資料不夠的話回到F類或是E類
+補一句語意（例如「我要算 NPV，不是 IRR」）。
+
+F 類（Error: 規格缺失）會發生什麼
+
+
+範例題目：
+「我投資 100 萬，未來 4 年現金流各 30 萬，幫我算 NPV。」（但沒給折現率）
+系統觀察：
+系統很確定要選擇NPV的卡片，但是 required_input_summary 包含 discount_rate，用戶沒給
+缺必要規格，不能安全執行。
+
+F 類（Error: 規格缺失）會發生什麼
+
+
+系統行為：
+選卡成功（是 NPV）。
+抽取輸入時發現 discount_rate 缺失。
+回傳 Error (F)，訊息使用 f_error_message。
+產生動態補值欄位（例如 discount_rate、必要時 time basis）。
+使用者可做的事：
+manual_input_missing_fields：手動補折現率。
+confirm_unit_conversion：若輸入了 8，可確認是否轉 0.08。
+補齊後重新跑 F/E。通過才執行 Python engine。
+
+E 類（Alert: 邏輯/綁值/單位異常）會發生什麼
+「折現率 8（其實想表達 8%）、現金流是月度、但折現率是年化。」
+系統觀察：
+觸發 scale_discount_rate_decimal（8 vs 0.08）。
+觸發 scale_frequency_alignment（monthly cash flow vs annual rate）。
+這些在 scale_checks 已定義，先說好哪些常見的問題，以及包含ai診斷（針對不清楚的地方進行釐清）。
+這類特徵因為輸入或者是我給的資料不清楚導致數據欄位誤植，例如我的context錯誤的以為投資3.6萬年 投入4元（其實是3.6萬元投入4年）
+執行引擎在跑 Code 前會先過一次邏輯檢查，發現2% < 12% 違反了金融常識（邏輯悖論）。
+
+
+
+E 類（Alert: 邏輯/綁值/單位異常）會發生什麼
+系統行為：
+選卡成功，輸入也「看起來有值」。
+進入 E/F 檢查時發現異常。
+回傳 Error (E)。
+顯示「哪條規則被攔截、為什麼可疑、建議修正方式」。
+使用者可做的事：
+confirm_unit_conversion：把 8 改成 0.08。
+swap_suspected_fields：欄位疑似綁錯時可一鍵交換。
+force_run_with_override：確認這是極端/特例情境，允許強制執行。
+若使用者 override，系統仍執行，但會留審計紀錄（這很適合論文的「可解釋安全閘」論點）。
+
+
+最後成功（Success）時會有什麼
+
+
+回傳 npv。
+附 deterministic 計算路徑（可審計）。
+附帶 pv_operating/pv_terminal/discounted_cash_flows 等中間值。
+前面的審計過了理論上就不會有calculating error的問題
+但確實可能有因為問的問題複雜導致沒有適合的card的情況 留到之後補充（看是要做卡片組合(中間物連貫)還是多卡片+llm自行整理成一張新card這樣
+
+最後成功（Success）時會有什麼
+
+
+M 防「亂猜任務」：不確定就拒答並引導澄清。
+F 防「缺規格硬算」：缺參數就停，先補值，或者llm自信以為選對公式但是用戶發現完全錯誤的情況也是這類
+E 防「單位/綁值錯誤造成荒謬答案」：先警示再讓人修復或覆核。
+真正數值計算交給 deterministic Python，不靠 LLM 算答案。
+
+
+診斷狀態
+攔截的錯誤
+系統建議與互動介面 (UI/UX Action)
+用戶的操作選項 (User Options)
+Success
+None
+直接輸出結果與計算路徑存檔。
+無需操作，可選「匯出審計報告」。
+Refusal
+M (語義模糊)
+「我不確定您是要算 A 還是 B，請協助釐清。」系統列出可能的 FIC 選項。
+1. 選擇合約：從建議清單選一張卡。 2. 補充描述：重新描述任務意圖。
+Error
+F (參數缺失)
+「計算此公式尚缺 R_f。請提供數值，或由系統檢索最新公債殖利率？」
+1. 手動輸入：直接填寫缺少的數值。 2. 授權檢索：讓系統去查找資料庫/網路
+Alert
+E (邏輯異常)
+「偵測到異常：R_f (8.5%) > R_m(3%)。這與常規邏輯不符，請確認數據。」
+1. 數值對調：一鍵交換 R_f 與 R_m。 2. 強制執行：確認這是極端行情，批准計算。
+
+實驗方式：1. 核心研究問題
+
+接下來要報告的是 我要怎麼做系統實驗
+我要強調的是，我們的設計是要讓llm做錯誤審判，還有他們在一個標準一樣的人（aka我本人）的情況下 出現M, F,E類錯誤機率多少，以及他們最後有沒有辦法得到正確答案（以及M, F,E過程看起來都ok但實際上某個地方出錯導致實際數字和標準答案不同的情況）
+我用的是customize dataset 先從剛剛提到的有question. answer. context . python code的資料集裡面挑選原始框架下llm會對的題目，然後我對這些題目動手腳，例如把剛剛npv問題讓他出現M,F,E類失誤，看看llm在不同系統上是否都能夠偵測到錯誤 這樣就會有抓到錯誤的機率，llm會不會出現false positive或false negative太多的情況（例如因為太神經質所以一直給M類錯誤請求修正）
+
+實驗方式：1. 核心研究問題
+
+LLM 對 M/F/E 錯誤的攔截率是多少？
+會不會過度攔截（False Positive 過高，太神經質）？
+會不會漏攔截（False Negative，放錯誤通過）？
+最終答案正確率如何？
+是否出現「M/F/E 都看起來正常，但最後數值仍錯」的隱性錯誤？
+研究對象：不要是pro版本的，用instant版本進行對決，也要有開源的llm進行比較（部分公司注重隱私性）
+
+實驗方式:  2. 資料集設計
+基底題目：先挑「原始框架下 LLM 能答對」的題目（避免題目本身太難造成混淆）。
+對每題產生 5 個版本：
+Clean（無陷阱）
+M-trap（語義模糊/公式家族混淆）
+F-trap（缺必要規格/參數）
+E-trap（單位、欄位綁錯、邏輯矛盾）
+Mixed-trap（M+F 或 F+E）
+每筆都標註「預期正確系統行為」：Success / Refusal(M) / Error(F) / Alert(E)。
+這工作我會做 
+
+實驗方式: 3. 比較系統（三組）
+
+Baseline-A：直接 LLM（無診斷層）
+Baseline-B：V1（模板+抽值+計算，弱拒答）
+Proposed：V2（FIC + Diagnostic + refusal taxonomy）
+
+實驗方式: 4. 控制變因（提到「同一個人」很關鍵）
+
+同一位操作者（希望是我本人）
+固定 prompt 模板與回合上限（舉例來說，最多尋求clarafication三次，不然就視為llm 不會）
+同一批題、同一執行順序（或隨機後固定 seed）
+每模型跑多次（例如 3 次）取平均，避免偶然性
+
+實驗方式: 5. 指標
+
+診斷層指標
+TPR/Recall：該抓到有抓到
+FPR：不該抓卻抓到（過度保守）
+FNR：該抓沒抓到（危險）
+Precision/F1
+M/F/E 各自發生機率vs期望機率
+Unsafe Pass Rate：有 trap 卻被放行且答案錯
+Over-Refusal Rate：Clean 題卻被拒答/警報...
+
+報表格式
+M/F/E 混淆矩陣（每模型一張）
+每類 trap 的 TP/FP/FN 表
+最終正確率 + Silent Wrong Rate 對照表
+案例分析：各模型各挑 2-3 個典型失敗案例（含系統訊息）
+
+結論：瑕疵捕捉論 (Trap-Driven Logic)：
+系統的核心價值在於 「捕捉瑕疵」：當用戶提問模糊（如 INR-GBP 匯率假設）或參數缺失時，LLM 必須在合約階段「捕捉」到這些問題並觸發拒答或澄清。
+Deployment mode（給使用者）：
+選一個 LLM 當 mapper，系統盡力給 audited answer，不行就拒絕/升級人類
+Diagnostic mode（給研究者）：
+固定設計一個dataset，（相當謹慎的）設計failure mode, ex.刻意敘述不清楚、資料範圍不一致，看LLM在我們系統中有沒有辦法正確抓錯（處理FP, FN)
+
+FIC(formula identity card)範例
+ "id": "fic_investment_analysis_npv_irregular_cashflows_v1",
+  "name": "Net Present Value (NPV) with Irregular Period Cash Flows and Optional Terminal Adjustments",
+  "domain": "investment_analysis",
+  "topic": "npv",
+  "inputs": [ "name": "initial_investment",，"type": "float",””description": "Initial cash outflow at time 0, expressed as a positive amount (the engine subtracts it in the NPV formula).",      "required": true,  "unit": "currency".....]有數個inputs},
+
+FIC(formula identity card)範例
+ "output_var": "npv",
+  "execution": {
+    "language": "python",
+    "entrypoint": "compute",
+    "deterministic": true,
+    “code”: 一大串}
+
+FIC(formula identity card)範例
+"diagnostics":
+{ "invariants": [ { "id": "inv_discount_rate_gt_minus_one", "rule": "discount_rate > -1", "category": "F", "severity": "error", "message": "discount_rate must be greater than -1 (so that 1 + discount_rate remains positive)." },
+ { "id": "inv_cash_flows_non_empty", "rule": "len(cash_flows) >= 1", "category": "F", "severity": "error", "message": "At least one future cash flow is required to compute NPV." },}...
+
+FIC(formula identity card)範例
+"scale_checks": [ 
+{ "id": "scale_discount_rate_decimal", "params": ["discount_rate"], "expected": "decimal_rate", "category": "E", "severity": "alert", "message": "discount_rate should usually be decimal rather than percentage raw ." },
+{ "id": "scale_currency_magnitude_consistency", "params": ["initial_investment", "cash_flows", "terminal_value", "terminal_cost"], "expected": "same_currency_scale", "category": "E", "severity": "alert", "message": "Cash flow values and investment/terminal values may be using inconsistent currency scales (e.g., dollars vs thousands)."}...
+
+FIC(formula identity card)範例
+ "selection_hints": {(給ai看的)
+    "self_description": "Use this FIC to compute NPV from an initial investment, a sequence of future cash flows, and a per-period discount rate, with optional terminal value and terminal cost.",
+applicable when ……
+not applicable when……
+
+FIC(formula identity card)範例
+ "selection_hints": {(給ai看的)
+    "self_description": "Use this FIC to compute NPV from an initial investment, a sequence of future cash flows, and a per-period discount rate, with optional terminal value and terminal cost.",
+applicable when ……
+not applicable when……
+
+FIC(formula identity card)範例
+  "refusal_hints": {
+    "m_refusal_message": "Ambiguous task definition: this may be NPV, IRR, ROI, or payback analysis. Please clarify the target metric and whether discounting is required.",
+    "f_error_message": "Missing required specification/input for NPV. Please provide the initial investment, future cash flows, and discount rate (with time basis).",...
+   "disambiguation_prompts": [ #應該要做one-on-one mapping
+      "Do you want NPV at a given discount rate, or are you asking for IRR (the rate that makes NPV zero)?",
+      "Are the cash flows annual, monthly, or quarterly, and is the discount rate on the same basis?",
+      "Should terminal salvage value and terminal cleanup cost be included at the final period?" ]...
+
+
+limitation
+FIC coverage 仍有限（長尾公式, 複雜公式）
+診斷規則需持續擴充
+某些題可能同時觸發多類錯誤，目前是計劃先M再F, E
+目前 HITL 成本仍高（但換到可審計與安全）
+
+conclusion 
+學術價值： 提出一套新的財金 LLM 評測範式——從「結果導向」轉向「診斷導向」。
+工程價值： 提供一個可部署、可審計的金融 Agent 框架，降低企業使用 AI 的風險。
+「我們不追求讓 AI 變得更聰明，我們追求讓系統變得更嚴謹。」
+
+
+實驗方式
+接下來要報告的是 我要怎麼做系統實驗
+我要強調的是，我們的設計是要讓llm做錯誤審判，還有他們在一個標準一樣的人（aka我本人）的情況下 出現M, F,E類錯誤機率多少，以及他們最後有沒有辦法得到正確答案（以及M, F,E過程看起來都ok但實際上某個地方出錯導致實際數字和標準答案不同的情況）
+我用的是customize dataset 先從剛剛提到的有question. answer. context . python code的資料集裡面挑選原始框架下llm會對的題目，然後我對這些題目動手腳，例如把剛剛npv問題讓他出現M,F,E類失誤，看看llm在不同系統上是否都能夠偵測到錯誤 這樣就會有抓到錯誤的機率，llm會不會出現false positive或false negative太多的情況（例如因為太神經質所以一直給M類錯誤請求修正）
+
+我想到的是可以透過用戶的反饋和質疑 甚至是card使用次數來決定哪些formula card最常被用 相較冷門的就不會常出現，然後也可以設計pdf某最新計算內容轉乘formula card的標準轉換流程 但是品質維護和惡意攻擊就是新問題 我甚至覺得我可以創業了（欸冷靜現在半夜快三點）
+5901865236
+
+20260226 Weekly Meeting
+R14946005柯宥圻
+ 
+ 
+ 
+
+這段時間回顧
+過年期間大概真的想好了論文框架 比之前幾個版本清晰很多
+這學期選課：李濬屹教授 - 深度強化學習（徵求組員中）、羅紹元教授 - 生成式人工智慧安全、李宏毅教授 - 機器學習
+旁聽：吳沛遠教授：機器學習與核方法
+接了守德教授機率課程的助教
+守德教授實驗室：最近要開始新的專案cycle
+題目一：預測投信/外資/others (等優式的資料下來)
+題目二：改進上學期的比賽用模型（程式碼：https://github.com/B09902005/trading_competition/tree/main）
+題目三：回答是否停損停利（正在進行中）
+所有參與守德教授「專題討論」的人都要比一個AI Agent競賽，下裡拜要提出初稿proposal，然後在6月中決賽（邀請外界講師評分），前三名有很多錢錢，我打算繼續以我這裡提出的可驗證金融問答框架做延伸，預期將拉了一個碩0新人進來跟我一起做AI Agent競賽（他有興趣，但我還在確認）
+
+FinanceReasoning: Benchmarking Financial Numerical Reasoning More Credible, Comprehensive and Challenging (ACL2025)
+
+2025/08的論文，和我們現在想要做的事情很像：對於（不同難度、不同種類的）財經問題，做跨LLM的推理理解，看LLM的正確率跟失敗模式。
+我們現在想要做的也很類似，設計資料集，問ai，看ai是否可以妥善回答，雖然我的版本會偏向是「如果不給予完整資料和先決條件，ai會不會亂猜，或者是能夠反問關鍵的模糊敘述」，但是和這篇論文想要做的還是有點像。
+這篇論文主要的貢獻是修benchmark讓這個financial benchmark更嚴格，然後提出討論。
+
+FinanceReasoning: Benchmarking Financial Numerical Reasoning More Credible, Comprehensive and Challenging (ACL2025)
+
+2025/08的論文，和我們現在想要做的事情很像：對於（不同難度、不同種類的）財經問題，做跨LLM的推理理解，看LLM的正確率跟失敗模式。
+這篇論文主要的貢獻，是把原本歧意很多、答案沒有想像中標準的舊版benchmark進行修改，補充加強，讓這個financial benchmark更嚴格，然後提出討論。
+
+FinanceReasoning資料集
+這是一個問題+資料+數值回答+python的資料集，跟我當時想要找的JP morgan私人資料集很類似，甚至更好。 資料內容包含：
+question, context (一段文字和數據，裡面的內容足以回答context的問題), 
+python solution(完整的python code),  statistics (有關於code的統計數據)
+difficuly(有分數值版，跟easy, medium, hard分級版), 
+ground truth(question的解答), 
+source(他有四個來源，其中幾個來源沒有python所以團隊還幫忙新增python code)
+我的版本裡面code有已知模板，問題可以被分類到不同模板中，這題則是希望ai可以生成python code來回答問題，並且檢驗生成的code跟抓的資料對不對。
+
+finance reasoning 資料集範例
+Question : What is the average INR-GBP exchange rate in FY 2019? Answer to two decimal places
+context: {"USD": {"Weightage (%)": 53.6, "FY 2019 `": 70.07, "FY 2018 `": 64.49, "% Change YoY": 8.7}, "GBP": {"Weightage (%)": 13.9, "FY 2019 `": 91.6, "FY 2018 `": 86.05, "% Change YoY": 6.5},...
+Python code: irn_gbp_2019 = df["GBP"]["FY 2019 `"]
+answer = 1.0 / irn_gbp_2019
+ground_truth = 0.01
+Level: easy, 0.693147
+
+finance reasoning 可能的問題
+INR-GBP定義不清，財金系學的通常是GBP/INR, 這題我問chatgpt回答說是91.60, Gemini是0.01 (除法), 但是只有gemini是對的
+FY 2019 + 一個數字 這樣子就是「INR per GBP」 有點趨向於猜測
+沒有說average如何達成，例如是全年日均？月均？還是一個數字即可
+這題只能「推測」91.6 是 INR/GBP， 但無法保證它符合 question 的語意。
+
+
+FinanceReasoning 核心目標
+論文主要的作用是「更準確地『評估』大型語言模型在金融數值推理上的能力。」所以還是「看最後唯一數值的accuracy」。
+現有金融數值推理資料集（CodeFinQA、TAT-QA、FinanceMath…） → 太簡單、太模糊、評估標準太鬆
+雖然LLM/LRM在各種數據上 看起來 accuracy都很高， 但其實是 dataset 飽和(資料集已經無法再有效區分模型能力高低了)
+現有的金融資料集分數和llm是否能進行「有效的金融推理」關係越來越遠（甚至懷疑是背答案和一種「反射性回答」）
+論文把各種零散的「金融問題」改寫成「完美資訊、無歧義、可用 Python 完整算出來的數值推理題」， 再用這些題來測模型的 reasoning 能力。
+
+dataset 飽和的幾個典型徵象
+題目語意固定→ 模型看到句型就知道大概怎麼算
+context 結構高度重複，模型機械性地知道怎麼處理這種問題
+在題目中ground truth 是靠 code 反推的：code是實際定義，question是用code反推，所以llm很容易看到題目之後推到正確的code怎麼寫
+evaluation 太寬鬆 ，例如抓到±1% 誤差、不檢查方向、單位、正負，有時甚至忽略 currency / scaling等
+這樣的話模型「看起來很強」，但其實是在刷熟題。
+ FinanceReasoning 的做法是： 把 ambiguity 全部拿掉，把定義寫死，把 tolerance 收得很嚴，再讓llm回答，希望可以讓llm能力做出差別化。
+
+finance reasoning 資料集範例
+Question : What is the average INR-GBP exchange rate in FY 2019? Answer to two decimal places
+context: {"USD": {"Weightage (%)": 53.6, "FY 2019 `": 70.07, "FY 2018 `": 64.49, "% Change YoY": 8.7}, "GBP": {"Weightage (%)": 13.9, "FY 2019 `": 91.6, "FY 2018 `": 86.05, "% Change YoY": 6.5},...
+Python code: irn_gbp_2019 = df["GBP"]["FY 2019 `"]
+answer = 1.0 / irn_gbp_2019
+像是這樣的問題會在這篇論文被定義成嚴謹，可用code解釋的內容，但是根據剛剛討論還會有歧異，以及用戶和ai想的不一致的心智問題。
+
+Credibility：如何更準確地『評估LLM能力』
+現有的金融數值推理資料集「看起來能用，但實際上不可信」。
+問題層級失靈：有些題目在給定的 context 下，根本不可能推出唯一答案，例如： 題目要求的指標沒有在 context 定義、需要的數值根本不存在或是題目與表格對不上 這種題在原本資料集中，卻仍然有 ground truth。
+語意歧義（但評估時被忽略）。 例如： 報酬率是 simple 還是 log average， 是算術平均還是加權， FY / 年化 / 期間邊界沒有定， 這些在金融分析裡是關鍵定義，但在舊資料集中，只要數字「差不多」，就算答對。
+code 與 answer 本身錯誤或不一致。
+評估標準過度寬鬆
+他們做的就是，修改或刪除無法解的題目、重算 ground truth、把 tolerance 收緊到 0.2% 強制單位、方向、正負一致等等的收斂到一致(15.6% 的問題)，為 908 個新問題標註了詳細的 Python 解決方案，並嚴格改進了評估標準。
+
+re-annotation
+
+貢獻2: Comprehensiveness：他們怎麼避免再度「飽和」
+在部分他們自創的題目中，他們不再從「題目」出發，而是從「金融 function」出發。
+他們從 Investopedia 抽取大量金融概念（6000多個），經過人工清洗與審核後，問gpt說這些內容可以生成哪些python公式建立了一個包含 3,133 個 Python financial functions 的庫。
+每一個 function 都被當成一個「金融事實單位」，因此改成了「先有 function，再生成題目」而非「給題目，找答案」。但問題是他生成的題目有自己版本的python solution而非使用剛剛gpt生成的financial solution庫 
+他的financial reasoning資料庫裡面有一部分屬於這樣子生成的data，他有1000題easy, 1000題medium, 238題hard, 1000題easy裡面包涵212題用這個方法生成出來的問題。FinanceReasoning 涵蓋了  3,133 個金融概念和公式中的67.8% 
+
+貢獻3:Challenge（難度）：他們「怎麼讓題目變難」
+他們刻意設計了一個 Hard subset，特徵是：
+一題不只對應一個 function
+需要多個金融概念串接
+中間結果要被正確 reuse
+數值依賴關係不能錯
+他們本質上是在建立一個「理想化、無歧義、以 function 為真理來源」的金融推理 benchmark，用來測試模型在完美資訊條件下的推理與計算能力。表現最佳的模型（ 即採用 PoT 的 OpenAI o1）達到了 89.1%的準確率
+
+實驗與評估方式
+Input：question + context
+Output：用 CoT 或 PoT, 直接生成 Python code
+Execution：跑 code ->拿結果跟 ground truth 比
+Metric：Accuracy（0.2% 內算對）
+
+他們甚至用 operator / code length / parentheses 數量 來定義題目難度
+
+FinanceReasoning拿的資料是795+288+47+200=1330既有題目，然後他們又根據investopia的內容與python程式庫發明了2238-1330=908題新問題，他總共創造了3133個金融觀念和相對應的公式內容與解釋，整個資料集共2238題涵蓋了2123個金融觀念。
+
+
+silver是修正前，gold是修正後，可以發現對同一個model修正後得表現有提升，所以之前舊的dataset因為語意不清所造成的誤會是存在且會對evaluation產生影響的
+在silver晉升成gold之後，R1跟V3的差別更明顯，在financereasoning裡面V1才是好的，但是之前silver舊版本大家會以為兩個能力差不多。
+
+就算升級成 Gold，我們真的能確定「沒有歧義了」嗎？
+我認為Gold 的所有改善，來自於人工的觀察，包含人工重寫題目、修正 code、選擇「正確定義」決定 evaluation 標準等等，但是回到匯率那題，那題其實沒有一個完整定義是前面除以後面還是後面除以前面。所以現在雖然升級了dataset，他的品質還是很脆弱的。
+語意歧義確實會嚴重干擾 evaluation，修正後才能看見模型的真實能力。
+但它同時也暴露了另一個問題：即便在 Gold 標準下，正確性仍然依賴人工定義與假設。我們應該要把「是否可回答、哪裡有歧義、哪些定義需要確認」系統性地顯性化並納入推理流程本身。
+
+
+主要結果1:LRM 是否優於其他 LLM?
+整體上PoT +  LRM（如 OpenAI o1）表現最佳，在 Hard 子集上的準確率達到 89.1%，顯著優於其他 LRM 和 LLM。
+在 Easy 和 Medium 子集上，除 Llama 模型外，所有評估的 LLM 準確率均超過 87%，分數差異較為不明顯
+在hard上， OpenAI o1 和 DeepSeek-R1表現出明顯的效能差異，所以要拉到hard難度thinking優勢才會放大。
+但整體很難比較，因為唯一有適合的對照關係的只有deepseek 
+
+誤差分析（研究問題 2）
+論文總結目前 LRM (Deepseek - R1) 在處理具有挑戰性的領域特定推理問題時存在的四種錯誤類型，從失敗案例中挑出20題簡單20題中等40題困難：
+• 對問題的誤解：由於缺乏金融知識，該模型錯誤地解讀了問題和背景。
+• 公式應用錯誤：由於缺乏財務推理經驗，此模型使用了與問題指定條件不符的錯誤公式。
+• 數值提取錯誤：儘管推理過程和所選公式是正確的，但該模型提取的變數不正確，尤其是在處理結構化表格資料時。
+• 數值計算誤差：當涉及多個計算步驟時，由於計算過程中的捨入和誤差，模型會產生與正確答案之間顯著的精度差異。
+
+
+
+insight from failure taxanomy
+雖然這是小樣本但可以觀察錯誤種類隨難度不同的變化
+misunderstanding是easy最常見，討論說可能是因為問題太簡易反而ai想太多而失誤
+Formula application錯誤是hard最常見，可以得知在較複雜或者是有多種觀念組合時容易出錯
+calculation error普遍存在在各種錯誤中，有必要引入外部計算工具或模型協作來增強數值計算能力，這可以減少相對簡單問題中因計算不準確而導致的錯誤，我覺得可能是他預設的PoT並沒有執行真正的python檔導致。
+
+思考：所謂的正確答案真的會因為思維範疇不同而差異
+我上禮拜在幫老師測試機率課程的期中期末考有沒有辦法被ai答對，但是ai有時候會提出一些方式，邏輯上是對的，實務上也可以這樣做但是解答和我們期望的標準解答差不多。
+連續修正（Continuity Correction），是統計學中用來縮小「離散數據」與「連續分布」之間誤差的方法，用來提高小樣本情況下的檢定精確度。這個東西大學不會教但是ai預設會套用他，讓ai覺得學生答案是錯的，但其實應該是對的
+或者像是小學 以為負數不存在 所以很有彈性空間
+
+pot vs cot
+PoT 利用結構化程式碼產生來減少 token 消耗。在 token 消耗量相近或更低的情況下，PoT 能夠達到更高的準確率。此外，其效能與某些採用測試時擴展策略的 LRM 相當。例如，GPT-4o 在 PoT 的提示下，只消耗 54k 個 token 即可解決困難子集，而 CoT 則需要 173k 個 token。
+
+Limitation and What I will do further (Ongoing)
+這篇的limitation是我要做的方向（也希望沒人做過）
+這篇論文的limitation寫說:1. 沒測試multimodal 2. 有些測試沒跑完因為沒錢  3.他們會定期維護新增問題。4. 我們澄清，FinanceReasoning 評估的是所有解決方案前提條件均明確提供的完美資訊場景，因此著重於 LRM 在確定性計算中的精確度上限。他們把 「歧義消除（Ambiguity Resolution）」 和 「主動尋求澄清（Active Clarification）」 列為「超出了本文研究範圍」的未來方向。我特地去看了一下這篇論文的團隊和引用這篇論文的論文們應該是都沒有解決這部分，但我也要跟者快速解決。
+
+快速對齊：我之前有提到過類似內容
+ 解決 Limitation (4)：從「完美資訊」跨向「真實歧義」
+VerifiQuant 透過以下方式突破了這些限制：
+主動捕捉（Active Catching）： 透過 FIC (Financial Inference Contract) 的強約束(也就是之前提到，用json的contract進行計算和對齊) ，將『歧義消除』納入系統核心，填補了從確定性計算到互動式推理的鴻溝。
+自動化溯源（Automated Provenance）： 利用 Formula Identity Cards，我們能為缺乏參考代碼的存量資料集自動生成具備審計線索的解決方案。
+當然這是用非完全覆蓋來交換 因為前置作業變多，但是換得高審計性
+
+===
+下面的是我的完整proposal 可以下次再討論
+
+VerifiQuant — 基於合約驗證的診斷驅動財金 AI 系統
+「當我們在談論 LLM 的財金能力時，我們到底在評測什麼？」
+現狀的迷思：
+目前的 Benchmark 往往只看 結果正確率 (Outcome Accuracy)。
+隱患： 低品質題目會讓「Instant 模型」靠著運氣或簡單假設獲得與「Thinking 模型」相近的分數。
+許多論文宣稱，現在LLM會解題目只是因為資料集問題結構相似
+盲點： 我們無法區分錯誤是來自「數學算錯」、「公式用錯」還是「根本沒看懂題目」。
+
+金融業的痛點與轉折
+金融決策不容許「無聲的幻覺 (Silent Hallucination)」。
+比起一個「可能對的數字」，分析師更需要「可審計的推理路徑」與「在不確定時拒絕的勇氣」。
+核心靈感：來自 「軟體合約 (Design by Contract)」。與其叫 LLM 直接算數字，不如叫它簽一份「執行合約」。（想法來源：之前報告過的astro程式語言的合約）
+
+AI 回結構化 JSON，和這個版本比較？？？？？？
+如果以上的內容都ok那麼就會對應到一個python code 做可確定的計算，當然這部分也可以把計算主權還給ai
+
+
+提供預設的資料來源vs直接進production
+原本上個版本測試ai的什麼能力 我現在的新版本（嚴格來說是v1版本）又是要測什麼能力 
+我覺得我現在的defend很對 只是剛好要用舊舊架構
+
+論文主軸
+本來有三個候選主軸：「我設計了一個llm在解財金問題失敗的錯誤分類法」，還是「我設計了新一代的評測系統」還是「我設計了一個verification-first的agent問答系統」
+現在會變成「我設計了一個verification-first的agent問答系統」，然後設計一個llm在解財金問題失敗的錯誤分類法，這些錯誤分類不是ai犯下的，是人類在設計問題或詢問問題時的不精確之處，llm負責捕捉這些瑕疵；然後，這個verification-first的agent問答系統可以透過設計好的(瑕疵)資料集來評測各家不同llm抓錯誤的強度，然後提供比較表說不同llm在抓這些「常見瑕疵」的能力。
+
+Main Claim
+「Contract 是模糊語義與確定性計算之間的唯一橋樑，也是責任分配協議。」
+LLM 的責任：把問題映射成合格 Contract 或宣告失敗
+Execution engine 的責任：deterministic 計算、可重跑、可驗證
+Verification layer 的責任：把 failure mode 變成可檢查的 guardrails
+
+
+Main Figure
+https://mermaid.ai/d/75084f0c-a2a7-437d-a882-e00997b438b1
+「LLM 不算數字，它只負責產生可審計的 task_plan；數值全部由 deterministic engine 負責。」
+
+
+Failure Taxonomy（以“合約映射失敗”角度定義）
+Contract mapping errors：
+scope/time-range mismatch（超界）
+frequency mismatch（daily vs monthly）
+unknown entity（ticker/field）
+formula mis-specification（formula_id 不一致）
+invariant violation（vol<0 / corr not in [-1,1] / beta not finite）
+refusal behavior errors（false accept / over-refusal）
+「taxonomy 的目的不是怪誰，而是讓錯誤可以被機械化分類與定位。」
+
+已經做出來的東西
+eval_dataset_schema（含：expected_outcome, tolerance, audit_requirements, task_spec/formula_id）
+model_output_schema（LLM 必須輸出 JSON、audit checks）
+reference computation engine（deterministic ground truth）
+generator：自動生成 answer cases + refusal cases（並通過 schema validation）
+
+執行計畫 (Execution Plan)
+Step 1: 構建「陷阱驅動」資料集 (Trap-Driven Dataset)
+不只是收集題目，而是為每個題目設計 「瑕疵版本」。需要自行標註每題的「合約規格」與「預期捕捉類型」（如：Missing Param, Ambiguous Entity）。
+Step 2: 系統開發 (VerifiQuant Framework)
+開發 Formula Identity Cards：定義標準公式庫。（用llm生，使用financialreasoning用的investopia資料集或者是之前用的finchain)
+開發 Reference Computation Engine：確保 Ground Truth 是由程式碼產生，而非模型生成。（已經做好了）
+
+ 診斷式評測 (Diagnostic Evaluation)
+模型橫向對比： 拿 GPT-4o, o1, DeepSeek-R1 等模型來跑。
+核心指標：
+True Refusal Rate: 該拒絕時有沒有拒絕？
+Audit Success Rate: 通過審計且答案正確的比例。
+Failure Mode Heatmap: 不同模型在哪些「陷阱」中最容易掉進去？
+
+預期貢獻與結論 (Expected Impact)
+學術價值： 提出一套新的財金 LLM 評測範式——從「結果導向」轉向「診斷導向」。
+工程價值： 提供一個可部署、可審計的金融 Agent 框架，降低企業使用 AI 的風險。
+
+「我們不追求讓 AI 變得更聰明，我們追求讓系統變得更嚴謹。」
+
+===
+下面的是草稿
+
+Dataset 飽和的意思不是模型變完美了， 而是資料集已經不足以測出模型是否真的理解金融。
+FinanceReasoning 嘗試在「理想化、無歧義」的設定下延長 benchmark 的壽命； VerifiQuant 則是接受現實世界的 ambiguity， 並把「能否回答、何時拒絕、如何審計」變成系統的一部分。
+
+
+我和他的不同是，我目前問的問題
+這裡就回到你跟他們的根本差異（超重要）
+
+你現在做的 VerifiQuant，其實是在做dataset 飽和之後，下一步該做什麼。
+
+你不是想再做一個更難的考卷而已，你是在問：
+
+如果題目本身就不嚴謹，
+如果語意跟資料合約不一致，
+那「答對」這件事本身還有意義嗎？
+
+所以當你說：
+
+這種 INR–GBP 題在 VerifiQuant 應該被判為「資訊不足」
+
+這不是你系統弱，
+而是你在處理 benchmark 刻意忽略、但真實世界充滿的那一塊。
+
+silver是修正前，gold是修正後，可以發現對同一個model修正後得表現有提升，所以之前舊的dataset因為語意不清所造成的誤會是存在且會對evaluation產生影響的
+在silver晉升成gold之後，R1跟V3的差別更明顯，在financereasoning裡面V1才是好的，但是之前silver舊版本大家會以為兩個能力差不多。
+但是根據我們的了解就算晉升成gold我們還是不知道是否夠好 夠完整還是會有一些歧異出現，畢竟升級過程是人工干預的 所以verifiquant就很重要
+
+
+CoT vs verifiquant
+同樣的 question+context，會有兩種不同量測版本
+普通CoT QA 系統: 會吐 0.01 或 91.60 並且自信
+VerifiQuant :我期待會吐「兩個可能解 + 需要澄清的一句話 + 若採用資料集隱含定義則答案為 0.01 的可追溯理由」，以滿足“auditability。
+這牽扯到兩套邏輯的claim （可討論）：
+[一個好的系統，應該能處理未知、複雜、多樣的財金問題]
+[在可審計、可重現、不可 hallucinate 的前提下，處理一個「明確定義的子集合」，涵蓋足夠多的題型]
+
+以「處理多問題」為主vs「處理準問題」為主
+如果要用verifiquant的想法來處理，可能會有以下兩個版本：
+1. 一開始先判斷題目是不是verifiquant的守備範圍，例如我在上禮拜已經設計好的volatility, 兩隻股票的correlation, capm等等，如果是的話才繼續處理 
+2. 我設計一個新的語意對齊框架，這個框架理論上可以容納財金各種多樣性，然後透過向用戶確認的動作來確保想要的方向是人類想要的，也就是一種有模板式的Human in the loop（參考：語意對齊層）
+我目前是偏向於第一種可能性。
+
+
+流程圖
+https://mermaid.ai/app/projects/ba7fa1e6-4bd5-4853-a8ab-5787937aae1d/diagrams/75084f0c-a2a7-437d-a882-e00997b438b1/version/v0.1/edit
+左邊：資料集導向的 QA 系統 問題、context、ground truth 都假設是乾淨且一致的； LLM 的目標是「答對」。
+右邊：VerifiQuant 問題一進來，第一件事不是算，而是判斷能不能算。
+
+
+守備範圍判定
+我現在有的 pipeline大致上是OHLC + rf + CAPM + volatility + correlation, 資料 schema 明確、金融定義較為嚴格，一個輸出可以對應到 deterministic Python function
+如果這個pipeline遇到像是 INR–GBP ，要嘛 hallucinate（違反 VerifiQuant 初衷），要嘛瘋狂擴模板（擴展性差的那條路），可以問：
+是否是資產定價 / 報酬 / 風險 / 相關性 / 波動？
+是否可由 time-series + known financial identity 計算？
+是否所有 required variables 在 schema 中有定義？
+一旦不是 → 直接拒絕進入 deterministic core
+
+新的語意對齊框架，要怎麼才不會變成「泛用但混亂」
+
+ demo 三個場景對比：
+
+In-scope 問題
+問 CAPM beta / expected return
+VerifiQuant：planner → python → audit trail → single answer
+Out-of-scope 但 deterministic systems 會亂答的問題（INR–GBP）
+普通 QA：直接吐 0.01
+VerifiQuant：
+Scope check：False
+轉 Semantic Alignment Mode
+明確指出 ambiguity + 要求確認
+Human 確認後再次執行
+使用者選定方向
+系統再產生 deterministic computation
+結果 now becomes auditable
+
+1.是否把llm視為calculator
+大部分的論文：使用Cot把llm視為整套的reasoner+calculator進行回答
+我打算把 LLM 的角色限定為「planner / compiler」，不是 calculator。它只輸出一個受約束的 JSON 計畫：能不能答、用哪張公式卡、需要哪些欄位、採用哪個政策版本（例如年化只能 sqrt(12)、資料頻率只能 monthly、缺值政策是 dropna 或 error）。這個 JSON 是可審計的決策軌跡。
+有了這張json 卡，就可以輸入到我們的deterministic系統，輸出ground truth跟auditable trace
+
+1.是否把llm視為calculator
+所有數值計算都由 deterministic engine 完成，而且必須引用版本化的公式卡（formula_id）與資料合約（dataset_version / schema）。因此結果可重現、可追溯、可比對。
+這是把「可擴展性」從“教模型更多招”轉成“擴充公式卡與資料合約”，工程上可控得多。如果設定好基礎的樣態，就可以透過擴充公式卡跟資料樣態來回答更多問題。
+
+
+2. 拒絕與澄清的重要性
+大部分的論文：不會主動拒絕而是嘗試滿足需求
+真實金融問題常見的不確定性（方向、單位、期間、平均/年化定義、log/simple return、missing data policy）如果不顯式處理，只會把風險轉嫁給模型的猜測。我想要把不確定性結構化地回報給使用者，必要時 human-in-the-loop 對齊後再算，這才符合可用於研究/實務的標準。
+ in-scope：AAPL 2021–2025 monthly annualized volatility。LLM 產生 plan JSON → deterministic 算 → 回傳答案 + audit（樣本數、期間、公式卡 ID、政策版本）。
+ ambiguous：INR–GBP FY2019。系統不吐單一數字，而吐 needs_clarification：請確認匯率方向與平均定義；並列出兩個可行解釋的候選結果但標註為 provisional。這是一個「負責任的金融推理系統」，不是「答題機器」。
+
+泛用性issue
+如果用資料卡+deterministic推理內容的話，現實中用的人是誰？ 如果他想要分析的是私人資料，而不是我提前主動處理好的dataset內容，例如aapl 是我在yahoo finance裡面提前下載好的 那該怎麼辦？
+但是實際上，VerifiQuant 並不要求資料一定是公開或預先下載的；它要求的是：任何資料在被分析之前，必須被轉換成一個明確、可審計的資料合約（data contract）。私人資料可以用，只是不能「直接餵給 LLM」，而是先丟到data preprocessor整理成deterministic內容engine。
+
+
+泛用性issue
+我會做 deterministic ingestion step，會附註metadata說明 資料頻率是什麼（daily / monthly） 時間範圍是什麼 欄位定義是什麼（price / return / log-return） 缺值怎麼處理 等
+這應該會是 一個 Python script 的ETL pipeline 
+完成之後，產生一個 dataset_id + schema + metadata。 
+從這一刻起，它在 VerifiQuant 眼中，就跟 AAPL from Yahoo Finance 沒有本質差別
+
+雙層結構
+第一個模式是比較熟悉的：在題目語意已經被固定、資料乾淨的情況下，讓模型更穩定地選對公式、算對數字、提高回答準確度。這一層我們可以用 FinanceReasoning-style 的題目來驗證，也可以直接用 accuracy 當指標。
+第二個模式是我們額外引入的安全層：在語意尚未固定、資料合約可能被違反的時候，系統不以「猜對答案」為目標，而是以「避免做出不可審計假設」為目標。這一層不追求 accuracy，而追求 admissibility correctness（該答就答、該拒就拒）。我們發現，如果沒有第二層，第一層在真實金融問題中會系統性地過度自信，尤其在匯率方向、期間定義、年化方式這類地方。
+只要 admissibility = true 且無 ambiguity，VerifiQuant 就退化成一個高準確度的答題系統；一旦 ambiguity 出現，它才展現出「你真正想做的那一半」。
+
+whether to CoT is still a problem
+在我原本的設計中，我們希望LLM的思考可以外部化，也就是把推理過程分解成「可以讓llm自由生成」跟「應該交由外部去審計的內容」，可能犧牲掉CoT的一部分能力，換得更高的可解釋與可審計性。
+但是現在大部分的論文都還是讓各種llm的能力全開，並且擺在競技場上看誰的能力最好，我雖然也可以做這類型任務，但是就是比較沒有學術創新性，頂多就是換個不同的資料集，用一樣的方法得到一個leaderboard。
+這篇論文就是llm能力全開版的結果討論，我們也可以去參考他們怎麼評估reasoning結果並且獲得啟發。
+VerifiQuant 追求的其實是「在可審計的前提下，涵蓋足夠多的題型」。
+
+ INR–GBP，在金融市場的標準寫法中，這代表「1 單位的前者（INR）可以換到多少單位的後者（GBP）」，
+但就算是這樣沒錯，我們在verifiquant的設計遇到這裡還是會錯，因為這樣子的寫法並非共通如果直接暴力拆就會錯
+我最近遇到瓶頸是因為老師質疑我的「python外部化，ai只做語意分析＋選擇適合的模板，填入資料進模板，然後給deterministic的python code跑完得到ground truth」泛用性低，擴展性差。
+
+
+20260204 Weekly Meeting
+R14946005柯宥圻
+
+本週目標：建立資料集、測試系統能力
+真的很抱歉寒假的進度推比較少，但是最近真實遇到了以下事情
+google等公司面試要考DSA，期末考後到1月在練習刷題（已結束）
+台積電的黑客松進入決賽，這禮拜五、禮拜六跟隊友在台積電比賽，這個禮拜在處理比賽前要準備的model training事情（關於背景光源追蹤的計畫）
+遠親過世，去老家拜訪團聚處理後事
+優式資本結案，我和隊友在處理將code整理、打包進入私人系統的事情
+出遊行程（已結束）
+
+LLM on finance reasoning
+
+回顧論文: LLM on answering financial data
+LLM 在金融新聞或財報的情感提取和分類任務中表現優異，能快速處理大量非結構化文字。例如，在 FinMA 模型的評估中，它在情感分析任務的準確率高達 85-90%。 
+2024LLM 在 CFA 考試的 Level I 和 II 部分（如投資組合管理和固定收益分類）通過率可達 70-80%，2025年的研究在Level III也可以到80%左右。
+但我還沒有整理好一個overview，因為論文都是著重在小面向而且表現結果跟他們的insight常常不一致
+
+dataset能力測試
+在初步的嘗試中，我選擇的是Time-series Risk & Dependency Metrics（時間序列上的風險指標與相關性指標），選擇的原因是：資料集好找且乾淨，LLM有機會有錯誤，可以識別不同llm發生錯誤種類的特性。
+雖然在我原始的想法中是採取在財報裡面抓資料->用這些擷取到的資料做可被定義、觀測的分析，並得到結果，但是我們可以先專注於其中一個部分，接者再慢慢拓寬財經的其他部分。
+也對應到老師提到的想法：我們先對目前LLM對於財金資料解讀與指標做一個分類學，然後再去找要怎麼解決他們，我之前提出的verifiquant只是其中一種方法。
+
+系統設計總覽 
+語義與調度層（LLM layer）
+理解自然語言問題
+決定 task family、tickers、date range、formula
+產生結構化 task_plan 與 audit trace
+確定性推理與驗證層（Deterministic layer）
+Reference computation（Python / statsmodels）
+規則檢查、數學不變量、schema validation
+完全可重現、可審計
+
+簡單來說有兩個版本
+版本一：我已經有dataset, 問題描述和system prompt了，所以這些內容都給ai也可以獲得解答，如果是要測試ai計算財金問題能力的話這樣已經ok了（我設計一個 dataset，裡面有財金資料、問題，然後讓 AI 直接算出數值答案，再跟標準答案比對。）
+版本二：實際上我刻意避免讓 AI 直接算答案。AI 完全看不到原始財金資料，也看不到 reference 答案。AI 的任務不是算數字，而是決定這個問題能不能被合法回答，以及應該怎麼被回答(數字結果python搞定)。然後拆成三個責任：
+判斷問題是否符合 data contract（時間、頻率、資料可用性）
+選擇正確的公式（用 formula_id，而不是自由發揮）
+產生一個可審計的 JSON 結構，描述 task plan 與 audit 結果
+
+我目前做了哪些工程實作
+
+1. Reference Computation Engine
+Python + pandas + statsmodels
+作為唯一 ground truth
+所有 eval item 的 reference 都來自此引擎，針對每個題目去設計解答與合理推理內容，然後也有一些題目理論上是無法推得答案的，我也有在這裡設計
+2. Evaluation Dataset 設計（不是 prompt collection）
+每一題包含：
+task_family / formula_id
+audit_requirements（date range、frequency、invariants）
+tolerance（abs / rel）
+expected_outcome（answer / refusal）
+
+這裡可以先測試各式LLM會失誤的地方。設計的問題內容包含
+一個明確定義的 financial data contract
+時間範圍（2021–2025）、資料頻率（monthly）、可用欄位（returns, RF, Mkt-RF）
+一個 deterministic reference computation engine
+所有正確答案都來自同一套 Python 計算，LLM 永遠不直接算數字（可以分成兩個版本，一個是決定好schema之後讓llm生成並使用python計算數字，一個是就停在上一步，讓固定的schema內容取得公式並計算）
+一個 evaluation dataset schema
+每一題不只問「答案是什麼」，而是定義：
+這題允不允許回答
+必須滿足哪些 audit invariants
+錯的時候應該怎麼拒絕
+
+我目前做了哪些工程實作
+
+5.3 Model Output Schema
+強制 LLM：
+明確聲明使用的 formula_id
+輸出 audit.checks
+區分 answer / refusal
+不允許自由文字推理（no free-form CoT）
+
+一個例子（這裡假設ai是用來選擇先不用來計算，老實說如果只是要生成題目並且計算現在就可以做了）
+簡單來說，我們給 AI 的不是原始資料，也不是要它算數字，而是給它一個受約束的分析任務描述，要求它在明確的資料合約下，判斷能不能回答、用什麼公式、並回報審計結果。（ai不會得到公式內容、原始資料來源，而是選擇正確的schema）
+例如我們給 AI 的 user input 是一句很普通的話：Calculate the annualized volatility of AAPL from 2021 to 2025 based on monthly returns.
+這一句不是單獨給的，它一定是搭配一個 system prompt，這個 prompt 明確告訴 AI：資料時間只到 2021–2025、只能用 monthly data、volatility 的年化方式只能是 sqrt(12)、資料不足或不合規必須拒絕等等
+
+AI 不是回一段文字解釋或答案，而是回一個結構化 JSON
+如果以上的內容都ok那麼就會對應到一個python code 做可確定的計算，當然這部分也可以把計算主權還給ai
+
+
+如果題目本身不合法，例如這個：
+
+Compute the annualized volatility of AAPL from 2010 to 2012.
+
+
+資料集選擇與建置
+資料來源（完全標準）
+Equities（價格）：Yahoo Finance
+Risk-free rate & factors：Fama-French Data Library
+期間：最近 5 年（日資料）
+公司數：10 間（足夠多、但不噪）
+為什麼這樣設計？
+公開資料 → 可重現
+日頻 → rolling metrics 合理
+5 年 → window 不會太短
+10 檔 → covariance / correlation 有意義
+AAPL   # Tech
+MSFT   # Tech
+GOOGL  # Tech
+AMZN   # Consumer / Tech
+META   # Tech
+JPM    # Finance
+BAC    # Finance
+XOM    # Energy
+JNJ    # Healthcare
+KO     # Consumer Staples
+
+除了測試「答案準不準」外，也測試其他不同的能力
+（一）語義對齊能力（Task Understanding）
+能不能：從自然語言判斷 task_family、正確選擇 formula_id、辨識需要哪些 inputs，這不是數學能力，而是 financial semantics parsing。（如果ai沒有對齊人類需求就會導致失效）
+（二）合規能力（Contract Compliance）
+能不能：發現時間範圍不合法、發現 frequency 不匹配 、發現 ticker 不存在 → 正確拒絕，這在金融實務中是比算對數字更重要的能力。（避免幻覺）
+（三）審計一致性（Auditability）
+answer ≠ 合格
+answer + audit fail = 系統錯誤
+refusal + audit pass = 正確行為
+
+實際 evaluation 流程
+首先給 LLM一個固定 system prompt（data contract） 與一題 evaluation item（自然語言） ，LLM 產生結構化輸出（JSON） 。系統做三層檢查：
+ Output schema validation Formula / task family match 
+Audit requirement satisfaction 
+reference computation 比對（若允許回答） 
+這是一個完全可重現的 pipeline，不是人工判分。
+
+
+20260113 Weekly Meeting
+R14946005柯宥圻
+
+本週回顧
+這週內容回顧：
+跟家人去日本行程結束
+優式資本參訪
+準備TSMC CAREERHACK複試、準備GOOGLE暑期實習coding面試、整理github介面與履歷
+論文內容重新聚焦與優化中
+
+產學合作對方的核心假設與實務取向
+合作公司（優式資本）目前核心目標是最大化短期與中期的交易績效
+策略主軸為：大規模因子池、因子合成 + 基因演算法（GA）、挑選 Sharpe ratio 表現最佳者，著重在最後績效與風險控管平衡，和我目前的構想不同。
+實務上，近期短期策略 Sharpe ratio 可達 5+，顯示該公司搜尋與 infra 能力在當前市場 regime 下相當有效。
+目前林守德教授和優式資本合作愉快，有一些新的題目正在被發想，大部分是策略驗證的部分，聽起來會偏向研究新交易策略，還有原本發想的策略們implement在短中長期策略的績效研究等，還沒確定，我會先觀望一陣子看那邊的題目是否要做下去。（我跟優式說希望可以做系統面，但是他希望我們實驗室做交易策略面）。
+
+我與對方路線的關鍵差異與總結
+對方目前假設：只要最終績效（Sharpe、PnL）站得住中間過程的語意責任與可驗證性不是主要瓶頸
+我的研究假設：當策略搜尋空間與系統複雜度持續放大，驗證、審計與責任歸屬會成為不可忽略的系統風險。
+所以目前我仍然會繼續做現在的研究，去專注於特定領域與研究方法。
+產學合作部分： 持續參與、理解業界如何 scale 搜尋、infra 與交易系統 
+VerifiQuant 部分： 持續聚焦於 LLM 的語意角色定位，以及確定性計算與可驗證推論架構，提出novelty
+
+上週報告的總結
+scope目前還太大太模糊應該要找一個specific的問題來解，不用完整但是要驗證可行性
+要找一個真的可以用的資料集，確保我的問題在保證可復現性以外不會表現太差
+最近在想的事情是要不要讓ai完全照者卡片與卡片的組合來做，因為這樣子中間產物的管理會很麻煩，但如果授權給llm做有限度的調整卻又有錯誤的可能性。
+我最近讀的論文大部分提到的「可復現性」都是相同問題換個問法有沒有辦法讓結果一樣，審計則是讓llm自己審計做laaj，我暫時沒有找到更多相對應的論文，所以打算從設計資料集和效果驗證開始看（並且找學術痛點）
+
+或許可以用的資料集vs可復現性
+我打算嘗試先確定我們要使用的benchmark，verifiquant之前被老師說的指教是：
+- scope目前還太大太模糊應該要找一個specific的問題來解，不用完整但是要驗證可行性
+- 要找一個真的可以用的資料集，確保我的問題在保證可復現性以外不會表現太差
+我本來最有興趣的是jp morgan的100題研究提但是後來沒有公開，他有分成統計問題和財務問題，但就算她有公開還是有點太廣泛。
+裡面同時混了： time-series statistics, portfolio analytics, accounting ratios macro + equity, 混合指標等，scope 太大，想挑最乾淨、最容易錯、最容易驗證的問題。
+
+如何設計資料集來驗證我的想法？
+尋找好的資料應該要滿足這些條件
+有明確定義的計算。
+有公開、穩定、可重播的資料，如果是可以用api獲取整理得更好。
+LLM 很常算錯（用錯公式、用錯欄位、用錯 window），如果可以的話可以嘗試開源模型的能力差異。
+系統可以系統性避免這些錯誤。
+我會希望避免從頭開始發明問題，因為這會有很多疑慮，例如External validity（是不是真的有人在用還是我在研究沒人研究的問題）、Cherry-picking、Comparability等。同時也不會完全使用他人既定的資料集問題，而是一個有修改過適合我們的問題集，我們要表現出穩定的回答品質跟可驗證性等。
+
+Use existing datasets, but design new tasks that stress the failure modes I care about.
+如果現在馬上挑一個的話，我會選擇time-series risk & dependency metrics
+Time-Series（時間序列）： 數據是按時間順序排列的（如：每日、每小時）。這讓我們能觀察趨勢（Trend）、季節性（Seasonality）和異常波動（Volatility）。
+Risk Metrics（風險指標）： 衡量潛在損失或失敗的機率。例如：金融中的 VaR（風險價值）、系統運維中的平均故障間隔（MTBF）。
+Dependency Metrics（相依性指標）： 衡量 A 與 B 之間的耦合程度。如果 A 發生延遲，B 會受多大影響？
+
+
+我們希望準確讓我的系統回答的是：
+在時間序列風險與相依性計算中，系統是否能：
+正確理解計算意圖，包含annualized or not, rolling window size, return definition等等
+正確選擇計算算子（card），包括但不限於std vs var, cov vs corr, beta vs corr
+正確對齊資料: dates, frequencies, missing handling等要進行處理、透明化
+產生可重播、可審計的計算結果：每一步 trace,數字來源到output
+我們希望有一組 固定、公開、可信的時間序列資料，然後設計一組「對計算意圖高度敏感」的問題，來比較不同系統在 計算正確性、穩定性、可審計性 上的差異。
+
+這是一個可以『證明 VerifiQuant 有用』的最小問題集？
+或許是，但前提是要想好該怎麼樣運用和用它來說明系統，以及一個合適的dataset(一張表加上數個問題），進行壓力測試。
+我想要定義一類計算任務，其錯誤模式在 LLM 系統中特別常見。藉由設計可控的計算任務來測系統錯誤模式。如果直接用現成的qa內容反而會陷入跟他人比較。我希望我的系統可以比zero-shot或cot好。
+但是我不確定這樣子（現有dataset放資料但是沒有問答，我自己設計問答）是否正確，還是我真的要想辦法去找一組包含數據與qa的dataset
+Verified computation of time-series risk and dependency metrics under explicit assumptions and audit constraints.
+
+我們把 LLM 的自由度視為風險來源，而不是智能來源；因此設計的目標是用形式化與封閉算子空間，把風險移出模型、移進可驗證系統。
+
+回顧放者LLM自由回答可能會錯誤的問題 Threat Model
+一開始的核心假設錯誤
+使用者沒有講清楚所以隨便猜一個
+一開始核心的公式就用錯
+在推理時遇到瑕疵且未及時修正(包含金融知識不足）
+window size 誤用
+沒有對齊交易日
+ 用 correlation 當 tracking error等等的
+計算錯誤或者丟失中間項
+雖然這些看似是CoT可以解決的問題，但是前面提到過，一來是計算的結果與用戶的意圖之間對齊CoT不一定可以達成，二來是LLM可能弄錯核心假設，例如公式超參數錯誤，3來是不斷提到的審計性問題，最後是計算外部化比讓cot想更好。
+
+risk / dependency 資料概述
+我要找的資料集應該要符合：
+原始時間序列（raw time series）
+被廣泛使用、沒人會質疑其可信度
+能支撐多種風險 / 相依性計算
+資料處理細節清楚（頻率、欄位定義）
+允許你自己定義 intent 與 metric
+所以其實可以找單一或多家公司的股價時間序列，股票 × 市場因子（CAPM / dependency 的黃金標準）例如fama french等，可以故意製造：日期不齊、頻率不一致等
+
+implementation examples:
+Daily adjusted close prices of 20 U.S. equities (2015–2022)
+Daily market factor returns (Fama–French)
+Task instantiations（你設計的 benchmark）
+Rolling volatility (W = 60, annualized)
+Rolling correlation (AAPL, MSFT, W = 90)
+CAPM beta (AAPL vs MKT, 2018–2020)
+Tracking error vs S&P 500等
+風險：這些問題其實太簡單，雖然前面有提到verifiquant好處但是會不會這些問題直接問chatgpt就已經達到讓用戶放心的準確率？
+
+題目越簡單 → 結果越應該可信 → 系統缺陷越明顯
+如果在「簡單到大家都會算的問題」上，模型仍然：無法清楚說明假設、無法重播、無法審計，那它在複雜問題上更不值得被信任。
+可能的實驗結果比較是：
+GPT-5.2：
+數值正確率：98%
+可重播率：不穩定
+假設顯性化：低
+trace 可驗證性：接近 0
+VerifiQuant：
+數值正確率：97–99%（甚至可能略低）
+可重播率：100%
+假設顯性化：100%
+trace 可驗證性：100%
+後者反而可以抓到所有錯誤可能性與後續的問問題方向。
+
+Template 1: Rolling Volatility with Explicit Assumptions
+Compute the annualized rolling volatility of a stock’s daily returns over a fixed window.
+Formal specification elements:
+Asset: single equity iii
+Input data: daily adjusted close prices
+Return definition: log returns
+Rolling window: W trading days
+Annualization factor: 252
+Missing data handling: drop missing observations
+Output: time series of rolling volatility values over a specified date range
+
+LLM常見錯誤
+用 price 的 std，而不是 return
+用 simple return / log return 混用
+ 忘記 annualization 或用 365
+window size 誤用（60 vs 63）
+對 missing values silently forward-fill
+每次回答數值不同（不可重播）
+這些錯誤通常不會被語言層面的 CoT 發現。
+
+VerifiQuant 如何避免
+IntentSpec 強制顯性化： return type , window , annualization 
+Card restriction： 選 rolling_std(return) + annualize 
+Preflight checks： window 是否合理, 年化因子是否指定 等
+Deterministic execution： 相同輸入 → 相同輸出 
+Audit trace： 每個 volatility 值都能回溯到一組 return，然後記錄用到的值，使用的公式
+
+我打算採用的資料來源/整理
+股票日頻價格時間序列（約 20 檔美國大型股）
+使用調整後收盤價（Adj Close）
+後續轉成日報酬（return）
+Fama–French 資料
+Market factor（MKT-RF）
+Risk-free rate（RF）
+我刻意不使用「已經幫我算好風險指標的資料集」，因為風險與相依性指標本身就是我要驗證的對象。
+
+
+預計進行的 benchmark 任務（先做小而精）
+第一階段我會聚焦在 3 類 time-series risk / dependency 任務：
+Rolling volatility: 指定 window size、年化方式
+Rolling correlation 不同股票之間，明確定義對齊方式
+CAPM beta股票 vs 市場因子（MKT-RF），明確處理 RF
+這些任務本身在數學上不難，但非常適合暴露 LLM 的常見錯誤模式，例如：
+一開始假設不明確（window、return 定義）
+用錯指標定義（correlation 當 tracking error）
+資料未對齊卻沒被察覺
+算對數值但無法說清楚是怎麼算的
+
+這樣下來大致上回到財金系與資料科學的交會點並且讓這個系統可以寫我寫過的作業ｘｄ
+
+VerifiQuant 在這裡要驗證的是什麼
+Intent alignment:先把使用者問題轉成一個明確的、可審查的 IntentSpec, 人類確認後 freeze，不允許推理中偷偷改假設
+Constrained computation: LLM 不能自由寫程式，只能在既有的 formula cards 下做計算編排
+Auditability & replayability; 每一步計算都有 trace、輸入來源、公式依據, 同樣輸入一定可以重跑得到同樣結果
+
+我會刻意對比「直接問 GPT」與 VerifiQuant，在可解釋性、可重播性、錯誤可定位性上的差異，而不只比數值。
+
+預期能達成的效益
+即使在簡單金融任務上，LLM 的回答仍然缺乏形式化保證
+透過 IntentSpec + card-based execution，可以把 LLM 的角色從「計算者」降級為「受約束的規劃者」
+在不犧牲實用性的前提下，可以換來審計性與可重播性，這對金融應用是實質價值
+如果第一階段跑通，後續才會考慮更複雜的任務（例如投組層級或多步 DAG），但不會一開始就把 scope 拉太大。
+
+
+AIRepr: An Analyst-Inspector Framework for Evaluating Reproducibility of LLMs in Data Science
+
+這篇論文是2025 emnlp (Nov, 2025)，主要的功能是評估資料科學中 LLM 可複現性的分析師-檢查員框架，看看這種可復現性是否可以取代deterministic的卡片內容，如果每次生成的code可以復現的話或許不用那麼麻煩。
+論文引入了兩種新的可複現性增強提示策略，並在來自三個公開基準測試的 15 個分析師-檢查員 LLM 對和 1032 個任務上。
+
+
+圖片說明
+給定一個任務，AI產生工作流程、程式碼和結論。AI檢查員基於該工作流程產生新的程式碼和新的結論。如果人工智慧分析師的結論可以獨立復現，那麼人工分析師就可以專注於評估工作流程的合理性，而無需驗證程式碼。但如果人工智慧解決方案未能通過可複現性檢查，則需要對其進行修改，然後再提交人工審核。 痛點：這篇還是要請ai生工作流程啊？
+
+Assessing Consistency and Reproducibility in the Outputs of Large Language Models:
+Evidence Across Diverse Finance and Accounting Tasks
+這是一篇arxiv論文，2025/09出版有27 citations，找到的原因是關鍵字搜尋的第一篇
+他們說This study provides the first comprehensive assessment of consistency and reproducibility in (LLM) outputs in finance and accounting tasks.
+研究任務：classification, sentiment analysis, summarization, text generation, and prediction，這些任務在「獨立問答」之間的關聯。
+資料來源 financial source texts and data, covering MD&As, FOMC statements, finance
+news articles, earnings call transcripts, and financial statements
+
+前言
+LLM 的財務分析是否能夠產生一致、可複現的結果？他們研究發現在2025年也仍未被（充分）探索。
+如果不使用LLM而使用各種已經發展成熟的深度學習模型，在金融任務的可驗證性上已經有許多發展。金融領域的機器學習文獻已經開發了各種方法來應對可解釋性和驗證挑戰。 深度學習技術在資產定價 (Chen et al. 2024)、抵押貸款風險預測 (Sadhwani et al. 2021)、共同基金績效評估 (Kaniel et al. 2023)、信用評級遷移 (Kumar et al. 2025) 以及許多其他應用中都取得了成功。 Giesecke et al. (2025) 透過開發針對特徵顯著性檢驗，解決了這些應用中的可解釋性擔憂。
+
+related works
+LLM本身能力：分析FOMC內容、情感分析、分類、總結等。
+Pérignon et al. (2024) find only 52% of finance results could be precisely reproduced even with provided code and documentation。數個研究發現就算不是llm，只要涉及財務復現率就會降低。
+P-hacking，也就是想辦法讓其顯著，報告指出在財務會計領域是常見的。
+G-hacking(LLM常見)：評估方式bias，例如20筆資料只有三筆顯著但是只用力說明三筆的特性。
+Sarkar and Vafa (2024) 討論了在使用預訓練語言模型輸出的實證分析中存在的時間前瞻偏差（temporal lookahead bias）問題，也就是偷看數據。
+
+related works
+Yoo (2024) 評估了金融新聞情緒分析中 LLM 自我報告置信度分數的可靠性。 這項工作突顯了 LLM 自我評估能力的局限性，但沒有解決輸出可重複性的根本問題。（LAAJ本身的痛點）「我覺得我算出來的數學正確機率是xx%」這樣不準
+Levy (2024) 為生成式 AI 系統在會計和金融相關任務中記錄的卓越表現提供合理解釋，同時強調了 LLM 較差的數值推理能力以及預測任務中前瞻偏差的存在。
+Bini et al. (2025) 發現 LLM 在經濟決策中表現出系統性的行為偏差，並提出了減輕此類偏差的方法。
+研究旨在填補文獻中的一個關鍵空白，專門評估 LLM 在金融和會計領域的各種自然語言處理任務中，跨多次運行的表現一致性和可重複性。
+
+research questions
+RQ1：在多次運行中，LLM 在常見金融和會計任務中的輸出一致性如何？
+RQ2：不同版本的 LLMs 在輸出一致性方面表現如何？
+RQ3：大語言模型（LLMs）是否表現出與人類標註者相似的一致性模式？
+RQ4：跨多次運行的聚合策略能否增強 LLM 輸出的一致性？
+RQ5：LLM 輸出的變異如何影響下游統計分析？
+
+評估方式簡介
+透過約 75 萬次 API 呼叫產生了超過 340 萬個輸出，基於不同運行之間的 8,000 多萬次兩兩比較，創建了迄今為止對 LLM 可重複性最全面的評估之一。（比較同樣的問題在不同環境下結果差異與可再現性）。使用zero shot而非cot來避免偏差。
+測量項目包括評分者間一致性測量（Fleiss’ Kappa, Krippendorff's Alpha）、相關性指標（組內相關、Pearson、Spearman 和 Concordance）、變異指標（平均相對差異），以及其他運行層面和文件層面的輸出一致性指標，以便進行全面分析。 也評估了文字輸出在語義相似性以及語氣和長度等特徵的一致性。
+
+https://arxiv.org/html/2508.03366v1
+神經符號人工智慧方法在可解釋邏輯推理中的比較研究
+
+
+感覺現在讀論文有點太慢了，
+目前讀了那麼多都沒有相似的方法，就算是reproduce ability都偏向是多次的相同問題之後整合，這樣和我們的系統邏輯沒有到非常相似

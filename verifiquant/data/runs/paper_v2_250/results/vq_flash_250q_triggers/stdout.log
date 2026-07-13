@@ -1,0 +1,555 @@
+[framework-guided] processing test-1831
+  ↳ Turn 1: F
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1575
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2214
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1034
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1251
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1452
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1458
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1703
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2072
+  ↳ Turn 1: F
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1714
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1866
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1771
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1007
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1959
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2095
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1595
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1823
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1801
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1070
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1243
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2148
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2075
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1490
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1249
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1922
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2188
+  ↳ Turn 1: E
+  ↳ Turn 2: E
+  ↳ Turn 3: E
+[framework-guided] processing test-1248
+  ↳ Turn 1: E
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1590
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1132
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2216
+  ↳ Turn 1: E
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1088
+  ↳ Turn 1: E
+  ↳ Turn 2: E
+  ↳ Turn 3: E
+[framework-guided] processing test-1271
+  ↳ Turn 1: F
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1463
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1448
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2127
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2110
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1020
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1004
+  ↳ Turn 1: I_SOFT_MISMATCH
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1809
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2002
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: I_HARD
+  ↳ Turn 3: I_HARD
+[framework-guided] processing test-1754
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1100
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1942
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1057
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2236
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1263
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1600
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1474
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1117
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2186
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1891
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1702
+  ↳ Turn 1: N
+  ↳ Turn 2: I_SOFT_MISMATCH
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1894
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1591
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1561
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1706
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2189
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1865
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2149
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1108
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1980
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1006
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1253
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1921
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2234
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1122
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2199
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1926
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2021
+  ↳ Turn 1: I_SOFT_MISMATCH
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1264
+  ↳ Turn 1: C
+[framework-guided] processing test-1805
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1545
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2137
+  ↳ Turn 1: I_SOFT_MISMATCH
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1035
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1442
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2204
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1131
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2093
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1709
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1437
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1578
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1750
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: I_HARD
+  ↳ Turn 3: I_HARD
+[framework-guided] processing test-1593
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1864
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-2081
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-2057
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1082
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1565
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: E
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1564
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2151
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1909
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2009
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1064
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1465
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2019
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1017
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1969
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1678
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2058
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2211
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1650
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1092
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2115
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2191
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2146
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1126
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1739
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1014
+  ↳ Turn 1: E
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1427
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1472
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2218
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1647
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1664
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2023
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2004
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2020
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2179
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1861
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1434
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1607
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1422
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2130
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2079
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1842
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1890
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: I_HARD
+  ↳ Turn 3: NONE
+[framework-guided] processing test-1075
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2077
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2198
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2097
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1606
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1435
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1782
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1023
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2134
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2139
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1022
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2011
+  ↳ Turn 1: N
+[framework-guided] processing test-1433
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1879
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2014
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1008
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1242
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1105
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1777
+  ↳ Turn 1: I_SOFT_MISMATCH
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1785
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1941
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2022
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: I_HARD
+  ↳ Turn 3: I_HARD
+[framework-guided] processing test-1710
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1958
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1828
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2096
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1121
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1588
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1705
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1945
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1250
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2098
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1747
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1028
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1810
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1016
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1751
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1701
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1699
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1424
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1555
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1097
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1786
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1577
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-2024
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2080
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1952
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2125
+  ↳ Turn 1: C
+[framework-guided] processing test-2003
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1648
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1498
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1824
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2197
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1470
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1580
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1086
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1037
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1237
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1572
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1649
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1236
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1067
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1950
+  ↳ Turn 1: F
+  ↳ Turn 2: F
+  ↳ Turn 3: F
+[framework-guided] processing test-1825
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1808
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1787
+  ↳ Turn 1: N
+  ↳ Turn 2: NONE
+[framework-guided] processing test-2010
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1128
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1062
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2237
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1094
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1499
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1712
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1597
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2104
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2163
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1902
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2102
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2088
+  ↳ Turn 1: E
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1609
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2052
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1043
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2231
+  ↳ Turn 1: M
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1439
+  ↳ Turn 1: E
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1500
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2187
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2121
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1993
+  ↳ Turn 1: N
+[framework-guided] processing test-2224
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1967
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1560
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1080
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1845
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1652
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2159
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1708
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1826
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2143
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1903
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1841
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2108
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1494
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1102
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1668
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1661
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1026
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1715
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1546
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1924
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1563
+  ↳ Turn 1: I_HARD
+  ↳ Turn 2: NONE
+[framework-guided] processing test-1003
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1032
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2065
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2160
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1704
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1559
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2059
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1063
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1443
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1039
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1605
+  ↳ Turn 1: NONE
+[framework-guided] processing test-2025
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1446
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1789
+  ↳ Turn 1: NONE
+[framework-guided] processing test-1036
+  ↳ Turn 1: NONE
+Wrote 250 framework-guided records to verifiquant/data/runs/paper_v2_250/results/vq_flash_250q_triggers/output.jsonl
+{
+  "total_cases": 250,
+  "success_count": 238,
+  "success_rate": 0.952,
+  "correct_count": 235,
+  "accuracy": 0.94,
+  "recovery_count": 26,
+  "recovery_rate": 0.104
+}
