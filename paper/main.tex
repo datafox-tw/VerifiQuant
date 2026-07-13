@@ -25,19 +25,30 @@
 \affiliation{\institution{Anonymous Institution}\country{}}
 
 \begin{abstract}
-Large language models are increasingly embedded in financial workflows, yet they are governed---if at all---by prompts and post-hoc review.
-We argue that the central deployment risk is not accuracy but \emph{governability}: a production financial AI system must declare its scope boundaries, refuse structurally when it cannot verify its own reasoning, expose audit-replayable decision traces, and numerically cross-verify every repair it applies against a contract-declared algebraic relation at the exact binding being repaired.
-We present \textbf{VerifiQuant}, a framework that compiles these governance controls into the reasoning pipeline itself.
-Each financial formula family is represented as a \emph{Financial Inference Contract} (FIC)---retrieval metadata, deterministic executable code, invariants, and declared semantic ambiguities---and every query passes through a six-layer diagnostic funnel in which each layer (M, N, F, E, I, C) is a legitimate, auditable exit.
-Semantic repairs are restricted to \emph{verifiable atomic transforms} whose numerical effect is cross-checked against a declared algebraic identity before acceptance.
-On 250 FinanceReasoning questions spanning medium and hard tiers, VerifiQuant reaches \vqAccAll{} accuracy with a silent-wrong rate of \vqSWRAll{}, dominating chain-of-thought baselines on \emph{both} axes at their respective operating points: the strongest CoT+oracle configuration reaches \cotoAccAll{} accuracy with \cotoSWRAll{} SWR, and the gap widens with difficulty (\vqSWRatioMed{} lower SWR on the medium tier, \vqSWRatioHard{} on hard).
-In fully autonomous operation ($K{=}1$, no clarification) VerifiQuant reaches 81.2\% accuracy with 2.8\% SWR at 84\% coverage; the headline \vqAccAll{} is clarification-assisted recoverability, and under matched coverage the deployed abstention policy exceeds even a perfect-rejector upper bound for the single-shot baseline (\S\ref{sec:kablation}).
-Its abstention is selective in a way prompting cannot replicate: on formula families absent from the contract library it abstains 88.9\% of the time versus 19.6\% on covered families, while a refusal-permitted CoT baseline shows almost no such separation (\S\ref{sec:oodfam}).
-Every residual VerifiQuant failure is attributed to one of three named frontier gaps---and mechanizing one of them (declared-hint recall) already cuts overall SWR to 1.2\% and the medium tier to 0\%, at an explicit 1.6-point coverage cost.
-On contract-grounded adversarial traps the funnel cuts silent-wrong rates from 90\% to 20\% (boundary violations) and 100\% to 10\% (ambiguity).
-Critically, governance does not transfer through prompts: injecting the complete diagnostic taxonomy into oracle prompts \emph{degrades} accuracy under blind review, and prompted refusal misfires on the wrong questions.
-Governance must be executed by architecture, not described in context.
+Large language models embedded in financial workflows fail most dangerously by emitting \emph{silent wrongs}---confident, well-formatted, wrong numbers carrying no signal that distinguishes them from correct ones: chain-of-thought baselines do so on \cotSWRAll{} of 250 financial questions, rising on the hard tier.
+We argue the central deployment risk is therefore \emph{governability}, not accuracy: a production system must declare its scope, validate its inputs, disclose its assumptions, and refuse structurally when it cannot verify its own reasoning.
+\textbf{VerifiQuant} compiles these controls into the pipeline itself: each formula family becomes a \emph{Financial Inference Contract} (retrieval metadata, deterministic executable code, invariants, declared semantic ambiguities); every query passes a six-layer diagnostic funnel (M/N/F/E/I/C) whose gates are structured, auditable exits; and repairs are restricted to atomic transforms numerically cross-verified against a contract-declared relation at the exact binding being repaired.
+The LLM selects, binds, and flags---it never computes.
+Operating fully autonomously ($K{=}1$), VerifiQuant answers 84\% of the questions with 81.2\% overall accuracy and a 2.8\% silent-wrong rate, versus \cotSWRAll{} for single-shot CoT and \cotoSWRAll{} for the strongest CoT-plus-oracle baseline; its real risk--coverage operating point exceeds the single-shot baseline's perfect-rejector upper bound at matched coverage.
+With a ground-truth-blind clarification oracle ($K{=}3$), abstentions convert into correct answers and accuracy reaches \vqAccAll{} at \vqSWRAll{} SWR---reported separately as \emph{recoverability}, not autonomous accuracy.
+The abstention is selective where prompting is not: the system abstains on 88.9\% of formula families absent from its contract library versus 19.6\% of covered ones, cuts silent-wrong rates on contract-grounded traps from 90\% to 20\% (boundary violations) and 100\% to 10\% (ambiguity), and every residual failure is post-hoc localized to one of three pre-declared LLM-mediated steps---mechanizing one of them (declared-hint recall) further cuts overall SWR to 1.2\%.
+In our setting, describing governance in prompts did not reproduce the selectivity or attribution of executed controls.
+All claims are scoped to formula-grounded financial numerical reasoning: questions whose answer is a deterministic computation over inputs extractable from the given context.
 \end{abstract}
+%% ---------- OLD ABSTRACT (replaced 2026-07-13, kept for reference) ----------
+%% Large language models are increasingly embedded in financial workflows, yet they are governed---if at all---by prompts and post-hoc review.
+%% We argue that the central deployment risk is not accuracy but \emph{governability}: a production financial reasoning system must declare its scope boundaries, refuse structurally when it cannot verify its own reasoning, expose audit-replayable decision traces, and numerically cross-verify every repair it applies against a contract-declared algebraic relation at the exact binding being repaired.
+%% We present \textbf{VerifiQuant}, a framework that compiles these governance controls into the reasoning pipeline itself, scoped to the \emph{formula-grounded numerical core} of financial workflows: questions whose answer is a deterministic computation over extractable inputs.
+%% Each financial formula family is represented as a \emph{Financial Inference Contract} (FIC)---retrieval metadata, deterministic executable code, invariants, and declared semantic ambiguities---and every query passes through a six-layer diagnostic funnel in which each layer (M, N, F, E, I, C) is a legitimate, auditable exit.
+%% Semantic repairs are restricted to \emph{verifiable atomic transforms} whose numerical effect is cross-checked against a declared algebraic identity before acceptance.
+%% On 250 FinanceReasoning questions spanning medium and hard tiers, VerifiQuant reaches \vqAccAll{} accuracy with a silent-wrong rate of \vqSWRAll{}, dominating chain-of-thought baselines on \emph{both} axes at their respective operating points: the strongest CoT+oracle configuration reaches \cotoAccAll{} accuracy with \cotoSWRAll{} SWR, and the gap widens with difficulty (\vqSWRatioMed{} lower SWR on the medium tier, \vqSWRatioHard{} on hard).
+%% In fully autonomous operation ($K{=}1$, no clarification) VerifiQuant reaches 81.2\% accuracy with 2.8\% SWR at 84\% coverage; the headline \vqAccAll{} is clarification-assisted recoverability, and under matched coverage the deployed abstention policy exceeds even a perfect-rejector upper bound for the single-shot baseline.
+%% Its abstention is selective in a way prompting cannot replicate: on formula families absent from the contract library it abstains 88.9\% of the time versus 19.6\% on covered families, while a refusal-permitted CoT baseline shows almost no such separation.
+%% Every residual VerifiQuant failure is post-hoc localized to one of three pre-declared frontier classes---the three pipeline steps where the LLM still acts (selection, binding, hint recall)---and mechanizing one of them (declared-hint recall) already cuts overall SWR to 1.2\% and the medium tier to 0\%, at an explicit 1.6-point coverage cost.
+%% On contract-grounded adversarial traps the funnel cuts silent-wrong rates from 90\% to 20\% (boundary violations) and 100\% to 10\% (ambiguity).
+%% Critically, governance did not transfer through prompts in our experiments: injecting the complete diagnostic taxonomy into oracle prompts \emph{degrades} accuracy under blind review, and prompted refusal misfires on the wrong questions.
+%% In our setting, describing governance in prompts did not reproduce the selectivity or attribution of executed controls.
+%% ----------------------------------------------------------------------------
 
 \begin{CCSXML}
 <ccs2012>
@@ -81,11 +92,16 @@ VerifiQuant is built around three mechanisms.
 
 \textbf{Contributions.}
 \begin{itemize}
-\item We reframe financial LLM reliability as a governance problem and derive six executable controls from regulatory requirements (Table~\ref{tab:spine}), mapping each to an architectural mechanism and an experimental test.
+\item We reframe financial LLM reliability as a governance problem and operationalize recurring regulatory governance concerns into six executable controls (Table~\ref{tab:spine}), mapping each to an architectural mechanism and an experimental test.
 \item We present the FIC + diagnostic-funnel architecture with verifiable atomic transforms (\S\ref{sec:method}), making refusal, clarification, and repair first-class auditable outcomes.
-\item On 250 FinanceReasoning \cite{tang2025financereasoning} questions (180 medium + 70 hard), VerifiQuant dominates CoT baselines on accuracy \emph{and} silent-wrong rate at their respective operating points (\vqAccAll{} / \vqSWRAll{} vs.\ \cotoAccAll{} / \cotoSWRAll{} for the strongest baseline), with the SWR gap widening under difficulty shift (\S\ref{sec:results}); we separate autonomous ($K{=}1$: 81.2\%, 2.8\% SWR) from clarification-assisted operation, place both on a risk--coverage curve against a perfect-rejector baseline bound (\S\ref{sec:kablation}), and attribute every residual failure to a named frontier gap (\S\ref{sec:attribution}).
+\item On 250 FinanceReasoning \cite{tang2025financereasoning} questions (180 medium + 70 hard), VerifiQuant dominates CoT baselines on accuracy \emph{and} silent-wrong rate at their respective operating points (\vqAccAll{} / \vqSWRAll{} vs.\ \cotoAccAll{} / \cotoSWRAll{} for the strongest baseline), with the SWR gap widening under difficulty shift (\S\ref{sec:results}); we separate autonomous ($K{=}1$: 81.2\%, 2.8\% SWR) from clarification-assisted operation, place both on a risk--coverage curve against a perfect-rejector baseline bound (\S\ref{sec:kablation}), and post-hoc localize every residual failure to one of the three LLM-mediated pipeline steps (\S\ref{sec:attribution}).
 \item We show governance does not transfer through prompts: describing the full diagnostic taxonomy to an oracle \emph{degrades} it under blind review, and prompted refusal is non-selective (\S\ref{sec:promptsnotcontrols}). We further localize the I-gate's binding constraint to \emph{declared-hint recall} and show a deterministic trigger pre-pass recovers it (\S\ref{sec:recall}).
 \end{itemize}
+
+\emph{Scope of claims.}
+This paper's evaluated territory is the formula-grounded numerical core: single questions whose answer is a deterministic computation over inputs extractable from the given context.
+Production financial workflows add multi-document extraction, tabular and PDF ingestion, conflicting sources, data freshness, jurisdiction-dependent accounting policy, and non-numerical judgment; our deployed demonstration system already ingests PDF and tabular context, but none of the claims here depend on it.
+``Governance-by-execution'' is evaluated for the reasoning core, not the full document-to-decision pipeline.
 
 \section{The Governance Problem}\label{sec:governance}
 
@@ -191,6 +207,14 @@ FIC cards are auto-generated per formula family present in the reference corpus 
 \emph{Contamination control.}
 An early pipeline built cards from each question's reference \emph{solution}---effectively compiling the test set into the knowledge base and mass-producing near-duplicate cards.
 The final protocol generates cards only from the benchmark's independent reference-function corpus (article-level implementations published separately from the questions), never receives gold answers or per-question solution code, and deduplicates formula kernels by AST hashing.
+\emph{Contract engineering cost, quantified.}
+The 250-card library was generated \emph{fully automatically}---three staged LLM calls per family (core, retrieval, repair) plus deterministic normalization.
+Manual inspection was not performed exhaustively at this scale; quality control is the gate battery, with automated audits surfacing a small candidate set for human review.
+The measured record: execution smoke 0/250 failures; E-check lint auto-repaired 4 expressions on 2 cards; the post-run type audit auto-repaired 4 cards under the pre-declared output policy and surfaced 5 candidates for human adjudication (2 deliberately-array cards confirmed as intended, 3 false positives cleared).
+The division of labor shifted rather than the cost vanishing: the 50Q pilot (before the audit battery) required hand repair on 5/50 cards from execution signals alone; at 250 cards the same signal classes are caught and repaired by automated audits, with human attention narrowed to the audit-flagged candidates above.
+What survives the gates is \emph{semantic} specification error---exactly the class-B/C/D frontier of \S\ref{sec:attribution}---and the hint-trigger pre-pass (\S\ref{sec:recall}) is its first mechanized reduction.
+The honest statement of the trade is that runtime hallucination is exchanged for build-time specification error, which is static, per-family localized, and partially auditable without gold answers; the record above quantifies ``partially''.
+We do not measure inter-author consistency (cards have a single LLM author) or cross-domain migration cost.
 
 \textbf{Trap set (contract-grounded).} Trap labels guessed from question text are themselves unreliable, so each trap is derived from a clean question plus its FIC by a deterministic operator---the label \emph{is} the operator.
 \textbf{F} removes a required input; \textbf{E} injects a boundary-violating value anchored to a declared E-check predicate; \textbf{I} deletes the disambiguating phrase that re-opens a declared semantic hint (hard/soft per the contract); \textbf{N} swaps in an out-of-scope ask while keeping the original context; \textbf{M} replaces the question with under-specified intent.
@@ -296,7 +320,9 @@ $K{=}3$ (canonical) & 234 (93.6\%) & 8 (3.2\%) & 8 & 96.8\% & 96.7\% \\
 
 \textbf{Matched-coverage comparison.}
 Point accuracies at different coverages are not directly comparable: VerifiQuant abstains, CoT answers everything.
-CoT exposes no confidence signal to threshold, so instead of sweeping one we grant it the strongest possible abstention mechanism: a \emph{perfect rejector} that drops its wrong answers first, tracing each baseline's best-case risk--coverage frontier (Figure~\ref{fig:riskcov}).
+Our CoT baselines expose no calibrated confidence to threshold; real proxies exist---answer entropy, self-consistency vote margins, verifier or external-calibrator scores---but any such proxy induces \emph{some} rejector, and every realizable rejector is dominated by the \emph{perfect} one that drops wrong answers first.
+We therefore grant the baseline the perfect rejector, tracing its best-case risk--coverage frontier (Figure~\ref{fig:riskcov}): beating this bound beats every confidence heuristic the baseline could deploy at that coverage.
+(Benchmarking specific proxies is future work; empirically, the refusal frontiers the baseline \emph{does} realize---prompted refusal in \S\ref{sec:promptsnotcontrols}, refusal-permitted prompting in \S\ref{sec:oodfam}---fall far below the bound.)
 VerifiQuant's \emph{real} autonomous operating point (96.7\% selective accuracy at 84\% coverage) lies \emph{above} the single-shot baseline's perfect-abstention bound at the same coverage (92.4\%): a deployed, attributable abstention policy beats what the baseline could achieve only with an oracle-grade rejector it does not have.
 The one bound that edges above it (CoT+oracle's, 97.6\% at 84\%) pits an oracle-assisted baseline's theoretical best against VerifiQuant \emph{without} clarification; at its own assisted setting ($K{=}3$) VerifiQuant again exceeds that baseline's bound at matched coverage by $\sim$12 points.
 The prompted-refusal ablation (\S\ref{sec:promptsnotcontrols}) closes the remaining objection empirically: when the baseline is actually given a refusal channel, its realized frontier collapses far below the perfect-rejector bound.
@@ -310,7 +336,10 @@ The prompted-refusal ablation (\S\ref{sec:promptsnotcontrols}) closes the remain
 
 \subsection{Residual-failure attribution and the audit loop}\label{sec:attribution}
 Fifty-question pilots of this framework achieved SWR $=0\%$; at 250 questions with a hard tier, silent wrongs appear.
-We attribute \emph{every} one.
+We localize \emph{every} one---but two kinds of attribution must not be conflated.
+\emph{Runtime diagnostic attribution} is what the system emits at a structured exit (which gate, which check): available at deployment, no gold answer involved.
+Silent wrongs, by definition, escaped every gate; for those we perform \emph{post-hoc research attribution}: with gold answers and the stored DiagnosticReport we identify which pipeline step diverged.
+The class taxonomy is not invented per error: the funnel leaves exactly three LLM-mediated steps---contract selection, input binding, declared-hint recall---fixed by the architecture before any run, and assignment is read off the stored trace (wrong \texttt{fic\_id} $\rightarrow$ selection; wrong bound value $\rightarrow$ binding; undischarged declared hint $\rightarrow$ recall), performed by one author but largely forced by the trace.
 The \swResidual{} silent wrongs of the initial 250Q run decompose into four classes.
 (The canonical numbers in Table~\ref{tab:main} are from the post-audit rerun described under class~A below; we narrate the initial run first because the audit is part of the result.)
 \textbf{(A) Output-policy violations (\swClassA{}, all hard).} Three time-series indicator cards (NVI, VPT, VWAP) compute the correct value series but return the whole list, violating the pre-declared scalar-output policy; the runtime surfaced the first element while the series-final value matches gold.
@@ -320,8 +349,9 @@ This audit-repair cycle is governance-by-execution applied to the system itself:
 \textbf{(C) Binding slips (\swClassC{}).} The extractor bound a wrong-but-legal value (e.g., the annualization base 360 where the 90-day tenor was required): the input-provenance gap of \S\ref{sec:limitations}.
 \textbf{(D) Declared-but-unrecalled ambiguities (\swClassD{}).} Most instructive: in all three cases the selected card \emph{already declares} the exact ambiguity as a semantic hint (per-share vs.\ total premium; percent vs.\ decimal output; sign convention of working-capital changes), yet the LLM critic failed to trigger it---declaration coverage 3/3, recall 0/3 (\S\ref{sec:recall}).
 
-After the class-A repair, the canonical rerun (Table~\ref{tab:main}) has \swResidualCanon{} silent wrongs---all from the \emph{same three frontier families} (\swCanonB{} selection, \swCanonC{} binding, \swCanonD{} convention), with zero unattributed: five persist from the initial run and three are sampling-variant instances of the same families (two of the initial convention cases resolve correctly under resampling, confirming that class~D behaves as an unflagged coin flip---precisely what I\textsubscript{SOFT} disclosure exists to prevent).
+After the class-A repair, the canonical rerun (Table~\ref{tab:main}) has \swResidualCanon{} silent wrongs---all from the \emph{same three frontier families} (\swCanonB{} selection, \swCanonC{} binding, \swCanonD{} convention), none falling outside these classes: five persist from the initial run and three are sampling-variant instances of the same families (two of the initial convention cases resolve correctly under resampling, confirming that class~D behaves as an unflagged coin flip---precisely what I\textsubscript{SOFT} disclosure exists to prevent).
 On the canonical 50-question subset the audited cards score 50/0/0.
+Across all $\sim$300 evaluated questions (250 main + 50 canonical), every observed silent wrong localizes to one of the three pre-declared LLM-mediated steps; we do not claim the taxonomy is exhaustive in the open world, only that 300 questions produced no fourth kind---and that the three kinds correspond one-to-one to the places where the architecture still delegates to the LLM.
 
 \subsection{Protocol validation on the canonical 50Q subset}\label{sec:fiftyq}
 The 50Q medium subset carries the full baseline grid (Table~\ref{tab:fifty}).
@@ -528,7 +558,8 @@ These are organizational and policy questions; the architecture's role is to giv
 %% [/ICAIF-CUT]
 
 \section{Limitations}\label{sec:limitations}
-\textbf{Silent wrongs are reduced and attributed, not eliminated.} \swResidual{} of 250 answers were unflagged wrong numbers before the output-policy audit and \swResidualCanon{} after it; the surviving classes (selection mismatch, binding slips, convention recall) are named frontier gaps with designed mechanisms, but they are gaps.
+\textbf{Silent wrongs are reduced and post-hoc localized, not eliminated.} \swResidual{} of 250 answers were unflagged wrong numbers before the output-policy audit and \swResidualCanon{} after it; the surviving classes (selection mismatch, binding slips, convention recall) are named frontier gaps with designed mechanisms, but they are gaps---and their attribution uses gold answers (\S\ref{sec:attribution}), which deployment does not have.
+\textbf{Scope: formula-grounded numerical QA, not full workflow governance.} The evaluation is single-question benchmark QA with per-question formula targets; the workflow surface that motivates \S\ref{sec:governance}---multi-document extraction, tables and PDFs, conflicting sources, jurisdictional policy---is deployment context our demo partially implements but this paper does not evaluate.
 \textbf{The funnel's guarantee is conditional on faithful input binding} (\S\ref{sec:binding}); provenance checking is designed, not implemented.
 \textbf{Contracts are LLM-generated at build time}; build-time gates (smoke, lint, type audit) catch the mechanical failure classes without gold answers, but semantic contract errors can survive---the 50Q pilot required repairing 5 of 50 cards, all from execution signals alone.
 \textbf{The trap M-operator does not isolate intent ambiguity}; M results are excluded from claims pending redesign.
@@ -538,7 +569,7 @@ These are organizational and policy questions; the architecture's role is to giv
 \section{Conclusion}
 Financial LLM deployment is blocked less by what models get wrong than by what systems cannot govern.
 Six governance controls demanded by regulators---boundary declaration, input validation, ambiguity disclosure, cross-verified repair, audit-replayable traces, selective abstention---can be compiled into the reasoning pipeline as executable mechanisms.
-At 250 questions across two difficulty tiers, the resulting system dominates prompt-governed baselines on accuracy and silent-wrong rate at their operating points and under matched coverage, abstains selectively where its contract library ends, attributes every residual failure to a named frontier gap, and repairs its own contract defects under pre-declared policy with a full audit trail.
+At 250 questions across two difficulty tiers, the resulting system dominates prompt-governed baselines on accuracy and silent-wrong rate at their operating points and under matched coverage, abstains selectively where its contract library ends, post-hoc localizes every residual failure to one of three pre-declared frontier classes, and repairs its own contract defects under pre-declared policy with a full audit trail.
 None of this transfers through prompts: describing the funnel degrades a blind oracle, and prompted refusal misfires.
 A governed system will sometimes say less; everything it says is attributable, audit-replayable, and---where it cannot verify---honestly refused.
 In high-stakes finance, an auditable refusal is worth more than an unauditable answer.
