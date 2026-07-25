@@ -901,6 +901,18 @@ Context:
 
 Return JSON only.
 """
+    if os.environ.get("VERIFIQUANT_STRICT_BINDING", "").lower() in ("1", "true", "yes"):
+        prompt += (
+            "\nSTRICT BINDING MODE (active):\n"
+            "- Copy each value LITERALLY from the text. Do NOT sum, subtract, scale,\n"
+            "  average, annualize, or otherwise derive values, even if the schema seems\n"
+            "  to expect a derived quantity.\n"
+            "- If the schema requires a value that is not literally present in the text,\n"
+            "  set status=\"missing\" instead of computing it.\n"
+            "- The only allowed conversions are the declared unit conversions above\n"
+            "  (percent to decimal, stated scale words). Everything else belongs to the\n"
+            "  deterministic contract code, not to you.\n"
+        )
     return _llm_json(client, model=model, prompt=prompt, schema=_schema_extraction())
 
 
@@ -930,6 +942,12 @@ def _semantic_echeck_with_llm(
 # its declared i_level. The lexicon is system-level (uniform across all cards and
 # questions); per-card machine-readable trigger_keywords are future stage_core work.
 _HINT_TRIGGERS_ENABLED = str(os.environ.get("VQ_HINT_TRIGGERS", "")).strip().lower() in {"1", "true", "yes"}
+
+# Gate ablation ladder (Wave 2-A): comma-separated gates to DISABLE, e.g. "MN,F,E,I".
+# A disabled gate does not exit structurally; the pipeline proceeds as if that gate were absent.
+# MN disabled -> selector abstain_m/n forced to select the top candidate; the m_min_top_score
+# N-style confidence floor is also lifted. F/E/I disabled -> their structured exits are skipped.
+_DISABLED_GATES = {g.strip().upper() for g in os.environ.get("VQ_DISABLE_GATES", "").split(",") if g.strip()}
 
 _HINT_TRIGGER_LEXICON: List[Tuple[List[str], List[str]]] = [
     # (phrases searched in question+context, keywords required in hint id/options text)
@@ -1437,6 +1455,14 @@ def run_case(
         f"reason={str(selection.get('reason', '')).strip() or '<empty>'}"
     )
 
+    if "MN" in _DISABLED_GATES and (decision != "select_card" or not chosen_fic_id):
+        # Ablation: no M/N gate -> commit to the top-scoring candidate instead of abstaining.
+        forced = next((str(cid) for cid in candidate_ids if str(cid).strip()), "")
+        if forced:
+            _dbg(f"gate-ablation MN disabled: forcing select_card={forced}")
+            decision = "select_card"
+            chosen_fic_id = forced
+
     if decision == "abstain_m":
         _dbg("early-exit: M (selector abstain_m)")
         _set_step("mn_analysis", "error", "M ambiguity detected by selector.")
@@ -1510,7 +1536,7 @@ def run_case(
 
     top_score = candidates[0].score if candidates else 0.0
     _dbg(f"retrieval-confidence: top_score={top_score:.3f}, threshold={m_min_top_score:.3f}")
-    if top_score < m_min_top_score:
+    if top_score < m_min_top_score and "MN" not in _DISABLED_GATES:
         _dbg("early-exit: N (low retrieval confidence)")
         _set_step("mn_analysis", "error", "Retrieval confidence below threshold.")
         _set_step("extract_values", "skipped", "No trusted card selected.")
@@ -1613,6 +1639,22 @@ def run_case(
         if val is not None:
             provided_inputs[name] = val
 
+    # Optional literal-grounding guard (anti-over-normalization; see strict_binding.py).
+    # Ungrounded REQUIRED values are downgraded to missing -> the F gate requests them,
+    # converting a potential silent binding slip into a structured ask. Opt-in.
+    if os.environ.get("VERIFIQUANT_STRICT_BINDING", "").lower() in ("1", "true", "yes"):
+        from verifiquant.pipeline.strict_binding import audit_binding
+        _, _ungrounded = audit_binding(provided_inputs, q, c)
+        for _n in _ungrounded:
+            if _n in required_names:
+                provided_inputs.pop(_n, None)
+                if _n not in missing:
+                    missing.append(_n)
+                coercion_notes.append(
+                    f"[{_n}] strict-binding: value not traceable to a literal context span; "
+                    "requesting the field instead of trusting a derived value."
+                )
+
     extraction_trace = {
         "required_names": required_names,
         "llm_extracted_inputs": extraction.get("inputs", []),
@@ -1630,7 +1672,7 @@ def run_case(
         f"ambiguous={ambiguous_fields}, schema_contradictions={schema_contradiction_fields}"
     )
 
-    if missing:
+    if missing and "F" not in _DISABLED_GATES:
         _dbg("early-exit: F (missing or unparsable required inputs)")
         _set_step("extract_values", "error", f"Missing required fields: {', '.join(missing)}")
         _set_step("fe_checks", "skipped", "Cannot run checks before required fields are filled.")
@@ -1801,7 +1843,7 @@ def run_case(
         })
 
     triggered = list(dict.fromkeys(auto_triggered))
-    if triggered:
+    if triggered and "E" not in _DISABLED_GATES:
         _dbg(f"early-exit: E (triggered_rule_ids={triggered})")
         reason = "Deterministic E-type checks detected potential inconsistencies."
         _set_step("fe_checks", "alert", f"E rules triggered: {', '.join(triggered)}")
@@ -1830,19 +1872,26 @@ def run_case(
     _set_step("ihard_check", "running", "Running I-gate critic for hidden assumptions.")
 
     semantic_hints = [h for h in (core.get("semantic_hints") or []) if isinstance(h, dict)]
-    critic = _critic_check_with_llm(
-        client=client,
-        model=judge_model,
-        question=q,
-        context=c,
-        semantic_hints=semantic_hints,
-        provided_inputs=provided_inputs,
-    )
-    critic_trace = {
-        "semantic_hints_count": len(semantic_hints),
-        "raw_critic": critic,
-    }
-    if _HINT_TRIGGERS_ENABLED:
+    if "I" in _DISABLED_GATES:
+        # Ablation: no I gate -> never block or warn on semantic ambiguity; proceed to compute.
+        _dbg("gate-ablation: I disabled (skipping critic)")
+        critic = {"needs_clarification": False}
+        critic_trace = {"semantic_hints_count": len(semantic_hints), "raw_critic": critic,
+                        "disabled": True}
+    else:
+        critic = _critic_check_with_llm(
+            client=client,
+            model=judge_model,
+            question=q,
+            context=c,
+            semantic_hints=semantic_hints,
+            provided_inputs=provided_inputs,
+        )
+        critic_trace = {
+            "semantic_hints_count": len(semantic_hints),
+            "raw_critic": critic,
+        }
+    if _HINT_TRIGGERS_ENABLED and "I" not in _DISABLED_GATES:
         det_hits = _lexical_hint_triggers(q, c, semantic_hints)
         if det_hits:
             llm_ids = [str(x).strip() for x in critic.get("triggered_hint_ids", []) if str(x).strip()]

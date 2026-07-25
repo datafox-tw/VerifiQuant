@@ -1,0 +1,64 @@
+[pro_off 1/50] test-1028 correct
+[pro_off 2/50] test-1035 abstain
+[pro_off 3/50] test-1561 correct
+[pro_off 4/50] test-1443 silent_wrong
+[pro_off 5/50] test-1008 abstain
+[pro_off 6/50] test-1023 correct
+[pro_off 7/50] test-1668 correct
+[pro_off 8/50] test-1926 correct
+[pro_off 9/50] test-1652 correct
+[pro_off 10/50] test-1545 correct
+[pro_off 11/50] test-1891 correct
+[pro_off 12/50] test-1437 correct
+[pro_off 13/50] test-1699 correct
+[pro_off 14/50] test-1664 correct
+[pro_off 15/50] test-1062 correct
+[pro_off 16/50] test-1590 abstain
+[pro_off 17/50] test-1026 silent_wrong
+[pro_off 18/50] test-1070 correct
+[pro_off 19/50] test-1108 correct
+[pro_off 20/50] test-1442 abstain
+[pro_off 21/50] test-1591 correct
+[pro_off 22/50] test-1845 correct
+[pro_off 23/50] test-1606 correct
+[pro_off 24/50] test-1006 correct
+[pro_off 25/50] test-1578 correct
+[pro_off 26/50] test-1237 correct
+[pro_off 27/50] test-1022 correct
+[pro_off 28/50] test-1710 correct
+[pro_off 29/50] test-1922 correct
+[pro_off 30/50] test-1458 correct
+[pro_off 31/50] test-1704 abstain
+[pro_off 32/50] test-1865 correct
+[pro_off 33/50] test-1810 abstain
+[pro_off 34/50] test-1890 abstain
+[pro_off 35/50] test-1969 correct
+[pro_off 36/50] test-1242 correct
+[pro_off 37/50] test-1701 correct
+[pro_off 38/50] test-1801 correct
+[pro_off 39/50] test-1823 silent_wrong
+[pro_off 40/50] test-1057 silent_wrong
+[pro_off 41/50] test-1866 correct
+[pro_off 42/50] test-1446 abstain
+[pro_off 43/50] test-1427 correct
+[pro_off 44/50] test-1789 correct
+[pro_off 45/50] test-1007 correct
+[pro_off 46/50] test-1500 correct
+[pro_off 47/50] test-1805 correct
+[pro_off 48/50] test-1593 correct
+[pro_off 49/50] test-1499 correct
+[pro_off 50/50] test-1474 correct
+{
+  "tag": "pro_off",
+  "model": "gemini-2.5-pro",
+  "lib_db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_100/cards.db",
+  "strict_binding_flag": "",
+  "n": 50,
+  "correct": 38,
+  "silent_wrong": 4,
+  "abstain": 8,
+  "near_miss": 4,
+  "strict_fired": 0,
+  "elapsed_s": 1367.2,
+  "ran_at": "2026-07-20T18:20:41"
+}

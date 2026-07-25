@@ -1,0 +1,282 @@
+[sc5_gemini_25_flash 1/250] test-1831 share=1.00 OK
+[sc5_gemini_25_flash 2/250] test-1575 share=1.00 OK
+[sc5_gemini_25_flash 3/250] test-2214 share=1.00 OK
+[sc5_gemini_25_flash 4/250] test-1034 share=1.00 OK
+[sc5_gemini_25_flash 5/250] test-1251 share=1.00 OK
+[sc5_gemini_25_flash 6/250] test-1452 share=1.00 OK
+[sc5_gemini_25_flash 7/250] test-1458 share=1.00 OK
+[sc5_gemini_25_flash 8/250] test-1703 share=1.00 OK
+[sc5_gemini_25_flash 9/250] test-2072 share=1.00 OK
+[sc5_gemini_25_flash 10/250] test-1714 share=1.00 OK
+[sc5_gemini_25_flash 11/250] test-1866 share=1.00 OK
+[sc5_gemini_25_flash 12/250] test-1771 share=1.00 OK
+[sc5_gemini_25_flash 13/250] test-1007 share=1.00 OK
+[sc5_gemini_25_flash 14/250] test-1959 share=0.00 no-answer
+[sc5_gemini_25_flash 15/250] test-2095 share=1.00 OK
+[sc5_gemini_25_flash 16/250] test-1595 share=1.00 OK
+[sc5_gemini_25_flash 17/250] test-1823 share=1.00 OK
+[sc5_gemini_25_flash 18/250] test-1801 share=1.00 OK
+[sc5_gemini_25_flash 19/250] test-1070 share=1.00 OK
+[sc5_gemini_25_flash 20/250] test-1243 share=1.00 OK
+[sc5_gemini_25_flash 21/250] test-2148 share=0.00 no-answer
+[sc5_gemini_25_flash 22/250] test-2075 share=0.00 no-answer
+[sc5_gemini_25_flash 23/250] test-1490 share=1.00 wrong
+[sc5_gemini_25_flash 24/250] test-1249 share=1.00 OK
+[sc5_gemini_25_flash 25/250] test-1922 share=1.00 OK
+[sc5_gemini_25_flash 26/250] test-2188 share=1.00 OK
+[sc5_gemini_25_flash 27/250] test-1248 share=1.00 OK
+[sc5_gemini_25_flash 28/250] test-1590 share=1.00 wrong
+[sc5_gemini_25_flash 29/250] test-1132 share=1.00 OK
+[sc5_gemini_25_flash 30/250] test-2216 share=1.00 OK
+[sc5_gemini_25_flash 31/250] test-1088 share=1.00 OK
+[sc5_gemini_25_flash 32/250] test-1271 share=1.00 OK
+[sc5_gemini_25_flash 33/250] test-1463 share=1.00 OK
+[sc5_gemini_25_flash 34/250] test-1448 share=1.00 OK
+[sc5_gemini_25_flash 35/250] test-2127 share=1.00 OK
+[sc5_gemini_25_flash 36/250] test-2110 share=0.50 wrong
+[sc5_gemini_25_flash 37/250] test-1020 share=1.00 OK
+[sc5_gemini_25_flash 38/250] test-1004 share=1.00 OK
+[sc5_gemini_25_flash 39/250] test-1809 share=1.00 OK
+[sc5_gemini_25_flash 40/250] test-2002 share=1.00 OK
+[sc5_gemini_25_flash 41/250] test-1754 share=1.00 OK
+[sc5_gemini_25_flash 42/250] test-1100 share=1.00 OK
+[sc5_gemini_25_flash 43/250] test-1942 share=1.00 OK
+[sc5_gemini_25_flash 44/250] test-1057 share=1.00 OK
+[sc5_gemini_25_flash 45/250] test-2236 share=0.00 no-answer
+[sc5_gemini_25_flash 46/250] test-1263 share=1.00 OK
+[sc5_gemini_25_flash 47/250] test-1600 share=1.00 OK
+[sc5_gemini_25_flash 48/250] test-1474 share=1.00 OK
+[sc5_gemini_25_flash 49/250] test-1117 share=1.00 OK
+[sc5_gemini_25_flash 50/250] test-2186 share=1.00 OK
+[sc5_gemini_25_flash 51/250] test-1891 share=0.00 no-answer
+[sc5_gemini_25_flash 52/250] test-1702 share=1.00 OK
+[sc5_gemini_25_flash 53/250] test-1894 share=1.00 OK
+[sc5_gemini_25_flash 54/250] test-1591 share=1.00 OK
+[sc5_gemini_25_flash 55/250] test-1561 share=1.00 OK
+[sc5_gemini_25_flash 56/250] test-1706 share=1.00 wrong
+[sc5_gemini_25_flash 57/250] test-2189 share=1.00 OK
+[sc5_gemini_25_flash 58/250] test-1865 share=1.00 wrong
+[sc5_gemini_25_flash 59/250] test-2149 share=1.00 OK
+[sc5_gemini_25_flash 60/250] test-1108 share=1.00 OK
+[sc5_gemini_25_flash 61/250] test-1980 share=1.00 OK
+[sc5_gemini_25_flash 62/250] test-1006 share=1.00 OK
+[sc5_gemini_25_flash 63/250] test-1253 share=1.00 OK
+[sc5_gemini_25_flash 64/250] test-1921 share=1.00 OK
+[sc5_gemini_25_flash 65/250] test-2234 share=0.00 no-answer
+[sc5_gemini_25_flash 66/250] test-1122 share=1.00 OK
+[sc5_gemini_25_flash 67/250] test-2199 share=0.00 no-answer
+[sc5_gemini_25_flash 68/250] test-1926 share=1.00 OK
+[sc5_gemini_25_flash 69/250] test-2021 share=1.00 wrong
+[sc5_gemini_25_flash 70/250] test-1264 share=1.00 OK
+[sc5_gemini_25_flash 71/250] test-1805 share=0.50 wrong
+[sc5_gemini_25_flash 72/250] test-1545 share=1.00 OK
+[sc5_gemini_25_flash 73/250] test-2137 share=0.50 wrong
+[sc5_gemini_25_flash 74/250] test-1035 share=1.00 OK
+[sc5_gemini_25_flash 75/250] test-1442 share=1.00 OK
+[sc5_gemini_25_flash 76/250] test-2204 share=1.00 OK
+[sc5_gemini_25_flash 77/250] test-1131 share=1.00 OK
+[sc5_gemini_25_flash 78/250] test-2093 share=1.00 wrong
+[sc5_gemini_25_flash 79/250] test-1709 share=1.00 OK
+[sc5_gemini_25_flash 80/250] test-1437 share=1.00 OK
+[sc5_gemini_25_flash 81/250] test-1578 share=1.00 OK
+[sc5_gemini_25_flash 82/250] test-1750 share=1.00 OK
+[sc5_gemini_25_flash 83/250] test-1593 share=1.00 wrong
+[sc5_gemini_25_flash 84/250] test-1864 share=1.00 OK
+[sc5_gemini_25_flash 85/250] test-2081 share=1.00 OK
+[sc5_gemini_25_flash 86/250] test-2057 share=1.00 OK
+[sc5_gemini_25_flash 87/250] test-1082 share=1.00 OK
+[sc5_gemini_25_flash 88/250] test-1565 share=1.00 OK
+[sc5_gemini_25_flash 89/250] test-1564 share=1.00 OK
+[sc5_gemini_25_flash 90/250] test-2151 share=1.00 wrong
+[sc5_gemini_25_flash 91/250] test-1909 share=1.00 OK
+[sc5_gemini_25_flash 92/250] test-2009 share=1.00 OK
+[sc5_gemini_25_flash 93/250] test-1064 share=1.00 OK
+[sc5_gemini_25_flash 94/250] test-1465 share=1.00 OK
+[sc5_gemini_25_flash 95/250] test-2019 share=1.00 OK
+[sc5_gemini_25_flash 96/250] test-1017 share=1.00 OK
+[sc5_gemini_25_flash 97/250] test-1969 share=1.00 OK
+[sc5_gemini_25_flash 98/250] test-1678 share=0.67 wrong
+[sc5_gemini_25_flash 99/250] test-2058 share=0.00 no-answer
+[sc5_gemini_25_flash 100/250] test-2211 share=0.00 no-answer
+[sc5_gemini_25_flash 101/250] test-1650 share=1.00 OK
+[sc5_gemini_25_flash 102/250] test-1092 share=1.00 OK
+[sc5_gemini_25_flash 103/250] test-2115 share=0.00 no-answer
+[sc5_gemini_25_flash 104/250] test-2191 share=0.00 no-answer
+[sc5_gemini_25_flash 105/250] test-2146 share=0.00 no-answer
+[sc5_gemini_25_flash 106/250] test-1126 share=1.00 OK
+[sc5_gemini_25_flash 107/250] test-1739 share=0.00 no-answer
+[sc5_gemini_25_flash 108/250] test-1014 share=0.00 no-answer
+[sc5_gemini_25_flash 109/250] test-1427 share=1.00 OK
+[sc5_gemini_25_flash 110/250] test-1472 share=1.00 OK
+[sc5_gemini_25_flash 111/250] test-2218 share=1.00 OK
+[sc5_gemini_25_flash 112/250] test-1647 share=1.00 OK
+[sc5_gemini_25_flash 113/250] test-1664 share=1.00 OK
+[sc5_gemini_25_flash 114/250] test-2023 share=0.00 no-answer
+[sc5_gemini_25_flash 115/250] test-2004 share=1.00 OK
+[sc5_gemini_25_flash 116/250] test-2020 share=1.00 OK
+[sc5_gemini_25_flash 117/250] test-2179 share=0.00 no-answer
+[sc5_gemini_25_flash 118/250] test-1861 share=1.00 OK
+[sc5_gemini_25_flash 119/250] test-1434 share=1.00 OK
+[sc5_gemini_25_flash 120/250] test-1607 share=0.75 OK
+[sc5_gemini_25_flash 121/250] test-1422 share=1.00 wrong
+[sc5_gemini_25_flash 122/250] test-2130 share=1.00 OK
+[sc5_gemini_25_flash 123/250] test-2079 share=1.00 OK
+[sc5_gemini_25_flash 124/250] test-1842 share=0.00 no-answer
+[sc5_gemini_25_flash 125/250] test-1890 share=1.00 OK
+[sc5_gemini_25_flash 126/250] test-1075 share=1.00 OK
+[sc5_gemini_25_flash 127/250] test-2077 share=1.00 OK
+[sc5_gemini_25_flash 128/250] test-2198 share=0.67 OK
+[sc5_gemini_25_flash 129/250] test-2097 share=1.00 OK
+[sc5_gemini_25_flash 130/250] test-1606 share=1.00 OK
+[sc5_gemini_25_flash 131/250] test-1435 share=0.67 OK
+[sc5_gemini_25_flash 132/250] test-1782 share=1.00 OK
+[sc5_gemini_25_flash 133/250] test-1023 share=1.00 OK
+[sc5_gemini_25_flash 134/250] test-2134 share=1.00 OK
+[sc5_gemini_25_flash 135/250] test-2139 share=1.00 OK
+[sc5_gemini_25_flash 136/250] test-1022 share=1.00 OK
+[sc5_gemini_25_flash 137/250] test-2011 share=1.00 OK
+[sc5_gemini_25_flash 138/250] test-1433 share=1.00 OK
+[sc5_gemini_25_flash 139/250] test-1879 share=1.00 OK
+[sc5_gemini_25_flash 140/250] test-2014 share=1.00 OK
+[sc5_gemini_25_flash 141/250] test-1008 share=0.67 OK
+[sc5_gemini_25_flash 142/250] test-1242 share=1.00 OK
+[sc5_gemini_25_flash 143/250] test-1105 share=1.00 OK
+[sc5_gemini_25_flash 144/250] test-1777 share=1.00 OK
+[sc5_gemini_25_flash 145/250] test-1785 share=1.00 OK
+[sc5_gemini_25_flash 146/250] test-1941 share=1.00 OK
+[sc5_gemini_25_flash 147/250] test-2022 share=1.00 OK
+[sc5_gemini_25_flash 148/250] test-1710 share=1.00 OK
+[sc5_gemini_25_flash 149/250] test-1958 share=1.00 wrong
+[sc5_gemini_25_flash 150/250] test-1828 share=1.00 OK
+[sc5_gemini_25_flash 151/250] test-2096 share=1.00 OK
+[sc5_gemini_25_flash 152/250] test-1121 share=1.00 OK
+[sc5_gemini_25_flash 153/250] test-1588 share=1.00 OK
+[sc5_gemini_25_flash 154/250] test-1705 share=0.33 OK
+[sc5_gemini_25_flash 155/250] test-1945 share=1.00 OK
+[sc5_gemini_25_flash 156/250] test-1250 share=1.00 OK
+[sc5_gemini_25_flash 157/250] test-2098 share=0.00 no-answer
+[sc5_gemini_25_flash 158/250] test-1747 share=0.00 no-answer
+[sc5_gemini_25_flash 159/250] test-1028 share=1.00 OK
+[sc5_gemini_25_flash 160/250] test-1810 share=1.00 OK
+[sc5_gemini_25_flash 161/250] test-1016 share=1.00 OK
+[sc5_gemini_25_flash 162/250] test-1751 share=1.00 OK
+[sc5_gemini_25_flash 163/250] test-1701 share=1.00 wrong
+[sc5_gemini_25_flash 164/250] test-1699 share=0.50 OK
+[sc5_gemini_25_flash 165/250] test-1424 share=1.00 wrong
+[sc5_gemini_25_flash 166/250] test-1555 share=1.00 OK
+[sc5_gemini_25_flash 167/250] test-1097 share=1.00 OK
+[sc5_gemini_25_flash 168/250] test-1786 share=1.00 OK
+[sc5_gemini_25_flash 169/250] test-1577 share=0.60 OK
+[sc5_gemini_25_flash 170/250] test-2024 share=1.00 OK
+[sc5_gemini_25_flash 171/250] test-2080 share=0.00 no-answer
+[sc5_gemini_25_flash 172/250] test-1952 share=1.00 OK
+[sc5_gemini_25_flash 173/250] test-2125 share=0.00 no-answer
+[sc5_gemini_25_flash 174/250] test-2003 share=1.00 OK
+[sc5_gemini_25_flash 175/250] test-1648 share=1.00 OK
+[sc5_gemini_25_flash 176/250] test-1498 share=1.00 OK
+[sc5_gemini_25_flash 177/250] test-1824 share=1.00 OK
+[sc5_gemini_25_flash 178/250] test-2197 share=1.00 OK
+[sc5_gemini_25_flash 179/250] test-1470 share=1.00 wrong
+[sc5_gemini_25_flash 180/250] test-1580 share=1.00 OK
+[sc5_gemini_25_flash 181/250] test-1086 share=1.00 OK
+[sc5_gemini_25_flash 182/250] test-1037 share=0.80 OK
+[sc5_gemini_25_flash 183/250] test-1237 share=1.00 OK
+[sc5_gemini_25_flash 184/250] test-1572 share=1.00 wrong
+[sc5_gemini_25_flash 185/250] test-1649 share=1.00 OK
+[sc5_gemini_25_flash 186/250] test-1236 share=1.00 OK
+[sc5_gemini_25_flash 187/250] test-1067 share=1.00 OK
+[sc5_gemini_25_flash 188/250] test-1950 share=1.00 OK
+[sc5_gemini_25_flash 189/250] test-1825 share=1.00 OK
+[sc5_gemini_25_flash 190/250] test-1808 share=0.00 no-answer
+[sc5_gemini_25_flash 191/250] test-1787 share=1.00 OK
+[sc5_gemini_25_flash 192/250] test-2010 share=1.00 OK
+[sc5_gemini_25_flash 193/250] test-1128 share=1.00 OK
+[sc5_gemini_25_flash 194/250] test-1062 share=1.00 OK
+[sc5_gemini_25_flash 195/250] test-2237 share=0.00 no-answer
+[sc5_gemini_25_flash 196/250] test-1094 share=1.00 OK
+[sc5_gemini_25_flash 197/250] test-1499 share=1.00 OK
+[sc5_gemini_25_flash 198/250] test-1712 share=1.00 OK
+[sc5_gemini_25_flash 199/250] test-1597 share=1.00 OK
+[sc5_gemini_25_flash 200/250] test-2104 share=1.00 OK
+[sc5_gemini_25_flash 201/250] test-2163 share=1.00 OK
+[sc5_gemini_25_flash 202/250] test-1902 share=1.00 OK
+[sc5_gemini_25_flash 203/250] test-2102 share=1.00 OK
+[sc5_gemini_25_flash 204/250] test-2088 share=1.00 OK
+[sc5_gemini_25_flash 205/250] test-1609 share=1.00 OK
+[sc5_gemini_25_flash 206/250] test-2052 share=1.00 OK
+[sc5_gemini_25_flash 207/250] test-1043 share=1.00 OK
+[sc5_gemini_25_flash 208/250] test-2231 share=1.00 wrong
+[sc5_gemini_25_flash 209/250] test-1439 share=1.00 OK
+[sc5_gemini_25_flash 210/250] test-1500 share=1.00 OK
+[sc5_gemini_25_flash 211/250] test-2187 share=1.00 OK
+[sc5_gemini_25_flash 212/250] test-2121 share=1.00 OK
+[sc5_gemini_25_flash 213/250] test-1993 share=1.00 OK
+[sc5_gemini_25_flash 214/250] test-2224 share=0.00 no-answer
+[sc5_gemini_25_flash 215/250] test-1967 share=1.00 OK
+[sc5_gemini_25_flash 216/250] test-1560 share=1.00 OK
+[sc5_gemini_25_flash 217/250] test-1080 share=1.00 OK
+[sc5_gemini_25_flash 218/250] test-1845 share=1.00 OK
+[sc5_gemini_25_flash 219/250] test-1652 share=1.00 OK
+[sc5_gemini_25_flash 220/250] test-2159 share=1.00 OK
+[sc5_gemini_25_flash 221/250] test-1708 share=1.00 OK
+[sc5_gemini_25_flash 222/250] test-1826 share=1.00 OK
+[sc5_gemini_25_flash 223/250] test-2143 share=0.00 no-answer
+[sc5_gemini_25_flash 224/250] test-1903 share=1.00 OK
+[sc5_gemini_25_flash 225/250] test-1841 share=1.00 OK
+[sc5_gemini_25_flash 226/250] test-2108 share=1.00 OK
+[sc5_gemini_25_flash 227/250] test-1494 share=0.00 no-answer
+[sc5_gemini_25_flash 228/250] test-1102 share=1.00 OK
+[sc5_gemini_25_flash 229/250] test-1668 share=1.00 OK
+[sc5_gemini_25_flash 230/250] test-1661 share=1.00 OK
+[sc5_gemini_25_flash 231/250] test-1026 share=1.00 OK
+[sc5_gemini_25_flash 232/250] test-1715 share=1.00 OK
+[sc5_gemini_25_flash 233/250] test-1546 share=1.00 OK
+[sc5_gemini_25_flash 234/250] test-1924 share=1.00 OK
+[sc5_gemini_25_flash 235/250] test-1563 share=1.00 OK
+[sc5_gemini_25_flash 236/250] test-1003 share=1.00 wrong
+[sc5_gemini_25_flash 237/250] test-1032 share=1.00 OK
+[sc5_gemini_25_flash 238/250] test-2065 share=1.00 OK
+[sc5_gemini_25_flash 239/250] test-2160 share=1.00 OK
+[sc5_gemini_25_flash 240/250] test-1704 share=1.00 OK
+[sc5_gemini_25_flash 241/250] test-1559 share=1.00 OK
+[sc5_gemini_25_flash 242/250] test-2059 share=0.00 no-answer
+[sc5_gemini_25_flash 243/250] test-1063 share=1.00 OK
+[sc5_gemini_25_flash 244/250] test-1443 share=1.00 OK
+[sc5_gemini_25_flash 245/250] test-1039 share=1.00 OK
+[sc5_gemini_25_flash 246/250] test-1605 share=1.00 OK
+[sc5_gemini_25_flash 247/250] test-2025 share=0.00 no-answer
+[sc5_gemini_25_flash 248/250] test-1446 share=1.00 OK
+[sc5_gemini_25_flash 249/250] test-1789 share=1.00 OK
+[sc5_gemini_25_flash 250/250] test-1036 share=1.00 OK
+[
+ {
+  "threshold": 0.0,
+  "coverage": 0.888,
+  "selective_acc": 0.9099099099099099,
+  "swr": 0.08
+ },
+ {
+  "threshold": 0.4,
+  "coverage": 0.884,
+  "selective_acc": 0.9095022624434389,
+  "swr": 0.08
+ },
+ {
+  "threshold": 0.6,
+  "coverage": 0.868,
+  "selective_acc": 0.9216589861751152,
+  "swr": 0.068
+ },
+ {
+  "threshold": 0.8,
+  "coverage": 0.844,
+  "selective_acc": 0.9241706161137441,
+  "swr": 0.064
+ },
+ {
+  "threshold": 1.0,
+  "coverage": 0.84,
+  "selective_acc": 0.9238095238095239,
+  "swr": 0.064
+ }
+]

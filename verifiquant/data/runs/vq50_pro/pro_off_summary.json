@@ -1,0 +1,14 @@
+{
+  "tag": "pro_off",
+  "model": "gemini-2.5-pro",
+  "lib_db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_100/cards.db",
+  "strict_binding_flag": "",
+  "n": 50,
+  "correct": 38,
+  "silent_wrong": 4,
+  "abstain": 8,
+  "near_miss": 4,
+  "strict_fired": 0,
+  "elapsed_s": 1367.2,
+  "ran_at": "2026-07-20T18:20:41"
+}
