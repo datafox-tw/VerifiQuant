@@ -87,7 +87,11 @@ def main():
         ys = [100 * p[key] for p in pts if p.get(key) is not None]
         return xs, ys
 
-    plt.figure(figsize=(7, 5))
+    plt.rcParams.update({
+        "font.size": 14, "axes.titlesize": 15, "axes.labelsize": 14,
+        "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 12,
+    })
+    plt.figure(figsize=(7.4, 5.2))
     for key, label, style, color in [
         ("ood_abstain", "OOD abstention (families not in library)", "-o", "#1f77b4"),
         ("id_abstain", "ID abstention (covered families)", "-s", "#aec7e8"),
@@ -107,7 +111,7 @@ def main():
     plt.xticks(FRACS)
     plt.ylim(-2, 102)
     plt.grid(alpha=0.3)
-    plt.legend(fontsize=8, loc="center right")
+    plt.legend(fontsize=12, loc="center right")
     plt.tight_layout()
     out = os.path.join(ROOT, "docs/figures/libsweep_250q.png")
     plt.savefig(out, dpi=150)

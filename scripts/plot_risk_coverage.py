@@ -57,7 +57,11 @@ def main():
     sc_xy = [(p["coverage"] * 100, p["selective_acc"] * 100)
              for p in sc if p["selective_acc"] is not None]
 
-    plt.figure(figsize=(7, 5))
+    plt.rcParams.update({
+        "font.size": 14, "axes.titlesize": 15, "axes.labelsize": 14,
+        "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 11.5,
+    })
+    plt.figure(figsize=(7.4, 5.2))
     c, a = ub_curve(cot1); plt.plot(c, a, "--", color="#d62728",
         label="CoT single-shot — perfect-rejector bound")
     c, a = ub_curve(cotO); plt.plot(c, a, "--", color="#ff9896",
@@ -70,13 +74,13 @@ def main():
         label="VerifiQuant — REAL policy (K=1→3)")
     for K in (1, 2, 3):
         plt.annotate(f"K={K}", (vq[K][0], vq[K][1]),
-                     textcoords="offset points", xytext=(6, -12), color="#1f77b4")
+                     textcoords="offset points", xytext=(6, -12), color="#1f77b4", fontsize=13)
     plt.axvline(vq[1][0], color="gray", ls=":", lw=0.8)
     plt.xlabel("Coverage (% answered)")
     plt.ylabel("Selective accuracy (% of answered)")
     plt.title("Risk–coverage (250Q): real policies vs baseline bounds")
     plt.ylim(70, 100); plt.xlim(75, 101); plt.grid(alpha=0.3)
-    plt.legend(fontsize=7.5, loc="lower left")
+    plt.legend(fontsize=11.5, loc="lower left")
     plt.tight_layout()
     out = os.path.join(ROOT, "docs/figures/risk_coverage_250q.png")
     plt.savefig(out, dpi=150)
