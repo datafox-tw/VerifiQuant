@@ -1,0 +1,437 @@
+# Messy-query labeling sheet
+
+Read each as a user would; do not look at any system output. One label + one-line reason.
+
+| id | label | reason |
+|----|-------|--------|
+| mq-01 |  |  |
+| mq-02 |  |  |
+| mq-03 |  |  |
+| mq-04 |  |  |
+| mq-05 |  |  |
+| mq-06 |  |  |
+| mq-07 |  |  |
+| mq-08 |  |  |
+| mq-09 |  |  |
+| mq-10 |  |  |
+| mq-11 |  |  |
+| mq-12 |  |  |
+| mq-13 |  |  |
+| mq-14 |  |  |
+| mq-15 |  |  |
+| mq-16 |  |  |
+| mq-17 |  |  |
+| mq-18 |  |  |
+| mq-19 |  |  |
+| mq-20 |  |  |
+| mq-21 |  |  |
+| mq-22 |  |  |
+| mq-23 |  |  |
+| mq-24 |  |  |
+| mq-25 |  |  |
+| mq-26 |  |  |
+| mq-27 |  |  |
+| mq-28 |  |  |
+| mq-29 |  |  |
+| mq-30 |  |  |
+| mq-31 |  |  |
+| mq-32 |  |  |
+| mq-33 |  |  |
+| mq-34 |  |  |
+| mq-35 |  |  |
+| mq-36 |  |  |
+| mq-37 |  |  |
+| mq-38 |  |  |
+| mq-39 |  |  |
+| mq-40 |  |  |
+| mq-41 |  |  |
+| mq-42 |  |  |
+| mq-43 |  |  |
+| mq-44 |  |  |
+| mq-45 |  |  |
+| mq-46 |  |  |
+| mq-47 |  |  |
+| mq-48 |  |  |
+| mq-49 |  |  |
+| mq-50 |  |  |
+| mq-51 |  |  |
+| mq-52 |  |  |
+| mq-53 |  |  |
+| mq-54 |  |  |
+| mq-55 |  |  |
+| mq-56 |  |  |
+| mq-57 |  |  |
+| mq-58 |  |  |
+| mq-59 |  |  |
+| mq-60 |  |  |
+| mq-61 |  |  |
+| mq-62 |  |  |
+| mq-63 |  |  |
+| mq-64 |  |  |
+| mq-65 |  |  |
+| mq-66 |  |  |
+| mq-67 |  |  |
+| mq-68 |  |  |
+| mq-69 |  |  |
+| mq-70 |  |  |
+| mq-71 |  |  |
+| mq-72 |  |  |
+| mq-73 |  |  |
+| mq-74 |  |  |
+| mq-75 |  |  |
+| mq-76 |  |  |
+| mq-77 |  |  |
+| mq-78 |  |  |
+| mq-79 |  |  |
+| mq-80 |  |  |
+
+## Questions
+
+**mq-01**  
+Q: I’m looking at this footnote rollforward for uncertain tax positions and I’m trying to figure out the “return/growth rate” for the year — like how much it grew overall — but I’m not sure what’s the right way to calculate it. Can you tell me what it would be based on these numbers?  
+Context: Unrecognized tax benefits rollforward (in $ millions): Start of year: 48. Increases from current-year positions: +3. Increases from prior-year positions: +21. Decreases from prior-year positions: -7. Settlements: -4. End of year: 61. Also says: 50 of the ending amount would affect the effective tax rate if recognized.
+
+**mq-02**  
+Q: I saw a headline about offsetting capital gains with losses—can you sanity-check the tax number for me? If I have $42,500 in total long-term capital gains this year and $13,200 in capital losses, and my long-term capital gains tax rate is 18%, what’s the capital gains tax owed after netting the losses (nearest dollar)?  
+Context: Total long-term capital gains: $42,500; capital losses: $13,200; long-term capital gains tax rate: 18%; compute tax on net gains, nearest dollar.
+
+**mq-03**  
+Q: I’m reviewing the project cash flow table in the report (years 1–5) and the discount rate listed there—can you calculate the intrinsic value / present value of the project from that and give me the result rounded to the nearest whole number for my summary slide?  
+Context: (none given)
+
+**mq-04**  
+Q: Can you calc the oil netback per bbl (USD, 2 decimals) given realized price $82.50/bbl, royalties $9.25/bbl, opex $18.40/bbl, and transport $7.60/bbl?  
+Context: Realized price: $82.50/bbl; Royalties: $9.25/bbl; Operating costs (opex): $18.40/bbl; Transportation: $7.60/bbl; Output requested: netback per barrel in USD to two decimals.
+
+**mq-05**  
+Q: Can you tell me the percent change in net sales for Germany from 2020 to 2021, rounded to two decimals?  
+Context: Net sales — Germany: 2021 = 15,620; 2020 = 14,275.
+
+**mq-06**  
+Q: I’m putting together a quick 2019 report and need the “growth/return” on these deferred comp liabilities, but I’m not sure which way we usually calculate it—can you give me the rate?
+
+Specifically, Accrued expenses went from 6 in 2018 to 6 in 2019, and Other long-term liabilities went from 25 in 2018 to 29 in 2019. We also show deferred comp plan assets at 31 in 2018 and 35 in 2019. What’s the growth/return here?  
+Context: {"Deferred compensation plan assets": {"April 26, 2019": 35, "April 27, 2018": 31}, "Deferred compensation liabilities reported as: -- Accrued expenses": {"April 26, 2019": 6, "April 27, 2018": 6}, "Deferred compensation liabilities reported as: -- Other long-term liabilities": {"April 26, 2019": 29, "April 27, 2018": 25}}
+
+**mq-07**  
+Q: I’m looking at the contract liabilities/deferred revenue rollforward table for the fiscal year ended June 30, 2019 — what’s the difference (in millions) between the “deferral of revenue” line and the “recognition of deferred revenue” line? Nearest whole million is fine.  
+Context: (none given)
+
+**mq-08**  
+Q: What is the absorption (full) manufacturing cost per unit, in USD, rounded to two decimals?  
+Context: Product: countertop coffee grinder. Reporting period totals: direct materials = 31,600 USD; direct labor = 18,900 USD; variable manufacturing overhead = 6,750 USD; fixed manufacturing overhead = 12,250 USD. Units produced = 620.
+
+**mq-09**  
+Q: I’m trying to figure out our cost of goods sold using LIFO — we sold 95 units, and our inventory purchases were 40 units at $58 each, then 35 units at $62 each, then the most recent batch was 50 units at $67 each. Under LIFO, what’s the total COGS in dollars for the 95 units sold (rounded to the nearest whole dollar)?  
+Context: Units sold: 95. Inventory batches (oldest to newest): 40 units @ $58/unit; 35 units @ $62/unit; 50 units @ $67/unit. Method: LIFO. Output: total COGS in dollars, rounded to nearest integer.
+
+**mq-10**  
+Q: In the 10-K/proxy section about equity compensation plans, there’s a table for plans approved by shareholders showing the value of equity awards to be issued upon exercise of outstanding options/warrants/rights as of year-end. What’s that value (please give it to three decimal places)?  
+Context: (none given)
+
+**mq-11**  
+Q: For my report, what percentage of the total contingent acquisition payments is due within the next 12 months? Please give the answer to three decimal places.  
+Context: Contingent acquisition payments due within next 12 months: 18.6 (in millions). Total contingent acquisition payments: 142.0 (in millions).
+
+**mq-12**  
+Q: I’ve got a client who bought into a mid-cap software name ~2 years ago (cost basis around $80k, mark-to-market now about $125k). They’re asking if it’s worth trimming here vs letting it run—how would you think about whether this kind of return is “good enough” to de-risk, absent a full model?  
+Context: Cost basis ~$80,000 about two years ago; current market value ~$125,000; mid-cap software/tech equity; client considering trimming vs holding.
+
+**mq-13**  
+Q: I’m looking at a table in this company’s filing about “unrecognized tax benefits” and it shows an ending balance for each of the last three years. Can you add up the ending balances across all three years and give me the total (just rounded to a whole number)?  
+Context: (none given)
+
+**mq-14**  
+Q: I’m putting together a quick ops report for leadership and need “the margin” for our office footprint — can you tell me what the margin is from these lease vs owned costs? Not sure if you’d calculate it as (owned savings vs leased spend) or (net savings divided by total), but I just need the margin number to drop into a slide.  
+Context: Office locations and annual occupancy costs (USD):
+- Boston HQ (Leased): 19,600 sq ft; rent + CAM $1,176,000; utilities $98,000
+- Southborough data center (Leased): 13,900 sq ft; rent + CAM $625,500; utilities $61,000
+- Atlanta accounting services (Leased): 21,400 sq ft; rent + CAM $856,000; utilities $74,000
+- Woburn operations (Owned): 57,800 sq ft; property tax + insurance $312,000; maintenance $168,000; utilities $210,000
+Assume leased sites have no separate property tax line (included in CAM).
+
+**mq-15**  
+Q: I saw a headline saying the company’s net earnings jumped from about $4.5B in 2013 to around $5.0B in 2014. Is that kind of improvement something you’d treat as sustainable going forward, or more like a one-off that shouldn’t change my expectations much?  
+Context: Headline cited net earnings roughly $4.5B (2013) vs ~$5.0B (2014); also mentioned restricted/deferred stock grant-date fair value rising (about $49M to $53M) and no stock options outstanding since 2012.
+
+**mq-16**  
+Q: From the liquidity table in that quarterly report, can you compute the company’s quick ratio using cash & cash equivalents + marketable securities + accounts receivable divided by current liabilities, and return it as a percentage to two decimal places?  
+Context: (none given)
+
+**mq-17**  
+Q: I’m looking at this bond quote table in a report (it shows the price I’d pay now, the price it’s expected to trade at in about a year if rates don’t move much, and the coupons I’d collect in the meantime). How do I calculate the “roll-down return” for holding it for the year and then selling it, and can you give it as a % to two decimals based on the figures in the table?  
+Context: (none given)
+
+**mq-18**  
+Q: I saw a headline saying this company is trading at “around 3x EBITDA” and I’m trying to sanity-check the return/multiple based on these figures — what do you get?  
+Context: Market cap: $62m
+Market value of debt: $18m
+Cash & short-term investments: $6m
+EBITDA (last 12 months): $23m
+Tax rate mentioned: 35%
+
+**mq-19**  
+Q: I’m putting together a quick report — what percent of our total purchase obligations are due in more than 5 years? Please give the percentage to two decimal places.  
+Context: Purchase obligations: Total = 512,880; More than 5 years = 44,120.
+
+**mq-20**  
+Q: Can you calculate the % change in weighted avg common shares outstanding (basic) from 2019 to 2020, to three decimals?  
+Context: Weighted avg common shares outstanding for basic computations (in millions): 2019 = 412.6, 2020 = 387.4.
+
+**mq-21**  
+Q: I’m looking at a company’s annual report and the income tax footnote talks about deferred tax assets from state/foreign losses, some expiring in a few years, and a valuation allowance they set up. As a small investor, should I treat that as a red flag for future earnings/cash flow, or is it pretty normal? Like, does it usually mean their taxes could jump later or that they might never use those tax benefits?  
+Context: Footnote mentions loss/credit carryforwards with a stated “tax effect” in the tens of millions, a smaller portion that expires over a multi-year window, and a valuation allowance of a few million against certain state operating losses. It also says some carryforwards came from acquisitions and may be limited by IRS rules.
+
+**mq-22**  
+Q: I’m pulling a quick slide for leadership—can you tell me the “growth/return” from Q3 to Q4 in 2019 using the highs below? Just need a single number to two decimals (whatever the standard way is).  
+Context: {"2019: Q4":{"High":52.18,"Low":41.06},"2019: Q3":{"High":47.62,"Low":35.44},"2019: Q2":{"High":39.95,"Low":28.30},"2019: Q1":{"High":33.10,"Low":22.85}}
+
+**mq-23**  
+Q: Can you sanity-check the dividend-adjusted forward price here (just the number to 2 decimals)?  
+Context: Spot price = $92.40. Continuously compounded risk-free rate r = 3.1% per year. Maturity T = 9 months (0.75 years). Expected cash dividends: $0.60 paid in 2 months (t=0.1667 years) and $0.75 paid in 6 months (t=0.5 years).
+
+**mq-24**  
+Q: In the notes to the consolidated financial statements, there’s a table that breaks out the allowance for doubtful accounts by year. For fiscal 2014, what is the allowance as a percentage of gross accounts receivable? Please compute and report to three decimal places.  
+Context: (none given)
+
+**mq-25**  
+Q: I’m looking at this stock price table in an annual report that lists the quarterly “high” and “low” sale prices for the company’s shares on the NYSE. For the quarter that ended March 31 (the earlier year shown in the table), how do I calculate the percent drop from the quarter’s high price to the quarter’s low price? Can you give me the % decrease rounded to 3 decimals based on the numbers in that table?  
+Context: (none given)
+
+**mq-26**  
+Q: I just saw a headline claiming this callable bond’s “effective duration is basically near zero,” and that sounds off to me—given a current price around 105 (per 100 par) and estimates like ~107 if yields drop 50 bps and ~103 if yields rise 50 bps, is it actually reasonable to call that near-zero duration, or is that misleading?  
+Context: Callable bond. Current price ~105 per 100 par. If yield -0.50% then price ~107. If yield +0.50% then price ~103. Headline claims effective duration is “basically near zero.”
+
+**mq-27**  
+Q: Can you calculate the average of the high and low sale prices for Q2 2003, and give it to three decimal places?  
+Context: In the table for 2003 Second Quarter, the high is $27.84 and the low is $19.16.
+
+**mq-28**  
+Q: Quick one — for this zero coupon, can you tell me the “10y key rate return/growth” from these bumps? Not sure if you’d treat it as DV01/KRD off price, or express it as a % move, but I just need the 10y number.  
+Context: | Item | Value |
+|---|---:|
+| Base price | 91.4620 |
+| Price w/ 2y key rate +1bp | 91.5396 |
+| Price w/ 5y key rate +1bp | 91.4983 |
+| Price w/ 10y key rate +1bp | 91.4217 |
+| Price w/ 30y key rate +1bp | 91.6128 |
+
+**mq-29**  
+Q: I’m looking at the table in this annual report and it lists “Adjusted EBITDA margin” for 2018 and 2019. Can you tell me how much it went up or down from 2018 to 2019 (just the change, rounded to one decimal place)?  
+Context: (none given)
+
+**mq-30**  
+Q: Can you calculate the percentage change in the total carrying amount of goodwill from 2021 to 2023, using the figures below, and give the result to three decimal places?  
+Context: Total carrying amount of goodwill: 2021 = 842.6 (million), 2023 = 915.4 (million). Please compute % change = (2023 - 2021) / 2021 * 100, rounded to three decimals.
+
+**mq-31**  
+Q: I saw a headline about an online bank pushing a “~5% APY” savings account with interest compounded monthly—should I actually move my emergency fund there, or is that kind of rate likely to drop soon and not worth the hassle?  
+Context: They’re advertising around 5% APY on a savings account with monthly compounding; I currently earn ~3% at my regular bank and keep about $20k in emergency savings. I’m worried about teaser rates and whether the APY will fall if the Fed cuts rates.
+
+**mq-32**  
+Q: Using the following balance-sheet figures, what is the debt-to-equity ratio for fiscal year 2018? Please express it as a percentage to three decimal places (Debt/Equity × 100).  
+Context: At December 31, 2018 (in thousands): total debt (including current maturities) = 942,560; total stockholders’ equity = 2,413,775.
+
+**mq-33**  
+Q: I’m a small retail investor and I’m trying to decide if this company’s quarter actually looks “healthy” or if the profit is kind of inflated — based on these figures, is their operating performance improving enough that it might be worth buying shares now, or would you wait for another quarter?  
+Context: TechFusion just reported quarterly revenue around $1.8M. They said cost of sales was about $1.05M, operating expenses were roughly $260k, plus depreciation near $70k and amortization around $30k. They also mentioned a big marketing push but didn’t break it out much.
+
+**mq-34**  
+Q: If the company has 160 leased office locations total and 143 of those are in the U.S., what percentage of leased locations are in the United States? Please give it to three decimal places.  
+Context: Total leased office locations: 160. Leased office locations in the U.S.: 143.
+
+**mq-35**  
+Q: I’m looking at the footnote table that rolls forward the company’s unrecognized tax benefits for 2008—can you tell me the net change in the balance during 2008 (end of year minus beginning of year), rounded to the nearest whole number?  
+Context: (none given)
+
+**mq-36**  
+Q: Quick sanity check—if a client drops $620k into a payout annuity and wants level withdrawals for 18 years, and the advisor says it should “grow ~4.25%” over that period, what’s the annual payment? Just need the ballpark.  
+Context: PV = $620,000; term = 18 years; stated growth/return/rate = ~4.25% (not specified if nominal vs effective, net vs gross, or compounding basis).
+
+**mq-37**  
+Q: I’m looking at this company summary table in a report that shows market cap, total debt, cash, plus a line for preferred stock and another for minority interest. Can you tell me what the enterprise value should be from that info (rounded to the nearest $1M)?  
+Context: (none given)
+
+**mq-38**  
+Q: Can you give me the ratio of tons hedged in 2022 to 2023, rounded to the nearest whole number?  
+Context: Tons hedged: 2022 = 95,000; 2023 = 130,000.
+
+**mq-39**  
+Q: I saw a headline about a company’s share-based comp tax benefits jumping — can you tell me what “the growth/return rate” would be here, roughly? I’m not sure if people mean simple % change, a margin vs equity, or something annualized.  
+Context: They cited excess tax benefits realized of $18.5M in 2008, and also mentioned $36.5M of unrecovered/unrealized benefits as of year-end 2008.
+
+**mq-40**  
+Q: Using the As reported figures, what is the absolute difference (nearest whole dollar) between Liabilities—Deferred revenue and Liabilities—Other non-current liabilities?  
+Context: Liabilities—Deferred revenue: As reported 31790; Liabilities—Other non-current liabilities: As reported 45215.
+
+**mq-41**  
+Q: I’m looking at this company’s 2010 filing and there’s a table showing the balance in their money market funds for 2009 vs 2010. Can you tell me the growth rate for 2010 and format it as a percentage to three decimal places?  
+Context: (none given)
+
+**mq-42**  
+Q: I saw a headline about a company still owing contingent “earnout” payments to former shareholders if the FDA approves a device—does it seem reasonable to treat that as a real near-term cash risk when thinking about valuation, or is it usually too uncertain to matter until approval is basically certain?  
+Context: I don’t have the full filing, just that the payments are contingent on FDA approval and could be in the tens of millions spread over time. Trying to decide whether to discount the stock for this or ignore it for now.
+
+**mq-43**  
+Q: I’m reviewing the balance sheet table in the report—can you tell me what % total liabilities are on a vertical common-size balance sheet (liabilities as a percentage of total liabilities + shareholders’ equity) to three decimal places?  
+Context: (none given)
+
+**mq-44**  
+Q: I’m skimming the annual macro table in this report—can you compute last year’s GDP for the country using the expenditure approach (C + I + G + X − M) and give it in USD trillions to 2 decimals?  
+Context: (none given)
+
+**mq-45**  
+Q: I’m looking at a company’s annual report and it has a table showing quarterly revenue is pretty seasonal (roughly low in Q1, higher in Q2/Q3, and still strong in Q4), and elsewhere it talks about environmental remediation spending vs. reserves for environmental matters. As a small retail investor, should I be worried if the remediation expenses are trending up even though the reserve number looks flat? Like, does that usually mean future costs are being underestimated, or can it be normal?  
+Context: Quarterly revenue mix shown as percentages is basically the same pattern across multiple years (about 22% in Q1, 25% in Q2, 26% in Q3, 27% in Q4). The environmental section has two line items: expenses for environmental remediation at sites and reserves for environmental matters, but I don’t have the full breakdown beyond that.
+
+**mq-46**  
+Q: I’m putting together a quick ops summary for our leadership deck—can you tell me “the growth rate/return” on our unbilled receivables on construction contracts between the two year-end figures? I just need a single percent number I can drop into the slide (round to three decimals).  
+Context: Unbilled receivables on construction contracts were $18.9 million at Dec 31, 2023 and $27.6 million at Dec 31, 2022.
+
+**mq-47**  
+Q: I just saw a headline saying the company’s “Other” revenue line has been shrinking for a few years (it was about 71 in 2017, 56.7 in 2018, and 44.1 in 2019) while fixed-price sales jumped a lot. Is this kind of decline in “Other” something to worry about, or is it usually just noise/reclassification? Would you treat it as a red flag if you were deciding whether to invest?  
+Context: Fixed Price: 2017=1036.9, 2018=1146.2, 2019=1452.4. Other: 2017=70.8, 2018=56.7, 2019=44.1. Total sales: 2017=1107.7, 2018=1202.9, 2019=1496.5.
+
+**mq-48**  
+Q: Given the debt maturity ladder and revolver terms below, should I push management to refinance/term out near-dated maturities now (i.e., issue 7–10y notes and reduce revolver reliance), or is it reasonable to run with the current profile given rates/credit spread risk? I’m looking for a judgment call under uncertainty, not a precise computation.  
+Context: Capital structure snapshot (USD): Revolving credit facility: $1.2bn total commitment; pricing = SOFR + 175 bps (step-up +50 bps if rating downgrades 1 notch), unused commitment fee 35 bps; maturity in 3.0 years; currently drawn $620mm; remaining availability $580mm; springing leverage covenant only if >35% drawn. Term loan: $400mm due in 2 years at SOFR + 225 bps. Senior notes: $500mm due in 4 years (fixed 5.25%); $750mm due in 8 years (fixed 6.10%). Cash $210mm. Next-12-month FCF estimate ~$150mm but volatile. Current rating BBB- outlook negative. Concern: refinancing window may close if spreads widen; alternatively, locking in long-dated fixed debt now could be expensive vs waiting.
+
+**mq-49**  
+Q: I bought 100 shares of a stock a few months ago around $84 and it’s about $97 now. I’m thinking of selling a covered call for about $6 premium with a $100 strike that expires in a few weeks. Is that a reasonable trade or am I basically capping my upside too much for not enough premium? Also, if the stock jumps to like $108 by expiration, do I end up worse off than just holding the shares?  
+Context: Position: long 100 shares cost basis ~$84, current price ~$97. Considering selling 1 call expiring in a few weeks, strike ~$100, premium ~$6. Worried about scenario where stock is ~$108 at expiration.
+
+**mq-50**  
+Q: I saw a headline saying GST input credits are getting tightened up—if my small manufacturing unit sells a batch where we add about ₹60 of value per unit and GST is 12%, does it still make sense to price as usual and rely on input tax credit (we typically have around ₹25–₹30 credit per unit), or should we change pricing/cashflow assumptions because remittances might spike?  
+Context: Manufacturing unit; value add ~₹60/unit; GST rate 12%; typical input tax credit ₹25–₹30 per unit; concerned about tighter GST input credit rules affecting cashflow/remittance.
+
+**mq-51**  
+Q: I’m putting together next quarter’s ops report—do you think it’s reasonable to keep running our main packaging machine for another year, or should we plan to replace it now?  
+Context: We bought it for about $210k and have been depreciating it straight-line at $21k/year. It’s around 7 years old, downtime has been creeping up, and maintenance spend is definitely higher than it used to be, but I don’t have a full cost model. I just need a sanity-check recommendation for leadership.
+
+**mq-52**  
+Q: Can you calc the real (inflation-adjusted) return for the mutual fund in that table—use the nominal return and the CPI line from the same period and give me the % to two decimals?  
+Context: (none given)
+
+**mq-53**  
+Q: Can you tell me the percent change in the company’s total long-lived assets from 2020 to 2021, rounded to 2 decimals?  
+Context: Total long-lived assets: 2021 = 1,214,680; 2020 = 1,089,450.
+
+**mq-54**  
+Q: I’m looking at this short-term government bond line in the filing—can you calculate the money market yield for it (annualized), and give it as a percentage to two decimals? The table shows the face value, the purchase price, and the days to maturity.  
+Context: (none given)
+
+**mq-55**  
+Q: I’m looking at this retirement planning table in a report (it uses the 4% rule and then bumps the withdrawal each year for inflation). Over the next 5 years, what’s the total dollar amount withdrawn in total? Can you just sum the five annual withdrawals and round to the nearest dollar?  
+Context: (none given)
+
+**mq-56**  
+Q: Compute the percentage change in total revenue from FY2021 to FY2024 and return a single value rounded to 2 decimals.  
+Context: FY2021 total revenue = 842,300; FY2024 total revenue = 1,037,950.
+
+**mq-57**  
+Q: In the Investment Management segment for 2016, what were the net revenues (in $ billions) — please give the number to 3 decimal places?  
+Context: Looking at the company’s annual report table for Investment Management net revenues and I need the 2016 figure in $ billions, rounded to three decimal places.
+
+**mq-58**  
+Q: I saw a headline about a bank’s sensitivity table and I’m trying to sanity-check the figure: if rates jumped by 2%, what’s the impact to “the return” they’re talking about for 2005 vs 2004?  
+Context: From the table (in millions) under an immediate +200bp rate change: Dec 31, 2005 shows 265; Dec 31, 2004 shows (557).
+
+**mq-59**  
+Q: I’m pulling a quick number for a slide — can you tell me what “the rate/return” would be for a 1-year period starting 2 years from now based on the curve below? Just need a single % figure to 3 decimals.  
+Context: Spot rates (annual): 1Y = 1.10%, 2Y = 1.72%, 3Y = 2.28%.
+
+**mq-60**  
+Q: Can you calculate the EOQ (nearest whole unit) given the numbers below? I just need the single EOQ figure.  
+Context: Annual demand: 48,000 units/year. Fixed ordering cost: $120 per order. Annual holding cost: $3.50 per unit per year.
+
+**mq-61**  
+Q: I’m looking at this segment asset breakdown and I’m trying to figure out what the “growth/return” was for Transportation Solutions from 2018 to 2019 — like is it roughly a percent change or some kind of rate? Not sure which version is standard.  
+Context: Segment assets (in millions): Transportation Solutions — 2018: 4,707; 2019: 4,781. Other segments: Industrial Solutions — 2018: 2,049; 2019: 2,100. Communications Solutions — 2018: 959; 2019: 849. Total segment assets — 2018: 7,715; 2019: 7,730. Total assets — 2018: 20,386; 2019: 19,694.
+
+**mq-62**  
+Q: Can you calculate the weighted average maturity (WAM) for this mortgage-backed security and give me just the number to 1 decimal place? It has three mortgage pools: $1.25M maturing in 45 days, $3.50M maturing in 120 days, and $5.25M maturing in 300 days.  
+Context: Mortgage-backed security pools: $1.25M matures in 45 days; $3.50M matures in 120 days; $5.25M matures in 300 days. Need WAM to 1 decimal place.
+
+**mq-63**  
+Q: I just saw a headline saying the company’s incentive payouts dropped a lot year-over-year—based on these figures, does that seem like a real pullback that might continue next year, or could it just be timing/accounting noise?  
+Context: Comp table I saw: Incentive schemes were 3m in 2018 and 2m in 2019; salaries/fees were flat at 4m both years; other benefits went from 1m to 0; total comp went from 8m to 6m.
+
+**mq-64**  
+Q: Compute the future value at t=18 years (nearest dollar) of a lump-sum variable annuity deposit, assuming annual compounding and that an annual fee is charged as a constant percentage of account value at each year-end immediately after interest is credited; use net growth accordingly.  
+Context: Initial deposit P0=225000 at t=0. Gross annual return r=6.3% compounded annually. Annual fee f=1.05% of account value assessed once per year at year-end after interest. Holding period n=18 years. Need FV at t=18, nearest $.
+
+**mq-65**  
+Q: If a company had 158 factory outlet stores total and 22 of them were in Europe (the rest 132 in US/Canada and 4 in Japan), what would you call the “rate” or “margin” of Europe in their store mix? I’m not sure if that’s just percent of total or if there’s some other way people calculate it, but I’m trying to get the main figure.  
+Context: Store counts: Total 158 factory stores. Europe 22. US/Canada 132. Japan 4.
+
+**mq-66**  
+Q: I’m looking at the MD&A table in this annual report that lists “provision for credit losses” by year (2016–2018). Can you tell me which of those three years had the largest provision, and what the amount was in millions (rounded to the nearest whole number)?  
+Context: (none given)
+
+**mq-67**  
+Q: I’m pulling a quick report and just need the consolidated taxable income number for our two subs filing a consolidated return. Can you calculate the consolidated taxable income (nearest dollar) based on these figures?  
+Context: ParentCo income from operations: 92,500; SubCo income from operations: 38,200; ParentCo Section 1231 loss: (9,600); SubCo Section 1231 gain: 2,400; ParentCo capital gain: 5,150; SubCo capital loss: (3,850). Assume no other income/deductions or special limitations—just combine these items.
+
+**mq-68**  
+Q: Quick sanity check — based on these restructuring charges, what’s the “growth” in restructuring costs over the program period?  
+Context: Company notes: initiated restructuring in June 2014 to consolidate operations and terminate some European distributor agreements. Aggregate restructuring charges incurred were $3.6m as of 12/31/2015. The programs were completed in 2015. Costs include termination benefits, contract termination costs, and other exit costs.
+
+**mq-69**  
+Q: If total pre-tax restructuring charges are 425.0 million and the employee-related portion is 276.5 million, what percent of the total is employee-related (to three decimal places)?  
+Context: Total pre-tax restructuring charges: 425.0 million. Employee-related restructuring costs: 276.5 million.
+
+**mq-70**  
+Q: I’m updating a quick report—what percent of our total contractual obligations for 2022 is long-term debt? Please round to the nearest whole percent.  
+Context: For 2022, total contractual obligations = 84.6 (in $ billions). Long-term debt obligations = 37.9 (in $ billions).
+
+**mq-71**  
+Q: I saw a chart that starts with $100 invested at the end of 2008 and by 2010 it shows Intel at 116.4 and the Dow Jones U.S. Technology index at 114.1 (dividends reinvested). What would you call “the return ratio” for Intel vs the tech index in 2010 — like Intel’s growth relative to the index — and what number do you get (3 decimals)?  
+Context: Chart baseline: $100 invested at end of 2008. 2010 values shown: Intel = 116.4, Dow Jones U.S. Technology index = 114.1. Dividends reinvested, cumulative total return style.
+
+**mq-72**  
+Q: Given the reconciliation below, what’s the growth/rate in “additions for tax positions of prior years” between the two years shown?  
+Context: Uncertain tax positions reconciliation (in $ millions):
+
+|  | 2020 | 2019 |
+|---|---:|---:|
+| Balance at Jan 1 | 305 | 297 |
+| Additions based on tax positions related to the current year | 22 | 19 |
+| Additions for tax positions of prior years | 14 | 9 |
+| Reductions for tax positions of prior years | (18) | (21) |
+| Settlements | (5) | — |
+| Business combinations | — | 2 |
+| Lapse of statute of limitations | (7) | (6) |
+| Foreign currency translation | 1 | (1) |
+| Balance at Dec 31 | 312 | 305 |
+
+**mq-73**  
+Q: I’m a small retail investor and I got offered some pre-IPO shares in a private round, but I’m not sure if the “discount for being illiquid” is actually fair — how do I judge whether it’s worth taking vs just waiting for the IPO? Like, what factors should I look at to decide if the private price is reasonable given the lock-up and the risk the IPO could price lower?  
+Context: Company is a software firm planning to IPO sometime in the next 6–12 months. The private round price being offered is $22/share with a 180-day lock-up after IPO. People are guessing the IPO could be around $28–$35 but obviously not guaranteed. I’m worried about not being able to sell and also about the IPO getting delayed.
+
+**mq-74**  
+Q: My dad gifted me some stock he bought for $24,500 when it was worth $19,800 on the gift date, and I later sold it for $15,200. For tax purposes, what’s my basis in the shares I sold (nearest dollar)?  
+Context: Dad’s original cost/basis: $24,500. Fair market value at time of gift: $19,800. My sale price: $15,200.
+
+**mq-75**  
+Q: Can you calculate the percent change in the fair value of the hedging-related financial market instruments from 2022 to 2023, and give it to three decimal places?  
+Context: Fair value (hedging financial market instruments): 2022 = 18.75 million; 2023 = 24.10 million.
+
+**mq-76**  
+Q: Between meetings—sanity check: does this options strip look like it violates put-call parity enough to be a real arb, or is it likely just dividends/borrow/settlement quirks? I’m looking at European options on a US large-cap: spot ~$52, 6M strike 55 call marked ~$2.10, matching put ~$5.40, and OIS ~4.6%. No special dividend announced but the name’s a bit hard-to-borrow. Would you treat this as a legit mispricing worth flagging or assume it’s explainable?  
+Context: Spot ~52; K=55; T~0.5y; call ~2.10; put ~5.40; r~4.6% OIS; European style; possible HTB; no special dividend announced.
+
+**mq-77**  
+Q: I’m looking at this note about using commodity derivatives to “protect the carrying value of excess inventories.” If in 2002 the amount tied to that was 28 (million?) and in 2003 it was 41, what’s the “return/growth rate” on that change? Not sure if you’d treat it like a simple % increase, or some kind of annualized rate/CAGR since it’s over a year.  
+Context: Company disclosure: derivative instruments used to mitigate price risk and protect carrying values of excess inventories. Amount associated with protecting carrying values of excess inventories: 2002 = 28, 2003 = 41.
+
+**mq-78**  
+Q: Can you tell me the percent change in audit-related fees from 2022 to 2023, rounded to the nearest whole percent?  
+Context: Audit-related fees: 2022 = 182,750; 2023 = 214,900.
+
+**mq-79**  
+Q: I saw a headline saying this hedge fund’s fees were “totally normal” even though AUM went from about $180M to $230M and they run a 2% management fee plus 20% performance fee with a high-water mark around $210M. Without doing a full model, does that fee structure seem reasonable/fair to investors given the year’s results, or is it the kind of setup where the manager gets paid a lot even if returns aren’t that great?  
+Context: Start AUM ~$180M, end AUM ~$230M. Fee terms mentioned: 2% management fee (sounds like on end-year AUM) + 20% performance fee subject to a high-water mark (~$210M).
+
+**mq-80**  
+Q: I put $75,000 into a fixed-rate note on 2022-03-15; stated coupon/interest is 4.6% with monthly compounding, and I’m holding it until 2029-03-15 with no interim withdrawals. Using these inputs, what’s “the return” / “the growth” over the holding period (pick the appropriate interpretation)?  
+Context: Principal P0 = 75,000 USD. Stated rate = 4.6% with monthly compounding. Start date 2022-03-15, end date 2029-03-15. No contributions/withdrawals. Assume no default.
