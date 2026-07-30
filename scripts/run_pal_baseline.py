@@ -12,7 +12,7 @@ Usage:
       [--model gemini-2.5-flash] [--limit 0]
 """
 from __future__ import annotations
-import argparse, json, os, re, subprocess, sys, time
+import argparse, ast, json, os, re, subprocess, sys, time
 from datetime import datetime
 
 from verifiquant.pipeline.run_error_classification_pipeline import create_genai_client_from_env
@@ -36,12 +36,33 @@ Context:
 {context}
 """
 
-# import/from anchored to line start (docstring prose like "from the context" must NOT match).
-DENY = re.compile(
-    r"(^\s*import\s+(?!math\b)\w+|^\s*from\s+(?!math\b)\w+"
-    r"|\bopen\s*\(|\bexec\s*\(|\beval\s*\(|__import__|\bsubprocess\b|\bsocket\b|\brequests\b|\burllib\b)",
-    re.MULTILINE,
-)
+FORBIDDEN_CALLS = {"open", "exec", "eval", "__import__"}
+
+
+def deny_reason(code: str) -> str:
+    """Return an AST-grounded sandbox rejection reason, or an empty string.
+
+    The original regex scanned docstrings and comments, so harmless prose such
+    as ``from the context`` was misclassified as a forbidden import.  Parsing
+    the program first keeps the stated policy (only ``math`` imports and no
+    dangerous builtins) without turning English prose into lost coverage.
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return ""  # The execution path will classify invalid syntax as exec_fail.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            forbidden = [alias.name for alias in node.names if alias.name != "math"]
+            if forbidden:
+                return f"forbidden_import:{','.join(forbidden)}"
+        elif isinstance(node, ast.ImportFrom):
+            if node.module != "math":
+                return f"forbidden_import_from:{node.module or '<relative>'}"
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id in FORBIDDEN_CALLS:
+                return f"forbidden_call:{node.func.id}"
+    return ""
 
 
 def extract_code(text: str) -> str | None:
@@ -60,6 +81,13 @@ def run_code(code: str) -> str | None:
 
 
 def _num(x):
+    if isinstance(x, bool):
+        return float(x)
+    normalized = str(x).strip().lower()
+    if normalized == "true":
+        return 1.0
+    if normalized == "false":
+        return 0.0
     try:
         return float(str(x).replace(",", "").replace("%", "").strip())
     except (TypeError, ValueError):
@@ -97,7 +125,7 @@ def main():
             if code is None:
                 counts["code_fail"] += 1
                 v = "abstain"
-            elif DENY.search(code):
+            elif deny_reason(code):
                 counts["denied"] += 1
                 v = "abstain"; reason = "denylist"
             else:

@@ -1,0 +1,15 @@
+{
+  "system": "cot",
+  "n_probes": 24,
+  "dry_run": false,
+  "by_condition": {
+    "ood": {
+      "n": 24,
+      "forcefit": 24,
+      "forcefit_rate": 1.0,
+      "outcomes": {
+        "forcefit": 24
+      }
+    }
+  }
+}

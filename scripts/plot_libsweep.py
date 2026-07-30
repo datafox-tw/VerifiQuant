@@ -88,8 +88,8 @@ def main():
         return xs, ys
 
     plt.rcParams.update({
-        "font.size": 14, "axes.titlesize": 15, "axes.labelsize": 14,
-        "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 12,
+        "font.size": 17, "axes.titlesize": 18, "axes.labelsize": 17,
+        "xtick.labelsize": 16, "ytick.labelsize": 16, "legend.fontsize": 15,
     })
     plt.figure(figsize=(7.4, 5.2))
     for key, label, style, color in [
@@ -111,10 +111,10 @@ def main():
     plt.xticks(FRACS)
     plt.ylim(-2, 102)
     plt.grid(alpha=0.3)
-    plt.legend(fontsize=12, loc="center right")
+    plt.legend(fontsize=15, loc="center right")
     plt.tight_layout()
     out = os.path.join(ROOT, "docs/figures/libsweep_250q.png")
-    plt.savefig(out, dpi=150)
+    plt.savefig(out, dpi=150, bbox_inches="tight", pad_inches=0.08)
     print("figure:", out)
     for p in pts:
         tag = "" if p["complete"] else "  (PARTIAL)"

@@ -1,0 +1,24 @@
+{
+  "system": "vq",
+  "n_probes": 24,
+  "dry_run": false,
+  "by_condition": {
+    "bare": {
+      "n": 24,
+      "forcefit": 0,
+      "forcefit_rate": 0.0,
+      "outcomes": {
+        "safe": 24
+      }
+    },
+    "nearmiss": {
+      "n": 24,
+      "forcefit": 2,
+      "forcefit_rate": 0.0833,
+      "outcomes": {
+        "safe": 22,
+        "forcefit": 2
+      }
+    }
+  }
+}

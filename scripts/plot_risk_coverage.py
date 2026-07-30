@@ -58,8 +58,8 @@ def main():
              for p in sc if p["selective_acc"] is not None]
 
     plt.rcParams.update({
-        "font.size": 14, "axes.titlesize": 15, "axes.labelsize": 14,
-        "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 11.5,
+        "font.size": 17, "axes.titlesize": 18, "axes.labelsize": 17,
+        "xtick.labelsize": 16, "ytick.labelsize": 16, "legend.fontsize": 14.5,
     })
     plt.figure(figsize=(7.4, 5.2))
     c, a = ub_curve(cot1); plt.plot(c, a, "--", color="#d62728",
@@ -73,17 +73,18 @@ def main():
     plt.plot(vx, vy, "-o", color="#1f77b4", markersize=9,
         label="VerifiQuant — REAL policy (K=1→3)")
     for K in (1, 2, 3):
+        offsets = {1: (8, -14), 2: (-44, -18), 3: (8, -18)}
         plt.annotate(f"K={K}", (vq[K][0], vq[K][1]),
-                     textcoords="offset points", xytext=(6, -12), color="#1f77b4", fontsize=13)
+                     textcoords="offset points", xytext=offsets[K], color="#1f77b4", fontsize=16)
     plt.axvline(vq[1][0], color="gray", ls=":", lw=0.8)
     plt.xlabel("Coverage (% answered)")
     plt.ylabel("Selective accuracy (% of answered)")
-    plt.title("Risk–coverage (250Q): real policies vs baseline bounds")
+    plt.title("Risk–coverage (250Q)")
     plt.ylim(70, 100); plt.xlim(75, 101); plt.grid(alpha=0.3)
-    plt.legend(fontsize=11.5, loc="lower left")
+    plt.legend(fontsize=14.5, loc="lower left")
     plt.tight_layout()
     out = os.path.join(ROOT, "docs/figures/risk_coverage_250q.png")
-    plt.savefig(out, dpi=150)
+    plt.savefig(out, dpi=150, bbox_inches="tight", pad_inches=0.08)
     print("figure:", out)
     print(f"VQ K=1 real: {vq[1][1]:.1f}% @ {vq[1][0]:.1f}% cov")
     print(f"SC@5 best:   {max(y for _,y in sc_xy):.1f}% sel-acc; at ~84% cov = "
