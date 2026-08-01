@@ -207,18 +207,23 @@ A gate ablation adds controls cumulatively on the same backbone: CoT ($18.0\%$ S
 Execution buys most of the initial drop; the later gates convert answerable-but-unqualified cases into abstention.
 The pattern is monotone in the metric that matters: \emph{gates buy safety with coverage, not accuracy}.
 
-A library-coverage sweep rebuilds the library at nested fractions of the 250 families.
-VerifiQuant's abstention is selective---on out-of-library families it abstains \oodVQabsOOD{} versus \oodVQabsID{} on in-library ones, a gap that holds at every library size (Figure~\ref{fig:v2libsweep}).
+A library-coverage sweep turns the scope signal into a measurable property.
+We rebuild the contract library at nested fractions of the 250 formula families---10/25/50/75/100\% (25/62/125/188/250 families, pristine seeded builds at a fixed seed, each subset contained in the next)---and rerun all 250 questions against each; a question is in-library (ID) or out-of-library (OOD) according to whether its formula family is present, so the denominators shift with coverage (e.g., 225 OOD / 25 ID at 10\%, 62 OOD / 188 ID at 75\%).
+Because the \emph{same} 250 questions are scored against every library, the ID/OOD split varies only with coverage and not with question difficulty, which rules out a difficulty confound.
+VerifiQuant's abstention is selective at every size (Figure~\ref{fig:v2libsweep}): OOD abstention stays high ($91.6\%{\to}80.6\%$ as the library grows) while ID abstention stays low ($8.0\%{\to}14.4\%$), a $67$--$84$ percentage-point selectivity gap throughout, and ID accuracy is flat ($81.6$--$84.0\%$) as the library grows tenfold.
+The one visible cost is honest: OOD silent-wrong rises mildly ($1.3\%{\to}4.8\%$) as the library densifies, because semantically adjacent contracts make near-neighbor force-fitting more tempting---the selection frontier of \S\ref{sec:v2boundary}, now measured as a function of density.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.94\linewidth]{figures/libsweep_250q.png}
-\caption{Library-size sweep ($K{=}1$, nested pristine subset libraries).
-Abstention tracks coverage: the out-of-library vs.\ in-library abstention gap holds at every size, while in-library accuracy is flat as the library grows $10\times$.}
+\caption{Library-coverage sweep ($K{=}1$).
+The contract library is rebuilt at nested fractions of the 250 formula families (25/62/125/188/250 families; fixed seed; each subset $\subset$ the next), and all 250 questions are rerun against each; a question is in-library (ID) or out-of-library (OOD) by whether its formula family is present, so difficulty is held fixed and only coverage varies.
+OOD abstention stays high ($91.6{\to}80.6\%$) and ID abstention low ($8.0{\to}14.4\%$)---a $67$--$84$-point selectivity gap at every size---while ID accuracy is flat ($81.6$--$84.0\%$) as the library grows $10\times$.
+OOD silent-wrong rises mildly ($1.3{\to}4.8\%$) as denser libraries make near-neighbor force-fitting more likely.}
 \label{fig:v2libsweep}
 \end{figure}
-But this is a trade-off, not a third victory: on the same out-of-library questions R-PAL answers far more, and does so at \oodRPALcorrOOD{} correct, drawing on parametric knowledge.
-VerifiQuant is not more accurate out of library---its own out-of-library selective accuracy is lower (\oodVQselOOD{} vs.\ \oodRPALselOOD{})---and its abstention does not reduce silent-wrong risk there.
+This selectivity is a trade-off, not a coverage win.
+On a fixed out-of-library split, a matched execution baseline answers nearly all such questions from parametric knowledge at \oodRPALcorrOOD{} correct, whereas VerifiQuant abstains on most; VerifiQuant is not more accurate out of library---its own out-of-library selective accuracy is lower (\oodVQselOOD{} vs.\ \oodRPALselOOD{})---and its abstention does not reduce silent-wrong risk there.
 What it provides is a \emph{verified/unverified boundary}: it emits a number only when a contract applies, whereas execution and prompting emit confident numbers they cannot vouch for.
 
 \section{Boundary and Failure Analysis}\label{sec:v2boundary}
@@ -230,10 +235,11 @@ Where these fail, VerifiQuant provides at most a scope signal, not a correct ans
 The clean-set result is in-library by construction, and out-of-library behavior is exactly the trade-off of RQ3.
 
 \emph{Where failures remain.}
-Every residual silent wrong localizes to one of three LLM-mediated \emph{runtime} frontiers, fixed before any run: the \emph{selection} frontier (choosing or force-fitting a near-neighbor contract), the \emph{binding} frontier (extracting or scaling an input wrongly), and the \emph{ambiguity-detection} frontier (failing to recall a declared ambiguity the contract already carries).
-No residual across ${\sim}300$ evaluated questions falls outside these three, which tells a deployment team where the next improvement lies rather than reporting an opaque aggregate.
-A separate class of \emph{build-time specification defects}---a contract that omits an ambiguity or encodes a wrong invariant---is caught by the contract audits of \S\ref{sec:v2method}, not at runtime.
-The ambiguity-detection frontier is already partly mechanized: a deterministic trigger pre-pass fires a declared ambiguity when its convention phrase appears verbatim, moving that hint-recall component out of LLM judgment and cutting SWR further at a small, explicit coverage cost.
+Every residual silent wrong localizes to one of three predeclared, LLM-mediated \emph{runtime} frontiers: contract \emph{selection} (choosing or force-fitting a near-neighbor contract), input \emph{binding} (extracting or scaling a value wrongly), and \emph{declared-hint recall} (failing to trigger an ambiguity the contract already declares).
+Across approximately 300 evaluated questions, every observed residual silent wrong mapped to one of these three predeclared runtime frontiers; in the canonical 250-question run, the eight residuals comprised three selection, two binding, and three declared-hint-recall failures.
+This attribution tells a deployment team where the next improvement lies rather than reporting an opaque aggregate.
+Distinct from these are \emph{build-time defects}---a contract that omits an ambiguity or encodes a wrong invariant, and, in this library, three indicator cards that returned a series instead of a scalar---which are caught by the contract audits and pre-declared type-policy check of \S\ref{sec:v2method} before runtime, not by the funnel.
+The declared-hint-recall frontier is already partly mechanized: a deterministic trigger pre-pass fires a declared ambiguity when its convention phrase appears verbatim in the question, moving that step out of LLM judgment and cutting SWR further at a small, explicit coverage cost.
 
 \emph{Recoverability.}
 Clarification recovers part of the abstained mass.
