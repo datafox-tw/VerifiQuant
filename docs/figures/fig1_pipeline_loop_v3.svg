@@ -1,0 +1,206 @@
+<svg viewBox="0 0 1380 950" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#455A64"/>
+    </marker>
+    <marker id="arrP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7B2FBE"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C0392B"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1380" height="950" fill="#FFFFFF"/>
+
+  <!-- 1. FIC Card Store (Top Banner) -->
+  <rect x="180" y="25" width="900" height="85" rx="10" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+  <text x="200" y="55" font-size="22" font-weight="bold" fill="#311B92">FIC Card Store (build-time compiled, lint- and smoke-gated)</text>
+  <text x="200" y="83" font-size="17" fill="#4527A0">retrieval cards · core cards · repair rules · typed inputs · deterministic code · invariants · semantic hints</text>
+
+  <!-- Build-time Feeds (Dashed Lines down to Gates) -->
+  <line x1="245" y1="110" x2="245" y2="145" stroke="#9575CD" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="425" y1="110" x2="425" y2="145" stroke="#9575CD" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="605" y1="110" x2="605" y2="145" stroke="#9575CD" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="785" y1="110" x2="785" y2="145" stroke="#9575CD" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="965" y1="110" x2="965" y2="145" stroke="#9575CD" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- 2. Question Input -->
+  <rect x="20" y="160" width="125" height="150" rx="11" fill="#FAFAFA" stroke="#90A4AE" stroke-width="2"/>
+  <text x="82.5" y="220" font-size="22" font-weight="bold" fill="#37474F" text-anchor="middle">Question</text>
+  <text x="82.5" y="250" font-size="17" fill="#607D8B" text-anchor="middle">q + context</text>
+  <line x1="145" y1="235" x2="168" y2="235" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- UPPER ROW GATES (M -> N -> F -> E -> I) -->
+
+  <!-- Gate M -->
+  <rect x="170" y="150" width="150" height="170" rx="10" fill="#FFF3E0" stroke="#E8871E" stroke-width="2"/>
+  <rect x="276" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="295" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C1</text>
+  <text x="185" y="195" font-size="30" font-weight="bold" fill="#B35309">M</text>
+  <text x="185" y="230" font-size="20" font-weight="bold" fill="#7C4A03">Intent gate</text>
+  <text x="185" y="265" font-size="17" fill="#8D5A10">LLM selector ·</text>
+  <text x="185" y="290" font-size="17" fill="#8D5A10">unique family?</text>
+  <line x1="320" y1="235" x2="348" y2="235" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Gate N -->
+  <rect x="350" y="150" width="150" height="170" rx="10" fill="#FFF3E0" stroke="#E8871E" stroke-width="2"/>
+  <rect x="456" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="475" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C1</text>
+  <text x="365" y="195" font-size="30" font-weight="bold" fill="#B35309">N</text>
+  <text x="365" y="230" font-size="20" font-weight="bold" fill="#7C4A03">Scope gate</text>
+  <text x="365" y="265" font-size="17" fill="#8D5A10">applicable FIC?</text>
+  <text x="365" y="290" font-size="17" fill="#8D5A10">BM25 + hints</text>
+  <line x1="500" y1="235" x2="528" y2="235" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Gate F -->
+  <rect x="530" y="150" width="150" height="170" rx="10" fill="#FFF3E0" stroke="#E8871E" stroke-width="2"/>
+  <rect x="636" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="655" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C2</text>
+  <text x="545" y="195" font-size="30" font-weight="bold" fill="#B35309">F</text>
+  <text x="545" y="230" font-size="20" font-weight="bold" fill="#7C4A03">Schema gate</text>
+  <text x="545" y="265" font-size="17" fill="#8D5A10">LLM extractor ·</text>
+  <text x="545" y="290" font-size="17" fill="#8D5A10">inputs bound?</text>
+  <line x1="680" y1="235" x2="708" y2="235" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Gate E -->
+  <rect x="710" y="150" width="150" height="170" rx="10" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+  <rect x="816" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="835" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C2</text>
+  <text x="725" y="195" font-size="30" font-weight="bold" fill="#0D47A1">E</text>
+  <text x="725" y="230" font-size="20" font-weight="bold" fill="#0D47A1">Boundary gate</text>
+  <text x="725" y="265" font-size="17" fill="#1565C0">invariant checks</text>
+  <text x="725" y="290" font-size="17" fill="#1565C0">&amp; scale checks</text>
+  <line x1="860" y1="235" x2="888" y2="235" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Gate I (Ambiguity Gate) -->
+  <rect x="890" y="150" width="170" height="170" rx="10" fill="#FFF3E0" stroke="#E8871E" stroke-width="2.2"/>
+  <rect x="1014" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="1033" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C3</text>
+  <text x="905" y="195" font-size="30" font-weight="bold" fill="#B35309">I</text>
+  <text x="905" y="230" font-size="20" font-weight="bold" fill="#7C4A03">Ambiguity gate</text>
+  <text x="905" y="265" font-size="17" fill="#8D5A10">LLM critic over hints</text>
+  <text x="905" y="290" font-size="17" fill="#8D5A10">hard block · soft warn</text>
+
+  <!-- IF-ELSE BRANCHing to Verified Transform (C4) -->
+  <line x1="1060" y1="235" x2="1108" y2="235" stroke="#7B2FBE" stroke-width="2.2" stroke-dasharray="6,4" marker-end="url(#arrP)"/>
+  <rect x="1058" y="200" x2="110" y2="28" rx="4" fill="#FFFFFF" stroke="#D1C4E9"/>
+  <text x="1083" y="220" font-size="14" font-weight="bold" fill="#7B2FBE" text-anchor="middle">I_HARD</text>
+
+  <!-- Verified Transform (C4) Box -->
+  <rect x="1110" y="150" width="240" height="170" rx="10" fill="#F6EEFB" stroke="#7B2FBE" stroke-width="2" stroke-dasharray="7,4"/>
+  <rect x="1304" y="158" width="38" height="26" rx="4" fill="#37474F"/>
+  <text x="1323" y="176" font-size="16" fill="#FFFFFF" text-anchor="middle">C4</text>
+  <text x="1125" y="195" font-size="20" font-weight="bold" fill="#5B21A6">Verified transform</text>
+  <text x="1125" y="230" font-size="17" fill="#5B21A6">postprocess / patch</text>
+  <text x="1125" y="258" font-size="17" fill="#5B21A6">AST-bounded ·</text>
+  <text x="1125" y="283" font-size="17" fill="#5B21A6">cross-verify</text>
+
+  <!-- STRUCTURED EXITS (Middle Row - Red Boxes) -->
+  <line x1="245" y1="320" x2="245" y2="375" stroke="#C0392B" stroke-width="2" marker-end="url(#arrR)"/>
+  <rect x="170" y="380" width="150" height="95" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+  <text x="182" y="410" font-size="18" font-weight="bold" fill="#7B241C">refusal / M</text>
+  <text x="182" y="435" font-size="16" fill="#922B21">structured</text>
+  <text x="182" y="458" font-size="16" fill="#922B21">disambiguation</text>
+
+  <line x1="425" y1="320" x2="425" y2="375" stroke="#C0392B" stroke-width="2" marker-end="url(#arrR)"/>
+  <rect x="350" y="380" width="150" height="95" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+  <text x="362" y="410" font-size="18" font-weight="bold" fill="#7B241C">refusal / N</text>
+  <text x="362" y="435" font-size="16" fill="#922B21">scope boundary</text>
+  <text x="362" y="458" font-size="16" fill="#922B21">named</text>
+
+  <line x1="605" y1="320" x2="605" y2="375" stroke="#C0392B" stroke-width="2" marker-end="url(#arrR)"/>
+  <rect x="530" y="380" width="150" height="95" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+  <text x="542" y="410" font-size="18" font-weight="bold" fill="#7B241C">error / F</text>
+  <text x="542" y="435" font-size="16" fill="#922B21">requested fields</text>
+  <text x="542" y="458" font-size="16" fill="#922B21">slot-filling request</text>
+
+  <line x1="785" y1="320" x2="785" y2="375" stroke="#C0392B" stroke-width="2" marker-end="url(#arrR)"/>
+  <rect x="710" y="380" width="150" height="95" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+  <text x="722" y="410" font-size="18" font-weight="bold" fill="#7B241C">alert / E</text>
+  <text x="722" y="435" font-size="16" fill="#922B21">violated check</text>
+  <text x="722" y="458" font-size="16" fill="#922B21">named</text>
+
+  <!-- 2. 加寬後的 clarification / I_HARD (寬度擴展至 220px) -->
+  <line x1="975" y1="320" x2="975" y2="375" stroke="#C0392B" stroke-width="2" marker-end="url(#arrR)"/>
+  <rect x="880" y="380" width="220" height="95" rx="8" fill="#FDECEA" stroke="#C0392B" stroke-width="1.8"/>
+  <text x="895" y="408" font-size="18" font-weight="bold" fill="#7B241C">clarification / I_HARD</text>
+  <text x="895" y="433" font-size="16" fill="#922B21">blocking · contract-declared</text>
+  <text x="895" y="456" font-size="16" fill="#922B21">options presented</text>
+
+  <!-- ************************************************************* -->
+  <!-- 3. 新的主流程與匯流走向 (避開所有紅框，從右側外圍穿過) -->
+  <!-- ************************************************************* -->
+
+  <!-- A. Pass / I_SOFT 路徑：從 I Gate 底部往下折向右邊與 C4 匯流點整合 -->
+  <!-- B. Verified Transform (C4) 輸出向下，在右側外圍（x=1230）合流 -->
+  <path d="M 1230 320 L 1230 510 L 175 510 L 175 570" fill="none" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- I Gate 的 Pass 直接走階梯進入這條 Main Channel -->
+  <path d="M 975 320 L 975 350 L 1120 350 L 1120 510" fill="none" stroke="#455A64" stroke-width="2" stroke-dasharray="5,4"/>
+
+  <!-- 主折線上的標籤 1：I Pass 標籤 -->
+  <rect x="990" y="335" width="115" height="28" rx="4" fill="#FFFFFF" stroke="#B0BEC5"/>
+  <text x="1047.5" y="354" font-size="14" font-weight="bold" fill="#37474F" text-anchor="middle">Pass / I_SOFT</text>
+
+  <!-- 主折線上的標籤 2：C4 修復完成標籤 -->
+  <rect x="1135" y="420" width="220" height="32" rx="5" fill="#FFFFFF" stroke="#D1C4E9"/>
+  <text x="1245" y="441" font-size="15" font-weight="bold" fill="#7B2FBE" text-anchor="middle">accepted iff identity holds</text>
+
+  <!-- ************************************************************* -->
+
+  <!-- LOWER ROW (C -> Answer -> C6) -->
+
+  <!-- Gate C (Compute) -->
+  <rect x="50" y="575" width="250" height="170" rx="10" fill="#E3F2FD" stroke="#1565C0" stroke-width="2.2"/>
+  <rect x="252" y="585" width="38" height="26" rx="5" fill="#37474F"/>
+  <text x="271" y="603" font-size="16" fill="#FFFFFF" text-anchor="middle">C5</text>
+  <text x="70" y="618" font-size="32" font-weight="bold" fill="#0D47A1">C</text>
+  <text x="70" y="655" font-size="22" font-weight="bold" fill="#0D47A1">Compute</text>
+  <text x="70" y="690" font-size="18" fill="#1565C0">deterministic Python</text>
+  <text x="70" y="715" font-size="18" fill="#1565C0">from core card</text>
+
+  <line x1="300" y1="660" x2="338" y2="660" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Answer + Diagnostic Report Endpoint -->
+  <rect x="340" y="575" width="310" height="170" rx="11" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2.2"/>
+  <rect x="602" y="585" width="38" height="26" rx="5" fill="#37474F"/>
+  <text x="621" y="603" font-size="16" fill="#FFFFFF" text-anchor="middle">C5</text>
+  <text x="360" y="615" font-size="22" font-weight="bold" fill="#1B5E20">Answer +</text>
+  <text x="360" y="642" font-size="22" font-weight="bold" fill="#1B5E20">Diagnostic Report</text>
+  <text x="360" y="678" font-size="17" fill="#2E7D32">exit_layer · fic_id</text>
+  <text x="360" y="703" font-size="17" fill="#2E7D32">binding · trace · action</text>
+  <text x="360" y="728" font-size="17" fill="#2E7D32">replayable decision record</text>
+
+  <line x1="650" y1="660" x2="688" y2="660" stroke="#455A64" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- C6 Abstention Control (Ultra Expanded) -->
+  <rect x="690" y="575" width="660" height="170" rx="11" fill="#ECEFF1" stroke="#78909C" stroke-width="2.2"/>
+  <rect x="715" y="595" width="50" height="32" rx="6" fill="#37474F"/>
+  <text x="740" y="617" font-size="18" font-weight="bold" fill="#FFFFFF" text-anchor="middle">C6</text>
+  <text x="780" y="618" font-size="24" fill="#263238" font-weight="bold">Abstention as a Control</text>
+  <text x="715" y="668" font-size="18" fill="#37474F">Five funnel conditions terminate cleanly in structured exits.</text>
+  <text x="715" y="700" font-size="18" font-weight="bold" fill="#1B5E20">Every execution path guarantees a replayable DiagnosticReport [C5].</text>
+
+  <!-- 4. ENLARGED LEGEND (Bottom Bar) -->
+  <rect x="20" y="800" width="1330" height="70" rx="8" fill="#F5F7F8" stroke="#CFD8DC" stroke-width="1.8"/>
+
+  <rect x="40" y="820" width="28" height="28" rx="4" fill="#FFF3E0" stroke="#E8871E" stroke-width="2"/>
+  <text x="78" y="840" font-size="18" font-weight="bold" fill="#37474F">LLM-executed</text>
+
+  <rect x="240" y="820" width="28" height="28" rx="4" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+  <text x="278" y="840" font-size="18" font-weight="bold" fill="#37474F">Deterministic</text>
+
+  <rect x="440" y="820" width="28" height="28" rx="4" fill="#FDECEA" stroke="#C0392B" stroke-width="2"/>
+  <text x="478" y="840" font-size="18" font-weight="bold" fill="#37474F">Structured exit</text>
+
+  <rect x="650" y="820" width="28" height="28" rx="4" fill="#F6EEFB" stroke="#7B2FBE" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="688" y="840" font-size="18" font-weight="bold" fill="#37474F">Verified repair (C4)</text>
+
+  <rect x="890" y="820" width="28" height="28" rx="4" fill="#EDE7F6" stroke="#5E35B1" stroke-width="2"/>
+  <text x="928" y="840" font-size="18" font-weight="bold" fill="#37474F">FIC artifacts</text>
+
+  <rect x="1080" y="820" width="50" height="28" rx="5" fill="#37474F"/>
+  <text x="1140" y="840" font-size="18" font-weight="bold" fill="#37474F">Control badge (Table 1)</text>
+
+</svg>

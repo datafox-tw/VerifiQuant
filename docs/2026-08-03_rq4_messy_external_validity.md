@@ -121,9 +121,44 @@ inspecting `rpal_plain.jsonl`'s candidate list for the same items, e.g. a LIFO-c
 question retrieves only a FIFO-costing card — not a substitutable formula). This is the
 paper's own pre-declared *selection frontier* (§`sec:v2boundary`), observed here under
 naturalistic paraphrase rather than contract-derived perturbation, not a new or unexplained
-failure mode. It also preempts the "low FNAR via indiscriminate refusal" critique: VQ's
-FNAR is low because it declines exactly where retrieval can't ground an answer, not because
-it refuses everything.
+failure mode. It also blunts the "low FNAR via indiscriminate refusal" critique: the
+abstentions are traceable to retrieval coverage rather than spread at random. The paper does
+**not** claim this makes the behavior good overall — §5.4 states plainly that the same
+mechanism removes most of the utility on this set, so the low FNAR is bought at a far larger
+coverage cost than on the clean set.
+
+## 6. Statistical power of the RQ4 ordering (KNOWN LIMITATION, not yet in the paper)
+
+⚠️ **The RQ4 ordering is only decisive against plain R-PAL.** The percentages rest on very few
+events (denominator = the 46 non-\textsc{answer} items):
+
+| System | Human-FNAR | events | two-sided Fisher vs VQ |
+|---|---|---|---|
+| VerifiQuant (K=1) | 8.7% | **4**/46 | — |
+| R-PAL+ (taxonomy prompt) | 13.0% | **6**/46 | **p = 0.74 (n.s.)** |
+| CoT (single-shot) | 21.7% | **10**/46 | p = 0.14 (n.s.) |
+| R-PAL (plain) | 56.5% | **26**/46 | p < 1e-4 ✅ |
+
+So the VQ-vs-R-PAL+ gap is **two items** and is not individually significant at this sample
+size. The paper currently writes the ordering ("again the lowest, below R-PAL+, CoT, and
+plain R-PAL") without this caveat. A statistically minded reviewer will compute it in under a
+minute, so this is a live exposure.
+
+**Correct framing (use in the paper or in rebuttal):** RQ4's job is *independent-label
+corroboration of the Panel B direction*, not a second powered comparison of the two governed
+systems. Panel B is the powered comparison (n=80 traps, base-clustered 95% CI [5.8, 26.4]
+excluding 0); RQ4 shows the same ordering arises when the labels come from experts blind to
+every system, and its decisive separation (4 vs 26 against plain R-PAL) is what carries the
+non-circularity argument.
+
+Ready-to-paste sentence if the page budget allows:
+
+> With 46 non-\textsc{answer} items, these rates correspond to 4, 6, 10, and 26 emitted
+> numbers respectively. The separation from plain R-PAL is decisive (Fisher exact
+> $p<10^{-4}$), whereas the two-item gap between VerifiQuant and R-PAL$^{+}$ is not
+> individually significant at this sample size ($p=.74$); we therefore read RQ4 as
+> independent-label corroboration of the Panel~B ordering, not as a second powered
+> comparison of the two governed systems.
 
 ## Reproduce
 
@@ -131,6 +166,9 @@ it refuses everything.
 PYTHONPATH=. python3 scripts/aggregate_messy_labels.py   # -> ground_truth.jsonl (idempotent, already frozen)
 PYTHONPATH=. python3 scripts/score_messy_external.py     # -> agreement/score_report.json + LaTeX rows
 ```
+
+Fisher exact values in §6 above are reproducible from the event counts in `score_report.json`
+(`fnar_hits` / `fnar_denom` per system); no additional run is required.
 
 Full per-system score detail (raw and the M→C comparison variant):
 `verifiquant/data/runs/messy_query_pilot/agreement/score_report.json`.
