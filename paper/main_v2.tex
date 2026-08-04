@@ -279,6 +279,7 @@ The 250-card library used here is generated fully automatically (three staged LL
 \end{figure*}
 Given a question and context, gates fire in order and each produces a \emph{DiagnosticReport} (Figure~\ref{fig:v2pipeline}).
 \textbf{M/N} ask whether exactly one applicable contract exists. The exit is a structured disambiguation request or a scope-boundary refusal.
+Candidates reach this gate from a purely lexical retriever: SQLite FTS5 BM25 over each card's title, summary, keywords, and embedding text, merged with a keyword-overlap ranking and filtered by the contract's declared selection hints. Nothing in the retriever is trained, tuned, or fitted to the evaluation sets, and the same retriever and the same top-4 depth serve VerifiQuant, R-PAL, and R-PAL$^{+}$, so retrieval quality is held fixed across the compared systems rather than being a variable one system optimizes. Sensitivity to the retrieval depth and the effect of a dense or hybrid neural retriever are untested and left to future work.
 \textbf{F/E} ask whether the inputs are complete and satisfy the contract's deterministic checks. The exit is a slot-filling request or a boundary alert naming the violated check.
 \textbf{I} asks whether an unresolved declared ambiguity would change the computation (blocking I\textsubscript{HARD}) or only its interpretation (warning I\textsubscript{SOFT}).
 \textbf{C} performs deterministic execution with an audit log.
@@ -320,7 +321,7 @@ We evaluate on 250 FinanceReasoning \cite{tang2025financereasoning} questions (1
 The contract library is built from those reference functions. The pipeline never reads the per-question worked solution or numeric gold answer, and it deduplicates formula kernels by AST hashing.
 By construction a card therefore contains the formula its matching question needs: the evaluation is \emph{in-library}, and it measures routing, binding, and gating, not unseen-formula derivation.
 This is a structural constraint of the only benchmark that ships per-question formula provenance.
-The out-of-library analysis of \S\ref{sec:v2res} uses a second, fixed split of the same 250 questions: the library is rebuilt from 50 formula families, which leaves 199 questions whose family is absent (OOD) and 51 whose family is present (ID).
+The out-of-library analysis of \S\ref{sec:v2res} uses a second, fixed split of the same 250 questions: the library is rebuilt from 50 formula families, which leaves 199 questions whose family is absent (OOD) and 51 whose family is present (ID). The comparison there is matched in the same way as the clean set. Both systems run the same backbone on the same 199 questions with the same question and context, and both retrieve top-4 from the \emph{same} 50-family library, so the baseline is not given a larger library or a different prompt. The split is fixed in advance by formula family rather than by difficulty, and the questions themselves are unchanged, so the two systems face an identical input distribution and differ only in whether the funnel runs.
 
 \subsection{Matched baselines}
 We compare systems on the clean set.
@@ -381,7 +382,7 @@ Panel A of Table~\ref{tab:v2main} reports both VerifiQuant operating modes. The 
 We read this not as a shortfall but as evidence that the clean-accuracy axis is \emph{saturated}: once the right formula is retrieved and executed deterministically, well-posed in-library questions leave little headroom for any governance layer to claim.
 Scaling the backbone does not remove the failure mode either: replacing Flash with Gemini 2.5 Pro raises single-shot CoT accuracy from $77.6\%$ to $82.4\%$, but its silent-wrong rate falls only from $18.0\%$ to $15.2\%$. All system comparisons in this paper hold the backbone fixed at Flash.
 R-PAL$^{+}$ behaves the same way (\govPromptAccAll{} accuracy at \govPromptSWRAll{} SWR), yet it accepts more than twice as many false numbers as VerifiQuant on the traps of RQ2. Standing on the clean set therefore does not predict governed behavior.
-Clean scalar accuracy is the wrong axis on which to measure governance, and it is not our contribution. Instead, the systems must be separated where an answer should not be emitted at all (RQ2).
+Clean scalar accuracy is the wrong axis on which to measure governance, and instead, the systems must be separated where an answer should not be emitted at all (RQ2).
 
 \begin{table}[t]
 \caption{Clean-input utility and malformed-input governance results for VerifiQuant and matched baselines. R-PAL$^{+}$ figures are 3-run means on both panels; the other systems are single audited runs.}
@@ -418,21 +419,24 @@ Because the traps are contract-derived (\S\ref{sec:v2design}), a declared check 
 The separation concentrates where correctness depends on a boundary or convention rather than on a present field (Table~\ref{tab:v2trapop}). On E and I traps, plain R-PAL force-fits almost always, and even the taxonomy-prompted variant stays high, whereas VerifiQuant's executed checks hold.
 On F and N the systems are close, and VerifiQuant is in fact marginally \emph{worse} than the taxonomy-prompted baseline (F: $10\%$ vs.\ $0\%$; N: $5\%$ vs.\ $0\%$). A missing field or a blatant out-of-scope ask is conspicuous enough for prompting to refuse. VerifiQuant's few residual acceptances here instead trace to the \emph{binding} frontier: the model fills the absent slot with a plausible nearby value, so the completeness (F) gate sees a satisfied schema, and an out-of-scope ask is occasionally force-fit onto a near-neighbor contract.
 These are the selection/binding failures we localize in \S\ref{sec:v2boundary}, not gate omissions.
+The per-class columns of Table~\ref{tab:v2trapop} show where each system's exits are actually wrong rather than only how often it emits a number. VerifiQuant is strongest on the operator whose evidence is a missing field (F, exact diagnostic $90\%$) and weakest on the one that requires reading an unstated convention (I, $60\%$). Its I errors are informative: of the twenty I traps, nine are downgraded to a soft warning and four pass as ready, so the residual is a \emph{severity} misjudgment inside the ambiguity gate rather than a failure to notice the ambiguity at all. R-PAL$^{+}$ shows the opposite profile. It labels conspicuous operators almost perfectly (F $100\%$, N $88\%$) while collapsing on I ($10\%$), which is the same asymmetry visible in FNAR and is what a prompt can and cannot enforce.
 
 \begin{table}[t]
-\caption{False numeric acceptance by governance-perturbation operator.}
+\caption{Per-operator behavior on the balanced 80-trap set ($n{=}20$ each). FNAR is false numeric acceptance (lower is safer); Diag is exact-diagnostic accuracy and Act is action accuracy (higher is better). R-PAL$^{+}$ columns are 3-run means.}
 \label{tab:v2trapop}
 \small
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-Operator (FNAR) & R-PAL & R-PAL$^{+}$ & VerifiQuant \\
+& \multicolumn{3}{c}{FNAR} & \multicolumn{2}{c}{VQ} & R-PAL$^{+}$ \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(l){7-7}
+Operator & R-PAL & R-PAL$^{+}$ & VQ & Diag & Act & Diag \\
 \midrule
-E (illegal boundary value) & 90\% & 30\% & \textbf{10\%} \\
-I (deleted disambiguator) & 95\% & 80\% & \textbf{20\%} \\
-F (removed required input) & 10\% & 0\% & 10\% \\
-N (out-of-scope ask) & 0\% & 0\% & 5\% \\
+E (illegal boundary) & 90\% & 30\% & \textbf{10\%} & 75\% & 75\% & 63\% \\
+I (deleted disambiguator) & 95\% & 80\% & \textbf{20\%} & 60\% & 60\% & 10\% \\
+F (removed input) & 10\% & 0\% & 10\% & 90\% & 85\% & 100\% \\
+N (out-of-scope ask) & 0\% & 0\% & 5\% & 75\% & 75\% & 88\% \\
 \addlinespace
-Overall (F/E/I/N) & \govPlainFnar{} & \govPromptFnar{} & \textbf{\govVQfnar{}} \\
+Overall & \govPlainFnar{} & \govPromptFnar{} & \textbf{\govVQfnar{}} & \govVQdiag{} & \govVQaction{} & \govPromptDiag{} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -454,6 +458,11 @@ Next, two mechanistic views.
 A gate ablation adds controls cumulatively on the same backbone (Table~\ref{tab:v2gateladder}). It is a dedicated autonomous $K{=}1$ run over all 250 clean questions with Gemini 2.5 Flash and the full contract library, using the same output-scale-normalized accuracy and SWR definitions as the main results. This gate-disable run is distinct from the canonical $K{=}1$ history truncation in Table~\ref{tab:v2kabl}: its full-funnel rung has $4.0\%$ SWR ($10/250$), compared with the canonical $2.8\%$ ($7/250$), so the claim concerns the within-run trend rather than equality of the absolute endpoints. Silent-wrong rate falls at every rung, from CoT's $18.0\%$ to $4.0\%$ at the full funnel, while accuracy trades off as the I and M/N gates convert ambiguous cases into abstention.
 Execution buys most of the initial drop, and the later gates move answerable-but-unqualified cases into abstention.
 The pattern is monotone in the metric that matters: \emph{gates buy safety with coverage, not accuracy}. The final hint-trigger rung is the illustrative in-sample pre-pass discussed in \S\ref{sec:v2boundary}, not a held-out result.
+
+\paragraph{What the funnel costs.}
+The same ladder prices the controls, since every rung runs the identical 250 questions on one backbone in one environment (Table~\ref{tab:v2gateladder}).
+Contract selection, binding, and execution alone take $6.6$\,s per question. Adding the \emph{deterministic} F/E gates costs $0.2$\,s, because those checks are executed Python rather than model calls. The ambiguity gate is where the cost sits: adding I raises the figure to $12.7$\,s, since it introduces a third model call per question. The full funnel runs at $12.2$\,s per question, against $10.5$\,s for plain R-PAL and $8.2$\,s for R-PAL$^{+}$ on the same set, so executed governance costs roughly $1.2\times$ a retrieval-and-execution baseline and well under a third of self-consistency at $K{=}5$ ($38.1$\,s). Architecturally VerifiQuant issues at most three model calls per question (selection, binding, ambiguity) where the single-call baselines issue one, and structured exits cut this further whenever a gate fires early.
+These are wall-clock means that include provider-side variance and retries, and we do not report token accounting, so they bound the order of magnitude rather than the marginal cost of a deployment.
 
 \begin{table}[t]
 \caption{Cumulative gate ablation from generation through the full diagnostic funnel.}
@@ -493,7 +502,7 @@ The one visible cost is honest. OOD silent-wrong rises mildly ($1.3\%{\to}4.8\%$
 \label{fig:v2libsweep}
 \end{figure}
 This selectivity is a trade-off, not a coverage win.
-On a fixed out-of-library split, a matched execution baseline answers nearly all such questions from parametric knowledge at \oodRPALcorrOOD{} correct, whereas VerifiQuant abstains on most. VerifiQuant is not more accurate out of library. Its own out-of-library selective accuracy is in fact lower (\oodVQselOOD{} vs.\ \oodRPALselOOD{}), and its abstention does not reduce silent-wrong risk there.
+On the fixed out-of-library split of \S\ref{sec:v2design} (199 questions whose formula family is absent from the 50-family library), the matched execution baseline answers almost all of them from parametric knowledge and is \oodRPALcorrOOD{} correct, abstaining on \oodRPALabsOOD{}. VerifiQuant abstains on \oodVQabsOOD{} of the same questions and answers \oodVQcorrOOD{} correctly. VerifiQuant is therefore not more accurate out of library, and this is the result that most constrains our claim: its own out-of-library selective accuracy is lower (\oodVQselOOD{} vs.\ \oodRPALselOOD{}), its residual silent-wrong rate there is no better than the baseline's (\oodVQswOOD{} vs.\ \oodRPALswOOD{}), and abstaining does not reduce silent-wrong risk on this split. The parametric knowledge that makes the baseline accurate here is exactly what carries no signal when it is wrong.
 What it provides is a \emph{verified/unverified boundary}: it emits a number only when a contract applies, whereas execution and prompting emit confident numbers they cannot vouch for.
 
 \subsection{RQ4: Does an independent human panel corroborate the boundary?}\label{sec:v2rq4}
