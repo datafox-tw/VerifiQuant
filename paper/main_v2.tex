@@ -110,6 +110,12 @@
 \newcommand{\govVQaction}{73.8\%}
 \newcommand{\govPromptDiag}{65.4\%}
 \newcommand{\govPromptAction}{55.8\%}
+%% R-PAL+ clean 250Q, 3-run mean (93.2/93.6/92.0 coverage; 91.6/93.2/91.2 accuracy).
+%% Runs: verifiquant/data/runs/governance_eval/prompted_clean250_run{1,2,3}.jsonl
+\newcommand{\govPromptCovAll}{92.9\%}
+\newcommand{\govPromptAccAll}{92.0\%}
+\newcommand{\govPromptSWRAll}{0.9\%}
+\newcommand{\govPromptSelAccAll}{99.0\%}
 %% I_HARD (n=6) / I_SOFT (n=14) FNAR split
 \newcommand{\govVQihard}{16.7\%}
 \newcommand{\govVQisoft}{21.4\%}
@@ -374,10 +380,11 @@ No, and this expected result precisely delineates the boundary of our claim.
 Panel A of Table~\ref{tab:v2main} reports both VerifiQuant operating modes. The primary deployable setting, autonomous $K{=}1$, reaches $81.2\%$ accuracy and $2.8\%$ SWR at $84.0\%$ coverage; R-PAL answers nearly all questions and reaches \rpalAccAll{} accuracy and \rpalSWRAll{} SWR. VerifiQuant's clarification-assisted $K{=}3$ result (\vqAccAll{} accuracy, \vqSWRAll{} SWR) is an idealized recoverability upper bound rather than the autonomous headline. R-PAL and that upper bound are not statistically distinguishable (accuracy $\Delta{=}{+}3.2$ points, 95\% CI $[-0.4, 6.8]$, exact McNemar $p{=}.134$; SWR $\Delta{=}{-}0.8$ points, 95\% CI $[-3.6, 2.0]$, $p{=}.791$). These paired tests use per-question binary outcomes from one audited R-PAL 250Q clean run and the canonical VerifiQuant $K{=}3$ run on the same case IDs, not averages over repeats. The accuracy discordants are 15 R-PAL-only versus 7 VerifiQuant-only correct cases; the SWR discordants are 6 versus 8. Three-run means are used only for the R-PAL trap results in Panel B.
 We read this not as a shortfall but as evidence that the clean-accuracy axis is \emph{saturated}: once the right formula is retrieved and executed deterministically, well-posed in-library questions leave little headroom for any governance layer to claim.
 Scaling the backbone does not remove the failure mode either: replacing Flash with Gemini 2.5 Pro raises single-shot CoT accuracy from $77.6\%$ to $82.4\%$, but its silent-wrong rate falls only from $18.0\%$ to $15.2\%$. All system comparisons in this paper hold the backbone fixed at Flash.
-Clean scalar accuracy is therefore the wrong axis on which to measure governance, and it is not our contribution. Instead, the systems must be separated where an answer should not be emitted at all (RQ2).
+R-PAL$^{+}$ behaves the same way (\govPromptAccAll{} accuracy at \govPromptSWRAll{} SWR), yet it accepts more than twice as many false numbers as VerifiQuant on the traps of RQ2. Standing on the clean set therefore does not predict governed behavior.
+Clean scalar accuracy is the wrong axis on which to measure governance, and it is not our contribution. Instead, the systems must be separated where an answer should not be emitted at all (RQ2).
 
 \begin{table}[t]
-\caption{Clean-input utility and malformed-input governance results for VerifiQuant and matched baselines.}
+\caption{Clean-input utility and malformed-input governance results for VerifiQuant and matched baselines. R-PAL$^{+}$ figures are 3-run means on both panels; the other systems are single audited runs.}
 \label{tab:v2main}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
@@ -387,6 +394,7 @@ System & Acc & SWR & Sel.\,Acc \\
 CoT (single-shot) & \cotAccAll{} & \cotSWRAll{} & \cotSelAccAll{} \\
 PAL (no retrieval) & \palAccAll{} & \palSWRAll{} & \palSelAccAll{} \\
 R-PAL (top-4 retrieval) & \rpalAccAll{} & \rpalSWRAll{} & \rpalSelAccAll{} \\
+R-PAL$^{+}$ (taxonomy prompt) & \govPromptAccAll{} & \govPromptSWRAll{} & \govPromptSelAccAll{} \\
 \textbf{VerifiQuant} ($K{=}1$, autonomous) & 81.2\% & 2.8\% & 96.7\% \\
 \quad $K{=}3$ (clarification upper bound) & \vqAccAll{} & \vqSWRAll{} & \vqSelAccAll{} \\
 \addlinespace
@@ -433,7 +441,7 @@ Overall (F/E/I/N) & \govPlainFnar{} & \govPromptFnar{} & \textbf{\govVQfnar{}} \
 We give three complementary pieces of evidence, starting with the trade-off as a whole.
 
 \paragraph{Safety versus utility.}
-Figure~\ref{fig:v2safety} places autonomous operating points on a safety--utility plane. The horizontal axis is clean coverage over 250 well-posed questions and the vertical axis is false numeric acceptance over the 80 F/E/I/N traps; the axes remain separate rather than assuming a clean-to-trap mixing ratio. Plain R-PAL and VerifiQuant use the same 250 clean questions and are directly comparable: R-PAL answers almost everything (\rpalCovAll{} coverage) but accepts a confident number on nearly half the traps (\govPlainFnar{}), whereas executed gates reach \govVQfnar{} at $84.0\%$ clean coverage. R-PAL$^{+}$ reaches \govPromptFnar{} on traps, but its clean coverage comes from a 50-question pilot. We therefore show it as an unconnected open diamond with a 95\% Wilson clean-coverage interval, not as a point on a fitted frontier; filled marks denote systems evaluated on the common 250-question clean set.
+Figure~\ref{fig:v2safety} places autonomous operating points on a safety--utility plane. The horizontal axis is clean coverage over 250 well-posed questions and the vertical axis is false numeric acceptance over the 80 F/E/I/N traps, and the axes remain separate rather than assuming a clean-to-trap mixing ratio. All three systems are evaluated on the same 250 clean questions, so the points are directly comparable and trace a monotone frontier. Plain R-PAL answers almost everything (\rpalCovAll{} coverage) but accepts a confident number on nearly half the traps (\govPlainFnar{}). Supplying the taxonomy in the prompt moves R-PAL$^{+}$ to \govPromptCovAll{} coverage at \govPromptFnar{}. Executing the gates reaches \govVQfnar{} at $84.0\%$ clean coverage.
 The safety is not free. VerifiQuant forgoes roughly fifteen points of clean coverage relative to plain execution. In return, it buys a reduction in false numeric acceptance that neither execution alone nor prompted governance attains.
 \begin{figure}[t]
 \centering
