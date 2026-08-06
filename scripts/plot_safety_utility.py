@@ -66,9 +66,10 @@ ax.set_xlim(82, 101.5)
 ax.set_ylim(-3, 55)
 ax.grid(alpha=0.25)
 ax.legend(fontsize=8, loc="upper left", frameon=True)
-ax.text(0.5, -0.30,
-        "All systems: clean 250Q, traps 80Q; R-PAL$^{+}$ is a 3-run mean on both axes",
-        transform=ax.transAxes, ha="center", fontsize=7, color="#6b7280")
+# Denominators stay in the figure, at a readable size, because the LaTeX caption is
+# kept short for the page budget. An earlier 7pt version of this line was unreadable.
+ax.text(0.5, -0.26, "clean 250Q  |  traps 80Q  |  R-PAL$^{+}$ = 3-run mean",
+        transform=ax.transAxes, ha="center", fontsize=8.5, color="#4b5563")
 
 plt.tight_layout()
 for ext in ("png", "pdf"):

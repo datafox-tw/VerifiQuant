@@ -93,11 +93,11 @@ def main():
     })
     plt.figure(figsize=(7.4, 5.2))
     for key, label, style, color in [
-        ("ood_abstain", "OOD abstention (families not in library)", "-o", "#1f77b4"),
-        ("id_abstain", "ID abstention (covered families)", "-s", "#aec7e8"),
-        ("id_acc", "ID accuracy (unit-normalized)", "-^", "#2ca02c"),
-        ("ood_sw", "OOD silent-wrong (unit-normalized)", "-v", "#d62728"),
-        ("id_sw", "ID silent-wrong (unit-normalized)", "--x", "#ff9896"),
+        ("ood_abstain", "OOD abstain (family absent)", "-o", "#1f77b4"),
+        ("id_abstain", "ID abstain (family present)", "-s", "#aec7e8"),
+        ("id_acc", "ID accuracy (unit-norm.)", "-^", "#2ca02c"),
+        ("ood_sw", "OOD silent-wrong (unit-norm.)", "-v", "#d62728"),
+        ("id_sw", "ID silent-wrong (unit-norm.)", "--x", "#ff9896"),
     ]:
         xs, ys = series(key)
         if xs:
@@ -111,11 +111,16 @@ def main():
     plt.xticks(FRACS)
     plt.ylim(-2, 102)
     plt.grid(alpha=0.3)
-    plt.legend(fontsize=15, loc="center right")
+    # Short labels + two columns in the empty mid-band: the long single-column
+    # legend overlapped the plotted lines. Definitions live in the caption.
+    plt.legend(fontsize=11, loc="center", ncol=2, framealpha=0.92)
     plt.tight_layout()
-    out = os.path.join(ROOT, "docs/figures/libsweep_250q.png")
-    plt.savefig(out, dpi=150, bbox_inches="tight", pad_inches=0.08)
-    print("figure:", out)
+    # Write both copies. paper/figures is what main_v2.tex actually includes, and a
+    # docs-only write here previously let the paper keep a stale figure for weeks.
+    for out in (os.path.join(ROOT, "docs/figures/libsweep_250q.png"),
+                os.path.join(ROOT, "paper/figures/libsweep_250q.png")):
+        plt.savefig(out, dpi=150, bbox_inches="tight", pad_inches=0.08)
+        print("figure:", out)
     for p in pts:
         tag = "" if p["complete"] else "  (PARTIAL)"
         print(f"  lib_{p['frac']:>3}: ID acc={_pc(p['id_acc'])} ID abst={_pc(p['id_abstain'])} "
