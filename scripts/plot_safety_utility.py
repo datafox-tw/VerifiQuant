@@ -48,7 +48,7 @@ for k in order:
 # per-point annotations (offset to avoid overlap); text hardcoded to match
 # paper macros exactly (numbers.tex) rather than float-formatting the raw fractions.
 ann = {"rpal_plain": (6, 6), "rpal_prompted": (8, 6), "vq_k1": (8, 6)}
-disp = {"rpal_plain": "99.2% / 48.7%", "rpal_prompted": "92.9% / 27.5%",
+disp = {"rpal_plain": "99.2% / 48.8%", "rpal_prompted": "92.9% / 27.5%",
         "vq_k1": "84.0% / 11.3%"}
 for k in order:
     x, y = d[k]["clean_coverage"] * 100, d[k]["trap_fnar"] * 100

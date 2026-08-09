@@ -7,7 +7,7 @@ Pipeline 加 `VQ_DISABLE_GATES` 開關(module-load 讀取);250Q、K=1、Flash、
 ## 結果(unit-normalized,與論文主結果同尺度)
 | Configuration | Acc | SWR | Abst |
 |---|---|---|---|
-| CoT single-shot(LLM 自己算,參考) | 77.6% | 18.0% | 6 |
+| CoT single-shot(LLM 自己算,參考) | 77.6% | 18.0% | 11 |
 | FIC select+bind+execute(無 gate) | 87.6% | 6.4% | 15 |
 | + F/E | 86.8% | 4.4% | 22 |
 | + I | 79.6% | 4.4% | 40 |
@@ -22,6 +22,14 @@ Pipeline 加 `VQ_DISABLE_GATES` 開關(module-load 讀取);250Q、K=1、Flash、
   誠實界定:它們的 silent-wrong 價值在**有注入歧義的 trap 集**(trap-I 100→10%,已在論文)
   與 **K=3 recovery**,不在乾淨 250Q。
 - **hint triggers 再砍 SWR**(4.0→3.6)且小幅回補 accuracy。
+
+## 更正(2026-08-09)
+- CoT 那列原記為 `Abst = 6`,與其自己的 Acc/SWR 加不到 250(194+45+6=245)。
+  重數 `paper_v2_250/results/cot_single_shot_flash/output.jsonl` 後為 **194 / 45 / 11**
+  (與 `\cotAbstainAll{}` 一致)。已更正本表與 `paper/main_v2.tex` 的 `tab:v2gateladder`。
+- 五個 VQ rung 已對 `runs/gate_ladder/r*_summary.json` 逐列覆核無誤:unit-norm 的
+  correct = `correct + near_miss`、SWR = `(silent_wrong - near_miss)/250`,
+  例如 r4 = 175+23=198 (79.2%)、(33-23)/250=4.0%、abstain 42。
 
 ## 技術註記
 - 開關:`VQ_DISABLE_GATES=MN,F,E,I`(逗號分隔);MN 停用時 forced-select top candidate、
