@@ -7,7 +7,9 @@
   "top_k": 4,
   "dataset": {
     "path": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/messy_query_pilot/messy_pilot.jsonl",
-    "sha256": "e164d5a6998a5e6ef454cede65051afc91cfd344dad79f8ca6760d760e978dcd"
+    "sha256": "e164d5a6998a5e6ef454cede65051afc91cfd344dad79f8ca6760d760e978dcd",
+    "n_at_run_time": 82,
+    "note": "sha256 is of the 82-item file as executed. The released set is the 80 in-design items; mq-81/mq-82 were removed post hoc by scripts/trim_messy_set_to_80.py on a structural, label-independent criterion. Pre-trim copies: _pre_trim_82q/."
   },
   "card_db": {
     "path": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250/fic/cards.db",

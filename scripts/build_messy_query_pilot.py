@@ -1,5 +1,5 @@
 """
-build_messy_query_pilot.py  (P4 external-validity author, v2 — intent-stratified)
+build_messy_query_pilot.py  (P4 external-validity author, v3 — intent-stratified)
 --------------------------------------------------------------------------------
 Independent, cross-model authoring of naturally-messy financial user questions.
 SOLVER stack is Gemini; AUTHOR here is OpenAI (gpt-5.2) so messiness is not aligned
@@ -9,9 +9,9 @@ M/N/F/E/I/C taxonomy.
 v1 skewed heavily to answerable questions because (a) every seed is a fully-specified
 computable question, (b) "don't force messiness" makes an LLM default to a clean
 question, and (c) the `context` field invites a full data dump. v2 fixes this by
-stratifying over natural USER INTENTS (not operators): a clean calc, a person
-referencing a document without pasting the numbers, a person loose about which
-version/metric they want, and a person wanting a judgment/forecast. These are generic
+stratifying over natural USER INTENTS (not operators): a clean calc, a person who
+provides a near-complete numeric excerpt but omits one indispensable value, a person
+loose about which version/metric they want, and a person wanting a judgment/forecast. These are generic
 user-behavior categories (a sampling choice), NOT VerifiQuant's gates; the human
 labeler still assigns the ground truth, and the intent is never shown to them.
 
@@ -20,7 +20,7 @@ Output (to --out-dir; default messy_query_pilot/):
 No solver is run here; labels are assigned by humans, not this script.
 """
 from __future__ import annotations
-import csv, json, os, random, sys
+import argparse, csv, json, os, random, re
 from pathlib import Path
 from openai import OpenAI
 
@@ -43,10 +43,12 @@ INTENTS = {
         "You have every figure you need and you ask clearly for one specific number.",
         "Put every number you use in `context`."),
     "missing": (
-        "You are looking at a report, table, or filing and you refer to it, but you do NOT "
-        "include the actual figures in your message — you only remember the topic, not the "
-        "numbers, and you ask as if the assistant could see the document.",
-        "Leave `context` EMPTY (or nearly so) — you did not paste the numbers."),
+        "You copied most of a small financial excerpt into your message. You include several "
+        "relevant labeled figures, but accidentally leave out exactly ONE numeric input that "
+        "is indispensable for the requested calculation.",
+        "Make `context` non-empty and include 2--5 realistic, relevant labeled numbers. Omit "
+        "exactly one key number without announcing the omission. If the user supplied that one "
+        "number, the question would have one clear numeric answer."),
     "ambiguous": (
         "You give the numbers, but you are loose about which exact version you want: you say "
         "'the return' / 'the growth' / 'the rate' / 'the margin' without pinning down "
@@ -86,7 +88,133 @@ Return STRICT JSON only:
 {{"question": "<the user's message>", "context": "<numbers/background the user includes, or empty string>"}}
 """
 
+MISSING_AUTHOR_PROMPT = """You are simulating a real person typing ONE financial question to an AI assistant.
+
+Persona: {persona_desc}.
+
+Topic to riff on (grounding only -- do NOT copy it or reuse its exact numbers):
+  REFERENCE QUESTION: {q}
+  REFERENCE CONTEXT: {c}
+
+Construct a realistic NEAR-COMPLETE request for one standard financial calculation:
+- The user includes 2--5 relevant numeric inputs, each with a clear label and unit, directly in
+  `context`. The context must stand on its own; do not merely say that a table/report exists.
+- Exactly ONE indispensable numeric input is absent. Without it, the requested number cannot be
+  calculated or derived. If it were supplied, the task would have one unambiguous numeric answer.
+- Omit the value naturally. Do NOT write placeholders or clues such as "none given", "missing",
+  "unknown", "N/A", "redacted", a blank cell, question marks, or "I don't have X".
+- Do NOT omit the metric definition, unit, time basis, or convention; this item tests missing DATA,
+  not semantic ambiguity. Do not include another number from which the omitted value is derivable.
+- The question should ask for the final computation normally, without announcing that information
+  is absent. Use this persona's natural voice.
+
+The audit fields are hidden from annotators and solvers. Name the single omitted numeric input and
+briefly state why the displayed numbers cannot substitute for it.
+
+Return STRICT JSON only:
+{{"question":"<user's message>","context":"<partial but numeric context>",
+  "omitted_input":"<one numeric field name>","why_required":"<one sentence>"}}
+"""
+
+_NUMBER_RE = re.compile(r"(?<![A-Za-z])[-+]?\d[\d,]*(?:\.\d+)?\s*(?:%|percent|bps|million|billion|thousand|[kmb])?", re.I)
+_OBVIOUS_MISSING_RE = re.compile(
+    r"\b(?:none given|not given|not provided|not disclosed|missing|unknown|redacted|tbd|n/?a)\b"
+    r"|\b(?:do not|don't|did not|didn't) have\b|\bnot included\b|\bleft blank\b"
+    r"|\[(?:blank|redacted|missing)[^]]*\]|\?{2,}",
+    re.I,
+)
+
 def _load(path): return json.load(open(path, encoding="utf-8"))
+
+
+def _source_pool():
+    exclude = {json.loads(l).get("question_id") for l in
+               open(ROOT / "verifiquant/data/runs/paper_v2_250/questions_250.jsonl")}
+    pool = []
+    for f in ("easy.json", "medium.json"):
+        for row in _load(ROOT / f"FinanceReasoning/data/FinanceReasoning/{f}"):
+            if row.get("question_id") not in exclude:
+                pool.append(row)
+    return pool
+
+
+def _call_json(client, prompt):
+    kw = dict(model=MODEL, messages=[{"role": "user", "content": prompt}],
+              response_format={"type": "json_object"})
+    try:
+        resp = client.chat.completions.create(reasoning_effort="low", **kw)
+    except TypeError:
+        resp = client.chat.completions.create(**kw)
+    return json.loads(resp.choices[0].message.content)
+
+
+def _validate_missing(obj):
+    question = str(obj.get("question") or "").strip()
+    context = str(obj.get("context") or "").strip()
+    omitted = str(obj.get("omitted_input") or "").strip()
+    why = str(obj.get("why_required") or "").strip()
+    errors = []
+    if not question:
+        errors.append("empty question")
+    if len(context) < 30:
+        errors.append("context is empty or too short")
+    number_count = len(_NUMBER_RE.findall(context))
+    if number_count < 2:
+        errors.append(f"context has only {number_count} numeric values; need >=2")
+    if _OBVIOUS_MISSING_RE.search(question + "\n" + context):
+        errors.append("contains an obvious missing-data marker")
+    if not omitted:
+        errors.append("omitted_input audit field is empty")
+    if not why:
+        errors.append("why_required audit field is empty")
+    return errors, number_count
+
+
+def _author_missing(client, source, persona_desc, max_attempts=4):
+    base = MISSING_AUTHOR_PROMPT.format(
+        persona_desc=persona_desc,
+        q=source["question"],
+        c=(source.get("context") or "")[:800],
+    )
+    feedback = ""
+    for attempt in range(1, max_attempts + 1):
+        obj = _call_json(client, base + feedback)
+        errors, number_count = _validate_missing(obj)
+        if not errors:
+            return obj, number_count, attempt
+        feedback = (
+            "\n\nYour previous draft failed automatic checks: " + "; ".join(errors) +
+            ". Produce a fresh item that satisfies every rule."
+        )
+    raise ValueError("missing-item author failed validation after retries: " + "; ".join(errors))
+
+
+def _write_labeling(rows, out):
+    md = ["# Messy-query labeling sheet", "",
+          "Read each as a user would; do not look at any system output. One label + one-line reason.",
+          "", "| id | label | reason |", "|----|-------|--------|"]
+    for row in rows:
+        md.append(f"| {row['id']} |  |  |")
+    md += ["", "## Questions"]
+    for row in rows:
+        md += [f"\n**{row['id']}**", "", f"Q: {row['question']}", "",
+               f"Context: {row['context'] or '(none given)'}"]
+    (out / "messy_pilot_labeling.md").write_text("\n".join(md), encoding="utf-8")
+    with open(out / "messy_pilot_labeling.csv", "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.writer(f, lineterminator="\n")
+        writer.writerow(["id", "question", "context", "label (A/R/C/O + ? if unsure)", "reason"])
+        for row in rows:
+            writer.writerow([row["id"], row["question"], row["context"] or "(none given)", "", ""])
+
+
+def _write_dataset(rows, provenance, out):
+    tmp_jsonl = out / "messy_pilot.jsonl.tmp"
+    tmp_jsonl.write_text(
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+    tmp_jsonl.replace(out / "messy_pilot.jsonl")
+    (out / "messy_pilot_provenance.json").write_text(
+        json.dumps(provenance, ensure_ascii=False, indent=2), encoding="utf-8")
+    _write_labeling(rows, out)
 
 def build_plan(n, weights):
     plan = []
@@ -99,13 +227,7 @@ def main(n=16, seed=20260731, weights=None, out_dir=None, equal=False):
     weights = weights or ({k: 0.25 for k in INTENTS} if equal else DEFAULT_WEIGHTS)
     OUT = Path(out_dir) if out_dir else ROOT / "verifiquant/data/runs/messy_query_pilot"
     client = OpenAI()
-    exclude = {json.loads(l).get("question_id") for l in
-               open(ROOT / "verifiquant/data/runs/paper_v2_250/questions_250.jsonl")}
-    pool = []
-    for f in ("easy.json", "medium.json"):
-        for r in _load(ROOT / f"FinanceReasoning/data/FinanceReasoning/{f}"):
-            if r.get("question_id") not in exclude:
-                pool.append(r)
+    pool = _source_pool()
     rng = random.Random(seed)
     seeds = rng.sample(pool, n)
     plan = build_plan(n, weights)
@@ -118,23 +240,29 @@ def main(n=16, seed=20260731, weights=None, out_dir=None, equal=False):
         pkey = PERSONA_ORDER[i % len(PERSONA_ORDER)]
         intent = plan[i]
         idesc, crule = INTENTS[intent]
-        prompt = AUTHOR_PROMPT.format(persona_desc=PERSONAS[pkey], intent_desc=idesc,
-                                      context_rule=crule, q=s["question"],
-                                      c=(s.get("context") or "")[:800])
-        kw = dict(model=MODEL, messages=[{"role": "user", "content": prompt}],
-                  response_format={"type": "json_object"})
-        try:
-            resp = client.chat.completions.create(reasoning_effort="low", **kw)
-        except TypeError:
-            resp = client.chat.completions.create(**kw)
-        obj = json.loads(resp.choices[0].message.content)
+        if intent == "missing":
+            obj, number_count, attempts = _author_missing(client, s, PERSONAS[pkey])
+        else:
+            prompt = AUTHOR_PROMPT.format(persona_desc=PERSONAS[pkey], intent_desc=idesc,
+                                          context_rule=crule, q=s["question"],
+                                          c=(s.get("context") or "")[:800])
+            obj = _call_json(client, prompt)
+            number_count, attempts = None, 1
         qid = f"mq-{i+1:02d}"
         rows.append({"id": qid, "persona": pkey, "intended": intent,
                      "question": obj.get("question", "").strip(),
                      "context": (obj.get("context") or "").strip(),
                      "source_id": s.get("question_id"), "author_model": MODEL})
-        prov.append({"id": qid, "intended": intent, "source_id": s.get("question_id"),
-                     "source_question": s["question"], "source_gold": s.get("ground_truth")})
+        provenance = {"id": qid, "intended": intent, "source_id": s.get("question_id"),
+                      "source_question": s["question"], "source_gold": s.get("ground_truth")}
+        if intent == "missing":
+            provenance["authoring_audit"] = {
+                "omitted_input": obj["omitted_input"].strip(),
+                "why_required": obj["why_required"].strip(),
+                "present_numeric_count": number_count,
+                "generation_attempts": attempts,
+            }
+        prov.append(provenance)
         jf.write(json.dumps(rows[-1], ensure_ascii=False) + "\n"); jf.flush()
         print(f"[{qid}] intended={intent:9s} {pkey}: {obj.get('question','')[:80]}")
 
@@ -142,23 +270,50 @@ def main(n=16, seed=20260731, weights=None, out_dir=None, equal=False):
     (OUT / "messy_pilot_provenance.json").write_text(
         json.dumps(prov, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # labeling sheet — persona AND intent withheld (avoid biasing the human)
-    md = ["# Messy-query labeling sheet", "",
-          "Read each as a user would; do not look at any system output. One label + one-line reason.",
-          "", "| id | label | reason |", "|----|-------|--------|"]
-    for r in rows: md.append(f"| {r['id']} |  |  |")
-    md += ["", "## Questions"]
-    for r in rows:
-        md += [f"\n**{r['id']}**  ", f"Q: {r['question']}  ", f"Context: {r['context'] or '(none given)'}"]
-    (OUT / "messy_pilot_labeling.md").write_text("\n".join(md), encoding="utf-8")
-    with open(OUT / "messy_pilot_labeling.csv", "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.writer(f)
-        w.writerow(["id", "question", "context", "label (A/R/C/O + ? if unsure)", "reason"])
-        for r in rows:
-            w.writerow([r["id"], r["question"], r["context"] or "(none given)", "", ""])
+    _write_labeling(rows, OUT)
     print(f"\nwrote {len(rows)} -> {OUT}")
 
+
+def regenerate_missing(out_dir=None):
+    """Replace only intended=missing rows in an existing set; preserve IDs and all other rows."""
+    out = Path(out_dir) if out_dir else ROOT / "verifiquant/data/runs/messy_query_pilot"
+    rows = [json.loads(line) for line in (out / "messy_pilot.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()]
+    provenance = _load(out / "messy_pilot_provenance.json")
+    prov_by_id = {row["id"]: row for row in provenance}
+    sources = {str(row["question_id"]): row for row in _source_pool()}
+    targets = [row for row in rows if row.get("intended") == "missing"]
+    if not targets:
+        raise ValueError("existing dataset has no intended=missing rows")
+
+    client = OpenAI()
+    for row in targets:
+        source = sources[str(row["source_id"])]
+        obj, number_count, attempts = _author_missing(client, source, PERSONAS[row["persona"]])
+        row["question"] = obj["question"].strip()
+        row["context"] = obj["context"].strip()
+        prov_by_id[row["id"]]["authoring_audit"] = {
+            "omitted_input": obj["omitted_input"].strip(),
+            "why_required": obj["why_required"].strip(),
+            "present_numeric_count": number_count,
+            "generation_attempts": attempts,
+            "regenerated_with_prompt": "partial_context_single_key_omission_v3",
+        }
+        print(f"[{row['id']}] regenerated missing: {number_count} numbers; "
+              f"omitted={obj['omitted_input']!r}")
+
+    _write_dataset(rows, [prov_by_id[row["id"]] for row in rows], out)
+    print(f"\nregenerated {len(targets)} missing-data items -> {out}")
+
 if __name__ == "__main__":
-    n = int(sys.argv[1]) if len(sys.argv) > 1 else 16
-    od = sys.argv[2] if len(sys.argv) > 2 else None
-    main(n=n, out_dir=od, equal=(n <= 20))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("n", nargs="?", type=int, default=16)
+    parser.add_argument("out_dir", nargs="?")
+    parser.add_argument("--seed", type=int, default=20260731)
+    parser.add_argument("--regenerate-missing", action="store_true",
+                        help="replace only intended=missing rows in an existing dataset")
+    args = parser.parse_args()
+    if args.regenerate_missing:
+        regenerate_missing(args.out_dir)
+    else:
+        main(n=args.n, seed=args.seed, out_dir=args.out_dir, equal=(args.n <= 20))

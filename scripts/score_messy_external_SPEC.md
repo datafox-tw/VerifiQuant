@@ -5,7 +5,7 @@ You write the script; this is the contract.
 
 ## Two steps (keep them separate)
 
-1. **Run each system on the 82 messy queries** (needs `GEMINI_API_KEY` + `cards.db`) with the
+1. **Run each system on the 80 messy queries** (needs `GEMINI_API_KEY` + `cards.db`) with the
    *existing* runners, saving one output file per system. Do NOT rebuild runners.
    - VQ (K=1): `run_error_classification_pipeline.py` on `messy_pilot.jsonl`.
    - R-PAL / R-PAL+ / CoT: the same baseline runners used for the 250Q eval, pointed at
@@ -15,7 +15,7 @@ You write the script; this is the contract.
 ## Inputs
 
 - `verifiquant/data/runs/messy_query_pilot/ground_truth.jsonl`
-  — `{id, label∈{A,R,C,O}, votes, n_raters}`, 82 rows. (already frozen; 0 disagreement pool)
+  — `{id, label∈{A,R,C,O}, votes, n_raters}`, 80 rows. (already frozen; 0 disagreement pool)
 - `verifiquant/data/runs/messy_query_pilot/messy_pilot_provenance.json`
   — join by `id` to get `source_gold` (numeric). **`messy_pilot.jsonl` has NO gold** — get it here.
 - Per-system run output (one file each): must expose, per `id`, enough to derive
@@ -59,11 +59,11 @@ action : "A"|"R"|"C"|"O"   # the system's behavior mapped to the human taxonomy
 
 ## Metrics (exact)
 
-Let `RCO = {id : GT=R,C,O}` (46 items), `AA = {id : GT=A}` (36 items).
+Let `RCO = {id : GT=R,C,O}` (46 items), `AA = {id : GT=A}` (34 items).
 
 - **Human-FNAR(S)** = `#{id∈RCO : emit_S} / 46`. Lower = safer. **This is the headline** (mirrors
   Panel B: emitting a number where humans say none is legitimate).
-- **Match(S)** = 4-way `#{id : action_S == GT} / 82` (VQ), or binary per D2 for baselines.
+- **Match(S)** = 4-way `#{id : action_S == GT} / 80` (VQ), or binary per D2 for baselines.
 - **Sel.Acc(S)** = `#{id : emit_S AND GT=A AND num_match(value_S, gold)} / #{id : emit_S}`.
   Answering any R/C/O item is automatically not correct (no valid single gold), so it depresses
   Sel.Acc — that is intended.
@@ -81,7 +81,7 @@ Let `RCO = {id : GT=R,C,O}` (46 items), `AA = {id : GT=A}` (36 items).
 
 ## Edge cases / gotchas
 
-- **A3 covers 81/82 items** → one item has `n_raters=4` (majority still ≥3). GT already handles it;
+- **A3 covers 79/80 items** → one item has `n_raters=4` (majority still ≥3). GT already handles it;
   keep the per-id `n_raters` in mind if you weight anything.
 - **Gold on R/C/O items is meaningless** (the messy edit removed/mangled the input). Only use gold
   for `num_match` on `GT=A` items. Never "credit" an answered R/C/O item as correct.

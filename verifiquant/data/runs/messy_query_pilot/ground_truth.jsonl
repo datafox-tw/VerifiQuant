@@ -78,5 +78,3 @@
 {"id": "mq-78", "label": "A", "votes": {"A": 5}, "n_raters": 5}
 {"id": "mq-79", "label": "O", "votes": {"O": 4, "A": 1}, "n_raters": 5}
 {"id": "mq-80", "label": "C", "votes": {"C": 4, "A": 1}, "n_raters": 5}
-{"id": "mq-81", "label": "A", "votes": {"A": 5}, "n_raters": 5}
-{"id": "mq-82", "label": "A", "votes": {"A": 5}, "n_raters": 5}

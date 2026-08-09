@@ -40,8 +40,9 @@ contracts" objection.
 ## Golden rules
 1. Judge from the **question + context only**, as if you were the assistant. Ignore any system's
    output or design.
-2. **Don't assume unstated numbers exist.** "the table / the report / the filing" with no figures
-   given → the data is missing (**R**).
+2. **Don't infer an unstated number from nearby figures.** If a partial table/excerpt supplies
+   several inputs but omits one value required by the formula, the data is still missing (**R**).
+   Name the specific value the assistant should request.
 3. **User confusion ≠ task ambiguity.** "I'm not sure how to compute it" but all data present and
    standard → **A**. Their uncertainty does not change the label.
 4. **The label is what the assistant should *do*, not whether the question's own numbers/claims
@@ -59,8 +60,8 @@ contracts" objection.
 ## Examples
 - **A** — "Revenue 500 (2022) → 550 (2023): YoY % change?" · "Face 1,000, 5% annual coupon, 3y,
   yield 4%: price?" · "Headline says VaR ≈ $3.3, does it check out? [inputs given]".
-- **R** — "What's the ROI?" (no cost given) · "Aggregate Q4 buyback value?" when the monthly rows
-  are never provided.
+- **R** — "Revenue is 520 and operating cost is 390; what's ROA?" (average assets missing) ·
+  "Face value 1,000, price 970, calculate money-market yield" (days to maturity missing).
 - **C** — "Annualize this 90-day return" (360 vs 365 basis) · "What's the growth?" with several
   years given (YoY of which year? vs CAGR) · "Give me the debt ratio" (debt/equity vs debt/assets).
 - **O** — "Should I invest in this project?" (advice) · "Will the stock rise next quarter?"

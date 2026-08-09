@@ -292,7 +292,7 @@ def main() -> None:
     mode = "a" if args.resume and output_path.exists() else "w"
     with output_path.open(mode, encoding="utf-8") as fh:
         for index, row in enumerate(rows, 1):
-            case_id = str(row.get("question_id") or row.get("trap_id") or row.get("case_id"))
+            case_id = str(row.get("question_id") or row.get("trap_id") or row.get("case_id") or row.get("id"))
             if case_id in completed:
                 print(f"[{run_name} {index}/{len(rows)}] {case_id} skip", flush=True)
                 continue

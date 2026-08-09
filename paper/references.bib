@@ -3,7 +3,7 @@
 % 查證紀錄見 docs/2026-07-12_experiment_record_master.md §9-7
 
 % ── Financial reasoning benchmarks & baselines ─────────────────────────────
-
+%OK
 @inproceedings{tang2025financereasoning,
   title     = {{F}inance{R}easoning: Benchmarking Financial Numerical Reasoning More Credible, Comprehensive and Challenging},
   author    = {Tang, Zichen and E, Haihong and Ma, Ziyan and He, Haoyang and Liu, Jiacheng and Yang, Zhongjun and Rong, Zihua and Li, Rongjin and Ji, Kun and Huang, Qing and Hu, Xinyang and Liu, Yang and Zheng, Qianhe},
@@ -27,13 +27,18 @@
 }
 
 % ── Multi-agent failure & CoT faithfulness ─────────────────────────────────
-
+%OK
 @inproceedings{cemri2025mas,
-  title     = {Why Do Multi-Agent {LLM} Systems Fail?},
-  author    = {Cemri, Mert and Pan, Melissa Z. and Yang, Shuyi and Agrawal, Lakshya A. and Chopra, Bhavya and Tiwari, Rishabh and Keutzer, Kurt and Parameswaran, Aditya and Klein, Dan and Ramchandran, Kannan and Zaharia, Matei and Gonzalez, Joseph E. and Stoica, Ion},
-  booktitle = {Advances in Neural Information Processing Systems 38 (NeurIPS 2025), Datasets and Benchmarks Track},
-  year      = {2025},
-  note      = {Spotlight. arXiv:2503.13657}
+ author = {Cemri, Mert and Pan, Melissa Z and Yang, Shuyi and Agrawal, Lakshya A and Chopra, Bhavya and Tiwari, Rishabh and Keutzer, Kurt and Parameswaran, Aditya and Klein, Dan and Ramchandran, Kannan and Zaharia, Matei A and Gonzalez, Joseph and Stoica, Ion},
+ booktitle = {Advances in Neural Information Processing Systems},
+ address = {San Diego, CA, United States},
+ editor = {D. Belgrave and C. Zhang and H. Lin and R. Pascanu and P. Koniusz and M. Ghassemi and N. Chen},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {Why Do Multi-Agent LLM Systems Fail?},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2025/file/b1041e52d3be19f0a9bc491657488e4a-Paper-Datasets_and_Benchmarks_Track.pdf},
+ volume = {38},
+ year = {2025}
 }
 
 @inproceedings{turpin2023language,
@@ -51,21 +56,32 @@
 }
 
 % ── Execution-based reasoning ──────────────────────────────────────────────
-
-@inproceedings{gao2023pal,
-  title     = {{PAL}: Program-aided Language Models},
-  author    = {Gao, Luyu and Madaan, Aman and Zhou, Shuyan and Alon, Uri and Liu, Pengfei and Yang, Yiming and Callan, Jamie and Neubig, Graham},
-  booktitle = {Proceedings of the 40th International Conference on Machine Learning (ICML)},
-  year      = {2023},
-  publisher = {PMLR}
+%OK
+@InProceedings{gao2023pal,
+  title = 	 {{PAL}: Program-aided Language Models},
+  author =       {Gao, Luyu and Madaan, Aman and Zhou, Shuyan and Alon, Uri and Liu, Pengfei and Yang, Yiming and Callan, Jamie and Neubig, Graham},
+  booktitle = 	 {Proceedings of the 40th International Conference on Machine Learning},
+  pages = 	 {10764--10799},
+  year = 	 {2023},
+  editor = 	 {Krause, Andreas and Brunskill, Emma and Cho, Kyunghyun and Engelhardt, Barbara and Sabato, Sivan and Scarlett, Jonathan},
+  volume = 	 {202},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {23--29 Jul},
+  address = {Honolulu, Hawaii, USA},
+  publisher =    {PMLR},
+  pdf = 	 {https://proceedings.mlr.press/v202/gao23f/gao23f.pdf},
+  url = 	 {https://proceedings.mlr.press/v202/gao23f.html},
 }
 
-@article{chen2023pot,
+@misc{chen2023pot,
   title   = {Program of Thoughts Prompting: Disentangling Computation from Reasoning for Numerical Reasoning Tasks},
   author  = {Chen, Wenhu and Ma, Xueguang and Wang, Xinyi and Cohen, William W.},
   journal = {Transactions on Machine Learning Research},
   year    = {2023}
 }
+
+
+
 
 % ── Neuro-symbolic translation ─────────────────────────────────────────────
 
@@ -91,11 +107,19 @@
 }
 
 @inproceedings{ye2023satlm,
-  title     = {{SatLM}: Satisfiability-Aided Language Models Using Declarative Prompting},
-  author    = {Ye, Xi and Chen, Qiaochu and Dillig, Isil and Durrett, Greg},
-  booktitle = {Advances in Neural Information Processing Systems 36 (NeurIPS 2023)},
-  year      = {2023}
+ author = {Ye, Xi and Chen, Qiaochu and Dillig, Isil and Durrett, Greg},
+ booktitle = {Advances in Neural Information Processing Systems},
+ doi = {10.52202/075280-1974},
+ editor = {A. Oh and T. Naumann and A. Globerson and K. Saenko and M. Hardt and S. Levine},
+ pages = {45548--45580},
+ publisher = {Curran Associates, Inc.},
+ title = {SatLM: Satisfiability-Aided Language Models Using Declarative Prompting},
+ address = {New Orleans, LA , United States},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2023/file/8e9c7d4a48bdac81a58f983a64aaf42b-Paper-Conference.pdf},
+ volume = {36},
+ year = {2023}
 }
+
 
 @misc{akinfaderin2025verafi,
   title  = {{VERAFI}: Verified Agentic Financial Intelligence through Neurosymbolic Policy Generation},
@@ -104,7 +128,7 @@
   note   = {arXiv:2512.14744; AAAI 2026 Workshop on Trust and Control in Agentic AI}
 }
 
-@article{zhou2026formaljudge,
+@misc{zhou2026formaljudge,
   title   = {{FormalJudge}: A Neuro-Symbolic Paradigm for Agentic Oversight},
   author  = {Zhou, Jin and Sheng, Yi and Lou, Hao and Yang, Yue and Fu, Jie},
   journal = {arXiv preprint arXiv:2602.11136},
@@ -123,11 +147,18 @@
   year    = {2010}
 }
 
+%OK
 @inproceedings{geifman2017selective,
-  title     = {Selective Classification for Deep Neural Networks},
-  author    = {Geifman, Yonatan and El-Yaniv, Ran},
-  booktitle = {Advances in Neural Information Processing Systems 30 (NeurIPS 2017)},
-  year      = {2017}
+ author = {Geifman, Yonatan and El-Yaniv, Ran},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {I. Guyon and U. Von Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
+ pages = {},
+ publisher = {Curran Associates, Inc.},
+ title = {Selective Classification for Deep Neural Networks},
+ address = {Long Beach, CA, United States},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2017/file/4a8423d5e91fda00bb7e46540e2b0cf1-Paper.pdf},
+ volume = {30},
+ year = {2017}
 }
 
 % ── Regulatory anchors ─────────────────────────────────────────────────────

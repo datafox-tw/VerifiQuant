@@ -219,7 +219,7 @@ for tag, anchor in LADDER:
 
 print()
 print("=" * 78)
-print("Table 5 — human-labeled external validity (82Q)")
+print("Table 5 — human-labeled external validity (80Q)")
 print("=" * 78)
 sr = load(RUNS / "messy_query_pilot/agreement/score_report.json")
 RQ4 = {
@@ -228,14 +228,109 @@ RQ4 = {
     "R-PAL+ (taxonomy prompt)": r"R-PAL$^{+}$ (taxonomy prompt)",
     "VerifiQuant (K=1, M->O)": r"\textbf{VerifiQuant} ($K{=}1$)",
 }
+# Answer coverage: share of human-ANSWER items each system actually answered. This
+# needs no gold value, unlike the retired Sel.Acc column: the messy queries were
+# rewritten with fresh numbers, so the source question's gold does not transfer.
+import importlib.util as _ilu
+
+_spec = _ilu.spec_from_file_location("_sme", ROOT / "scripts/score_messy_external.py")
+_sme = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_sme)
+_gt = _sme.load_gt()
+_sysrecs = {
+    "CoT (single-shot)": _sme.adapt_cot(),
+    "R-PAL (top-4 retrieval)": _sme.adapt_rpal_plain(),
+    "R-PAL+ (taxonomy prompt)": _sme.adapt_rpal_plus(),
+    "VerifiQuant (K=1, M->O)": _sme.adapt_vq(m_as_clarify=False),
+}
+_ans_items = [i for i, l in _gt.items() if l == "A"]
+cov = {
+    name: sum(1 for i in _ans_items if _sysrecs[name].get(i) and _sysrecs[name][i]["emit"])
+    / len(_ans_items)
+    for name in _sysrecs
+}
+check("RQ4 |ANSWER| items", len(_ans_items), 34, nd=0)
+
 for src_name, anchor in RQ4.items():
     e = next(x for x in sr if x["system"] == src_name)
     check(f"RQ4 {src_name} Human-FNAR", 100 * e["human_fnar"], tex_table_cell("tab:v2ext", anchor, 1))
-    check(f"RQ4 {src_name} Match", 100 * e["match"], tex_table_cell("tab:v2ext", anchor, 2))
-    check(f"RQ4 {src_name} Sel.Acc", 100 * e["sel_acc"], tex_table_cell("tab:v2ext", anchor, 3))
+    check(f"RQ4 {src_name} answer coverage", 100 * cov[src_name], tex_table_cell("tab:v2ext", anchor, 2))
+    check(f"RQ4 {src_name} Match", 100 * e["match"], tex_table_cell("tab:v2ext", anchor, 3))
 # the M->clarify sensitivity figure quoted in the scoring-protocol paragraph
 mc = next(x for x in sr if x["system"] == "VerifiQuant (K=1, M->C)")
-check("RQ4 M->clarify Match (quoted 34.1%)", 100 * mc["match"], 34.1)
+check("RQ4 M->clarify Match (quoted 35.0%)", 100 * mc["match"], 35.0)
+
+print()
+print("=" * 78)
+print("RQ4 prose — every count stated in §3.5 / §5.4 body text")
+print("=" * 78)
+# Table cells have a guard above; the surrounding prose did not, which is how a stale
+# 31.7%/34.1% survived a set-size change. These checks re-derive each number the RQ4
+# and construction paragraphs assert, then confirm the paper actually prints it.
+MQ = RUNS / "messy_query_pilot"
+gt = {r["id"]: r["label"] for r in rows(MQ / "ground_truth.jsonl")}
+prov = load(MQ / "messy_pilot_provenance.json")
+agree = load(MQ / "agreement_report.json")
+vq_rows = {r["case_id"]: r for r in rows(MQ / "agreement/runs/vq_k1.jsonl")}
+dist = agree["majority_label_distribution"]
+n_items = len(gt)
+rco = [i for i in gt if gt[i] != "A"]
+answerable = [i for i in gt if gt[i] == "A"]
+vq_ans = [i for i in answerable if vq_rows[i]["status"] == "success"]
+shortfall = [i for i in answerable if vq_rows[i]["status"] != "success"]
+n_refusals = [i for i in shortfall if vq_rows[i]["diagnostic_type"] == "N"]
+cond = {}
+for r in prov:
+    cond[r["intended"]] = cond.get(r["intended"], 0) + 1
+
+
+def phrase_check(label: str, ok: bool, detail_ok: str, detail_bad: str) -> None:
+    """String-level guard: the recomputed value must actually appear in the paper."""
+    global CHECKS
+    CHECKS += 1
+    print(f"  [TXT] {'ok  ' if ok else 'FAIL'} {label:<58} {detail_ok if ok else detail_bad}")
+    if not ok:
+        FAILURES.append(f"{label}: {detail_bad}")
+
+
+check("RQ4 set size n", n_items, 80, nd=0)
+check("RQ4 conditions sum to n", sum(cond.values()), n_items, kind="INT", nd=0)
+for k, want in (("clean", 27), ("missing", 18), ("ambiguous", 18), ("judgment", 17)):
+    check(f"RQ4 condition {k}", cond[k], want, nd=0)
+check("RQ4 majority ANSWER", dist["A"], 34, nd=0)
+check("RQ4 majority REQUEST-INFO", dist["R"], 20, nd=0)
+check("RQ4 majority CLARIFY", dist["C"], 10, nd=0)
+check("RQ4 majority OUT-OF-SCOPE", dist["O"], 16, nd=0)
+check("RQ4 majority splits sum to n", sum(dist.values()), n_items, kind="INT", nd=0)
+check("RQ4 |RCO| (non-ANSWER items)", len(rco), 46, nd=0)
+check("RQ4 |RCO| + |A| == n", len(rco) + len(answerable), n_items, kind="INT", nd=0)
+check("RQ4 Fleiss kappa (2dp)", agree["fleiss_kappa"], 0.84, nd=2)
+check("RQ4 majority reached on all items", agree["majority_resolved"], n_items, kind="INT", nd=0)
+# per-system emitted counts over RCO, quoted in the body as "4, 6, 10, and 26"
+for src_name, want in (("VerifiQuant (K=1, M->O)", 4), ("R-PAL+ (taxonomy prompt)", 6),
+                       ("CoT (single-shot)", 10), ("R-PAL (top-4 retrieval)", 26)):
+    e = next(x for x in sr if x["system"] == src_name)
+    check(f"RQ4 RCO emits {src_name}", e["fnar_hits"], want, nd=0)
+vq = next(x for x in sr if x["system"] == "VerifiQuant (K=1, M->O)")
+check("RQ4 VQ answered count (quoted 11/80)", vq["n_answered"], 11, nd=0)
+check("RQ4 VQ answers on human-ANSWER items", len(vq_ans), 7, nd=0)
+check("RQ4 human-answerable item count", len(answerable), 34, nd=0)
+check("RQ4 VQ hit rate on answerable (quoted 20.6%)", 100 * len(vq_ans) / len(answerable), 20.6)
+check("RQ4 shortfall count", len(shortfall), 27, nd=0)
+check("RQ4 shortfalls that are N-refusals", len(n_refusals), 24, nd=0)
+check("RQ4 answered + shortfall == answerable",
+      len(vq_ans) + len(shortfall), len(answerable), kind="INT", nd=0)
+for phrase in ("80 naturalistic queries", "all 80 items", "46 of the 80 queries",
+               "$11/80$", "7 of the 34 items", "In 24 of the 27 shortfalls",
+               "$n{=}80$ items"):
+    phrase_check(f"prose states {phrase!r}", phrase in tex, "present", "MISSING from main_v2.tex")
+# 82-era values that must not survive anywhere in the paper. This is a migration
+# guard from the 2026-08-10 mq-81/mq-82 removal; retire it once the draft is final,
+# since these are bare decimals that a future unrelated number could legitimately use.
+for stale in ("87.8", "68.3", "65.9", "31.7", "34.1", "11/82", "7 of the 36",
+              "19.4", "26 of the 29", "plus two further"):
+    phrase_check(f"no stale 82-era {stale!r}", stale not in tex,
+                 "absent", "STILL PRESENT in main_v2.tex")
 
 print()
 print("=" * 78)
@@ -274,6 +369,28 @@ check("selectivity gap max (paper says 84)", max(gaps), 84, nd=0)
 accs = [100 * p["id_acc"] for p in sweep]
 check("ID accuracy min (paper says 81.6)", min(accs), 81.6)
 check("ID accuracy max (paper says 84.0)", max(accs), 84.0)
+
+print()
+print("=" * 78)
+print("Selective-prediction reference point — self-consistency vote-share sweep")
+print("=" * 78)
+# The related-work paragraph quotes a threshold sweep over the stored SC@5 samples.
+# Recompute it here with the run's own convention: an item counts as answered only
+# when a winner exists (28 questions yield no parseable answer at all), which is what
+# keeps the no-threshold coverage at 88.8% rather than 100%.
+sc = rows(RUNS / "sc_baseline/sc5_gemini_25_flash.jsonl")
+check("SC set size", len(sc), 250, nd=0)
+check("SC unanimous questions", sum(1 for r in sc if r["share"] >= 1.0), macro_pct("scUnanimous"), nd=0)
+for tau, cov_macro, swr_macro in ((0.0, "scCovOpen", "scSWRopen"), (1.0, "scCovTight", "scSWRtight")):
+    ans = [r for r in sc if r["winner"] is not None and r["share"] >= tau]
+    corr = sum(1 for r in ans if r["correct"])
+    check(f"SC tau={tau} coverage", 100 * len(ans) / len(sc), macro_pct(cov_macro))
+    check(f"SC tau={tau} SWR", 100 * (len(ans) - corr) / len(sc), macro_pct(swr_macro))
+    if tau == 1.0:
+        check("SC tau=1 selective accuracy", 100 * corr / len(ans), macro_pct("scSelAccTight"))
+        # the paragraph's whole point is that this threshold lands on VQ's coverage exactly
+        check("SC tau=1 coverage == VQ K=1 coverage", 100 * len(ans) / len(sc),
+              tex_table_cell("tab:v2kabl", r"$K{=}1$ (autonomous)", 3), kind="INT")
 
 print()
 print("=" * 78)

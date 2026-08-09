@@ -1,24 +1,24 @@
 {
   "n_annotators": 5,
   "annotators": {
-    "A1": 82,
-    "A2": 82,
-    "A3": 81,
-    "A4": 82,
-    "A5": 82
+    "A1": 80,
+    "A2": 80,
+    "A3": 79,
+    "A4": 80,
+    "A5": 80
   },
-  "n_items": 82,
-  "majority_resolved": 82,
+  "n_items": 80,
+  "majority_resolved": 80,
   "disagreement_pool": 0,
   "majority_rate": 1.0,
-  "fleiss_kappa": 0.838,
+  "fleiss_kappa": 0.835,
   "kappa_computed_on": {
-    "n_items": 81,
+    "n_items": 79,
     "raters_per_item": 5
   },
   "majority_label_distribution": {
     "C": 10,
-    "A": 36,
+    "A": 34,
     "R": 20,
     "O": 16
   }

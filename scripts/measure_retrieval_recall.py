@@ -17,9 +17,9 @@ Gold linkage, and a trap to avoid. `core_cards.source_meta_json` carries BOTH
 
 The messy set's `source_id` lives in the `source` namespace, not the `question_id`
 one. Comparing it against `question_id` yields a spurious zero overlap. Comparing
-it against `source` yields 13/82, but source overlap is a poor proxy for whether a
+it against `source` yields 13/80, but source overlap is a poor proxy for whether a
 card's formula actually applies, and VerifiQuant's answer rate does not separate on
-it (15.4% vs 13.0%, n=13 vs 69). We therefore do NOT use this script to attribute
+it (15.4% vs 13.4%, n=13 vs 67). We therefore do NOT use this script to attribute
 the messy-set shortfall to library coverage; it measures retriever quality only, on
 the clean set where the gold contract is in-library by construction.
 
@@ -99,9 +99,9 @@ def main():
     print("\n=== Note on the messy set ===")
     print("  The messy set carries `source_id`, which is in the `source` namespace,")
     print("  not the function-linked `question_id` namespace, so it has no reliable")
-    print("  gold-contract key. Source-level overlap with the library is 13/82, but")
-    print("  VerifiQuant's answer rate does not separate on it (15.4% vs 13.0%,")
-    print("  n=13 vs 69), so we make no library-coverage claim from that overlap.")
+    print("  gold-contract key. Source-level overlap with the library is 13/80, but")
+    print("  VerifiQuant's answer rate does not separate on it (15.4% vs 13.4%,")
+    print("  n=13 vs 67), so we make no library-coverage claim from that overlap.")
 
 
 if __name__ == "__main__":

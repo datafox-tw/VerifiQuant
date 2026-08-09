@@ -2,7 +2,7 @@
 score_messy_external.py
 ------------------------
 RQ4 scorer: fills tab:v2ext (Human-FNAR / Match / Sel.Acc) for CoT, R-PAL, R-PAL+, VQ
-on the 82-item human-labeled messy-query set. Offline; reads the four run files +
+on the 80-item human-labeled messy-query set. Offline; reads the four run files +
 ground_truth.jsonl + messy_pilot_provenance.json. See scripts/score_messy_external_SPEC.md.
 
 Decisions locked (per spec):
@@ -10,9 +10,18 @@ Decisions locked (per spec):
   D2: 4-way action where the system exposes structured decision (R-PAL+, VQ);
       binary answer/abstain Match where it does not (CoT, R-PAL plain).
   Sel.Acc denominator = all answered (emit=True) items.
+
+RETIRED (2026-08-09): the `sel_acc` field is still computed but is NO LONGER reported in
+the paper. It compares each emitted value against `source_gold`, which is the answer to the
+*source* FinanceReasoning question, not to the rewritten query. The author model generated
+fresh numbers (mq-05 asks 2020->2021 where the source asked 2018->2019; mq-02's source gold
+is 3750 where the rewritten inputs give 5274), so no gold transfers and most "correct" hits
+were coincidences inside the 1% tolerance. Table 5 now reports answer coverage instead,
+which needs no gold. Do not resurrect sel_acc without building real per-item gold first.
 """
 from __future__ import annotations
 import json, re, sys
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
 _NUM_RE = re.compile(r"-?\d+\.?\d*(?:[eE][+-]?\d+)?")
@@ -37,6 +46,14 @@ def _to_float(o):
         pass
     m = _NUM_RE.search(s)
     return float(m.group()) if m else None
+
+def _pct(x):
+    """Format a rate as a 1-decimal percentage with round-half-up, matching the
+    rounding scripts/assert_paper_numbers.py checks the paper's cells against.
+    Python's own .1f rounds half-to-even, which disagrees on exact .X5 ties
+    (e.g. 53/80 = 66.25%)."""
+    return f"{Decimal(100 * x).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)}"
+
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -191,8 +208,8 @@ def main():
     print(json.dumps(results, indent=2))
     print("\n-- LaTeX rows (tab:v2ext) --")
     for r in results:
-        sa = f"{100*r['sel_acc']:.1f}\\%" if r["sel_acc"] is not None else "---"
-        print(f"{r['system']:28s} & {100*r['human_fnar']:.1f}\\% & {100*r['match']:.1f}\\% & {sa} \\\\  "
+        sa = f"{_pct(r['sel_acc'])}\\%" if r["sel_acc"] is not None else "---"
+        print(f"{r['system']:28s} & {_pct(r['human_fnar'])}\\% & {_pct(r['match'])}\\% & {sa} \\\\  "
               f"% match_mode={r['match_mode']} n_answered={r['n_answered']} unresolved={r['unresolved_action']}")
 
     out_dir = DIR / "agreement"
