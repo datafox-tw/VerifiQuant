@@ -2,7 +2,7 @@
 """
 assert_paper_numbers.py
 -----------------------
-Pre-submission guard: every headline number in paper/main_v2.tex is re-derived
+Pre-submission guard: every headline number in paper/main_final.tex is re-derived
 from the raw run artifacts and compared against what the paper prints.
 
 Two kinds of check:
@@ -22,7 +22,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEX = ROOT / os.environ.get("PAPER_TEX", "paper/main_v2.tex")
+# main_final.tex is the submitted version; main_v2.tex is its immediate predecessor and
+# is kept only for diffing. Override with PAPER_TEX to check a draft before it lands.
+TEX = ROOT / os.environ.get("PAPER_TEX", "paper/main_final.tex")
 RUNS = ROOT / "verifiquant/data/runs"
 
 FAILURES: list[str] = []
