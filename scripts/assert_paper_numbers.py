@@ -16,12 +16,13 @@ Exit code 0 = all pass, 1 = at least one mismatch.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEX = ROOT / "paper/main_v2.tex"
+TEX = ROOT / os.environ.get("PAPER_TEX", "paper/main_v2.tex")
 RUNS = ROOT / "verifiquant/data/runs"
 
 FAILURES: list[str] = []
@@ -205,7 +206,9 @@ LADDER = [
     ("r2_fe", r"\quad + F/E gates"),
     ("r3_fei", r"\quad + I gate"),
     ("r4_full", r"\quad + M/N gates (full funnel)"),
-    ("r5_full_hint", r"\quad + hint triggers (illustrative)"),
+    # r5_full_hint is deliberately absent: the hint-trigger rung was an in-sample,
+    # non-held-out result and was cut from Table 4. runs/gate_ladder/r5_full_hint_*
+    # is retained for the record but is no longer a paper number.
 ]
 for tag, anchor in LADDER:
     s = load(RUNS / f"gate_ladder/{tag}_summary.json")
