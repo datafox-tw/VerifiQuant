@@ -4,6 +4,11 @@
 
 A neuro-symbolic diagnostic framework for reliable financial reasoning. Instead of asking "did the LLM get the right number?", VerifiQuant asks **"at which layer did the reasoning break — and can we intercept it before it does damage?"**
 
+> **導覽入口：[`START_HERE.md`](START_HERE.md)（中文）**
+> 這份 README 只講 VerifiQuant 這一個系統，寫於 2026-06-14，不含後來的論文實驗與
+> Agenthon。`START_HERE.md` 橫跨整個工作目錄，用**驗證方式**而不是目錄來分區，
+> 並說明每個檔案憑什麼證據講話。要找某個檔案的用途，先讀那一份。
+
 ---
 
 ## The Problem

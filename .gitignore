@@ -11,3 +11,8 @@ __pycache__
 *.pywzz
 *.pyzzz
 *.pywzzz
+# agenthon/ is its own git repo with its own remote (datafox-tw/responsible-agent).
+# Ignored here so a `git add -A` in this repo cannot swallow it as a gitlink or as
+# 1925 loose files. Clone it separately; it is not a submodule on purpose, because
+# the competition code moves on its own schedule.
+agenthon/
