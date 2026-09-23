@@ -16,3 +16,9 @@ __pycache__
 # 1925 loose files. Clone it separately; it is not a submodule on purpose, because
 # the competition code moves on its own schedule.
 agenthon/
+
+# paper/ is the manuscript, not the system. It stays on this machine and in the
+# history up to bb97ef6, but it is no longer tracked going forward, so a clone of
+# this repo carries the code and the experiment record without carrying the writing.
+# To recover an old version: git show bb97ef6:paper/main_final.tex
+paper/
