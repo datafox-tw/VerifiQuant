@@ -1,6 +1,16 @@
 # 驗證元件參考：功能、測試內容、排除範例
 
-最後更新：2026-09-23
+最後更新：**2026-09-26**（原建於 2026-09-23）
+
+**0926 這一版改了什麼：**
+
+| 元件 | 0923 的狀態 | 現在 |
+|---|---|---|
+| §13b 不變量檢索 | 寫好了但從未執行過 | 86/86 題實際執行，機制確認、因果未確認 |
+| §13 L3 traceability 閘 | 視為純粹的保護 | 量到一次**假陰性**，是目前最明確的待修項 |
+| §15 L4b | 語料誤告率未量 | **量到了：0/23，上界約 13%**。整合完成但預設關閉 |
+| §14 L4a | 18/87 題、0 誤控 | 不變。論文的實用價值其實落在這裡，見 §15.5 |
+| 新增 §22 | — | roster 層級時間預算（不是驗證元件，但它決定其他元件有沒有時間跑） |
 
 這份文件把專案裡**所有發揮 verification 作用的元件**逐一列出。
 分區與導覽看 `START_HERE.md`，這份是規格表。
@@ -447,6 +457,41 @@ lint 與 runtime 共用同一份名單，不會漂移。
 那條會被降成 advisory，不再消耗回合。替代方案是讓一行生成出來的 Python
 決定整個單元的命運。
 
+### 13c. traceability 閘的假陰性（2026-09-26 量到）
+
+L3 的硬閘要求模型附一段 **≥12 字元、逐字出現在本題 instruction** 的引文。
+程式碼註解寫明理由：
+
+> An invariant the instruction does not support is the model's prior about finance,
+> not this task's contract, and the two disagree often enough to matter.
+
+這對**題目專屬的主張**完全正確。但對**定義上必然為真**的關係是誤殺，而且量到了實例：
+
+```
+t1-credit-portfolio-var-cvar，exclude_self 對 off 配對實驗
+  exclude_self 多生出一條 cvar_not_below_var（來自檢索排第一、50 分的
+  risk.var_es.tail_order 卡）
+  → rejected: quote is not traceable to the instruction
+```
+
+同信心水準下 CVaR ≥ VaR 是定義上必然為真，與題目寫不寫無關。
+**這是卡片檢索在那一題唯一的貢獻，被這道閘擋掉了**，
+也是 0925 那次上傳淨效果約為零的具體機制。
+
+**待做的修法**：讓卡片攜帶普適性宣告（人寫、可稽核）。
+來自 universal 卡片的不變量免除題目引文要求，但保留其他三道檢查
+（欄位存在、AST 安全、講的是我們的答案）。
+可追溯性追到**卡片**而不是模型先驗，硬閘要保護的性質不變。
+
+**先量再改。** mrfull2 帶了 `--save-replies`，86 題被拒不變量的全文都在；
+`solutions/` 有 86 份已知能跑的腳本。把前者對後者跑一遍：
+通過的是誤殺、失敗的是擋對了。那個比率決定 universal 卡片值不值得做。
+
+這也是這份文件的主張在自己身上的一次應用：
+**排除規則的價值在它在正確答案面前閉嘴，但一條閉嘴過度的排除規則同樣要被量。**
+
+---
+
 ### 13b. 不變量檢索 — `agent/invariant_retrieval.py`
 
 **功能**：從公開練習語料取出有用的不變量**模式**（平價、可加性、機率界限）。
@@ -457,6 +502,34 @@ lint 與 runtime 共用同一份名單，不會漂移。
 **絕不**把取回的卡片直接變成一個會擋人的檢查。
 
 理由是語料同時含有可遷移的模式**和**題目專屬的答案，兩者必須分開。
+
+**觸發時機**：L3 生成之前，每題一次。它是詞彙比對不是 embedding，
+跑在請求預算檢查之前，所以**不佔模型額度也不排擠求解輪數**。
+
+**測試內容**（全部是 deterministic Python，無模型呼叫）：
+查詢由「題目 instruction 全文 + card.toml 的 category + tags + 輸出檔名」組成，
+切詞後對每張卡加權計分 —— `concepts` 命中 3.0/詞、`retrieval_hints` 1.5/詞、
+`principle` 散文 0.5/詞、整句 hint 片語出現 +4.0、卡片 family 等於題目 category +3.0。
+**門檻 5.0**，取前 4 張。註解寫明門檻的理由：
+「光靠同一個 family（3.0）或一個普通詞是進不去的」。
+
+**負控制（2026-09-26 實測，86 題）**：
+
+```
+有 rag trace 的題數        86/86     ← 這一層第一次真正執行
+檢索選到卡片 (selected>0)  83/86
+最後留下 kept invariant    66
+selected 張數分布  {0: 3, 1: 6, 2: 12, 3: 17, 4: 48}
+```
+
+**機制確認，因果未確認。** 官方分數 0.1163 → 0.1279（10/86 → 11/86），
+但 `not_reached` 同時從 10 掉到 1，所以多啟動了 9 題只多拿 1 分，
+**以「真的跑到的題目」為分母通過率是平的（13.2% → 12.9%）**。
+要歸因需要同 86 題、只差 `T1_INVARIANT_RAG=off` 的配對 sweep。
+
+**卡片庫太小是已知限制**：8 張卡、3 個 family
+（derivatives-pricing 3、risk-management 3、credit-risk 2），
+要面對 Final 的 100 題散在十個 category。即使閘門放行，覆蓋率也撐不起可觀效果。
 
 ---
 
@@ -571,7 +644,7 @@ L4a 把 `input_par_rate - model_par_rate` 擬合上去，然後指控灰塵最�
 |---|---|
 | 功能 | 把題目改成一個不該改變答案的樣子，重跑，看答案變不變 |
 | 模型呼叫 | **無** |
-| 狀態 | **建好但刻意未接線**，語料誤告率未量 |
+| 狀態 | 整合完成，**預設關閉**（`T1_METAMORPHIC`）。語料誤告率已量：0/23，上界約 13% |
 
 L4a 只能在產出把同一個量命名兩次時說話。
 **87 個單元裡有 23 個寫的是扁平 JSON，同一個量只出現一次。**
@@ -664,8 +737,99 @@ Perignon et al. 2006 在真實選擇權資料上量到，
 ### 負控制
 
 離線控制 12/12 通過（7 負控制、3 正控制、2 結構）。
-**語料層級的誤告率還沒量到，所以這一層沒有接線。精確率是硬約束。**
-語料控制在 `eval/metamorphic_sweep.py`，卡在需要一次帶 `--save-outputs` 的全量 sweep。
+
+**語料負控制（2026-09-26，`eval/metamorphic_sweep.py`，容器內跑）**：
+
+```
+units seen 86   with a saved script 86   admitted relation 70
+findings 14   hard 1   advisory 13
+FALSE ALARMS (hard finding on a unit that scored 1.0): 0
+```
+
+分母是 **23**（reward=1.0 的題數）不是 86。
+0/23 用三法則，95% 信賴上界約 **13%**。
+正確的說法是「在 23 題上未觀察到誤告」，**不是「誤告率為零」**。
+
+**四閘判決分布**，全部由 deterministic Python 判定：
+
+```
+determinism   27 admit   43 admit_ood   16 defer     0 reject
+permutation    1 admit    3 admit_ood   15 defer   121 reject
+scale          0 admit   26 admit_ood   16 defer    98 reject
+```
+
+366 個候選關係只有 100 條真的執行（28 + 72），其中 72 條只能出 advisory，
+所以**有資格提出 hard finding 的只有 28 條**。
+219 次拒絕不是失敗而是設計，程式碼 docstring 寫著
+「almost all of its verdicts are `reject`. That is the design.」
+
+**唯一那條 hard finding 是真陽性**：
+
+```
+t1-historical-var-data-prep   reward=0        ← 主辦方判 0
+  results.json: worst_day_return —
+  打亂 returns_raw.csv 的列順序後，3 個輸出欄位跟著動，最嚴重 0.17 相對偏移
+```
+
+hard finding 的成績是 **1/1**：開了一次口，開對了。
+
+**工具自己還寫了一條對它不利的但書**：permutation 的指控嚴格說是
+「這段程式碼脆弱」而不是「答案錯」—— 一支依賴列順序的腳本，
+在它拿到的那個順序上仍可能算出正確數字。工具**把這也算進誤告**，
+也就是用比較嚴的標準報自己的成績。
+
+---
+
+### 15.5 L4 的爭論，到此為止
+
+這一節存在的目的是讓 L4a/L4b 不要再被重新辯論一次。三個結論，各自有依據。
+
+**一、L4a 留在迴圈裡，有投票權。** 依據：18/87 題找到 79 條關係、0 次誤控，
+而且每一條界線都是負控制逼出來的。它已經賺到投票權了。
+
+**二、L4b 留在 image 裡但預設關閉，沒有投票權。** 依據是一串連鎖的事實，
+每一個都可以查證：
+
+1. advisory 模式下它**不能改變任何答案** —— finding 進不了 `problems`、
+   進不了 `_output_rank`，執行期日誌印的是 `0 acted on`
+2. 但它**仍要花 2+k 次腳本重跑**，而自從 roster 份額上限（§22）之後牆鐘是稀缺資源
+3. 曾經支持「還是付這個代價」的理由是「報告會在真正的評分環境裡產生」。
+   **這個理由是錯的**：`track1-coding-public/docs/TRUSTED-CHECKER-LABELS.md`
+   寫明 private reports 留在主辦方的 diagnostics channel，
+   而「official public reporting retains its bounded projection」——
+   也就是那張 per-reason 計數表，不是我們的輸出檔案。**檔案拿不回來。**
+4. 所以在評分的那一趟裡開著它，是**花牆鐘去產生一個沒有人能讀的檔案**
+
+因此它跟這個 codebase 裡每一個量測開關同一個模式：預設關閉，sweep 才開。
+**它在能夠 block 的時候才會被打開**，不是在「錯了不痛」的時候 ——
+因為錯了不痛的那個模式，同時也是對了也沒用的模式。
+
+**三、論文的實用價值已經兌現了，但兌現在 L4a 不在 L4b。** 這是最容易被錯過的一點。
+
+arXiv:2606.17529 真正值錢的不是 determinism / permutation / scale 三個關係
+（那三個誰都想得到），而是這條規則：**容忍度必須壓過量測儀器本身的固有誤差底線，
+逐欄位、量出來而不是假設。**
+
+而我們是怎麼走到這條規則的：L4a 曾經對 `t1-swap-curve-bootstrap-ois` 一個
+正確答案的兩粒浮點灰塵提告，事後補上 `_RESOLUTION`。
+論文把那個補丁**形式化成一條有理論依據的界線**。
+
+```
+論文 → gate 4 的規則 → _RESOLUTION → L4a 能以 0 誤控在迴圈裡跑   ← 已兌現
+論文 → L4b 這一層                  → 目前對分數貢獻為負          ← 未兌現
+```
+
+所以「引用這篇論文」不是裝飾，它替一個原本只有經驗依據的界線補上了理論基礎。
+L4b 這一層本身則要靠累積分母才有未來，那是論文之外的工作。
+
+**L4b 剩下的兩個理由，一薄一實**：
+
+- **薄**：覆蓋率。L4a 只在輸出把同一個量印兩次時能說話，而 23/87 題寫的是
+  只印一次的扁平 JSON。理論成立，實測只碰到 1 題。
+- **實**：它問的是**不同的問題**。L4a 問「印出來的數字彼此一致嗎」，
+  L4b 問「這個答案的**程式碼**依賴了它不該依賴的東西嗎」。
+  `t1-historical-var-data-prep` 那條就是後者，而 L4a 結構上永遠看不到 ——
+  它讀數字，不讀行為。這是論文層面的貢獻，不是分數層面的。
 
 ---
 
@@ -913,10 +1077,60 @@ A、B、D 三種可以靠想的，C 型只能靠「它指控了一份正確答�
 
 ---
 
+## 22. roster 層級時間預算 — `agent/agent.py:roster_share_budget()`
+
+| | |
+|---|---|
+| 功能 | 不讓一道慢題吃掉整個 roster 的時間 |
+| 模型呼叫 | **無** |
+| 狀態 | 已實作，**預設開啟**（`T1_ROSTER_BUDGET_OFF=1` 可關） |
+
+**它不是驗證元件，但它決定其他每一個元件有沒有時間跑**，所以列在這裡。
+
+**問題**：`read_card_timeout()` 讀的是**單題** `card.toml` 的 `timeout_sec`
+（1200 到 5400 秒），而 `DEVELOPMENT-RUNTIME.md`（"Execution clocks"）寫的是
+整個 ingestion stage **共用一個 43,200 秒的時鐘，86 題循序跑**，
+並且明說「does not promise that every unit can use its full individual ceiling」、
+「earlier units still consume the shared stage budget」。
+
+按 card 編預算是一個**只會在 roster 尾端現形的錯誤**，而它現形的方式是：
+
+| 上傳 | `not_reached` | `resource_timeout` |
+|---|---|---|
+| 0923 | **10** | — |
+| 0925 | 1 | 2 |
+
+`not_reached` 的意思是那一題**從未被啟動**，卻照樣以最差值計入分母。
+所以代價不是「一道慢題表現不好」，而是「九道題從來沒有被問」。
+
+**測試內容**：取「本題 card 減去安全邊界」與「本題在 roster 上的公平份額」較緊的那個。
+
+```
+43200 / 86 x (1 - 0.40) = 301 秒
+```
+
+40% 保留給我們控制不到的部分：容器建立、image pull，
+以及 Track 1 上 unit 自己的 checks 跑我們交付物的時間。
+
+**上限的數字是用語料訂的，不是憑感覺。** mrfull2 的 86 題裡：
+
+```
+通過的 23 題，最慢 297 秒，全部在 300 秒內
+上限 301s -> 砍掉 0 題通過，從失敗題收回 1.3 小時
+```
+
+兩條獨立的線吻合：公平份額算出 301，語料證據說 300 以上安全。
+
+**已知的不確定**：本機用 gemini-2.5-flash，官方用 House model。
+如果 House 每次呼叫慢很多，301 秒可能砍掉本來會收斂的輪數。
+取捨是明確的 —— 新啟動題目的邊際通過率是 11%，
+**保證每一題都被問到比給幾道難題多幾輪更值錢** —— 但這個判斷要靠下一次上傳驗證。
+
+**負控制**：`T1_ROSTER_BUDGET_OFF=1` 回到只看 card 的舊行為，
+所以「這個上限的代價」是可以量的，不是只能論證。
+
+---
+
 ## 相關文件
 
 - `START_HERE.md` — 全專案導覽，依驗證方式分區
-- `agenthon/docs/2026-09-25_meeting.md` — L1 到 L4b 的完整設計與量測過程
-- `README.md` — VerifiQuant 單一系統的技術說明
-- `.claude/CLAUDE.md` — 修改程式碼前必讀的陷阱清單
-- `docs/2026-07-21_reviewer_evidence_scorecard.md` — 每個主張對應的證據
