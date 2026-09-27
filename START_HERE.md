@@ -1,10 +1,11 @@
 # 專案導覽（依驗證方式分區）
 
-最後更新：2026-09-26
+最後更新：2026-09-27
 
-**Agenthon 這條線在 2026-09-26 暫停。** 恢復之前先讀
-`docs/2026-09-23_verification_layers_reference.md` 第五部分（§23–26）：
-局部最優的診斷、與軟體測試工程的對照、以及恢復時的順序。
+**Agenthon 這條線 9/26 暫停、同日恢復。** 暫停時的判斷在
+`docs/2026-09-23_verification_layers_reference.md` 第五部分（§23–26）；恢復之後的進度
+（突變測試、L5 決策宣告 v0、官方逐題結果）在 `agenthon/docs/2026-10-02_meeting.md`。
+每一次上傳的內容與結果在 `agenthon/submission/zips/README.md`。
 
 這份文件是整個工作目錄的入口。它跟 `README.md` 的差別在切法：`README.md` 講
 VerifiQuant 這一個系統怎麼運作，寫於 2026-06-14，不包含後來的論文實驗與 Agenthon。
@@ -48,7 +49,7 @@ VerifiQuant 這一個系統怎麼運作，寫於 2026-06-14，不包含後來的
 |---|---|---|---|---|
 | **A** | 宣告式驗證（FIC 卡片） | 事先建好的卡片庫 | 建卡時有，用卡時無 | 上線 |
 | **B** | 自證式驗證（產出物自洽） | 答案本身 | L3 有，其餘無 | L1–L4a 上線，L4b 已整合但預設關閉 |
-| **C** | 指令遵循驗證 | 題目文字 | 有 | Critic 上線，L5 未建 |
+| **C** | 指令遵循驗證 | 題目文字 | 有 | Critic 上線；L5 決策宣告 v0 已建，預設關閉 |
 | **D** | 前置與環境驗證 | 真實輸入檔與執行環境 | 部分有 | 上線 |
 | **E** | 驗證器的驗證（負控制） | 已知正確 / 已知錯誤的案例 | 無 | 上線，是本專案的方法論核心 |
 | **F** | 實驗與證據 | 跑出來的數字 | 有 | 論文數字的唯一來源 |
@@ -549,10 +550,18 @@ A 區與 B 區都在問「答案內部合不合理」。這一區問的是完全
 
 ---
 
-### L5 慣例帳本（尚未建）
+### L5 決策宣告（v0 已建，預設關閉）— `agent/decisions.py`
 
 validation 的另一半：指令容許**多種合理讀法**的時候。
 義務地圖刻意不碰這塊，因為一條義務只在指令講死的時候才成立。
+
+**9/27 的做法**：Writer 在腳本開頭寫一個 `DECISIONS = [...]` 常值，逐條交代慣例選擇
+（慣例軸、選項、依據是題目/參數/自己假設、實作它的程式碼錨點）。每一條用**翻轉錨點再重跑**來驗證，
+沒有模型參與。慣例軸詞彙表就是突變測試的運算子（`agent/conventions.py`，兩邊共用）。
+開關是 `T1_DECISIONS`，只寫紀錄 `_agent_decisions.json`，不改答案。
+離線控制 `eval/test_decisions.py` 11/11；8 題實測見 `agenthon/docs/2026-10-02_meeting.md` 5.2a。
+
+下面這張表是 9/18 做成因分析時的原始動機：
 
 **為什麼它排在下一個。** 18 個被標記過成因的 silent-wrong 單元，分佈是：
 
@@ -700,6 +709,8 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 
 **離線控制（不呼叫模型、不連網）**
 - `eval/test_metamorphic.py` — L4b，12/12（7 負控制、3 正控制、2 結構）
+- `eval/test_decisions.py` — L5，11/11（4 負控制、5 正控制、2 結構）
+- `eval/test_mutation_score.py` — 突變測試工具本身，7/7
 - `eval/test_cross_derive.py` — L4a
 - `eval/test_invariants.py` — L3
 - `eval/test_invariant_retrieval.py` — L3 檢索
@@ -710,8 +721,10 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 **語料層級的負控制**
 - `eval/metamorphic_sweep.py` — 對整個 87 單元語料量 L4b 的誤告率。2026-09-26 已跑：0/23 誤告，上界約 13%
 - `eval/cross_derive_sweep.py` — 同樣的事，對 L4a
-- `eval/mutation_test.sh` — 突變測試。故意弄壞正確解，看哪一層抓得到。
-  目前只對檢查器做過；對 agent 產出的腳本逐題算突變分數是恢復工作的第 2 步（參考文件 §24）
+- `eval/mutation_test.sh` — exemplar 上的三個手寫突變，看 L2 抓不抓得到
+- `eval/mutation_score.py` — **逐題突變分數，不需要 grader**。對每份腳本套慣例突變（拿掉 /365、252↔365、
+  ddof、對數↔算術報酬等），重跑，看哪一層開口。9/27 全語料：62 題 1,106 個突變，我們抓 21.9%
+- `eval/mutation_grade.py` — 同一批突變給官方 grader 評分：grader 75%、我們 22%、只有我們 3.5%
 - `eval/l4_opportunity.py` — **在建之前先量機會**。L4 能碰到幾題？不值得就不建
 - `eval/measure.py` / `measure_input_rewrite.py` / `measure_unpresented_inputs.py` — 各項前置量測
 - `eval/loop_detector_check.py` / `loop_probe.py` — 迴圈偵測
@@ -832,8 +845,11 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 
 ### Agenthon 對齊文件 — `agenthon/docs/`
 
-- `2026-09-25_meeting.md` — **最新且最完整的一份**，八個 Part，涵蓋 L1 到 L4b 的
+- `2026-10-02_meeting.md` — **最新的一份，轉向提案**。Part 2 是局部最優的量測（我們是官方 grader
+  較弱的子集），Part 4 是突變測試與導數探針的機會量，Part 5 是 L5 決策宣告與第一次實測
+- `2026-09-25_meeting.md` — 八個 Part，涵蓋 L1 到 L4b 的
   全部設計、量測、以及被推翻的部分。Part 6 是 L4b，Part 7 是全部 17 次 sweep 的回溯
+- `../submission/zips/README.md` — 每次上傳的內容、官方逐題結果、同一個 zip 被評兩次的翻轉率
 - `2026-09-06_from_verifiquant_to_agenthon.md` — 兩個專案的銜接論述
 - `2026-09-17_verifiquant_vs_agenthon_direction.md` — 方向上的差異
 - `2026-09-11_advisor_briefing.md` / `2026-09-18_advisor_briefing.md` — 指導會議
@@ -899,7 +915,7 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 | 滿不滿足恆等式 | 卡片的 `invariants` | L3，模型每題現場產生 | 否（L3） |
 | 報出來的數字彼此對不對 | 無對應 | L4a 交叉推導 | 是 |
 | 改題目答案該不該變 | 無對應 | L4b 蛻變測試 | 是 |
-| 隱性歧義 | I 層，卡片的 `semantic_hints` | L5 慣例帳本（未建） | 否 |
+| 隱性歧義 | I 層，卡片的 `semantic_hints` | L5 決策宣告（v0，預設關閉） | 否 |
 | 指令有沒有被遵守 | 卡片本身即規格 | 義務地圖 + Critic | 部分 |
 
 值得注意的是**空格在哪裡**。VerifiQuant 缺 L4a / L4b 那一類「答案內部互相對照」的檢查，
@@ -985,7 +1001,7 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 **如果你是第一次看這個專案**
 1. 這份文件的第 0 節與第 2 節
 2. `README.md` 的架構段（六層漏斗的完整表格）
-3. `agenthon/docs/2026-09-25_meeting.md` 的 Part 0 到 Part 4
+3. `agenthon/docs/2026-10-02_meeting.md` 的 Part 1 與 Part 2（目前所有控制元件的總覽，以及為什麼要轉向）
 
 **如果你要改 VerifiQuant 的程式**
 1. `.claude/CLAUDE.md`，特別是 Common Pitfalls
@@ -993,8 +1009,8 @@ E 區的存在，就是讓「我們的檢查器不會在證據不足時給出高
 3. 記住：改 `preprocessing/` 的薄包裝沒有效果
 
 **如果你要改 Agenthon 的程式**
-1. `docs/2026-09-23_verification_layers_reference.md` 第五部分（暫停時的判斷與恢復順序）
-2. `agenthon/docs/2026-09-25_meeting.md` 的 Part 5 到 Part 7
+1. `agenthon/docs/2026-10-02_meeting.md` 的 Part 6（時程、停損點、刻意不做的事）
+2. `agenthon/submission/zips/README.md` 的「下一步」與「每次上傳前的固定檢查」
 3. 對應層的模組 docstring，每支開頭都寫了「這層為什麼存在」而且附量測數字
 4. 動任何一層之前，先跑該層的 `eval/test_*.py`
 
