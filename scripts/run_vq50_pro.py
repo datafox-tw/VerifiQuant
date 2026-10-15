@@ -9,10 +9,18 @@ scripts/compare_vq50_runs.py. Scores are ternary + unit-normalized.
 Usage:
   PYTHONPATH=. GEMINI_API_KEY=... [VERIFIQUANT_STRICT_BINDING=1] \
     .venv/bin/python scripts/run_vq50_pro.py --tag pro_on --model gemini-2.5-pro
+
+Also the gate-ladder runner (scripts/run_gate_ladder.sh). Retrieval depth was hard-coded
+to 3 until 2026-10-15; ``--top-k`` (default 3, the old behaviour) now sets it, and the
+camera-ready rerun (E14) passes 4. ``--resume`` and the API guard (scripts/api_guard.py)
+work as in run_ood_family_eval.py: persistent API failures stop the run (exit 3) instead
+of being recorded as abstentions.
 """
 from __future__ import annotations
-import argparse, json, os, time
+import argparse, json, os, sys, time
 from datetime import datetime
+
+from api_guard import EXIT_API_EXHAUSTED, ApiExhausted, client_with_timeout, diagnose_with_api_retry
 
 from verifiquant.pipeline.run_error_classification_pipeline import (
     ErrorClassificationAPI, create_genai_client_from_env,
@@ -50,6 +58,9 @@ def main():
     ap.add_argument("--lib-db", default=LIB)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out-dir", default=os.path.join(ROOT, "verifiquant/data/runs/vq50_pro"))
+    ap.add_argument("--top-k", type=int, default=3)
+    ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--http-timeout-s", type=int, default=120)
     args = ap.parse_args()
 
     qs = [json.loads(l) for l in open(args.questions) if l.strip()]
@@ -57,9 +68,9 @@ def main():
         qs = qs[: args.limit]
 
     api = ErrorClassificationAPI.from_db(
-        db_url=f"sqlite:///{args.lib_db}", client=create_genai_client_from_env(),
+        db_url=f"sqlite:///{args.lib_db}", client=client_with_timeout(args.http_timeout_s),
         selector_model=args.model, extractor_model=args.model, judge_model=args.model,
-        top_k=3,
+        top_k=args.top_k,
     )
     os.makedirs(args.out_dir, exist_ok=True)
     out_path = os.path.join(args.out_dir, f"{args.tag}.jsonl")
@@ -67,12 +78,22 @@ def main():
     t0 = time.time()
     counts = {"correct": 0, "silent_wrong": 0, "abstain": 0, "near_miss": 0, "strict_fired": 0}
 
-    with open(out_path, "w") as fo:
+    done = set()
+    if args.resume and os.path.exists(out_path):
+        done = {json.loads(l)["case_id"] for l in open(out_path) if l.strip()}
+    with open(out_path, "a" if args.resume else "w") as fo:
         for i, q in enumerate(qs, 1):
             row = {"case_id": q.get("question_id") or q.get("function_id"),
                    "question": q.get("question", ""), "context": q.get("context", "")}
+            if row["case_id"] in done:
+                continue
             try:
-                rep = api.diagnose_row(row, top_k=3, debug_sanity=False)
+                rep = diagnose_with_api_retry(
+                    lambda: api.diagnose_row(row, top_k=args.top_k, debug_sanity=False),
+                    label=f"{args.tag}/{row['case_id']}")
+            except ApiExhausted as exc:
+                print(f"API_EXHAUSTED {exc}", flush=True)
+                sys.exit(EXIT_API_EXHAUSTED)
             except Exception as exc:
                 rep = {"status": "error", "diagnostic_type": "Unknown", "message": str(exc)}
             v, near = verdict(rep, q.get("ground_truth"))
@@ -94,7 +115,15 @@ def main():
             print(f"[{args.tag} {i}/{len(qs)}] {row['case_id']} {v}"
                   + (" [STRICT]" if fired else ""))
 
-    summary = {"tag": args.tag, "model": args.model, "lib_db": args.lib_db,
+    # Recount from the file so a resumed run summarises every row, not only this session's.
+    counts = {"correct": 0, "silent_wrong": 0, "abstain": 0, "near_miss": 0, "strict_fired": 0}
+    for line in open(out_path):
+        if line.strip():
+            r = json.loads(line)
+            counts[r["verdict"]] += 1
+            counts["near_miss"] += bool(r.get("scale_near_miss"))
+            counts["strict_fired"] += bool(r.get("strict_notes"))
+    summary = {"tag": args.tag, "model": args.model, "lib_db": args.lib_db, "top_k": args.top_k,
                "strict_binding_flag": flag, "n": len(qs), **counts,
                "elapsed_s": round(time.time() - t0, 1),
                "ran_at": datetime.now().isoformat(timespec="seconds")}

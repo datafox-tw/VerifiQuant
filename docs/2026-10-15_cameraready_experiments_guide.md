@@ -218,6 +218,36 @@ R1、R2 指出 VQ 和 R-PAL+ 同時差兩件事：VQ **執行**合約綁定的�
 
 ---
 
+## 5b. E13 到 E15：用 top-4 重跑庫外 split、gate 消融、規模掃描（10/15）
+
+**為什麼**：除了 trap，這三組 VerifiQuant 的執行在 7 月也是 top-3。原因有兩個：`run_ood_family_eval.py` 的 `--top-k` 預設是 3，而 `run_libsweep.sh` 沒有覆寫；`run_vq50_pro.py`（gate 消融用）把深度寫死成 3。
+
+**程式改動**（預設行為都不變）：
+
+- **`scripts/api_guard.py`**（新）
+  - `client_with_timeout()`：HTTP 逾時。
+  - `diagnose_with_api_retry()`：只重試 API 層級的錯誤（google.genai 的 APIError、httpx 傳輸錯誤、逾時），退避等待最多約 10 分鐘。用盡就丟出 `ApiExhausted`，執行器以代碼 3 結束，那一列不寫入。其他例外照原本的規則記成 error，也就是拒答。
+- **`scripts/run_ood_family_eval.py`**：新增 `--out-name`、`--resume`、`--http-timeout-s` 與 API 防護。每列多存 `case_id`；摘要改成從檔案重算，續跑時才不會少算。
+- **`scripts/run_vq50_pro.py`**：新增 `--top-k`（預設 3，即舊行為）、`--resume`、API 防護。摘要多記 `top_k`，也改成從檔案重算。
+- **`scripts/plot_libsweep.py`**：新增 `--sweep-dir` 與 `--suffix`，可畫出 `libsweep_250q_top4.png`。預設模式重算出的 `aggregate.json` 與 7 月的一字不差（已驗證）。
+- **`scripts/analyze_cameraready_topk_reruns.py`**（新）：把三組的 7 月 top-3 與 top-4 重跑並排比較，算法和論文相同。
+- **`scripts/assert_paper_numbers.py`**：gate 消融、規模掃描、庫外 split 都依論文檔裡的來源註記（`gate_ladder_top4`、`libsweep_top4`、`ood_eval_top4`）自動選資料。庫外 split 的六個巨集原本沒被稽核，現在兩種模式都會檢查。
+
+**結果**：
+
+| 執行 | 7 月 top-3 | top-4 重跑 |
+|---|---|---|
+| 庫外 split（拒答／答對／SWR／選擇性準確率） | 88.9／7.0／4.0／63.6% | 完全相同（10 題判定改變但互相抵消） |
+| Gate 消融，完整漏斗（準確率／SWR／拒答題數） | 79.2%／4.0%／42 | 82.0%／4.4%／34 |
+| 規模掃描，庫內準確率 | 81.6% 到 84.0% | 83.2% 到 87.1% |
+| 規模掃描，庫外 SWR | 1.3% → 4.8% | 2.2% → 4.8%（中間有起伏） |
+
+**執行**：10/15 11:21 到 12:14，十組平行，2,500 題，沒有任何 API 重試或錯誤。gate 消融的延遲數字（6.6、12.7、12.2 秒）仍用 7 月依序執行的量測，因為平行執行的牆鐘時間互相干擾。
+
+**原始資料**：`verifiquant/data/runs/ood_eval_top4/`、`gate_ladder_top4/`、`libsweep_top4/`，比較摘要在 `verifiquant/data/runs/cameraready_topk_reruns_summary.json`。
+
+---
+
 ## 6. 論文那一側的改動（E10 採用 (a)）
 
 - **`scripts/analyze_governance_confirmatory.py --vq top4x3`**：讀三次 top-4 重跑，VQ 取三次平均，寫出 `governance_confirmatory_1014/confirmatory_summary_top4.json`。預設 `--vq july` 照舊寫 7 月的摘要，原有數值完全不變，只多了 `source`、`fnar_per_run`、`per_operator_diag_action` 三個欄位。
@@ -274,4 +304,13 @@ PAPER_TEX=paper/main_camera_ready_9p.tex .venv/bin/python scripts/assert_paper_n
 
 # E12
 .venv/bin/python scripts/run_vq_trap_rerun.py --top-k 4 --model gemini-2.5-pro --shard 0/4 --out-dir verifiquant/data/runs/governance_confirmatory_1015_pro --run-name vq_pro_top4_run1_shard0
+
+# E13（E15 把 --lib-db 換成 libsweep/lib_{10,25,50,75,100}/cards.db，--limit-ood 999 --limit-id 999）
+PYTHONPATH=. .venv/bin/python scripts/run_ood_family_eval.py --lib-db verifiquant/data/runs/paper_v1/fic/cards.db --limit-ood 199 --limit-id 51 --seed 0 --top-k 4 --no-baseline --out-dir verifiquant/data/runs/ood_eval_top4 --out-name e13_top4
+
+# E14（四個 rung 的 VQ_DISABLE_GATES 依序是 "MN,F,E,I"、"MN,I"、"MN"、""）
+VQ_DISABLE_GATES="MN" PYTHONPATH=. .venv/bin/python scripts/run_vq50_pro.py --tag r3_fei --model gemini-2.5-flash --questions verifiquant/data/runs/paper_v2_250/questions_250.jsonl --lib-db verifiquant/data/runs/libsweep/lib_100/cards.db --out-dir verifiquant/data/runs/gate_ladder_top4 --top-k 4
+
+# E13 到 E15 的比較（不呼叫模型）
+.venv/bin/python scripts/analyze_cameraready_topk_reruns.py
 ```

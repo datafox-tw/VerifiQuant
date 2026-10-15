@@ -78,6 +78,14 @@ GOV_SUMMARY = (RUNS / "governance_confirmatory_1014/confirmatory_summary_top4.js
                else RUNS / "governance_confirmatory/confirmatory_summary.json")
 VQ_TRAP_FILES = ([RUNS / f"governance_confirmatory_1014/vq_k1_top4_run{i}.jsonl" for i in (1, 2, 3)]
                  if VQ_TOP4 else [RUNS / "governance_confirmatory/vq_k1_traps.jsonl"])
+# The gate ladder, library sweep and out-of-library split also ran at top-3 in July and
+# were rerun at top-4 on 2026-10-15 (E13-E15). A draft citing a rerun names its directory
+# in a comment or a figure path, and the audit follows it.
+LADDER_DIR = RUNS / ("gate_ladder_top4" if "gate_ladder_top4" in tex else "gate_ladder")
+SWEEP_TOP4 = "libsweep_top4" in tex
+SWEEP_AGG = RUNS / ("libsweep_top4" if SWEEP_TOP4 else "libsweep") / "aggregate.json"
+OOD_RESULTS = (RUNS / "ood_eval_top4/ood_results_e13_top4.jsonl" if "ood_eval_top4" in tex
+               else RUNS / "ood_eval/ood_results_20260713_005129.jsonl")
 
 
 def text_check(label: str, text: str) -> None:
@@ -243,8 +251,9 @@ LADDER = [
     # non-held-out result and was cut from Table 4. runs/gate_ladder/r5_full_hint_*
     # is retained for the record but is no longer a paper number.
 ]
+print(f"  ladder source: {LADDER_DIR.name}")
 for tag, anchor in LADDER:
-    s = load(RUNS / f"gate_ladder/{tag}_summary.json")
+    s = load(LADDER_DIR / f"{tag}_summary.json")
     # the paper reports unit-normalized figures: near-misses count as correct
     corr = s["correct"] + s["near_miss"]
     swr = s["silent_wrong"] - s["near_miss"]
@@ -391,20 +400,59 @@ print()
 print("=" * 78)
 print("Figure 3 — library-coverage sweep")
 print("=" * 78)
-sweep = load(RUNS / "libsweep/aggregate.json")["points"]
+print(f"  sweep source: {SWEEP_AGG.parent.name}")
+sweep = load(SWEEP_AGG)["points"]
 ood = [p for p in sweep if p["ood_abstain"] is not None]
-check("OOD abstain at 10%", 100 * ood[0]["ood_abstain"], 91.6)
-check("OOD abstain at 75%", 100 * ood[-1]["ood_abstain"], 80.6)
-check("ID abstain at 10%", 100 * sweep[0]["id_abstain"], 8.0)
-check("ID abstain at 100%", 100 * sweep[-1]["id_abstain"], 14.4)
-check("OOD silent-wrong at 10%", 100 * ood[0]["ood_sw"], 1.3)
-check("OOD silent-wrong at 75%", 100 * ood[-1]["ood_sw"], 4.8)
-gaps = [100 * p["selectivity_gap"] for p in ood]
-check("selectivity gap min (paper says 67)", min(gaps), 67, nd=0)
-check("selectivity gap max (paper says 84)", max(gaps), 84, nd=0)
-accs = [100 * p["id_acc"] for p in sweep]
-check("ID accuracy min (paper says 81.6)", min(accs), 81.6)
-check("ID accuracy max (paper says 84.0)", max(accs), 84.0)
+if SWEEP_TOP4:
+    # The sentence carries the endpoints; check each printed value against the rerun.
+    def _p(x, nd=1):
+        return f"{round_half_up(100 * x, nd):.{nd}f}"
+    gaps = [100 * p["selectivity_gap"] for p in ood]
+    accs = [100 * p["id_acc"] for p in sweep]
+    text_check("sweep OOD abstain endpoints",
+               f"${_p(ood[0]['ood_abstain'])}\\%{{\\to}}{_p(ood[-1]['ood_abstain'])}\\%$")
+    text_check("sweep ID abstain endpoints",
+               f"${_p(sweep[0]['id_abstain'])}\\%{{\\to}}{_p(sweep[-1]['id_abstain'])}\\%$")
+    text_check("sweep gap range",
+               f"between ${round_half_up(min(gaps), 0):.0f}$ and ${round_half_up(max(gaps), 0):.0f}$ points")
+    text_check("sweep ID accuracy range",
+               f"${round_half_up(min(accs), 1):.1f}$--${round_half_up(max(accs), 1):.1f}\\%$")
+    text_check("sweep OOD silent-wrong endpoints",
+               f"${_p(ood[0]['ood_sw'])}\\%{{\\to}}{_p(ood[-1]['ood_sw'])}\\%$")
+if not SWEEP_TOP4:
+  check("OOD abstain at 10%", 100 * ood[0]["ood_abstain"], 91.6)
+  check("OOD abstain at 75%", 100 * ood[-1]["ood_abstain"], 80.6)
+  check("ID abstain at 10%", 100 * sweep[0]["id_abstain"], 8.0)
+  check("ID abstain at 100%", 100 * sweep[-1]["id_abstain"], 14.4)
+  check("OOD silent-wrong at 10%", 100 * ood[0]["ood_sw"], 1.3)
+  check("OOD silent-wrong at 75%", 100 * ood[-1]["ood_sw"], 4.8)
+  gaps = [100 * p["selectivity_gap"] for p in ood]
+  check("selectivity gap min (paper says 67)", min(gaps), 67, nd=0)
+  check("selectivity gap max (paper says 84)", max(gaps), 84, nd=0)
+  accs = [100 * p["id_acc"] for p in sweep]
+  check("ID accuracy min (paper says 81.6)", min(accs), 81.6)
+  check("ID accuracy max (paper says 84.0)", max(accs), 84.0)
+
+print()
+print("=" * 78)
+print("Out-of-library split (199 OOD + 51 ID), VerifiQuant macros")
+print("=" * 78)
+print(f"  OOD-split source: {OOD_RESULTS.name}")
+_ood_rows = rows(OOD_RESULTS)
+def _split(name):
+    sub = [r for r in _ood_rows if r["split"] == name]
+    return sub, {v: sum(r["verdict"] == v for r in sub) for v in ("abstain", "correct", "silent_wrong")}
+_o, _oc = _split("OOD")
+_i, _ic = _split("ID")
+check("OOD split: out-of-library questions", len(_o), 199, kind="INT", nd=0)
+check("OOD split: in-library questions", len(_i), 51, kind="INT", nd=0)
+check("VQ OOD abstain", 100 * _oc["abstain"] / len(_o), macro_pct("oodVQabsOOD"))
+check("VQ ID abstain", 100 * _ic["abstain"] / len(_i), macro_pct("oodVQabsID"))
+check("VQ OOD-ID abstain gap", 100 * (_oc["abstain"] / len(_o) - _ic["abstain"] / len(_i)), float(MACRO["oodVQgap"]))
+check("VQ OOD correct", 100 * _oc["correct"] / len(_o), macro_pct("oodVQcorrOOD"))
+check("VQ OOD silent-wrong", 100 * _oc["silent_wrong"] / len(_o), macro_pct("oodVQswOOD"))
+check("VQ OOD selective accuracy", 100 * _oc["correct"] / (_oc["correct"] + _oc["silent_wrong"]),
+      macro_pct("oodVQselOOD"))
 
 print()
 print("=" * 78)

@@ -8,9 +8,13 @@ and draws them vs library size. Output: docs/figures/libsweep_250q.png + a
 machine-readable aggregate at verifiquant/data/runs/libsweep/aggregate.json.
 
 Robust to partial points (uses whatever rows exist; marks them as partial).
+
+``--sweep-dir verifiquant/data/runs/libsweep_top4 --suffix _top4`` aggregates the
+2026-10-15 top-4 rerun (E15) and writes libsweep_250q_top4.png; the defaults redraw the
+July top-3 sweep exactly as before.
 """
 from __future__ import annotations
-import glob, json, os
+import argparse, glob, json, os
 
 import matplotlib
 matplotlib.use("Agg")
@@ -21,8 +25,8 @@ SWEEP = os.path.join(ROOT, "verifiquant/data/runs/libsweep")
 FRACS = [10, 25, 50, 75, 100]
 
 
-def point_stats(frac: int):
-    d = os.path.join(SWEEP, f"results_{frac}")
+def point_stats(frac: int, sweep: str = SWEEP):
+    d = os.path.join(sweep, f"results_{frac}")
     rows = []
     files = sorted(glob.glob(os.path.join(d, "ood_results_*.jsonl")), key=os.path.getmtime)
     if not files:
@@ -76,11 +80,16 @@ def point_stats(frac: int):
 
 
 def main():
-    pts = [p for p in (point_stats(f) for f in FRACS) if p]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--sweep-dir", default=SWEEP)
+    ap.add_argument("--suffix", default="", help="appended to the figure file name")
+    args = ap.parse_args()
+    sweep = os.path.join(ROOT, args.sweep_dir) if not os.path.isabs(args.sweep_dir) else args.sweep_dir
+    pts = [p for p in (point_stats(f, sweep) for f in FRACS) if p]
     if not pts:
         raise SystemExit("no sweep results found")
     agg = {"points": pts}
-    json.dump(agg, open(os.path.join(SWEEP, "aggregate.json"), "w"), indent=2)
+    json.dump(agg, open(os.path.join(sweep, "aggregate.json"), "w"), indent=2)
 
     def series(key):
         xs = [p["frac"] for p in pts if p.get(key) is not None]
@@ -117,8 +126,8 @@ def main():
     plt.tight_layout()
     # Write both copies. paper/figures is what main_v2.tex actually includes, and a
     # docs-only write here previously let the paper keep a stale figure for weeks.
-    for out in (os.path.join(ROOT, "docs/figures/libsweep_250q.png"),
-                os.path.join(ROOT, "paper/figures/libsweep_250q.png")):
+    for out in (os.path.join(ROOT, f"docs/figures/libsweep_250q{args.suffix}.png"),
+                os.path.join(ROOT, f"paper/figures/libsweep_250q{args.suffix}.png")):
         plt.savefig(out, dpi=150, bbox_inches="tight", pad_inches=0.08)
         print("figure:", out)
     for p in pts:

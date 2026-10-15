@@ -1,0 +1,277 @@
+[OOD 1/125] 1774      VQ=abstain      CoT=None fic=None
+[OOD 2/125] 1288      VQ=abstain      CoT=None fic=None
+[OOD 3/125] 2786      VQ=correct      CoT=None fic=fic_article_2273
+[OOD 4/125] 2132      VQ=abstain      CoT=None fic=None
+[OOD 5/125] 12        VQ=abstain      CoT=None fic=None
+[OOD 6/125] 764       VQ=abstain      CoT=None fic=None
+[OOD 7/125] 2843      VQ=abstain      CoT=None fic=None
+[OOD 8/125] 306       VQ=abstain      CoT=None fic=None
+[OOD 9/125] 330       VQ=abstain      CoT=None fic=None
+[OOD 10/125] 1874      VQ=abstain      CoT=None fic=None
+[OOD 11/125] 1975      VQ=abstain      CoT=None fic=None
+[OOD 12/125] 1996      VQ=abstain      CoT=None fic=fic_article_925
+[OOD 13/125] 1905      VQ=abstain      CoT=None fic=None
+[OOD 14/125] 1504      VQ=abstain      CoT=None fic=None
+[OOD 15/125] 2883      VQ=abstain      CoT=None fic=None
+[OOD 16/125] 2027      VQ=abstain      CoT=None fic=fic_article_1613
+[OOD 17/125] 2807      VQ=abstain      CoT=None fic=None
+[OOD 18/125] 104       VQ=abstain      CoT=None fic=None
+[OOD 19/125] 1730      VQ=abstain      CoT=None fic=None
+[OOD 20/125] 1739      VQ=abstain      CoT=None fic=None
+[OOD 21/125] 213       VQ=abstain      CoT=None fic=None
+[OOD 22/125] 123       VQ=abstain      CoT=None fic=None
+[OOD 23/125] 2451      VQ=correct      CoT=None fic=fic_article_2448
+[OOD 24/125] 2809      VQ=abstain      CoT=None fic=None
+[OOD 25/125] 31        VQ=abstain      CoT=None fic=None
+[OOD 26/125] 333       VQ=abstain      CoT=None fic=None
+[OOD 27/125] 83        VQ=abstain      CoT=None fic=None
+[OOD 28/125] 319       VQ=abstain      CoT=None fic=None
+[OOD 29/125] 2516      VQ=abstain      CoT=None fic=None
+[OOD 30/125] 966       VQ=abstain      CoT=None fic=None
+[OOD 31/125] 2183      VQ=abstain      CoT=None fic=None
+[OOD 32/125] 2305      VQ=abstain      CoT=None fic=None
+[OOD 33/125] 2028      VQ=abstain      CoT=None fic=None
+[OOD 34/125] 2303      VQ=silent_wrong CoT=None fic=fic_article_313
+[OOD 35/125] 3100      VQ=abstain      CoT=None fic=None
+[OOD 36/125] 1280      VQ=abstain      CoT=None fic=None
+[OOD 37/125] 60        VQ=abstain      CoT=None fic=None
+[OOD 38/125] 369       VQ=abstain      CoT=None fic=fic_article_322
+[OOD 39/125] 1864      VQ=abstain      CoT=None fic=None
+[OOD 40/125] 2440      VQ=abstain      CoT=None fic=None
+[OOD 41/125] 872       VQ=correct      CoT=None fic=fic_article_1744
+[OOD 42/125] 1509      VQ=abstain      CoT=None fic=None
+[OOD 43/125] 2677      VQ=abstain      CoT=None fic=None
+[OOD 44/125] 1831      VQ=abstain      CoT=None fic=None
+[OOD 45/125] 1633      VQ=abstain      CoT=None fic=None
+[OOD 46/125] 117       VQ=abstain      CoT=None fic=None
+[OOD 47/125] 1668      VQ=abstain      CoT=None fic=None
+[OOD 48/125] 2909      VQ=abstain      CoT=None fic=None
+[OOD 49/125] 655       VQ=abstain      CoT=None fic=None
+[OOD 50/125] 440       VQ=abstain      CoT=None fic=None
+[OOD 51/125] 1347      VQ=abstain      CoT=None fic=None
+[OOD 52/125] 898       VQ=abstain      CoT=None fic=None
+[OOD 53/125] 109       VQ=correct      CoT=None fic=fic_article_2532
+[OOD 54/125] 1815      VQ=correct      CoT=None fic=fic_article_313
+[OOD 55/125] 603       VQ=abstain      CoT=None fic=None
+[OOD 56/125] 365       VQ=abstain      CoT=None fic=None
+[OOD 57/125] 447       VQ=abstain      CoT=None fic=None
+[OOD 58/125] 1400      VQ=abstain      CoT=None fic=None
+[OOD 59/125] 853       VQ=abstain      CoT=None fic=None
+[OOD 60/125] 2502      VQ=abstain      CoT=None fic=None
+[OOD 61/125] 326       VQ=abstain      CoT=None fic=fic_article_327
+[OOD 62/125] 1726      VQ=abstain      CoT=None fic=None
+[OOD 63/125] 1407      VQ=abstain      CoT=None fic=fic_article_3067
+[OOD 64/125] 1740      VQ=abstain      CoT=None fic=None
+[OOD 65/125] 2099      VQ=abstain      CoT=None fic=None
+[OOD 66/125] 30        VQ=abstain      CoT=None fic=None
+[OOD 67/125] 990       VQ=correct      CoT=None fic=fic_article_994
+[OOD 68/125] 1638      VQ=abstain      CoT=None fic=None
+[OOD 69/125] 687       VQ=correct      CoT=None fic=fic_article_2532
+[OOD 70/125] 1068      VQ=correct      CoT=None fic=fic_article_2164
+[OOD 71/125] 18        VQ=abstain      CoT=None fic=None
+[OOD 72/125] 2738      VQ=abstain      CoT=None fic=None
+[OOD 73/125] 1738      VQ=abstain      CoT=None fic=None
+[OOD 74/125] 177       VQ=abstain      CoT=None fic=None
+[OOD 75/125] 593       VQ=abstain      CoT=None fic=None
+[OOD 76/125] 2250      VQ=abstain      CoT=None fic=None
+[OOD 77/125] 2259      VQ=abstain      CoT=None fic=fic_article_1441
+[OOD 78/125] 1824      VQ=abstain      CoT=None fic=None
+[OOD 79/125] 1319      VQ=abstain      CoT=None fic=None
+[OOD 80/125] 641       VQ=abstain      CoT=None fic=None
+[OOD 81/125] 1733      VQ=abstain      CoT=None fic=None
+[OOD 82/125] 2569      VQ=abstain      CoT=None fic=None
+[OOD 83/125] 450       VQ=silent_wrong CoT=None fic=fic_article_611
+[OOD 84/125] 1537      VQ=abstain      CoT=None fic=None
+[OOD 85/125] 2766      VQ=abstain      CoT=None fic=None
+[OOD 86/125] 2851      VQ=abstain      CoT=None fic=None
+[OOD 87/125] 956       VQ=correct      CoT=None fic=fic_article_2164
+[OOD 88/125] 2071      VQ=abstain      CoT=None fic=None
+[OOD 89/125] 817       VQ=abstain      CoT=None fic=None
+[OOD 90/125] 219       VQ=correct      CoT=None fic=fic_article_611
+[OOD 91/125] 1130      VQ=silent_wrong CoT=None fic=fic_article_2330
+[OOD 92/125] 950       VQ=abstain      CoT=None fic=None
+[OOD 93/125] 1375      VQ=abstain      CoT=None fic=None
+[OOD 94/125] 1834      VQ=correct      CoT=None fic=fic_article_313
+[OOD 95/125] 922       VQ=abstain      CoT=None fic=None
+[OOD 96/125] 1450      VQ=correct      CoT=None fic=fic_article_1167
+[OOD 97/125] 1162      VQ=abstain      CoT=None fic=None
+[OOD 98/125] 247       VQ=abstain      CoT=None fic=fic_article_1097
+[OOD 99/125] 2824      VQ=correct      CoT=None fic=fic_article_1898
+[OOD 100/125] 2659      VQ=abstain      CoT=None fic=None
+[OOD 101/125] 1213      VQ=silent_wrong CoT=None fic=fic_article_1217
+[OOD 102/125] 2093      VQ=correct      CoT=None fic=fic_article_1167
+[OOD 103/125] 825       VQ=abstain      CoT=None fic=fic_article_925
+[OOD 104/125] 2253      VQ=abstain      CoT=None fic=None
+[OOD 105/125] 1244      VQ=abstain      CoT=None fic=None
+[OOD 106/125] 477       VQ=correct      CoT=None fic=fic_article_1922
+[OOD 107/125] 453       VQ=abstain      CoT=None fic=None
+[OOD 108/125] 1072      VQ=abstain      CoT=None fic=None
+[OOD 109/125] 2105      VQ=correct      CoT=None fic=fic_article_1959
+[OOD 110/125] 3         VQ=correct      CoT=None fic=fic_article_1063
+[OOD 111/125] 2839      VQ=abstain      CoT=None fic=None
+[OOD 112/125] 431       VQ=silent_wrong CoT=None fic=fic_article_1904
+[OOD 113/125] 2551      VQ=abstain      CoT=None fic=None
+[OOD 114/125] 503       VQ=abstain      CoT=None fic=None
+[OOD 115/125] 582       VQ=abstain      CoT=None fic=None
+[OOD 116/125] 2290      VQ=abstain      CoT=None fic=None
+[OOD 117/125] 1816      VQ=abstain      CoT=None fic=None
+[OOD 118/125] 906       VQ=abstain      CoT=None fic=None
+[OOD 119/125] 2106      VQ=correct      CoT=None fic=fic_article_1959
+[OOD 120/125] 2845      VQ=abstain      CoT=None fic=None
+[OOD 121/125] 3061      VQ=abstain      CoT=None fic=fic_article_3060
+[OOD 122/125] 2567      VQ=abstain      CoT=None fic=None
+[OOD 123/125] 1254      VQ=abstain      CoT=None fic=None
+[OOD 124/125] 2310      VQ=correct      CoT=None fic=fic_article_2164
+[OOD 125/125] 2637      VQ=abstain      CoT=None fic=None
+[ID 1/125] 207       VQ=correct      CoT=None fic=fic_article_207
+[ID 2/125] 1395      VQ=correct      CoT=None fic=fic_article_1395
+[ID 3/125] 1067      VQ=correct      CoT=None fic=fic_article_1067
+[ID 4/125] 1541      VQ=silent_wrong CoT=None fic=fic_article_1541
+[ID 5/125] 994       VQ=correct      CoT=None fic=fic_article_994
+[ID 6/125] 610       VQ=silent_wrong CoT=None fic=fic_article_610
+[ID 7/125] 1605      VQ=abstain      CoT=None fic=fic_article_1605
+[ID 8/125] 2455      VQ=correct      CoT=None fic=fic_article_2455
+[ID 9/125] 571       VQ=correct      CoT=None fic=fic_article_571
+[ID 10/125] 705       VQ=correct      CoT=None fic=fic_article_705
+[ID 11/125] 2794      VQ=correct      CoT=None fic=fic_article_2794
+[ID 12/125] 2829      VQ=silent_wrong CoT=None fic=fic_article_2829
+[ID 13/125] 2817      VQ=correct      CoT=None fic=fic_article_2817
+[ID 14/125] 1745      VQ=correct      CoT=None fic=fic_article_1745
+[ID 15/125] 2120      VQ=silent_wrong CoT=None fic=fic_article_2120
+[ID 16/125] 1811      VQ=correct      CoT=None fic=fic_article_1811
+[ID 17/125] 2198      VQ=abstain      CoT=None fic=fic_article_2198
+[ID 18/125] 510       VQ=correct      CoT=None fic=fic_article_510
+[ID 19/125] 116       VQ=correct      CoT=None fic=fic_article_116
+[ID 20/125] 1984      VQ=abstain      CoT=None fic=fic_article_1984
+[ID 21/125] 1796      VQ=abstain      CoT=None fic=fic_article_1796
+[ID 22/125] 1050      VQ=silent_wrong CoT=None fic=fic_article_1050
+[ID 23/125] 1644      VQ=silent_wrong CoT=None fic=fic_article_2452
+[ID 24/125] 327       VQ=correct      CoT=None fic=fic_article_327
+[ID 25/125] 2334      VQ=correct      CoT=None fic=fic_article_2334
+[ID 26/125] 1922      VQ=correct      CoT=None fic=fic_article_1922
+[ID 27/125] 138       VQ=abstain      CoT=None fic=None
+[ID 28/125] 2456      VQ=correct      CoT=None fic=fic_article_2456
+[ID 29/125] 1666      VQ=correct      CoT=None fic=fic_article_1666
+[ID 30/125] 955       VQ=correct      CoT=None fic=fic_article_955
+[ID 31/125] 2735      VQ=correct      CoT=None fic=fic_article_2735
+[ID 32/125] 701       VQ=correct      CoT=None fic=fic_article_701
+[ID 33/125] 233       VQ=silent_wrong CoT=None fic=fic_article_233
+[ID 34/125] 2330      VQ=abstain      CoT=None fic=fic_article_1217
+[ID 35/125] 1610      VQ=correct      CoT=None fic=fic_article_1610
+[ID 36/125] 2953      VQ=correct      CoT=None fic=fic_article_2953
+[ID 37/125] 51        VQ=correct      CoT=None fic=fic_article_51
+[ID 38/125] 1064      VQ=correct      CoT=None fic=fic_article_1064
+[ID 39/125] 72        VQ=correct      CoT=None fic=fic_article_72
+[ID 40/125] 716       VQ=correct      CoT=None fic=fic_article_716
+[ID 41/125] 1558      VQ=correct      CoT=None fic=fic_article_1558
+[ID 42/125] 722       VQ=correct      CoT=None fic=fic_article_722
+[ID 43/125] 2311      VQ=correct      CoT=None fic=fic_article_2311
+[ID 44/125] 1167      VQ=correct      CoT=None fic=fic_article_1167
+[ID 45/125] 737       VQ=correct      CoT=None fic=fic_article_737
+[ID 46/125] 1432      VQ=silent_wrong CoT=None fic=fic_article_1432
+[ID 47/125] 2994      VQ=correct      CoT=None fic=fic_article_2994
+[ID 48/125] 1885      VQ=correct      CoT=None fic=fic_article_1885
+[ID 49/125] 322       VQ=correct      CoT=None fic=fic_article_322
+[ID 50/125] 1613      VQ=abstain      CoT=None fic=fic_article_1613
+[ID 51/125] 561       VQ=abstain      CoT=None fic=fic_article_1644
+[ID 52/125] 2287      VQ=correct      CoT=None fic=fic_article_2287
+[ID 53/125] 1855      VQ=correct      CoT=None fic=fic_article_1855
+[ID 54/125] 500       VQ=silent_wrong CoT=None fic=fic_article_500
+[ID 55/125] 1091      VQ=correct      CoT=None fic=fic_article_1091
+[ID 56/125] 2750      VQ=correct      CoT=None fic=fic_article_2750
+[ID 57/125] 633       VQ=correct      CoT=None fic=fic_article_633
+[ID 58/125] 2182      VQ=correct      CoT=None fic=fic_article_2182
+[ID 59/125] 1243      VQ=correct      CoT=None fic=fic_article_1243
+[ID 60/125] 3041      VQ=correct      CoT=None fic=fic_article_3041
+[ID 61/125] 1898      VQ=correct      CoT=None fic=fic_article_1898
+[ID 62/125] 92        VQ=correct      CoT=None fic=fic_article_92
+[ID 63/125] 1396      VQ=correct      CoT=None fic=fic_article_1396
+[ID 64/125] 2870      VQ=abstain      CoT=None fic=fic_article_2870
+[ID 65/125] 999       VQ=correct      CoT=None fic=fic_article_999
+[ID 66/125] 514       VQ=correct      CoT=None fic=fic_article_514
+[ID 67/125] 1441      VQ=correct      CoT=None fic=fic_article_1441
+[ID 68/125] 2457      VQ=correct      CoT=None fic=fic_article_2457
+[ID 69/125] 1959      VQ=correct      CoT=None fic=fic_article_1959
+[ID 70/125] 1520      VQ=correct      CoT=None fic=fic_article_1520
+[ID 71/125] 3078      VQ=correct      CoT=None fic=fic_article_3078
+[ID 72/125] 711       VQ=correct      CoT=None fic=fic_article_711
+[ID 73/125] 793       VQ=correct      CoT=None fic=fic_article_793
+[ID 74/125] 137       VQ=silent_wrong CoT=None fic=fic_article_1217
+[ID 75/125] 501       VQ=correct      CoT=None fic=fic_article_501
+[ID 76/125] 2281      VQ=correct      CoT=None fic=fic_article_2281
+[ID 77/125] 61        VQ=silent_wrong CoT=None fic=fic_article_61
+[ID 78/125] 2205      VQ=correct      CoT=None fic=fic_article_2205
+[ID 79/125] 190       VQ=silent_wrong CoT=None fic=fic_article_190
+[ID 80/125] 2316      VQ=abstain      CoT=None fic=fic_article_2316
+[ID 81/125] 281       VQ=correct      CoT=None fic=fic_article_281
+[ID 82/125] 313       VQ=correct      CoT=None fic=fic_article_313
+[ID 83/125] 1336      VQ=correct      CoT=None fic=fic_article_1336
+[ID 84/125] 1152      VQ=correct      CoT=None fic=fic_article_1152
+[ID 85/125] 925       VQ=silent_wrong CoT=None fic=fic_article_925
+[ID 86/125] 2164      VQ=correct      CoT=None fic=fic_article_2164
+[ID 87/125] 2331      VQ=silent_wrong CoT=None fic=fic_article_2331
+[ID 88/125] 961       VQ=correct      CoT=None fic=fic_article_961
+[ID 89/125] 1860      VQ=correct      CoT=None fic=fic_article_1860
+[ID 90/125] 2208      VQ=silent_wrong CoT=None fic=fic_article_2208
+[ID 91/125] 1063      VQ=correct      CoT=None fic=fic_article_1063
+[ID 92/125] 678       VQ=correct      CoT=None fic=fic_article_678
+[ID 93/125] 2302      VQ=correct      CoT=None fic=fic_article_2302
+[ID 94/125] 301       VQ=silent_wrong CoT=None fic=fic_article_301
+[ID 95/125] 334       VQ=correct      CoT=None fic=fic_article_334
+[ID 96/125] 2452      VQ=abstain      CoT=None fic=fic_article_1644
+[ID 97/125] 91        VQ=abstain      CoT=None fic=fic_article_91
+[ID 98/125] 2286      VQ=correct      CoT=None fic=fic_article_2286
+[ID 99/125] 2494      VQ=silent_wrong CoT=None fic=fic_article_2494
+[ID 100/125] 2273      VQ=correct      CoT=None fic=fic_article_2273
+[ID 101/125] 611       VQ=correct      CoT=None fic=fic_article_611
+[ID 102/125] 84        VQ=correct      CoT=None fic=fic_article_84
+[ID 103/125] 2793      VQ=abstain      CoT=None fic=fic_article_2793
+[ID 104/125] 891       VQ=correct      CoT=None fic=fic_article_891
+[ID 105/125] 2145      VQ=correct      CoT=None fic=fic_article_2145
+[ID 106/125] 520       VQ=correct      CoT=None fic=fic_article_520
+[ID 107/125] 626       VQ=correct      CoT=None fic=fic_article_626
+[ID 108/125] 1744      VQ=correct      CoT=None fic=fic_article_1744
+[ID 109/125] 1217      VQ=silent_wrong CoT=None fic=fic_article_1217
+[ID 110/125] 2419      VQ=silent_wrong CoT=None fic=fic_article_2419
+[ID 111/125] 3060      VQ=abstain      CoT=None fic=None
+[ID 112/125] 1987      VQ=correct      CoT=None fic=fic_article_1987
+[ID 113/125] 2566      VQ=silent_wrong CoT=None fic=fic_article_2566
+[ID 114/125] 1032      VQ=correct      CoT=None fic=fic_article_3060
+[ID 115/125] 730       VQ=silent_wrong CoT=None fic=fic_article_730
+[ID 116/125] 2749      VQ=correct      CoT=None fic=fic_article_2749
+[ID 117/125] 886       VQ=correct      CoT=None fic=fic_article_886
+[ID 118/125] 2342      VQ=silent_wrong CoT=None fic=fic_article_2342
+[ID 119/125] 1904      VQ=correct      CoT=None fic=fic_article_1904
+[ID 120/125] 2245      VQ=correct      CoT=None fic=fic_article_2245
+[ID 121/125] 1097      VQ=correct      CoT=None fic=fic_article_1097
+[ID 122/125] 1372      VQ=correct      CoT=None fic=fic_article_1372
+[ID 123/125] 2448      VQ=correct      CoT=None fic=fic_article_2448
+[ID 124/125] 2532      VQ=correct      CoT=None fic=fic_article_2532
+[ID 125/125] 3067      VQ=correct      CoT=None fic=fic_article_3067
+
+=== SUMMARY ===
+{
+  "VQ": {
+    "OOD": {
+      "abstain": 101,
+      "correct": 19,
+      "silent_wrong": 5,
+      "n": 125,
+      "abstain_rate": 0.808,
+      "silent_wrong_rate": 0.04,
+      "force_fit_correct_rate": 0.152
+    },
+    "ID": {
+      "abstain": 14,
+      "correct": 89,
+      "silent_wrong": 22,
+      "n": 125,
+      "accuracy": 0.712,
+      "silent_wrong_rate": 0.176,
+      "abstain_rate": 0.112
+    }
+  },
+  "CoT_baseline": null
+}
+results: verifiquant/data/runs/libsweep_top4/results_50/ood_results_e15_top4_lib50.jsonl
+summary: verifiquant/data/runs/libsweep_top4/results_50/ood_summary_e15_top4_lib50.json

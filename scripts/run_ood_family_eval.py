@@ -15,10 +15,17 @@ conjure a missing card. Config is recorded so a later K-variation is a cheap re-
 Usage:
   PYTHONPATH=. GEMINI_API_KEY=… python3 scripts/run_ood_family_eval.py \
       --limit-ood 60 --limit-id 20 --seed 0 --out-dir verifiquant/data/runs/ood_eval
+
+Camera-ready reruns (E13, E15) add ``--top-k 4`` (the July runs used the default 3),
+``--out-name``/``--resume`` and an API guard (scripts/api_guard.py): API-level failures
+are retried and, if they persist, stop the run (exit 3) instead of being recorded as an
+abstention. Every other exception is still recorded as an error, as before.
 """
 from __future__ import annotations
-import argparse, json, os, random, sqlite3, time
+import argparse, json, os, random, sqlite3, sys, time
 from datetime import datetime
+
+from api_guard import EXIT_API_EXHAUSTED, ApiExhausted, client_with_timeout, diagnose_with_api_retry
 
 from verifiquant.card_store import SQLAlchemyArtifactStore  # noqa: F401 (import sanity)
 from verifiquant.pipeline.run_error_classification_pipeline import (
@@ -101,6 +108,9 @@ def main():
     ap.add_argument("--with-baseline", action="store_true", default=True,
                     help="also run a CoT single-shot baseline on the same questions")
     ap.add_argument("--no-baseline", dest="with_baseline", action="store_false")
+    ap.add_argument("--out-name", default="", help="fixed file stem instead of a timestamp")
+    ap.add_argument("--resume", action="store_true", help="skip case_ids already in --out-name")
+    ap.add_argument("--http-timeout-s", type=int, default=120)
     args = ap.parse_args()
 
     lib = {r[0].replace("fic_article_", "")
@@ -115,7 +125,7 @@ def main():
     ood = ood[: args.limit_ood]
     idd = idd[: args.limit_id]
 
-    client = create_genai_client_from_env()
+    client = client_with_timeout(args.http_timeout_s)
     api = ErrorClassificationAPI.from_db(
         db_url=f"sqlite:///{args.lib_db}", client=client,
         selector_model=args.model, extractor_model=args.model, judge_model=args.model,
@@ -123,22 +133,32 @@ def main():
     )
 
     os.makedirs(args.out_dir, exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    ts = args.out_name or datetime.now().strftime("%Y%m%d_%H%M%S")
     out_jsonl = os.path.join(args.out_dir, f"ood_results_{ts}.jsonl")
     out_summary = os.path.join(args.out_dir, f"ood_summary_{ts}.json")
+    done = set()
+    if args.resume and os.path.exists(out_jsonl):
+        done = {json.loads(l)["case_id"] for l in open(out_jsonl) if l.strip()}
 
     blank = lambda: {"abstain": 0, "correct": 0, "silent_wrong": 0, "n": 0}
     counts = {"OOD": blank(), "ID": blank()}
     bcounts = {"OOD": blank(), "ID": blank()}  # CoT baseline
     t0 = time.time()
-    with open(out_jsonl, "w") as fo:
+    with open(out_jsonl, "a" if args.resume else "w") as fo:
         for split, items in (("OOD", ood), ("ID", idd)):
             for i, q in enumerate(items, 1):
                 row = {"case_id": q.get("question_id") or fam(q),
                        "question": q.get("question", ""), "context": q.get("context", "")}
+                if row["case_id"] in done:
+                    continue
                 gold = q.get("ground_truth")
                 try:
-                    rep = api.diagnose_row(row, top_k=args.top_k, debug_sanity=False)
+                    rep = diagnose_with_api_retry(
+                        lambda: api.diagnose_row(row, top_k=args.top_k, debug_sanity=False),
+                        label=f"{split}/{row['case_id']}")
+                except ApiExhausted as exc:
+                    print(f"API_EXHAUSTED {exc}", flush=True)
+                    sys.exit(EXIT_API_EXHAUSTED)
                 except Exception as exc:
                     rep = {"status": "error", "diagnostic_type": "Unknown", "message": str(exc)}
                 verdict = classify(rep, gold)
@@ -146,7 +166,7 @@ def main():
                 counts[split]["n"] += 1
 
                 rec = {
-                    "split": split, "family": fam(q), "title": q.get("article_title"),
+                    "case_id": row["case_id"], "split": split, "family": fam(q), "title": q.get("article_title"),
                     "gold": gold, "verdict": verdict,
                     "status": rep.get("status"), "diagnostic_type": rep.get("diagnostic_type"),
                     "chosen_fic": rep.get("fic_id"), "output_value": rep.get("output_value"),
@@ -168,6 +188,20 @@ def main():
                 fo.flush()  # incremental so long runs are monitorable / resumable-by-inspection
                 print(f"[{split} {i}/{len(items)}] {fam(q):9} VQ={verdict:12} "
                       f"CoT={bverdict} fic={rep.get('fic_id')}")
+
+    # Recount from the file so a resumed run summarises every row, not only this session's.
+    counts = {"OOD": blank(), "ID": blank()}
+    bcounts = {"OOD": blank(), "ID": blank()}
+    for line in open(out_jsonl):
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        counts[r["split"]][r["verdict"]] += 1
+        counts[r["split"]]["n"] += 1
+        if args.with_baseline and "baseline_verdict" in r:
+            if r["baseline_verdict"] in bcounts[r["split"]]:
+                bcounts[r["split"]][r["baseline_verdict"]] += 1
+            bcounts[r["split"]]["n"] += 1
 
     def rate(c, split, k):
         n = c[split]["n"] or 1
