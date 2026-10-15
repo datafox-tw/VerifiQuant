@@ -21,9 +21,17 @@ Metrics on a mixed set of N = |clean| + |traps| items, per system:
 
 Because the clean:trap ratio is a modelling choice, we emit several variants and
 also a ratio-free "safety vs utility" view (clean coverage/sel-acc vs trap FNAR).
+
+``--vq july`` (default) uses the July VQ trap run and writes mixed_risk_coverage.json
+(the submitted Figure 3). ``--vq top4x3`` uses the mean of the three 2026-10-14
+top-4 reruns and writes mixed_risk_coverage_top4.json (camera-ready Figure 3).
+The safety-vs-utility R-PAL+ point reads the 250Q prompted runs, as the paper states;
+the JSON had been patched to those values by hand while this script still read the
+50Q pilot runs.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import statistics
 import sys
@@ -41,8 +49,17 @@ from analyze_governance_eval import (  # noqa: E402
 
 BASE = ROOT / "verifiquant/data/runs"
 G = BASE / "governance_confirmatory"
-OUT_DIR = Path(sys.argv[1]) if len(sys.argv) > 1 else (ROOT / "verifiquant/data/runs/mixed_risk_coverage")
+_ap = argparse.ArgumentParser()
+_ap.add_argument("out_dir", nargs="?", type=Path, default=ROOT / "verifiquant/data/runs/mixed_risk_coverage")
+_ap.add_argument("--vq", choices=("july", "top4x3"), default="july")
+ARGS = _ap.parse_args()
+OUT_DIR = ARGS.out_dir
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+G1014 = BASE / "governance_confirmatory_1014"
+VQ_TRAP_FILES = ([G / "vq_k1_traps.jsonl"] if ARGS.vq == "july"
+                 else [G1014 / f"vq_k1_top4_run{i}.jsonl" for i in (1, 2, 3)])
+VQ_FNAR_EXPECTED = 0.1125 if ARGS.vq == "july" else 25 / 240  # 10 + 8 + 7 unsafe over 3 x 80
+OUT_NAME = "mixed_risk_coverage.json" if ARGS.vq == "july" else "mixed_risk_coverage_top4.json"
 
 
 def approx(a: float, b: float, tol: float = 5e-4) -> bool:
@@ -59,7 +76,8 @@ def unsafe_flags(rows, normalizer):
     return {d["case_id"]: int(d["unsafe_numeric"]) for d in scored["details"]}
 
 
-vq_unsafe = unsafe_flags(load_jsonl(G / "vq_k1_traps.jsonl"), normalize_vq)
+_vq_runs = [unsafe_flags(load_jsonl(p), normalize_vq) for p in VQ_TRAP_FILES]
+vq_unsafe = {tid: statistics.mean(r[tid] for r in _vq_runs) for tid in trap_ids}
 plain_unsafe = unsafe_flags(load_jsonl(G / "conf_plain_run1.jsonl"), normalize_rpal)
 prompted_runs_unsafe = [
     unsafe_flags(load_jsonl(G / f"conf_prompted_run{i}.jsonl"), normalize_rpal) for i in (1, 2, 3)
@@ -72,7 +90,7 @@ def fnar(flags):
 
 
 # validate against confirmatory_summary.json
-assert approx(fnar(vq_unsafe), 0.1125), fnar(vq_unsafe)
+assert approx(fnar(vq_unsafe), VQ_FNAR_EXPECTED), fnar(vq_unsafe)
 assert approx(fnar(plain_unsafe), 0.4875), fnar(plain_unsafe)
 assert approx(fnar(prompted_unsafe_mean), 0.275), fnar(prompted_unsafe_mean)
 
@@ -88,6 +106,11 @@ plain_clean = clean_labels_from_rpal(
 )
 prompted_clean_runs = [
     clean_labels_from_rpal(load_jsonl(BASE / f"governance_eval/gov_run{i}_prompted_clean.jsonl"),
+                           questions, use_stored_verdict=False)
+    for i in (1, 2, 3)
+]
+prompted_clean250_runs = [
+    clean_labels_from_rpal(load_jsonl(BASE / f"governance_eval/prompted_clean250_run{i}.jsonl"),
                            questions, use_stored_verdict=False)
     for i in (1, 2, 3)
 ]
@@ -171,13 +194,15 @@ common = {
 su = {
     "vq_k1": safety_utility(vq_clean, vq_unsafe),
     "rpal_plain": safety_utility(plain_clean, plain_unsafe),
-    "rpal_prompted": {k: statistics.mean(safety_utility(prompted_clean_runs[i], prompted_runs_unsafe[i])[k]
+    "rpal_prompted": {k: statistics.mean(safety_utility(prompted_clean250_runs[i], prompted_runs_unsafe[i])[k]
                                          for i in range(3))
                       for k in ("clean_coverage", "clean_selective_accuracy", "clean_accuracy", "trap_fnar")}
-                     | {"n_clean": 50, "note": "3-run mean"},
+                     | {"n_clean": 250,
+                        "note": "clean = 3-run mean on the same 250Q set as plain R-PAL and VQ; traps = 3-run mean"},
 }
 
 report = {
+    "vq_trap_source": [str(p.relative_to(ROOT)) for p in VQ_TRAP_FILES],
     "distribution": "clean 250Q + 80 F/E/I/N traps (no valid numeric answer)",
     "trap_fnar_validated": {"vq_k1": fnar(vq_unsafe), "rpal_plain": fnar(plain_unsafe),
                             "rpal_prompted_mean": fnar(prompted_unsafe_mean)},
@@ -187,7 +212,7 @@ report = {
     "variant2_common_subset": common,
     "variant3_safety_vs_utility": su,
 }
-(OUT_DIR / "mixed_risk_coverage.json").write_text(
+(OUT_DIR / OUT_NAME).write_text(
     json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 # ---------------------------------------------------------------- console
@@ -205,4 +230,4 @@ for k in ("vq_k1", "rpal_plain", "rpal_prompted"):
     s = su[k]
     print(f"  {k:16s} clean_cov={s['clean_coverage']:.3f}  clean_selacc={s['clean_selective_accuracy']:.3f}  "
           f"trap_FNAR={s['trap_fnar']:.3f}")
-print(f"\nwrote {OUT_DIR / 'mixed_risk_coverage.json'}")
+print(f"\nwrote {OUT_DIR / OUT_NAME}")

@@ -1,0 +1,49 @@
+  ↳ Turn 1: NONE
+[vq run1] I-test-1422 t1=I_HARD named=True t2=None out=7.971085621346904 correct=True
+  ↳ Turn 1: NONE
+[vq run1] I-test-1668 t1=I_HARD named=True t2=None out=300.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] I-test-1879 t1=M named=True t2=None out=0.0 correct=True
+[vq run1] I-test-1952 t1=READY NUM named=False t2=None out=None correct=None
+  ↳ Turn 1: F
+[vq run1] I-test-1980 t1=M named=True t2=F out=None correct=None
+  ↳ Turn 1: NONE
+[vq run1] I-test-2163 t1=I_HARD named=True t2=None out=6250.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1023 t1=F named=True t2=None out=8500.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1028 t1=F named=True t2=None out=2.272727272727273 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1036 t1=F named=True t2=None out=127.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1086 t1=F named=True t2=None out=15.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1092 t1=F named=True t2=None out=1805194.805194805 correct=True
+  ↳ Turn 1: I_HARD
+[vq run1] F-test-1035 t1=F named=True t2=I_HARD out=None correct=None
+[vq run1] F-test-1263 t1=I_SOFT NUM named=True t2=None out=None correct=None
+  ↳ Turn 1: F
+[vq run1] F-test-1271 t1=F named=False t2=F out=None correct=None
+[vq run1] F-test-1559 t1=I_SOFT NUM named=False t2=None out=None correct=None
+  ↳ Turn 1: NONE
+[vq run1] F-test-1591 t1=F named=True t2=None out=2.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1122 t1=F named=True t2=None out=5.2631578947368425 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1561 t1=F named=True t2=None out=850000.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1020 t1=F named=True t2=None out=158.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1022 t1=F named=True t2=None out=504.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1039 t1=F named=True t2=None out=700.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1043 t1=F named=True t2=None out=1800.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1082 t1=F named=True t2=None out=4.1666666666666705 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1064 t1=F named=True t2=None out=1.02 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1067 t1=F named=True t2=None out=25.0 correct=True
+  ↳ Turn 1: NONE
+[vq run1] F-test-1080 t1=F named=True t2=None out=10.0 correct=True

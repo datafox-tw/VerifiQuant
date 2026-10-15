@@ -12,10 +12,18 @@ Outputs:
   - per-operator FNAR (F/E/I/N) and the I_HARD vs I_SOFT split
   - base-question-clustered bootstrap 95% CI on the (prompted - VQ) FNAR gap
   - go/no-go vs H1: gap >= 10 points AND CI lower bound > 0
+
+``--vq july`` (default) scores the July VQ run ``vq_k1_traps.jsonl`` and writes
+``confirmatory_summary.json``, which the submitted paper cites. That run used the
+CLI default top-3 although the paper states top-4 for all systems, so
+``--vq top4x3`` scores the three 2026-10-14 top-4 reruns instead (VQ = 3-run mean,
+like R-PAL+) and writes ``governance_confirmatory_1014/confirmatory_summary_top4.json``
+for the camera-ready.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 import statistics
@@ -33,6 +41,12 @@ from scripts.analyze_governance_eval import (  # noqa: E402
 )
 
 G = ROOT / "verifiquant/data/runs/governance_confirmatory"
+G1014 = ROOT / "verifiquant/data/runs/governance_confirmatory_1014"
+VQ_SOURCES = {
+    "july": ([G / "vq_k1_traps.jsonl"], G / "confirmatory_summary.json"),
+    "top4x3": ([G1014 / f"vq_k1_top4_run{i}.jsonl" for i in (1, 2, 3)],
+               G1014 / "confirmatory_summary_top4.json"),
+}
 
 
 def _flags_by_trap(traps: Sequence[Mapping[str, Any]], rows, normalizer) -> Dict[str, int]:
@@ -46,13 +60,23 @@ def _fnar(flags: Mapping[str, float], ids: Sequence[str]) -> float:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--vq", choices=sorted(VQ_SOURCES), default="july")
+    args = parser.parse_args()
+    vq_paths, out = VQ_SOURCES[args.vq]
+
     traps = load_jsonl(G / "trap_set.jsonl")
     trap_ids = [str(t["trap_id"]) for t in traps]
     base_of = {str(t["trap_id"]): t["base_question_id"] for t in traps}
     expdt_of = {str(t["trap_id"]): t["expected_diagnostic"] for t in traps}
     op_of = {str(t["trap_id"]): t["operator"] for t in traps}
 
-    vq_flags, vq_scored = _flags_by_trap(traps, load_jsonl(G / "vq_k1_traps.jsonl"), normalize_vq)
+    vq_runs, vq_scored_runs = [], []
+    for path in vq_paths:
+        f, s = _flags_by_trap(traps, load_jsonl(path), normalize_vq)
+        vq_runs.append(f)
+        vq_scored_runs.append(s)
+    vq_flags = {tid: statistics.mean(r[tid] for r in vq_runs) for tid in trap_ids}
     plain_flags, plain_scored = _flags_by_trap(traps, load_jsonl(G / "conf_plain_run1.jsonl"), normalize_rpal)
     prompted_runs = []
     prompted_scored = []
@@ -79,9 +103,13 @@ def main() -> None:
 
     overall = {
         "vq_k1": {
+            "source": [str(p.relative_to(ROOT)) for p in vq_paths],
             "fnar": round(_fnar(vq_flags, trap_ids), 4),
-            "diagnostic_accuracy": round(vq_scored["overall"]["diagnostic_accuracy"], 4),
-            "action_accuracy": round(vq_scored["overall"]["action_accuracy"], 4),
+            "fnar_per_run": [round(_fnar(r, trap_ids), 4) for r in vq_runs],
+            "diagnostic_accuracy": round(
+                statistics.mean(s["overall"]["diagnostic_accuracy"] for s in vq_scored_runs), 4),
+            "action_accuracy": round(
+                statistics.mean(s["overall"]["action_accuracy"] for s in vq_scored_runs), 4),
         },
         "rpal_plain": {"fnar": round(_fnar(plain_flags, trap_ids), 4)},
         "rpal_prompted_mean": {
@@ -96,6 +124,13 @@ def main() -> None:
     per_operator = {"vq_k1": op_fnar(vq_flags), "rpal_plain": op_fnar(plain_flags),
                     "rpal_prompted_mean": op_fnar(prompted_mean)}
     i_split = {"vq_k1": isplit(vq_flags), "rpal_prompted_mean": isplit(prompted_mean)}
+
+    def op_rates(scored_runs):
+        return {op: {key: round(statistics.mean(s["per_operator"][op][key] for s in scored_runs), 4)
+                     for key in ("diagnostic_accuracy", "action_accuracy")}
+                for op in ("F", "E", "I", "N")}
+    per_operator_rates = {"vq_k1": op_rates(vq_scored_runs),
+                          "rpal_prompted_mean": op_rates(prompted_scored)}
 
     # ---- base-clustered bootstrap on (prompted_mean - vq) FNAR gap ----
     clusters = defaultdict(list)
@@ -123,13 +158,13 @@ def main() -> None:
         "overall": overall,
         "per_operator_fnar": per_operator,
         "i_hard_soft_fnar": i_split,
+        "per_operator_diag_action": per_operator_rates,
         "prompted_minus_vq_fnar_gap": {
             "point": round(point_gap, 4),
             "ci95_base_clustered": [round(lo, 4), round(hi, 4)],
         },
         "h1": {"gap_ge_10pts": h1_gap_ok, "ci_lower_gt_0": h1_ci_ok, "verdict": verdict},
     }
-    out = G / "confirmatory_summary.json"
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     # console

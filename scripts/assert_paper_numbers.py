@@ -70,6 +70,26 @@ MACRO = {
 }
 
 
+# Which VQ trap run the paper cites. The submitted paper used one July run made at the
+# CLI default top-3; the camera-ready drafts cite the mean of three top-4 reruns
+# (2026-10-14) and name those files in a comment next to \govVQfnar.
+VQ_TOP4 = "vq_k1_top4_run" in tex
+GOV_SUMMARY = (RUNS / "governance_confirmatory_1014/confirmatory_summary_top4.json" if VQ_TOP4
+               else RUNS / "governance_confirmatory/confirmatory_summary.json")
+VQ_TRAP_FILES = ([RUNS / f"governance_confirmatory_1014/vq_k1_top4_run{i}.jsonl" for i in (1, 2, 3)]
+                 if VQ_TOP4 else [RUNS / "governance_confirmatory/vq_k1_traps.jsonl"])
+
+
+def text_check(label: str, text: str) -> None:
+    """Assert that a sentence carrying a re-derived number is present verbatim."""
+    global CHECKS
+    CHECKS += 1
+    ok = text in tex
+    print(f"  [TXT] {'ok  ' if ok else 'FAIL'} {label:<52} \"{text[:60]}\"")
+    if not ok:
+        FAILURES.append(f"{label}: phrase not found: {text}")
+
+
 def macro_pct(name: str) -> float:
     """Read a \\newcommand-defined percentage macro as a float."""
     raw = MACRO[name].replace(r"\%", "").replace("%", "").strip()
@@ -168,7 +188,8 @@ print()
 print("=" * 78)
 print("Table 2 Panel B + Table 3 — governance traps (80Q)")
 print("=" * 78)
-g = load(RUNS / "governance_confirmatory/confirmatory_summary.json")
+g = load(GOV_SUMMARY)
+print(f"  VQ trap source: {', '.join(p.name for p in VQ_TRAP_FILES)}")
 o = g["overall"]
 check("VQ FNAR", 100 * o["vq_k1"]["fnar"], macro_pct("govVQfnar"))
 check("VQ exact diagnostic", 100 * o["vq_k1"]["diagnostic_accuracy"], macro_pct("govVQdiag"))
@@ -192,6 +213,16 @@ for op, anchor in OP_ANCHOR.items():
           tex_table_cell("tab:v2trapop", anchor, 2))
     check(f"Table3 {op} FNAR VQ", 100 * g["per_operator_fnar"]["vq_k1"][op],
           tex_table_cell("tab:v2trapop", anchor, 3))
+
+# VQ Diag / Act and R-PAL+ Diag columns of Table 3 (whole percent)
+pda = g["per_operator_diag_action"]
+for op, anchor in OP_ANCHOR.items():
+    check(f"Table3 {op} VQ Diag", 100 * pda["vq_k1"][op]["diagnostic_accuracy"],
+          tex_table_cell("tab:v2trapop", anchor, 4), nd=0)
+    check(f"Table3 {op} VQ Act", 100 * pda["vq_k1"][op]["action_accuracy"],
+          tex_table_cell("tab:v2trapop", anchor, 5), nd=0)
+    check(f"Table3 {op} R-PAL+ Diag", 100 * pda["rpal_prompted_mean"][op]["diagnostic_accuracy"],
+          tex_table_cell("tab:v2trapop", anchor, 6), nd=0)
 
 # the Table 3 per-operator FNAR columns must average to the Overall row
 for col, key in [(1, "rpal_plain"), (2, "rpal_prompted_mean"), (3, "vq_k1")]:
@@ -411,6 +442,155 @@ for budget, anchor in [("K=1", r"$K{=}1$ (autonomous)"), ("K=2", r"$K{=}2$ &")]:
 k3 = M["vq_k3"]
 check("Table6 K=3: acc + SWR == coverage",
       100 * (k3["accuracy"] + k3["swr"]), 100 * k3["coverage"], kind="INT")
+
+# CoT + oracle reference row. The submitted version has no such row, so the block runs
+# only on a draft that carries it. Counts use the CoT single-shot convention above, and
+# the prose counts beside the table are rebuilt from the two runs' own turn histories.
+if "CoT + oracle" in table_body("tab:v2kabl"):
+    coto = [r["cot_self_improve"] for r in rows(RUNS / "paper_v2_250/results/cot_basic_oracle_flash/output.jsonl")]
+    c = sum(1 for r in coto if r.get("final_is_correct"))
+    ab = sum(1 for r in coto if not r.get("final_is_correct")
+             and (r.get("final_answer") is None or not str(r.get("final_answer")).strip()))
+    sw = len(coto) - c - ab
+    check("Table6 CoT+oracle accuracy", 100 * c / len(coto), tex_table_cell("tab:v2kabl", "CoT + oracle", 1))
+    check("Table6 CoT+oracle SWR", 100 * sw / len(coto), tex_table_cell("tab:v2kabl", "CoT + oracle", 2))
+    check("Table6 CoT+oracle coverage", 100 * (c + sw) / len(coto), tex_table_cell("tab:v2kabl", "CoT + oracle", 3))
+    check("Table6 CoT+oracle selective accuracy", 100 * c / (c + sw), tex_table_cell("tab:v2kabl", "CoT + oracle", 4))
+    check("Table6 CoT+oracle coverage == VQ K=3 coverage", 100 * (c + sw) / len(coto), 100 * k3["coverage"], kind="INT")
+
+    first_ok = [bool(r["history"][0].get("is_correct")) for r in coto]
+    rescued = sum(1 for r, ok in zip(coto, first_ok) if not ok and r.get("final_is_correct"))
+    broken = sum(1 for r, ok in zip(coto, first_ok) if ok and not r.get("final_is_correct"))
+    phrase = f"rescues {rescued} answers but breaks {broken} of the {sum(first_ok)}"
+    phrase_check(f"prose states {phrase!r}", phrase in tex, "present", "MISSING or stale")
+
+    # VerifiQuant side: a first-turn abstention is a structured non-answer. The three
+    # I_SOFT_MISMATCH re-entries are answered-but-wrong turns and are not abstentions.
+    vq_fg = [r["framework_guided"] for r in rows(RUNS / "paper_v2_250/results/vq_flash/output.jsonl")]
+    done = lambda f: f["final_status"] == "success" and bool(f["final_is_correct"])
+    abst = [f for f in vq_fg if f["history"][0].get("recorded_error") not in ("NONE", "I_SOFT_MISMATCH")]
+    right = [f for f in vq_fg if f["history"][0].get("recorded_error") == "NONE"
+             and f["history"][0]["diagnostic"].get("is_correct")]
+    phrase = f"converts {sum(done(f) for f in abst)} of the {len(abst)} first-turn abstentions"
+    phrase_check(f"prose states {phrase!r}", phrase in tex, "present", "MISSING or stale")
+    kept = sum(done(f) for f in right)
+    phrase = f"none of the {len(right)} answers" if kept == len(right) else f"{len(right) - kept} of the {len(right)} answers"
+    phrase_check(f"prose states {phrase!r}", phrase in tex, "present", "MISSING or stale")
+
+# ── camera-ready additions (skeleton v3, 2026-10-14) ─────────────────────────────
+# Numbers the nine-page version will print that the submitted paper does not. They are
+# recomputed from the artifacts and compared with the values frozen in
+# paper/skeleton_9p_zh.md, so this block runs before the prose exists and does not read
+# the .tex. Once a number lands in the prose, add a phrase_check for it as well.
+print()
+print("Camera-ready additions (data side, independent of the .tex)")
+import csv
+
+MQ = RUNS / "messy_query_pilot"
+mq_gt = {r["id"]: r["label"] for r in rows(MQ / "ground_truth.jsonl")}
+mq_vq = {r["case_id"]: r for r in rows(MQ / "agreement/runs/vq_k1.jsonl")}
+q250 = {r["question_id"] for r in rows(RUNS / "paper_v2_250/questions_250.jsonl")}
+prov = load(MQ / "messy_pilot_provenance.json")
+check("CR human set: sources inside the 250", sum(p["source_id"] in q250 for p in prov), 0, nd=0)
+
+# Answerable items the system declined, and where they exited.
+answerable = [i for i, lab in mq_gt.items() if lab == "A"]
+declined = [i for i in answerable if mq_vq[i]["status"] != "success"]
+check("CR human set: answerable items", len(answerable), 34, nd=0)
+check("CR human set: answerable items declined", len(declined), 27, nd=0)
+check("CR human set: declined at N", sum(mq_vq[i]["diagnostic_type"] == "N" for i in declined), 24, nd=0)
+
+# Item-level attribution of those N refusals (scripts/attribute_messy_shortfalls.py).
+attr = [a for a in csv.DictReader(open(MQ / "shortfall_attribution.csv")) if a["vq_exit"] == "N"]
+present = [a for a in attr if a["verdict"] == "present"]
+absent = [a for a in attr if a["verdict"] == "absent"]
+ARITH = {"part / whole share", "ratio of two values", "absolute difference"}
+check("CR attribution: applicable card present", len(present), 7, nd=0)
+check("CR attribution: no applicable card", len(absent), 17, nd=0)
+check("CR attribution: absent, elementary arithmetic", sum(a["asked"] in ARITH for a in absent), 7, nd=0)
+check("CR attribution: absent, named formula", sum(a["asked"] not in ARITH for a in absent), 10, nd=0)
+check("CR attribution: present cards recovered at k=16",
+      sum(1 for a in present if a["depth_needed"] and int(a["depth_needed"]) <= 16), 1, nd=0)
+
+# Non-answer items: how many got no number, and how many of those exited at N.
+rco = [i for i, lab in mq_gt.items() if lab != "A"]
+no_number = [i for i in rco if mq_vq[i]["status"] != "success"]
+check("CR human set: non-answer items", len(rco), 46, nd=0)
+check("CR human set: non-answer items without a number", len(no_number), 42, nd=0)
+check("CR human set: ...of which exited at N", sum(mq_vq[i]["diagnostic_type"] == "N" for i in no_number), 28, nd=0)
+
+
+def from_selector(diag) -> bool:
+    return "abstain_n" in " ".join(diag.get("pipeline_logs") or [])
+
+
+# Every observed N refusal came from the LLM selector (answer to R2 on Figure 1).
+human_n = [r for r in mq_vq.values() if r["status"] != "success" and r["diagnostic_type"] == "N"]
+check("CR human set: N refusals", len(human_n), 52, nd=0)
+check("CR human set: N refusals from the LLM selector", sum(from_selector(r) for r in human_n), 52, nd=0)
+trap_n = [r["framework_guided"]["history"][0]["diagnostic"] for p in VQ_TRAP_FILES for r in rows(p)
+          if r["framework_guided"].get("final_diagnostic_type") == "N"]
+n_want = 47 if VQ_TOP4 else 15
+check("CR traps: N refusals (all runs)", len(trap_n), n_want, nd=0)
+check("CR traps: N refusals from the LLM selector", sum(from_selector(d) for d in trap_n), n_want, nd=0)
+
+# The FNAR gap split by operator (four classes, equal weight).
+po = g["per_operator_fnar"]
+if VQ_TOP4:
+    shares, total, nd_share = (("I", 14.6), ("E", 5.4), ("F", -2.5), ("N", -0.4)), 17.1, 1
+else:
+    shares, total, nd_share = (("I", 15.0), ("E", 5.0), ("F", -2.5), ("N", -1.25)), 16.25, 2
+for op, want in shares:
+    check(f"CR FNAR gap share, operator {op}", 100 * (po["rpal_prompted_mean"][op] - po["vq_k1"][op]) / 4,
+          want, nd=nd_share)
+check("CR FNAR gap, sum of the four shares",
+      sum(100 * (po["rpal_prompted_mean"][o] - po["vq_k1"][o]) / 4 for o in "FEIN"), total, nd=nd_share)
+
+if VQ_TOP4:
+    # Prose that carries the three-run numbers (E10, 2026-10-14).
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from analyze_governance_eval import normalize_vq, score_traps  # noqa: E402
+    traps = rows(RUNS / "governance_confirmatory/trap_set.jsonl")
+    i_wrong = [d for p in VQ_TRAP_FILES for d in score_traps(traps, rows(p), normalize_vq)["details"]
+               if d["operator"] == "I" and not d["diagnostic_correct"]]
+    n_ready = sum(d["got_diagnostic"] == "READY" for d in i_wrong)
+    n_neighbor = sum(d["got_diagnostic"] in {"M", "E", "F"} for d in i_wrong)
+    check("CR traps: wrong I exits over three runs", len(i_wrong), 23, nd=0)
+    check("CR traps: ...passing as ready", n_ready, 11, nd=0)
+    check("CR traps: ...stopping at M, E, or F", n_neighbor, 9, nd=0)
+    text_check("CR text: I-error profile",
+           "of its 23 wrong I exits over the three runs, 11 pass as ready and 9 stop at a neighboring gate")
+    text_check("CR text: N refusals on the traps", "all 47 on the traps over three runs")
+    text_check("CR text: integer gap", f"{round_half_up(100 * g['prompted_minus_vq_fnar_gap']['point'], 0):.0f}-point")
+    text_check("CR text: I-trap diagnostic", f"(I, ${round_half_up(100 * pda['vq_k1']['I']['diagnostic_accuracy'], 0):.0f}\\%$)")
+    text_check("CR text: N FNAR", f"N: ${round_half_up(100 * po['vq_k1']['N'], 1)}\\%$ vs.")
+    m = re.search(r"VerifiQuant loses ([0-9.]+) \(\\govVQdiag", tex)
+    if m:
+        check("CR text: VQ diagnosis-to-action drop", 100 * (o["vq_k1"]["diagnostic_accuracy"]
+              - o["vq_k1"]["action_accuracy"]), float(m.group(1)))
+
+# E1: the three answer-conditioned re-entries in the canonical K=3 run.
+vq3 = [r["framework_guided"] for r in rows(RUNS / "paper_v2_250/results/vq_flash/output.jsonl")]
+reentry = [f for f in vq3 if any(h.get("recorded_error") == "I_SOFT_MISMATCH" for h in f["history"])]
+rescued = sum(1 for f in reentry if f["final_status"] == "success" and f["final_is_correct"])
+check("CR K=3: answer-conditioned re-entries", len(reentry), 3, nd=0)
+check("CR K=3: ...that ended correct", rescued, 1, nd=0)
+k3_answered = sum(f["final_status"] == "success" for f in vq3)
+k3_correct = sum(1 for f in vq3 if f["final_status"] == "success" and f["final_is_correct"])
+check("CR K=3 accuracy without them", 100 * (k3_correct - rescued) / len(vq3), 93.2)
+check("CR K=3 SWR without them", 100 * (k3_answered - k3_correct + rescued) / len(vq3), 3.6)
+check("CR K=3 selective accuracy without them", 100 * (k3_correct - rescued) / k3_answered, 96.3)
+
+# E4: K=1 silent wrongs that carried an I_SOFT warning (the scorer counts them).
+first = [f["history"][0] for f in vq3]
+k1_wrong = [h["diagnostic"] for h in first
+            if h["diagnostic"].get("output_value") is not None
+            and (h["diagnostic"].get("status") == "success" or h.get("recorded_error") == "I_SOFT_MISMATCH")
+            and not h["diagnostic"].get("is_correct")]
+warned = [d for d in k1_wrong if d.get("has_i_soft") or d.get("soft_warnings")]
+check("CR K=1 silent wrongs", len(k1_wrong), 7, nd=0)
+check("CR K=1 silent wrongs carrying an I_SOFT warning", len(warned), 3, nd=0)
+check("CR K=1 SWR if warned numbers counted as flagged", 100 * (len(k1_wrong) - len(warned)) / len(vq3), 1.6)
 
 print()
 print("=" * 78)

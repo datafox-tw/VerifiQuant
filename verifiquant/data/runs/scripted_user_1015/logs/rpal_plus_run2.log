@@ -1,0 +1,26 @@
+[rpal_plus run2] I-test-1422 t1=N named=False t2=READY out=None correct=None
+[rpal_plus run2] I-test-1668 t1=READY NUM named=True t2=None out=None correct=None
+[rpal_plus run2] I-test-1879 t1=I_HARD named=True t2=READY out=0 correct=True
+[rpal_plus run2] I-test-1952 t1=READY NUM named=True t2=None out=None correct=None
+[rpal_plus run2] I-test-1980 t1=I_HARD named=True t2=READY out=7975.0 correct=True
+[rpal_plus run2] I-test-2163 t1=READY NUM named=False t2=None out=None correct=None
+[rpal_plus run2] F-test-1023 t1=F named=True t2=READY out=8500 correct=True
+[rpal_plus run2] F-test-1028 t1=F named=True t2=READY out=2.27 correct=True
+[rpal_plus run2] F-test-1036 t1=F named=True t2=READY out=127 correct=True
+[rpal_plus run2] F-test-1086 t1=F named=True t2=READY out=15.00% correct=True
+[rpal_plus run2] F-test-1092 t1=F named=True t2=I_HARD out=None correct=None
+[rpal_plus run2] F-test-1035 t1=F named=True t2=READY out=76.19 correct=True
+[rpal_plus run2] F-test-1263 t1=F named=False t2=READY out=-1500 correct=True
+[rpal_plus run2] F-test-1271 t1=F named=True t2=READY out=37500 correct=True
+[rpal_plus run2] F-test-1559 t1=F named=True t2=READY out=700 correct=True
+[rpal_plus run2] F-test-1591 t1=F named=True t2=READY out=2.0 correct=True
+[rpal_plus run2] F-test-1122 t1=F named=True t2=READY out=5.26 correct=True
+[rpal_plus run2] F-test-1561 t1=F named=True t2=READY out=850000 correct=True
+[rpal_plus run2] F-test-1020 t1=F named=True t2=READY out=158.0 correct=True
+[rpal_plus run2] F-test-1022 t1=F named=True t2=READY out=504.0 correct=True
+[rpal_plus run2] F-test-1039 t1=F named=True t2=READY out=700 correct=True
+[rpal_plus run2] F-test-1043 t1=F named=False t2=READY out=1800 correct=True
+[rpal_plus run2] F-test-1082 t1=F named=True t2=READY out=4.17% correct=True
+[rpal_plus run2] F-test-1064 t1=F named=True t2=READY out=1.02 correct=True
+[rpal_plus run2] F-test-1067 t1=F named=True t2=READY out=None correct=None
+[rpal_plus run2] F-test-1080 t1=F named=False t2=READY out=10.00% correct=True

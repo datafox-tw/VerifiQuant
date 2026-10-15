@@ -1,0 +1,94 @@
+[rpal_plus_pro_run2 1/80] E-test-1004 diag=E governance_intercept
+[rpal_plus_pro_run2 2/80] E-test-1006 diag=E governance_intercept
+[rpal_plus_pro_run2 3/80] E-test-1008 diag=E governance_intercept
+[rpal_plus_pro_run2 4/80] E-test-1032 diag=E governance_intercept
+[rpal_plus_pro_run2 5/80] E-test-1020 diag=E governance_intercept
+[rpal_plus_pro_run2 6/80] E-test-1022 diag=E governance_intercept
+[rpal_plus_pro_run2 7/80] E-test-1023 diag=E governance_intercept
+[rpal_plus_pro_run2 8/80] E-test-1026 diag=E governance_intercept
+[rpal_plus_pro_run2 9/80] E-test-1028 diag=E governance_intercept
+[rpal_plus_pro_run2 10/80] E-test-1036 diag=READY numeric
+[rpal_plus_pro_run2 11/80] E-test-1039 diag=E governance_intercept
+[rpal_plus_pro_run2 12/80] E-test-1043 diag=E governance_intercept
+[rpal_plus_pro_run2 13/80] E-test-1017 diag=E governance_intercept
+[rpal_plus_pro_run2 14/80] E-test-1034 diag=READY numeric
+[rpal_plus_pro_run2 15/80] E-test-1057 diag=E governance_intercept
+[rpal_plus_pro_run2 16/80] E-test-1062 diag=E governance_intercept
+[rpal_plus_pro_run2 17/80] E-test-1080 diag=READY numeric
+[rpal_plus_pro_run2 18/80] E-test-1128 diag=I_HARD governance_intercept
+[rpal_plus_pro_run2 19/80] E-test-1264 diag=E governance_intercept
+[rpal_plus_pro_run2 20/80] E-test-1648 diag=I_SOFT numeric
+[rpal_plus_pro_run2 21/80] I-test-1422 diag=I_HARD governance_intercept
+[rpal_plus_pro_run2 22/80] I-test-1668 diag=I_HARD governance_intercept
+[rpal_plus_pro_run2 23/80] I-test-1879 diag=I_HARD governance_intercept
+[rpal_plus_pro_run2 24/80] I-test-1952 diag=I_SOFT numeric
+[rpal_plus_pro_run2 25/80] I-test-1980 diag=F governance_intercept
+[rpal_plus_pro_run2 26/80] I-test-2163 diag=READY numeric
+[rpal_plus_pro_run2 27/80] I-test-1004 diag=I_HARD governance_intercept
+[rpal_plus_pro_run2 28/80] I-test-1007 diag=READY numeric
+[rpal_plus_pro_run2 29/80] I-test-1008 diag=READY numeric
+[rpal_plus_pro_run2 30/80] I-test-1014 diag=I_SOFT denylist
+[rpal_plus_pro_run2 31/80] I-test-1016 diag=READY numeric
+[rpal_plus_pro_run2 32/80] I-test-1017 diag=READY numeric
+[rpal_plus_pro_run2 33/80] I-test-1026 diag=I_SOFT numeric
+[rpal_plus_pro_run2 34/80] I-test-1032 diag=READY numeric
+[rpal_plus_pro_run2 35/80] I-test-1034 diag=READY numeric
+[rpal_plus_pro_run2 36/80] I-test-1037 diag=READY numeric
+[rpal_plus_pro_run2 37/80] I-test-1057 diag=READY numeric
+[rpal_plus_pro_run2 38/80] I-test-1062 diag=READY numeric
+[rpal_plus_pro_run2 39/80] I-test-1064 diag=READY numeric
+[rpal_plus_pro_run2 40/80] I-test-1067 diag=READY numeric
+[rpal_plus_pro_run2 41/80] F-test-1023 diag=F governance_intercept
+[rpal_plus_pro_run2 42/80] F-test-1028 diag=F governance_intercept
+[rpal_plus_pro_run2 43/80] F-test-1036 diag=F governance_intercept
+[rpal_plus_pro_run2 44/80] F-test-1086 diag=F governance_intercept
+[rpal_plus_pro_run2 45/80] F-test-1092 diag=F governance_intercept
+[rpal_plus_pro_run2 46/80] F-test-1035 diag=F governance_intercept
+[rpal_plus_pro_run2 47/80] F-test-1263 diag=F governance_intercept
+[rpal_plus_pro_run2 48/80] F-test-1271 diag=F governance_intercept
+[rpal_plus_pro_run2 49/80] F-test-1559 diag=F governance_intercept
+[rpal_plus_pro_run2 50/80] F-test-1591 diag=F governance_intercept
+[rpal_plus_pro_run2 51/80] F-test-1122 diag=F governance_intercept
+[rpal_plus_pro_run2 52/80] F-test-1561 diag=F governance_intercept
+[rpal_plus_pro_run2 53/80] F-test-1020 diag=F governance_intercept
+[rpal_plus_pro_run2 54/80] F-test-1022 diag=F governance_intercept
+[rpal_plus_pro_run2 55/80] F-test-1039 diag=F governance_intercept
+[rpal_plus_pro_run2 56/80] F-test-1043 diag=F governance_intercept
+[rpal_plus_pro_run2 57/80] F-test-1082 diag=F governance_intercept
+[rpal_plus_pro_run2 58/80] F-test-1064 diag=F governance_intercept
+[rpal_plus_pro_run2 59/80] F-test-1067 diag=F governance_intercept
+[rpal_plus_pro_run2 60/80] F-test-1080 diag=F governance_intercept
+[rpal_plus_pro_run2 61/80] N-test-1003 diag=M governance_intercept
+[rpal_plus_pro_run2 62/80] N-test-1006 diag=F governance_intercept
+[rpal_plus_pro_run2 63/80] N-test-1007 diag=N governance_intercept
+[rpal_plus_pro_run2 64/80] N-test-1035 diag=N governance_intercept
+[rpal_plus_pro_run2 65/80] N-test-1037 diag=M governance_intercept
+[rpal_plus_pro_run2 66/80] N-test-1070 diag=N governance_intercept
+[rpal_plus_pro_run2 67/80] N-test-1082 diag=N governance_intercept
+[rpal_plus_pro_run2 68/80] N-test-1086 diag=N governance_intercept
+[rpal_plus_pro_run2 69/80] N-test-1088 diag=N governance_intercept
+[rpal_plus_pro_run2 70/80] N-test-1092 diag=N governance_intercept
+[rpal_plus_pro_run2 71/80] N-test-1094 diag=N governance_intercept
+[rpal_plus_pro_run2 72/80] N-test-1102 diag=N governance_intercept
+[rpal_plus_pro_run2 73/80] N-test-1105 diag=N governance_intercept
+[rpal_plus_pro_run2 74/80] N-test-1108 diag=N governance_intercept
+[rpal_plus_pro_run2 75/80] N-test-1014 diag=N governance_intercept
+[rpal_plus_pro_run2 76/80] N-test-1016 diag=N governance_intercept
+[rpal_plus_pro_run2 77/80] N-test-1075 diag=N governance_intercept
+[rpal_plus_pro_run2 78/80] N-test-1097 diag=N governance_intercept
+[rpal_plus_pro_run2 79/80] N-test-1100 diag=N governance_intercept
+[rpal_plus_pro_run2 80/80] N-test-1122 diag=N governance_intercept
+{
+  "protocol": "governance_matched_rpal_v1",
+  "run_name": "rpal_plus_pro_run2",
+  "mode": "prompted",
+  "n": 80,
+  "complete": true,
+  "raw_outcomes": {
+    "governance_intercept": 61,
+    "numeric": 18,
+    "denylist": 1
+  },
+  "elapsed_s": 1234.1,
+  "note": "Not a scored result; use scripts/analyze_governance_eval.py"
+}

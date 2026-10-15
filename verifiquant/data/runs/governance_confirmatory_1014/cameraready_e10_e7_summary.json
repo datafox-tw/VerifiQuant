@@ -1,0 +1,815 @@
+{
+  "n_traps": 80,
+  "systems": {
+    "vq_july_top3": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory/vq_k1_traps.jsonl"
+      ],
+      "missing_rows": [
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.1125,
+        "fnar_per_run": [
+          0.1125
+        ]
+      },
+      "diag_acc_mean": 0.75,
+      "action_acc_mean": 0.7375,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.1,
+          "fnar_per_run": [
+            0.1
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.1,
+          "fnar_per_run": [
+            0.1
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.2,
+          "fnar_per_run": [
+            0.2
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.05,
+          "fnar_per_run": [
+            0.05
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.1667,
+          "fnar_per_run": [
+            0.1667
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.2143,
+          "fnar_per_run": [
+            0.2143
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.6429,
+      "i_confusion_pooled": {
+        "I_HARD->F": 2,
+        "I_HARD->I_HARD": 3,
+        "I_HARD->READY(num)": 1,
+        "I_SOFT->E": 1,
+        "I_SOFT->I_SOFT": 9,
+        "I_SOFT->M": 1,
+        "I_SOFT->READY(num)": 3
+      }
+    },
+    "vq_top3_rerun": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory_1014/vq_k1_top3_run2.jsonl"
+      ],
+      "missing_rows": [
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.075,
+        "fnar_per_run": [
+          0.075
+        ]
+      },
+      "diag_acc_mean": 0.8,
+      "action_acc_mean": 0.7875,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.1,
+          "fnar_per_run": [
+            0.1
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.05,
+          "fnar_per_run": [
+            0.05
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.15,
+          "fnar_per_run": [
+            0.15
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.1667,
+          "fnar_per_run": [
+            0.1667
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.1429,
+          "fnar_per_run": [
+            0.1429
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.7857,
+      "i_confusion_pooled": {
+        "I_HARD->F": 1,
+        "I_HARD->I_HARD": 3,
+        "I_HARD->M": 1,
+        "I_HARD->READY(num)": 1,
+        "I_SOFT->E": 1,
+        "I_SOFT->I_SOFT": 11,
+        "I_SOFT->READY(num)": 2
+      }
+    },
+    "vq_top4": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory_1014/vq_k1_top4_run1.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/vq_k1_top4_run2.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/vq_k1_top4_run3.jsonl"
+      ],
+      "missing_rows": [
+        0,
+        0,
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.1042,
+        "fnar_per_run": [
+          0.125,
+          0.1,
+          0.0875
+        ]
+      },
+      "diag_acc_mean": 0.7667,
+      "action_acc_mean": 0.7542,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.1,
+          "fnar_per_run": [
+            0.1,
+            0.1,
+            0.1
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.0833,
+          "fnar_per_run": [
+            0.15,
+            0.05,
+            0.05
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.2167,
+          "fnar_per_run": [
+            0.2,
+            0.25,
+            0.2
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0167,
+          "fnar_per_run": [
+            0.05,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.2222,
+          "fnar_per_run": [
+            0.1667,
+            0.1667,
+            0.3333
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.2143,
+          "fnar_per_run": [
+            0.2143,
+            0.2857,
+            0.1429
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.6905,
+      "i_confusion_pooled": {
+        "I_HARD->F": 2,
+        "I_HARD->I_HARD": 8,
+        "I_HARD->I_SOFT(num)": 1,
+        "I_HARD->M": 4,
+        "I_HARD->READY(num)": 3,
+        "I_SOFT->E": 3,
+        "I_SOFT->I_HARD": 1,
+        "I_SOFT->I_SOFT": 29,
+        "I_SOFT->I_SOFT_MISMATCH(num)": 1,
+        "I_SOFT->READY(num)": 8
+      }
+    },
+    "rpal_plain_july": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory/conf_plain_run1.jsonl"
+      ],
+      "missing_rows": [
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.4875,
+        "fnar_per_run": [
+          0.4875
+        ]
+      },
+      "diag_acc_mean": 0.0,
+      "action_acc_mean": 0.0,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.1,
+          "fnar_per_run": [
+            0.1
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.9,
+          "fnar_per_run": [
+            0.9
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.95,
+          "fnar_per_run": [
+            0.95
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.8333,
+          "fnar_per_run": [
+            0.8333
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 1.0,
+          "fnar_per_run": [
+            1.0
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.0,
+      "i_confusion_pooled": {
+        "I_HARD->READY": 1,
+        "I_HARD->READY(num)": 5,
+        "I_SOFT->READY(num)": 14
+      }
+    },
+    "rpal_plus_july": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory/conf_prompted_run1.jsonl",
+        "verifiquant/data/runs/governance_confirmatory/conf_prompted_run2.jsonl",
+        "verifiquant/data/runs/governance_confirmatory/conf_prompted_run3.jsonl"
+      ],
+      "missing_rows": [
+        0,
+        0,
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.275,
+        "fnar_per_run": [
+          0.2625,
+          0.3,
+          0.2625
+        ]
+      },
+      "diag_acc_mean": 0.6542,
+      "action_acc_mean": 0.5583,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.3,
+          "fnar_per_run": [
+            0.3,
+            0.35,
+            0.25
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.8,
+          "fnar_per_run": [
+            0.75,
+            0.85,
+            0.8
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.5,
+          "fnar_per_run": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.9286,
+          "fnar_per_run": [
+            0.8571,
+            1.0,
+            0.9286
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.0,
+      "i_confusion_pooled": {
+        "I_HARD->I_HARD": 6,
+        "I_HARD->N": 3,
+        "I_HARD->READY(num)": 9,
+        "I_SOFT->I_HARD": 2,
+        "I_SOFT->N": 1,
+        "I_SOFT->READY(num)": 39
+      }
+    },
+    "rpal_plus_run4": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory_1014/conf_prompted_run4.jsonl"
+      ],
+      "missing_rows": [
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.2625,
+        "fnar_per_run": [
+          0.2625
+        ]
+      },
+      "diag_acc_mean": 0.6625,
+      "action_acc_mean": 0.5375,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.35,
+          "fnar_per_run": [
+            0.35
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.7,
+          "fnar_per_run": [
+            0.7
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.5,
+          "fnar_per_run": [
+            0.5
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.7857,
+          "fnar_per_run": [
+            0.7857
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.0,
+      "i_confusion_pooled": {
+        "I_HARD->I_HARD": 2,
+        "I_HARD->N": 1,
+        "I_HARD->READY(num)": 3,
+        "I_SOFT->I_HARD": 2,
+        "I_SOFT->N": 1,
+        "I_SOFT->READY(num)": 11
+      }
+    },
+    "s1": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s1_run1.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s1_run2.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s1_run3.jsonl"
+      ],
+      "missing_rows": [
+        0,
+        0,
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.1583,
+        "fnar_per_run": [
+          0.15,
+          0.1375,
+          0.1875
+        ]
+      },
+      "diag_acc_mean": 0.7375,
+      "action_acc_mean": 0.6958,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.2,
+          "fnar_per_run": [
+            0.15,
+            0.2,
+            0.25
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.4333,
+          "fnar_per_run": [
+            0.45,
+            0.35,
+            0.5
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.2778,
+          "fnar_per_run": [
+            0.3333,
+            0.3333,
+            0.1667
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.5,
+          "fnar_per_run": [
+            0.5,
+            0.3571,
+            0.6429
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.0476,
+      "stopped_at_pooled": {
+        "ambiguity": 13,
+        "bounds": 51,
+        "inputs": 68,
+        "program": 49,
+        "scope": 59
+      },
+      "i_confusion_pooled": {
+        "I_HARD->F": 3,
+        "I_HARD->I_HARD": 6,
+        "I_HARD->I_SOFT": 1,
+        "I_HARD->I_SOFT(num)": 2,
+        "I_HARD->M": 2,
+        "I_HARD->READY": 1,
+        "I_HARD->READY(num)": 3,
+        "I_SOFT->E": 4,
+        "I_SOFT->F": 2,
+        "I_SOFT->I_HARD": 6,
+        "I_SOFT->I_SOFT": 8,
+        "I_SOFT->READY": 1,
+        "I_SOFT->READY(num)": 21
+      }
+    },
+    "s2": {
+      "files": [
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s2_run1.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s2_run2.jsonl",
+        "verifiquant/data/runs/governance_confirmatory_1014/staged_s2_run3.jsonl"
+      ],
+      "missing_rows": [
+        0,
+        0,
+        0
+      ],
+      "overall": {
+        "n": 80,
+        "fnar_mean": 0.0875,
+        "fnar_per_run": [
+          0.0875,
+          0.0875,
+          0.0875
+        ]
+      },
+      "diag_acc_mean": 0.8208,
+      "action_acc_mean": 0.8,
+      "per_operator": {
+        "F": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "E": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "I": {
+          "n": 20,
+          "fnar_mean": 0.35,
+          "fnar_per_run": [
+            0.35,
+            0.35,
+            0.35
+          ]
+        },
+        "N": {
+          "n": 20,
+          "fnar_mean": 0.0,
+          "fnar_per_run": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "i_split": {
+        "I_HARD": {
+          "n": 6,
+          "fnar_mean": 0.2778,
+          "fnar_per_run": [
+            0.1667,
+            0.3333,
+            0.3333
+          ]
+        },
+        "I_SOFT": {
+          "n": 14,
+          "fnar_mean": 0.381,
+          "fnar_per_run": [
+            0.4286,
+            0.3571,
+            0.3571
+          ]
+        }
+      },
+      "i_soft_targeted_warning_mean": 0.4048,
+      "stopped_at_pooled": {
+        "ambiguity": 5,
+        "bounds": 65,
+        "inputs": 67,
+        "program": 42,
+        "scope": 61
+      },
+      "i_confusion_pooled": {
+        "I_HARD->E": 1,
+        "I_HARD->F": 2,
+        "I_HARD->I_HARD": 5,
+        "I_HARD->M": 4,
+        "I_HARD->READY": 1,
+        "I_HARD->READY(num)": 5,
+        "I_SOFT->E": 5,
+        "I_SOFT->F": 1,
+        "I_SOFT->I_SOFT": 19,
+        "I_SOFT->READY": 1,
+        "I_SOFT->READY(num)": 16
+      }
+    }
+  },
+  "gaps": {
+    "rpal_plus_july - vq_july_top3": {
+      "point": 0.1625,
+      "ci95": [
+        0.0583,
+        0.2636
+      ]
+    },
+    "rpal_plus_july - vq_top4": {
+      "point": 0.1708,
+      "ci95": [
+        0.0684,
+        0.2698
+      ]
+    },
+    "rpal_plus_july - s1": {
+      "point": 0.1167,
+      "ci95": [
+        0.0549,
+        0.1865
+      ]
+    },
+    "s1 - vq_top4": {
+      "point": 0.0542,
+      "ci95": [
+        -0.0267,
+        0.1333
+      ]
+    },
+    "s1 - s2": {
+      "point": 0.0708,
+      "ci95": [
+        0.0167,
+        0.1308
+      ]
+    },
+    "s2 - vq_top4": {
+      "point": -0.0167,
+      "ci95": [
+        -0.0833,
+        0.0476
+      ]
+    },
+    "vq_top4 - vq_july_top3": {
+      "point": -0.0083,
+      "ci95": [
+        -0.0658,
+        0.0464
+      ]
+    }
+  },
+  "clean250": {
+    "vq_k1 (first turn of canonical K=3 run)": {
+      "n": 250,
+      "correct": 203,
+      "silent_wrong": 7,
+      "abstain": 40,
+      "accuracy": 0.812,
+      "swr": 0.028,
+      "coverage": 0.84,
+      "selective_accuracy": 0.9667
+    },
+    "rpal_plus_run1": {
+      "n": 250,
+      "correct": 229,
+      "silent_wrong": 4,
+      "abstain": 17,
+      "accuracy": 0.916,
+      "swr": 0.016,
+      "coverage": 0.932,
+      "selective_accuracy": 0.9828
+    },
+    "rpal_plus_run2": {
+      "n": 250,
+      "correct": 233,
+      "silent_wrong": 1,
+      "abstain": 16,
+      "accuracy": 0.932,
+      "swr": 0.004,
+      "coverage": 0.936,
+      "selective_accuracy": 0.9957
+    },
+    "rpal_plus_run3": {
+      "n": 250,
+      "correct": 228,
+      "silent_wrong": 2,
+      "abstain": 20,
+      "accuracy": 0.912,
+      "swr": 0.008,
+      "coverage": 0.92,
+      "selective_accuracy": 0.9913
+    },
+    "s1_run1": {
+      "n": 250,
+      "correct": 171,
+      "silent_wrong": 1,
+      "abstain": 78,
+      "accuracy": 0.684,
+      "swr": 0.004,
+      "coverage": 0.688,
+      "selective_accuracy": 0.9942,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 20,
+        "F": 7,
+        "I_HARD": 39,
+        "I_SOFT": 53,
+        "N": 3,
+        "READY": 128
+      },
+      "program_failures": 9
+    },
+    "s2_run1": {
+      "n": 250,
+      "correct": 184,
+      "silent_wrong": 4,
+      "abstain": 62,
+      "accuracy": 0.736,
+      "swr": 0.016,
+      "coverage": 0.752,
+      "selective_accuracy": 0.9787,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 16,
+        "F": 8,
+        "I_HARD": 16,
+        "I_SOFT": 108,
+        "N": 4,
+        "READY": 98
+      },
+      "program_failures": 18
+    }
+  }
+}
