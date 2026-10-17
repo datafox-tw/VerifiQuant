@@ -4,23 +4,23 @@
   "subsets": {
     "10": {
       "families": 25,
-      "db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_10/cards.db"
+      "db": "verifiquant/data/runs/libsweep/lib_10/cards.db"
     },
     "25": {
       "families": 62,
-      "db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_25/cards.db"
+      "db": "verifiquant/data/runs/libsweep/lib_25/cards.db"
     },
     "50": {
       "families": 125,
-      "db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_50/cards.db"
+      "db": "verifiquant/data/runs/libsweep/lib_50/cards.db"
     },
     "75": {
       "families": 188,
-      "db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_75/cards.db"
+      "db": "verifiquant/data/runs/libsweep/lib_75/cards.db"
     },
     "100": {
       "families": 250,
-      "db": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/libsweep/lib_100/cards.db"
+      "db": "verifiquant/data/runs/libsweep/lib_100/cards.db"
     }
   }
 }

@@ -32,9 +32,14 @@ derived here, and each derivation is checked against the record it replaces:
 
 Every count the paper states about these sets is asserted before anything is written, and the
 input hashes are checked against the trap-set manifest. The script fails instead of packaging a
-set that drifted. datasets/README.md is written by hand and is never touched.
+set that drifted. Three copied provenance files record absolute paths on the build machine; the
+repository prefix is stripped from them, and MANIFEST.json says which. datasets/README.md is
+written by hand and is never touched.
 
-Usage: .venv/bin/python scripts/package_datasets.py [--force]
+--zip writes the finished folder to one zip (for the ACM supplementary-material upload), under a
+wrapper folder named after the zip, with fixed timestamps so a rebuild gives identical bytes.
+
+Usage: .venv/bin/python scripts/package_datasets.py [--force] [--zip taps_upload/<tag>/icaif26-13-datasets.zip]
 """
 from __future__ import annotations
 
@@ -47,8 +52,8 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import zipfile
 from collections import Counter
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -57,6 +62,10 @@ FIC = RUNS / "paper_v2_250/fic"
 HUMAN = RUNS / "messy_query_pilot"
 SRC = ROOT / "FinanceReasoning/data"
 OUT = ROOT / "datasets"
+
+LOCAL_PREFIX = f"{ROOT}/".encode()
+TEXT_SUFFIXES = {".json", ".jsonl", ".yaml", ".md", ".csv", ".txt"}
+ZIP_DATE = (2026, 10, 18, 0, 0, 0)
 
 MANAGED = ["00_source", "01_clean_250", "02_contract_library", "03_traps_80", "04_out_of_library",
            "05_coverage_sweep", "06_human_set_80", "07_repair_mutants", "pilot_50", "MANIFEST.json"]
@@ -315,6 +324,7 @@ def git_commit() -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--force", action="store_true", help="replace the managed parts of an existing datasets/")
+    ap.add_argument("--zip", type=Path, help="also write datasets/ to this zip, under a folder named after it")
     args = ap.parse_args()
 
     existing = [name for name in MANAGED if (OUT / name).exists()]
@@ -344,8 +354,16 @@ def main() -> None:
     for rel, src in COPIES.items():
         dest = OUT / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dest)
         origin[rel] = str(src.relative_to(ROOT))
+        data = src.read_bytes()
+        if src.suffix in TEXT_SUFFIXES and LOCAL_PREFIX in data:
+            # a few provenance files record absolute paths on the build machine; keep them repo-relative
+            data = data.replace(LOCAL_PREFIX, b"")
+            origin[rel] += " (absolute repository prefix stripped)"
+        dest.write_bytes(data)
+    leaked = [str(p.relative_to(OUT)) for p in OUT.rglob("*")
+              if p.is_file() and p.suffix in TEXT_SUFFIXES and str(ROOT).encode() in p.read_bytes()]
+    assert not leaked, f"absolute local paths left in {leaked}"
 
     sums = [(sha256(SRC / f), f) for f in SOURCE_FILES]
     (OUT / "00_source").mkdir(parents=True, exist_ok=True)
@@ -371,7 +389,6 @@ def main() -> None:
         files.append({"path": rel, "sha256": sha256(path), "bytes": path.stat().st_size,
                       "rows": rows_of(path), "origin": origin[rel]})
     write_json(OUT / "MANIFEST.json", {
-        "created_at": datetime.now().isoformat(timespec="seconds"),
         "git_commit": git_commit(),
         "builder": "scripts/package_datasets.py",
         "source": {"repository": "https://github.com/BUPT-Reasoning/FinanceReasoning",
@@ -381,6 +398,29 @@ def main() -> None:
     })
     total = sum(f["bytes"] for f in files)
     print(f"wrote {len(files)} files ({total / 1e6:.1f} MB) to {OUT.relative_to(ROOT)}/")
+    if args.zip:
+        write_zip(args.zip, [f["path"] for f in files] + ["MANIFEST.json", "README.md"])
+
+
+def write_zip(zpath: Path, members: list[str]) -> None:
+    """Zip datasets/ under one wrapper folder, with fixed timestamps so a rebuild gives the same bytes."""
+    zpath = zpath.resolve()
+    zpath.parent.mkdir(parents=True, exist_ok=True)
+    top = zpath.stem
+    with zipfile.ZipFile(zpath, "w") as z:
+        for rel in sorted(members):
+            info = zipfile.ZipInfo(f"{top}/{rel}", date_time=ZIP_DATE)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            z.writestr(info, (OUT / rel).read_bytes(), compresslevel=9)
+    with zipfile.ZipFile(zpath) as z:
+        assert z.testzip() is None
+        names = z.namelist()
+        assert len(names) == len(members) and all(n.startswith(f"{top}/") for n in names)
+        for rel in members:
+            assert z.read(f"{top}/{rel}") == (OUT / rel).read_bytes(), f"{rel} differs inside the zip"
+    shown = zpath.relative_to(ROOT) if zpath.is_relative_to(ROOT) else zpath
+    print(f"zip: {shown} ({zpath.stat().st_size / 1e6:.1f} MB, {len(names)} files under {top}/)")
 
 
 if __name__ == "__main__":

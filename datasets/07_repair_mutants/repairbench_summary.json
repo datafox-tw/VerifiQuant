@@ -1,6 +1,6 @@
 {
   "ran_at": "20260719_184634",
-  "core": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250/fic/core.jsonl",
+  "core": "verifiquant/data/runs/paper_v2_250/fic/core.jsonl",
   "seed": 0,
   "samples_k": 5,
   "specs_total": 191,

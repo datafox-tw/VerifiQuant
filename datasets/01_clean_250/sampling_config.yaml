@@ -4,8 +4,8 @@ experiment:
   description: Scale-up 250Q (180 medium + 70 hard), superset of paper_v1 50Q, seed
     42
 sampling:
-  source_medium: /Users/blackwingedkite/Desktop/verifiquant-update/FinanceReasoning/data/FinanceReasoning/medium.json
-  source_hard: /Users/blackwingedkite/Desktop/verifiquant-update/FinanceReasoning/data/FinanceReasoning/hard.json
+  source_medium: FinanceReasoning/data/FinanceReasoning/medium.json
+  source_hard: FinanceReasoning/data/FinanceReasoning/hard.json
   n_medium: 180
   n_hard: 70
   seed: 42
@@ -607,5 +607,5 @@ pipelines:
     oracle_model: gemini-2.5-flash
     max_turns: 3
     description: CoT + blind oracle Flash, K=3
-output_jsonl: /Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250/questions_250.jsonl
-run_dir: /Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250
+output_jsonl: verifiquant/data/runs/paper_v2_250/questions_250.jsonl
+run_dir: verifiquant/data/runs/paper_v2_250

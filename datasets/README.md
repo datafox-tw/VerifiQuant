@@ -17,7 +17,7 @@ Only inputs and labels are here. System outputs (model runs, scores) stay in the
 | [`pilot_50/`](pilot_50/) | 50-question pilot and its 50-trap set | 50 + 50 | App. J only |
 | `MANIFEST.json` | sha256, size, row count and origin of every file | | |
 
-Section numbers refer to the camera-ready paper. Appendix letters refer to its extended (arXiv) version.
+Section numbers refer to the camera-ready paper. Appendix letters refer to its extended (arXiv) version. Paths such as `scripts/...`, `verifiquant/...` and `verifiquant/data/runs/...` refer to the code repository, <https://github.com/datafox-tw/icaif-verifiquant>.
 
 ## How the datasets relate
 
@@ -282,7 +282,7 @@ The R-PAL runners read the function library from `FinanceReasoning/data/function
 .venv/bin/python scripts/package_datasets.py --force
 ```
 
-Before it writes anything, the script asserts every count stated above. It also checks the input hashes against the trap manifest and fails if any set has drifted. It never touches this README. A few copied provenance files (`sampling_config.yaml`, `05_coverage_sweep/build_manifest.json`, `07_repair_mutants/repairbench_summary.json`) record absolute paths from the original machine. Read them as paths relative to the repository root.
+Before it writes anything, the script asserts every count stated above. It also checks the input hashes against the trap manifest and fails if any set has drifted. It never touches this README. Three copied provenance files (`01_clean_250/sampling_config.yaml`, `05_coverage_sweep/build_manifest.json`, `07_repair_mutants/repairbench_summary.json`) recorded absolute paths on the build machine. The script strips the repository prefix from them, so every path reads as relative to the repository root, and `MANIFEST.json` marks these files. With `--zip PATH` it also writes the folder to one zip with fixed timestamps, so a rebuild from the same commit gives identical bytes.
 
 ## Citation
 
