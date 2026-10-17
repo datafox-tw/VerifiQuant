@@ -1,5 +1,5 @@
 {
-  "git_commit": "b5b0ca711aa68fa53d4b0e86735c2af8b07e8d9d",
+  "git_commit": "31358a1ef563b38fb50dad2aaa8c4d3a764b3666",
   "builder": "scripts/package_datasets.py",
   "source": {
     "repository": "https://github.com/BUPT-Reasoning/FinanceReasoning",
