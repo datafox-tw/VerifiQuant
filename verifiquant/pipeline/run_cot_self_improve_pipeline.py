@@ -500,7 +500,7 @@ def main() -> None:
 
     out_rows: List[Dict[str, Any]] = []
     for idx, row in enumerate(rows, 1):
-        cid = row.get("case_id", row.get("question_id", idx))
+        cid = row.get("case_id") or row.get("question_id") or row.get("id") or idx
         print(f"[cot-self-improve] processing {cid}")
         cot = _cot_oracle_loop(
             client=client,
@@ -513,7 +513,7 @@ def main() -> None:
         out_rows.append(
             {
                 "case_id": cid,
-                "source_sample_id": row.get("source_sample_id", row.get("question_id")),
+                "source_sample_id": row.get("source_sample_id") or row.get("question_id") or row.get("id"),
                 "cot_self_improve": cot,
             }
         )

@@ -1326,7 +1326,7 @@ def run_case(
     c = str(row.get("context", "") or "")
     domain = str(row.get("domain", "") or "").strip() or None
     topic = str(row.get("topic", "") or "").strip() or None
-    case_id = str(row.get("case_id") or row.get("question_id") or "")
+    case_id = str(row.get("case_id") or row.get("question_id") or row.get("id") or "")
     base = {"case_id": case_id, "has_i_soft": False, "soft_warnings": []}
     debug_prefix = f"[sanity-debug][{case_id or 'unknown_case'}]"
     pipeline_logs: List[str] = []
@@ -2315,7 +2315,7 @@ def main() -> None:
         repair_index = _build_repair_index(repair_rows)
     out: List[Dict[str, Any]] = []
     for idx, row in enumerate(rows, 1):
-        cid = row.get("case_id", row.get("question_id", idx))
+        cid = row.get("case_id") or row.get("question_id") or row.get("id") or idx
         print(f"[run_run_error_classification_pipeline] processing {cid}")
         result = run_case(
             row=row,
