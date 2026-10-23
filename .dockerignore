@@ -24,17 +24,13 @@ verifiquant/data/.DS_Store
 # Negation requires re-including each parent dir before the nested file.
 verifiquant/data/runs/*
 
-# Default demo run: paper_v1 (questions_50 + fic/cards.db, a coherent pair)
-!verifiquant/data/runs/paper_v1
-verifiquant/data/runs/paper_v1/*
-!verifiquant/data/runs/paper_v1/questions_50.jsonl
-!verifiquant/data/runs/paper_v1/demo_showcase.jsonl
-!verifiquant/data/runs/paper_v1/trap
-verifiquant/data/runs/paper_v1/trap/*
-!verifiquant/data/runs/paper_v1/trap/trap_set.jsonl
-!verifiquant/data/runs/paper_v1/fic
-verifiquant/data/runs/paper_v1/fic/*
-!verifiquant/data/runs/paper_v1/fic/cards.db
+# Default demo run: paper_v2_250, the ICAIF '26 paper's 250-contract library + its 250 clean questions
+!verifiquant/data/runs/paper_v2_250
+verifiquant/data/runs/paper_v2_250/*
+!verifiquant/data/runs/paper_v2_250/questions_250.jsonl
+!verifiquant/data/runs/paper_v2_250/fic
+verifiquant/data/runs/paper_v2_250/fic/*
+!verifiquant/data/runs/paper_v2_250/fic/cards.db
 
 # Legacy fallback run
 !verifiquant/data/runs/demo_50q_0415

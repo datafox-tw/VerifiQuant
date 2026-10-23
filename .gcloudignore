@@ -1,57 +1,38 @@
 # Controls what `gcloud builds submit` / `gcloud run deploy --source` uploads as
-# the build context. WITHOUT this file gcloud falls back to .gitignore, which does
-# not exclude the untracked sibling repos (.venv, FinanceReasoning/, etc.), so the
-# source tarball ballooned to ~1.2 GiB. .dockerignore does NOT affect this upload.
+# the build context. WITHOUT this file gcloud falls back to .gitignore. .dockerignore
+# does NOT affect this upload.
 #
-# Mirror the .dockerignore data rules so the demo run still ships.
+# Allowlist: upload only what the Dockerfile copies. The repo root collects paper
+# sources, TAPS packages, the poster, sibling repos and personal notes, none of which
+# belong in a build upload (a denylist here once let ~600 MiB of them through).
+/*
+!/Dockerfile
+!/requirements-web.txt
+!/app.py
+!/templates/
+!/static/
+!/verifiquant/
 
-.git
-.github
-.claude
-.venv
-__pycache__
+__pycache__/
 *.pyc
-*.egg-info
 *.so
 .DS_Store
-
-# Heavy sibling repos / eval scaffolding — not part of the web image
-scratch/
-docs/
-scripts/
-reimplement-jpmogan/
-FinanceReasoning/
-finchain/
-preprocessing/
-!verifiquant/preprocessing
-!verifiquant/preprocessing/**
-
-# Secrets and local-only files
+*.db-journal
 .env
 .env.*
-test_*.py
-deploy.sh
-*.db-journal
 
-# Large datasets not needed by the web demo (financial_documents.json is 95 MiB)
+# Inside the package: large datasets the web demo does not read
+# (financial_documents.json alone is 95 MiB).
 verifiquant/data/*.json
 verifiquant/data/*.jsonl
 verifiquant/data/*.yaml
 
 # Run artifacts are heavy; ship only the demo run (see VERIFIQUANT_DEMO_RUN in app.py).
+# Default demo run: paper_v2_250, the ICAIF '26 paper's 250-contract library + its 250 clean questions.
 verifiquant/data/runs/*
-!verifiquant/data/runs/paper_v1
-verifiquant/data/runs/paper_v1/*
-!verifiquant/data/runs/paper_v1/questions_50.jsonl
-!verifiquant/data/runs/paper_v1/demo_showcase.jsonl
-!verifiquant/data/runs/paper_v1/trap
-verifiquant/data/runs/paper_v1/trap/*
-!verifiquant/data/runs/paper_v1/trap/trap_set.jsonl
-!verifiquant/data/runs/paper_v1/fic
-verifiquant/data/runs/paper_v1/fic/*
-!verifiquant/data/runs/paper_v1/fic/cards.db
-
-# Legacy fallback run
-!verifiquant/data/runs/demo_50q_0415
-verifiquant/data/runs/demo_50q_0415/*
-!verifiquant/data/runs/demo_50q_0415/cards.db
+!verifiquant/data/runs/paper_v2_250
+verifiquant/data/runs/paper_v2_250/*
+!verifiquant/data/runs/paper_v2_250/questions_250.jsonl
+!verifiquant/data/runs/paper_v2_250/fic
+verifiquant/data/runs/paper_v2_250/fic/*
+!verifiquant/data/runs/paper_v2_250/fic/cards.db
