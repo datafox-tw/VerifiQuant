@@ -38,6 +38,10 @@ from verifiquant.preprocessing.stage_transform import (
 RATE_LIMIT_PER_HOUR = int(os.environ.get("VERIFIQUANT_RATE_LIMIT", "20"))
 
 
+def _env_flag(name: str, default: str = "false") -> bool:
+    return os.environ.get(name, default).lower() in ("1", "true", "yes")
+
+
 class _RateLimiter:
     def __init__(self, max_requests: int, window_seconds: int = 3600):
         self._max = max_requests
@@ -244,12 +248,45 @@ def _dump_records_file(path_value: str, rows: List[Dict[str, Any]]) -> str:
 
 def create_app() -> Flask:
     _load_env_file()
+    public_lockdown = _env_flag("VERIFIQUANT_PUBLIC_LOCKDOWN", "false")
 
     app = Flask(
         __name__,
         template_folder=os.path.join(ROOT_DIR, "templates"),
         static_folder=os.path.join(ROOT_DIR, "static"),
     )
+
+    if public_lockdown:
+        @app.after_request
+        def add_noindex_headers(response: Any) -> Any:
+            response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+            return response
+
+        @app.get("/")
+        def coming_soon() -> str:
+            return render_template("coming_soon.html")
+
+        @app.get("/favicon.ico")
+        def favicon() -> Any:
+            return app.response_class("", status=204)
+
+        @app.get("/robots.txt")
+        def robots_txt() -> Any:
+            body = "\n".join(
+                [
+                    "User-agent: *",
+                    "Disallow: /",
+                    "Noindex: /",
+                    "",
+                ]
+            )
+            return app.response_class(body, mimetype="text/plain")
+
+        @app.errorhandler(404)
+        def locked_not_found(_error: Any) -> Any:
+            return render_template("coming_soon.html"), 404
+
+        return app
 
     store = SQLAlchemyArtifactStore(DEFAULT_DB_URL)
     pdf_config = pdf_config_from_env()
