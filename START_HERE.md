@@ -2,6 +2,9 @@
 
 最後更新：2026-09-27
 
+> **現在最急的事（到 2026-10-18）：ICAIF '26 camera-ready。**
+> 待辦清單在 [`CAMERA_READY_TODO.md`](CAMERA_READY_TODO.md)。
+
 **Agenthon 這條線 9/26 暫停、同日恢復。** 暫停時的判斷在
 `docs/2026-09-23_verification_layers_reference.md` 第五部分（§23–26）；恢復之後的進度
 （突變測試、L5 決策宣告 v0、官方逐題結果）在 `agenthon/docs/2026-10-02_meeting.md`。
