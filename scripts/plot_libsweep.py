@@ -83,6 +83,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sweep-dir", default=SWEEP)
     ap.add_argument("--suffix", default="", help="appended to the figure file name")
+    ap.add_argument("--compact", action="store_true",
+                    help="flatter figure without a title (the caption carries it) for the 9-page camera-ready")
     args = ap.parse_args()
     sweep = os.path.join(ROOT, args.sweep_dir) if not os.path.isabs(args.sweep_dir) else args.sweep_dir
     pts = [p for p in (point_stats(f, sweep) for f in FRACS) if p]
@@ -100,7 +102,7 @@ def main():
         "font.size": 17, "axes.titlesize": 18, "axes.labelsize": 17,
         "xtick.labelsize": 16, "ytick.labelsize": 16, "legend.fontsize": 15,
     })
-    plt.figure(figsize=(7.4, 5.2))
+    plt.figure(figsize=(7.4, 3.9) if args.compact else (7.4, 5.2))
     for key, label, style, color in [
         ("ood_abstain", "OOD abstain (family absent)", "-o", "#1f77b4"),
         ("id_abstain", "ID abstain (family present)", "-s", "#aec7e8"),
@@ -116,13 +118,18 @@ def main():
         plt.plot(xs, ys, ":d", color="#9467bd", label="selectivity gap (OOD − ID abstain)", markersize=7)
     plt.xlabel("Library size (% of the 250 formula families)")
     plt.ylabel("Rate (%)")
-    plt.title("Abstention tracks library coverage (250Q, K=1)")
+    if not args.compact:
+        plt.title("Abstention tracks library coverage (250Q, K=1)")
     plt.xticks(FRACS)
     plt.ylim(-2, 102)
     plt.grid(alpha=0.3)
     # Short labels + two columns in the empty mid-band: the long single-column
     # legend overlapped the plotted lines. Definitions live in the caption.
-    plt.legend(fontsize=11, loc="center", ncol=2, framealpha=0.92)
+    if args.compact:  # the free band between the two groups of lines is y = 15..64
+        plt.legend(fontsize=11, loc="center", bbox_to_anchor=(0.5, 0.40), ncol=2, framealpha=0.92,
+                   columnspacing=1.0, handlelength=1.8)
+    else:
+        plt.legend(fontsize=11, loc="center", ncol=2, framealpha=0.92)
     plt.tight_layout()
     # Write both copies. paper/figures is what main_v2.tex actually includes, and a
     # docs-only write here previously let the paper keep a stale figure for weeks.

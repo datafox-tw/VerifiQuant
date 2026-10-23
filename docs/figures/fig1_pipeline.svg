@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1240 560" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+<svg viewBox="0 0 1520 560" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#455A64"/>
@@ -8,157 +8,185 @@
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1240" height="560" fill="#FFFFFF"/>
-  <text x="16" y="28" font-size="12" fill="#607D8B">VerifiQuant pipeline — governance controls compiled into execution (badges C1–C6 ↔ Table 1)</text>
+  <rect x="0" y="0" width="1520" height="560" fill="#FFFFFF"/>
+  <text x="16" y="28" font-size="14" fill="#607D8B">VerifiQuant pipeline — governance controls compiled into execution (badges C1–C6 ↔ Table 1)</text>
 
   <!-- FIC card store -->
-  <rect x="140" y="42" width="560" height="60" rx="8" fill="#EDE7F6" stroke="#5E35B1" stroke-width="1.5"/>
-  <text x="158" y="64" font-size="12.5" font-weight="bold" fill="#311B92">FIC Card Store (build-time compiled, lint- and smoke-gated)</text>
-  <text x="158" y="82" font-size="10" fill="#4527A0">retrieval cards · core cards (typed inputs · deterministic code · invariants · semantic hints) · repair rules</text>
+  <rect x="156" y="42" width="682" height="60" rx="8" fill="#EDE7F6" stroke="#5E35B1" stroke-width="1.5"/>
+  <text x="174" y="64" font-size="14.5" font-weight="bold" fill="#311B92">FIC Card Store (build-time compiled, lint- and smoke-gated)</text>
+  <text x="174" y="80" font-size="12" fill="#4527A0">retrieval cards · core cards · repair rules</text>
+  <text x="174" y="96" font-size="12" fill="#4527A0">typed inputs · deterministic code · invariants · semantic hints</text>
 
   <!-- store feeds gates -->
-  <line x1="198" y1="102" x2="198" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
-  <line x1="354" y1="102" x2="354" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
-  <line x1="510" y1="102" x2="510" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
-  <line x1="666" y1="102" x2="666" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
-  <line x1="700" y1="98" x2="828" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+  <line x1="218" y1="102" x2="218" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+  <line x1="404" y1="102" x2="404" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+  <line x1="590" y1="102" x2="590" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+  <line x1="776" y1="102" x2="776" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
+  <line x1="838" y1="98" x2="968" y2="162" stroke="#9575CD" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr)"/>
 
   <!-- verified transform (top right) -->
+  <g transform="translate(226 0)">
   <rect x="940" y="42" width="180" height="66" rx="8" fill="#F6EEFB" stroke="#7B2FBE" stroke-width="1.5" stroke-dasharray="6,3"/>
-  <rect x="1088" y="86" width="26" height="16" rx="4" fill="#37474F"/><text x="1101" y="98" font-size="9.5" fill="#fff" text-anchor="middle">C4</text>
-  <text x="952" y="64" font-size="12" font-weight="bold" fill="#5B21A6">Verified atomic transform</text>
-  <text x="952" y="80" font-size="9.5" fill="#5B21A6">result_postprocess / code_patch</text>
-  <text x="952" y="98" font-size="9.5" fill="#5B21A6">AST-bounded · cross-verify</text>
+  <rect x="1088" y="48" width="26" height="16" rx="4" fill="#37474F"/><text x="1101" y="60" font-size="11.5" fill="#fff" text-anchor="middle">C4</text>
+  <text x="952" y="64" font-size="14" font-weight="bold" fill="#5B21A6">Verified transform</text>
+  <text x="952" y="80" font-size="11.5" fill="#5B21A6">postprocess / patch</text>
+  <text x="952" y="98" font-size="11.5" fill="#5B21A6">AST-bounded · cross-verify</text>
+  </g>
 
   <!-- question -->
   <rect x="16" y="180" width="92" height="64" rx="10" fill="#FAFAFA" stroke="#90A4AE" stroke-width="1.4"/>
-  <text x="62" y="207" font-size="12.5" font-weight="bold" fill="#37474F" text-anchor="middle">Question</text>
-  <text x="62" y="224" font-size="10" fill="#607D8B" text-anchor="middle">q + context</text>
+  <text x="62" y="207" font-size="14.5" font-weight="bold" fill="#37474F" text-anchor="middle">Question</text>
+  <text x="62" y="224" font-size="12" fill="#607D8B" text-anchor="middle">q + context</text>
 
   <!-- Gate M -->
+  <g transform="translate(20 0)">
   <rect x="136" y="166" width="124" height="92" rx="8" fill="#FFF3E0" stroke="#E8871E" stroke-width="1.6"/>
-  <rect x="226" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="239" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C1</text>
-  <text x="150" y="196" font-size="19" font-weight="bold" fill="#B35309">M</text>
-  <text x="150" y="214" font-size="11.5" font-weight="bold" fill="#7C4A03">Intent gate</text>
-  <text x="150" y="230" font-size="9" fill="#8D5A10">LLM selector ·</text>
-  <text x="150" y="242" font-size="9" fill="#8D5A10">unique contract family?</text>
+  <rect x="226" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="239" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C1</text>
+  <text x="150" y="196" font-size="21" font-weight="bold" fill="#B35309">M</text>
+  <text x="150" y="214" font-size="13.5" font-weight="bold" fill="#7C4A03">Intent gate</text>
+  <text x="150" y="230" font-size="11" fill="#8D5A10">LLM selector ·</text>
+  <text x="150" y="242" font-size="11" fill="#8D5A10">unique family?</text>
+  </g>
 
   <!-- Gate N -->
+  <g transform="translate(50 0)">
   <rect x="292" y="166" width="124" height="92" rx="8" fill="#FFF3E0" stroke="#E8871E" stroke-width="1.6"/>
-  <rect x="382" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="395" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C1</text>
-  <text x="306" y="196" font-size="19" font-weight="bold" fill="#B35309">N</text>
-  <text x="306" y="214" font-size="11.5" font-weight="bold" fill="#7C4A03">Scope gate</text>
-  <text x="306" y="230" font-size="9" fill="#8D5A10">any applicable FIC?</text>
-  <text x="306" y="242" font-size="9" fill="#8D5A10">BM25 + selection hints</text>
+  <rect x="382" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="395" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C1</text>
+  <text x="306" y="196" font-size="21" font-weight="bold" fill="#B35309">N</text>
+  <text x="306" y="214" font-size="13.5" font-weight="bold" fill="#7C4A03">Scope gate</text>
+  <text x="306" y="230" font-size="11" fill="#8D5A10">any applicable FIC?</text>
+  <text x="306" y="242" font-size="11" fill="#8D5A10">BM25 + hints</text>
+  </g>
 
   <!-- Gate F -->
+  <g transform="translate(80 0)">
   <rect x="448" y="166" width="124" height="92" rx="8" fill="#FFF3E0" stroke="#E8871E" stroke-width="1.6"/>
-  <rect x="538" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="551" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C2</text>
-  <text x="462" y="196" font-size="19" font-weight="bold" fill="#B35309">F</text>
-  <text x="462" y="214" font-size="11.5" font-weight="bold" fill="#7C4A03">Schema gate</text>
-  <text x="462" y="230" font-size="9" fill="#8D5A10">LLM extractor ·</text>
-  <text x="462" y="242" font-size="9" fill="#8D5A10">required inputs bound?</text>
+  <rect x="538" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="551" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C2</text>
+  <text x="462" y="196" font-size="21" font-weight="bold" fill="#B35309">F</text>
+  <text x="462" y="214" font-size="13.5" font-weight="bold" fill="#7C4A03">Schema gate</text>
+  <text x="462" y="230" font-size="11" fill="#8D5A10">LLM extractor ·</text>
+  <text x="462" y="242" font-size="11" fill="#8D5A10">inputs bound?</text>
+  </g>
 
   <!-- Gate E -->
+  <g transform="translate(110 0)">
   <rect x="604" y="166" width="124" height="92" rx="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.6"/>
-  <rect x="694" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="707" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C2</text>
-  <text x="618" y="196" font-size="19" font-weight="bold" fill="#0D47A1">E</text>
-  <text x="618" y="214" font-size="11.5" font-weight="bold" fill="#0D47A1">Boundary gate</text>
-  <text x="618" y="230" font-size="9" fill="#1565C0">deterministic invariants</text>
-  <text x="618" y="242" font-size="9" fill="#1565C0">&amp; scale checks</text>
+  <rect x="694" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="707" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C2</text>
+  <text x="618" y="196" font-size="21" font-weight="bold" fill="#0D47A1">E</text>
+  <text x="618" y="214" font-size="13.5" font-weight="bold" fill="#0D47A1">Boundary gate</text>
+  <text x="618" y="230" font-size="11" fill="#1565C0">invariant checks</text>
+  <text x="618" y="242" font-size="11" fill="#1565C0">&amp; scale checks</text>
+  </g>
 
   <!-- Gate I -->
+  <g transform="translate(140 0)">
   <rect x="760" y="166" width="148" height="92" rx="8" fill="#FFF3E0" stroke="#E8871E" stroke-width="1.6"/>
-  <rect x="874" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="887" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C3</text>
-  <text x="774" y="196" font-size="19" font-weight="bold" fill="#B35309">I</text>
-  <text x="774" y="214" font-size="11.5" font-weight="bold" fill="#7C4A03">Ambiguity gate</text>
-  <text x="774" y="230" font-size="9" fill="#8D5A10">LLM critic over declared hints</text>
-  <text x="774" y="242" font-size="9" fill="#8D5A10">I_HARD blocks · I_SOFT warns</text>
+  <rect x="874" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="887" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C3</text>
+  <text x="774" y="196" font-size="21" font-weight="bold" fill="#B35309">I</text>
+  <text x="774" y="214" font-size="13.5" font-weight="bold" fill="#7C4A03">Ambiguity gate</text>
+  <text x="774" y="230" font-size="11" fill="#8D5A10">LLM critic over hints</text>
+  <text x="774" y="242" font-size="11" fill="#8D5A10">hard block · soft warn</text>
+  </g>
 
   <!-- Gate C -->
+  <g transform="translate(210 0)">
   <rect x="956" y="166" width="124" height="92" rx="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.6"/>
-  <rect x="1046" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="1059" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C5</text>
-  <text x="970" y="196" font-size="19" font-weight="bold" fill="#0D47A1">C</text>
-  <text x="970" y="214" font-size="11.5" font-weight="bold" fill="#0D47A1">Compute</text>
-  <text x="970" y="230" font-size="9" fill="#1565C0">deterministic Python</text>
-  <text x="970" y="242" font-size="9" fill="#1565C0">from core card</text>
+  <rect x="1046" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="1059" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C5</text>
+  <text x="970" y="196" font-size="21" font-weight="bold" fill="#0D47A1">C</text>
+  <text x="970" y="214" font-size="13.5" font-weight="bold" fill="#0D47A1">Compute</text>
+  <text x="970" y="230" font-size="11" fill="#1565C0">deterministic Python</text>
+  <text x="970" y="242" font-size="11" fill="#1565C0">from core card</text>
+  </g>
 
   <!-- Report -->
+  <g transform="translate(270 0)">
   <rect x="1112" y="166" width="112" height="92" rx="10" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.8"/>
-  <rect x="1190" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="1203" y="184" font-size="9.5" fill="#fff" text-anchor="middle">C5</text>
-  <text x="1124" y="198" font-size="11.5" font-weight="bold" fill="#1B5E20">Answer +</text>
-  <text x="1124" y="212" font-size="11.5" font-weight="bold" fill="#1B5E20">Diagnostic</text>
-  <text x="1124" y="226" font-size="11.5" font-weight="bold" fill="#1B5E20">Report</text>
-  <text x="1124" y="242" font-size="8" fill="#2E7D32">exit_layer · fic_id · binding ·</text>
-  <text x="1124" y="252" font-size="8" fill="#2E7D32">invariant_trace · action</text>
+  <rect x="1190" y="172" width="26" height="16" rx="4" fill="#37474F"/><text x="1203" y="184" font-size="11.5" fill="#fff" text-anchor="middle">C5</text>
+  <text x="1124" y="198" font-size="13.5" font-weight="bold" fill="#1B5E20">Answer +</text>
+  <text x="1124" y="212" font-size="13.5" font-weight="bold" fill="#1B5E20">Diagnostic</text>
+  <text x="1124" y="226" font-size="13.5" font-weight="bold" fill="#1B5E20">Report</text>
+  <text x="1124" y="242" font-size="10" fill="#2E7D32">exit_layer · fic_id</text>
+  <text x="1124" y="252" font-size="10" fill="#2E7D32">binding · trace · action</text>
+  </g>
 
   <!-- main flow arrows -->
-  <line x1="108" y1="212" x2="132" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="260" y1="212" x2="288" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="416" y1="212" x2="444" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="572" y1="212" x2="600" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="728" y1="212" x2="756" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <line x1="908" y1="212" x2="952" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
-  <text x="928" y="203" font-size="8" fill="#607D8B" text-anchor="middle">pass /</text>
-  <text x="928" y="230" font-size="8" fill="#607D8B" text-anchor="middle">I_SOFT+warn</text>
-  <line x1="1080" y1="212" x2="1108" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="108" y1="212" x2="152" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="280" y1="212" x2="338" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="466" y1="212" x2="524" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="652" y1="212" x2="710" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="838" y1="212" x2="896" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="1048" y1="212" x2="1162" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="1105" y="198" font-size="10" fill="#607D8B" text-anchor="middle">pass /</text>
+  <text x="1105" y="230" font-size="10" fill="#607D8B" text-anchor="middle">I_SOFT + warn</text>
+  <line x1="1290" y1="212" x2="1378" y2="212" stroke="#455A64" stroke-width="1.8" marker-end="url(#arr)"/>
 
   <!-- I_HARD -> transform -> C -->
-  <path d="M 850 166 C 860 130, 900 96 936 80" fill="none" stroke="#7B2FBE" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#arrP)"/>
-  <text x="886" y="140" font-size="8.5" fill="#7B2FBE">I_HARD clarified</text>
-  <path d="M 1052 108 C 1046 132, 1032 148 1022 162" fill="none" stroke="#7B2FBE" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#arrP)"/>
-  <text x="1058" y="132" font-size="8.5" fill="#7B2FBE">accepted iff</text>
-  <text x="1058" y="143" font-size="8.5" fill="#7B2FBE">identity holds</text>
+  <path d="M 990 166 C 1004 126, 1090 92 1162 80" fill="none" stroke="#7B2FBE" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#arrP)"/>
+  <text x="1028" y="134" font-size="10.5" fill="#7B2FBE">I_HARD</text>
+  <text x="1028" y="146" font-size="10.5" fill="#7B2FBE">clarified</text>
+  <path d="M 1278 108 C 1272 132, 1256 148 1232 162" fill="none" stroke="#7B2FBE" stroke-width="1.6" stroke-dasharray="5,3" marker-end="url(#arrP)"/>
+  <text x="1288" y="132" font-size="10.5" fill="#7B2FBE">accepted iff</text>
+  <text x="1288" y="144" font-size="10.5" fill="#7B2FBE">identity holds</text>
 
   <!-- exit arrows + boxes -->
-  <line x1="198" y1="258" x2="198" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
-  <line x1="354" y1="258" x2="354" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
-  <line x1="510" y1="258" x2="510" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
-  <line x1="666" y1="258" x2="666" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
-  <line x1="834" y1="258" x2="834" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="218" y1="258" x2="218" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="404" y1="258" x2="404" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="590" y1="258" x2="590" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="776" y1="258" x2="776" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
+  <line x1="974" y1="258" x2="974" y2="314" stroke="#C0392B" stroke-width="1.4" marker-end="url(#arr)"/>
 
+  <g transform="translate(20 0)">
   <rect x="136" y="318" width="124" height="58" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="1.3"/>
-  <text x="148" y="338" font-size="10.5" font-weight="bold" fill="#7B241C">refusal / M</text>
-  <text x="148" y="354" font-size="9" fill="#922B21">structured</text>
-  <text x="148" y="366" font-size="9" fill="#922B21">disambiguation request</text>
+  <text x="148" y="338" font-size="12.5" font-weight="bold" fill="#7B241C">refusal / M</text>
+  <text x="148" y="354" font-size="11" fill="#922B21">structured</text>
+  <text x="148" y="366" font-size="11" fill="#922B21">disambiguation</text>
+  </g>
 
+  <g transform="translate(50 0)">
   <rect x="292" y="318" width="124" height="58" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="1.3"/>
-  <text x="304" y="338" font-size="10.5" font-weight="bold" fill="#7B241C">refusal / N</text>
-  <text x="304" y="354" font-size="9" fill="#922B21">scope boundary</text>
-  <text x="304" y="366" font-size="9" fill="#922B21">named</text>
+  <text x="304" y="338" font-size="12.5" font-weight="bold" fill="#7B241C">refusal / N</text>
+  <text x="304" y="354" font-size="11" fill="#922B21">scope boundary</text>
+  <text x="304" y="366" font-size="11" fill="#922B21">named</text>
+  </g>
 
+  <g transform="translate(80 0)">
   <rect x="448" y="318" width="124" height="58" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="1.3"/>
-  <text x="460" y="338" font-size="10.5" font-weight="bold" fill="#7B241C">error / F</text>
-  <text x="460" y="354" font-size="9" fill="#922B21">requested_fields = […]</text>
-  <text x="460" y="366" font-size="9" fill="#922B21">slot-filling request</text>
+  <text x="460" y="338" font-size="12.5" font-weight="bold" fill="#7B241C">error / F</text>
+  <text x="460" y="354" font-size="11" fill="#922B21">requested fields</text>
+  <text x="460" y="366" font-size="11" fill="#922B21">slot-filling request</text>
+  </g>
 
+  <g transform="translate(110 0)">
   <rect x="604" y="318" width="124" height="58" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="1.3"/>
-  <text x="616" y="338" font-size="10.5" font-weight="bold" fill="#7B241C">alert / E</text>
-  <text x="616" y="354" font-size="9" fill="#922B21">violated check</text>
-  <text x="616" y="366" font-size="9" fill="#922B21">named</text>
+  <text x="616" y="338" font-size="12.5" font-weight="bold" fill="#7B241C">alert / E</text>
+  <text x="616" y="354" font-size="11" fill="#922B21">violated check</text>
+  <text x="616" y="366" font-size="11" fill="#922B21">named</text>
+  </g>
 
+  <g transform="translate(140 0)">
   <rect x="760" y="318" width="148" height="58" rx="7" fill="#FDECEA" stroke="#C0392B" stroke-width="1.3"/>
-  <text x="772" y="338" font-size="10.5" font-weight="bold" fill="#7B241C">needs_clarification / I_HARD</text>
-  <text x="772" y="354" font-size="9" fill="#922B21">blocking · contract-declared</text>
-  <text x="772" y="366" font-size="9" fill="#922B21">options presented</text>
+  <text x="772" y="338" font-size="12.5" font-weight="bold" fill="#7B241C">clarification / I_HARD</text>
+  <text x="772" y="354" font-size="11" fill="#922B21">blocking · contract-declared</text>
+  <text x="772" y="366" font-size="11" fill="#922B21">options presented</text>
+  </g>
 
   <!-- bottom band -->
-  <rect x="16" y="404" width="1208" height="46" rx="8" fill="#ECEFF1" stroke="#B0BEC5" stroke-width="1"/>
-  <rect x="30" y="418" width="26" height="16" rx="4" fill="#37474F"/><text x="43" y="430" font-size="9.5" fill="#fff" text-anchor="middle">C6</text>
-  <text x="66" y="424" font-size="10.5" fill="#37474F" font-weight="bold">Abstention as a control:</text>
-  <text x="66" y="440" font-size="10" fill="#455A64">five of seven gates are legitimate structured exits (machine-readable, routable to HITL) — and every path, exit or success, emits a replayable DiagnosticReport [C5].</text>
+  <rect x="16" y="404" width="1488" height="46" rx="8" fill="#ECEFF1" stroke="#B0BEC5" stroke-width="1"/>
+  <rect x="30" y="418" width="26" height="16" rx="4" fill="#37474F"/><text x="43" y="430" font-size="11.5" fill="#fff" text-anchor="middle">C6</text>
+  <text x="66" y="424" font-size="12.5" fill="#37474F" font-weight="bold">Abstention as a control:</text>
+  <text x="66" y="440" font-size="12" fill="#455A64">five funnel conditions terminate in structured exits; every path emits a replayable DiagnosticReport [C5].</text>
 
   <!-- legend -->
   <rect x="16" y="474" width="14" height="12" fill="#FFF3E0" stroke="#E8871E" stroke-width="1.4"/>
-  <text x="36" y="484" font-size="9.5" fill="#455A64">LLM-executed (contract-constrained mapping)</text>
+  <text x="36" y="484" font-size="11.5" fill="#455A64">LLM-executed (contract-constrained mapping)</text>
   <rect x="286" y="474" width="14" height="12" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.4"/>
-  <text x="306" y="484" font-size="9.5" fill="#455A64">Deterministic (contract code)</text>
+  <text x="306" y="484" font-size="11.5" fill="#455A64">Deterministic (contract code)</text>
   <rect x="478" y="474" width="14" height="12" fill="#FDECEA" stroke="#C0392B" stroke-width="1.4"/>
-  <text x="498" y="484" font-size="9.5" fill="#455A64">Structured exit</text>
+  <text x="498" y="484" font-size="11.5" fill="#455A64">Structured exit</text>
   <rect x="596" y="474" width="14" height="12" fill="#F6EEFB" stroke="#7B2FBE" stroke-width="1.4" stroke-dasharray="4,2"/>
-  <text x="616" y="484" font-size="9.5" fill="#455A64">Verified repair (C4)</text>
+  <text x="616" y="484" font-size="11.5" fill="#455A64">Verified repair (C4)</text>
   <rect x="738" y="474" width="14" height="12" fill="#EDE7F6" stroke="#5E35B1" stroke-width="1.4"/>
-  <text x="758" y="484" font-size="9.5" fill="#455A64">FIC artifacts (build-time)</text>
+  <text x="758" y="484" font-size="11.5" fill="#455A64">FIC artifacts (build-time)</text>
   <rect x="908" y="474" width="26" height="12" rx="3" fill="#37474F"/>
-  <text x="940" y="484" font-size="9.5" fill="#455A64">governance control badge (Table 1)</text>
+  <text x="940" y="484" font-size="11.5" fill="#455A64">governance control badge (Table 1)</text>
 </svg>
