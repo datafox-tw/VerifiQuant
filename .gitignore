@@ -22,3 +22,16 @@ agenthon/
 # this repo carries the code and the experiment record without carrying the writing.
 # To recover an old version: git show bb97ef6:paper/main_final.tex
 paper/
+
+# Kept on this machine, never committed: personal files, scratch scripts, the ICAIF
+# media kit (third-party branding), and, like paper/, the writing deliverables (TAPS
+# upload packages and the poster).
+.DS_Store
+/CV_202610_Fintech.pdf
+/台大_r14946005_資科碩二_柯宥圻.md
+/範例二_用APIKEY互動.py
+/hello.py
+/icaif-2026-media-kit/
+/icaif-2026-media-kit.zip
+/taps_upload/
+/poster/
