@@ -3,8 +3,10 @@
 **Do not score this set with `source_gold` from `messy_pilot_provenance.json`.**
 
 `source_gold` is the answer to the *source* FinanceReasoning question that a topic was drawn
-from. The independent author model rewrote each topic into a new naturalistic query **with
-fresh numbers**, so that value does not correspond to the query in `messy_pilot.jsonl`.
+from. GPT-5.2 rewrote each topic into a new naturalistic query **with fresh numbers**, so that
+value does not correspond to the query in `messy_pilot.jsonl`. (The 18 missing-input items were
+then revised offline with an OpenAI Codex agent, seeded by the GPT-5.2 versions, before any label
+was collected; `author_model` records them as `gpt-5.2_seed_then_codex_curated_v3`.)
 
 Measured on the 34 items whose human majority label is `ANSWER`, `source_gold` disagrees with
 the query's actual answer on **30 of 34**:
