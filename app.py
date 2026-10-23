@@ -8,7 +8,7 @@ import threading
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Mapping
 
 from flask import Flask, jsonify, render_template, request, send_file
 from werkzeug.utils import secure_filename
@@ -132,6 +132,8 @@ DEFAULT_DB_URL = os.environ.get(
 )
 # The paper retrieves the top 4 contracts for every system.
 DEFAULT_TOP_K = int(os.environ.get("VERIFIQUANT_TOP_K", "4"))
+# Demo mode caps a client-supplied top_k so one request cannot fill the prompt with the library.
+MAX_DEMO_TOP_K = 8
 DEFAULT_SELECTOR_MODEL = os.environ.get("VERIFIQUANT_SELECTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
@@ -330,6 +332,15 @@ def create_app() -> Flask:
         top_k=DEFAULT_TOP_K,
     )
 
+    def _demo_locked(feature: str) -> Any:
+        """Workspace file access and batch runs are local-only: the public demo must not read,
+        write or bulk-run anything a visitor names."""
+        return jsonify({"status": "error", "message": f"{feature} is disabled in demo mode."}), 403
+
+    def _top_k_from(payload: Mapping[str, Any]) -> int:
+        top_k = int(payload.get("top_k") or diag_api.top_k)
+        return max(1, min(top_k, MAX_DEMO_TOP_K)) if DEMO_MODE else top_k
+
     @app.get("/")
     def index() -> str:
         return render_template("home.html", active_page="home")
@@ -375,6 +386,8 @@ def create_app() -> Flask:
     def demo_questions() -> Any:
         want_showcase = _clean_text(request.args.get("showcase")) in ("1", "true", "yes")
         default_path = _resolve_run_showcase(DEFAULT_DEMO_RUN) if want_showcase else DEFAULT_DEMO_QUESTION_BANK
+        if DEMO_MODE and request.args.get("path"):
+            return _demo_locked("Loading a question bank by path")
         path_value = _clean_text(request.args.get("path")) or default_path
         try:
             rows = _load_records_file(path_value)
@@ -427,7 +440,7 @@ def create_app() -> Flask:
         context = str(payload.get("context") or "")
         domain = _clean_text(payload.get("domain")) or None
         topic = _clean_text(payload.get("topic")) or None
-        top_k = int(payload.get("top_k") or DEFAULT_TOP_K)
+        top_k = _top_k_from(payload)
 
         if not question:
             return jsonify({"status": "error", "message": "question is required"}), 400
@@ -536,6 +549,8 @@ def create_app() -> Flask:
 
     @app.get("/api/files/history")
     def files_history() -> Any:
+        if DEMO_MODE:
+            return _demo_locked("File history")
         directory = _clean_text(request.args.get("dir")) or os.path.relpath(DEFAULT_OUTPUT_DIR, ROOT_DIR)
         suffix = _clean_text(request.args.get("suffix")) or ".jsonl"
         try:
@@ -567,6 +582,8 @@ def create_app() -> Flask:
 
     @app.get("/api/files/summary")
     def file_summary() -> Any:
+        if DEMO_MODE:
+            return _demo_locked("File summary")
         path_value = _clean_text(request.args.get("path"))
         if not path_value:
             return jsonify({"status": "error", "message": "path is required"}), 400
@@ -608,6 +625,8 @@ def create_app() -> Flask:
 
     @app.get("/api/files/download")
     def file_download() -> Any:
+        if DEMO_MODE:
+            return _demo_locked("File download")
         path_value = _clean_text(request.args.get("path"))
         if not path_value:
             return jsonify({"status": "error", "message": "path is required"}), 400
@@ -636,7 +655,7 @@ def create_app() -> Flask:
         case_id = _clean_text(payload.get("case_id") or payload.get("question_id"))
         domain = _clean_text(payload.get("domain")) or None
         topic = _clean_text(payload.get("topic")) or None
-        top_k = int(payload.get("top_k") or diag_api.top_k)
+        top_k = _top_k_from(payload)
         m_min_top_score = float(payload.get("m_min_top_score") or diag_api.m_min_top_score)
         debug_sanity = bool(payload.get("debug_sanity", True))
 
@@ -678,6 +697,8 @@ def create_app() -> Flask:
 
     @app.post("/api/diagnose/batch")
     def diagnose_batch() -> Any:
+        if DEMO_MODE:
+            return _demo_locked("Batch diagnosis")
         ip = _get_client_ip()
         if not _rate_limiter.is_allowed(ip):
             return jsonify({
@@ -692,7 +713,7 @@ def create_app() -> Flask:
         max_records = int(payload.get("max_records") or 0)
         default_domain = _clean_text(payload.get("domain")) or None
         default_topic = _clean_text(payload.get("topic")) or None
-        top_k = int(payload.get("top_k") or diag_api.top_k)
+        top_k = _top_k_from(payload)
         m_min_top_score = float(payload.get("m_min_top_score") or diag_api.m_min_top_score)
         include_results = bool(payload.get("include_results", True))
         debug_sanity = bool(payload.get("debug_sanity", False))
