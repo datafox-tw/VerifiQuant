@@ -186,22 +186,44 @@ def main() -> None:
         p = ROOT / f"verifiquant/data/runs/governance_eval/prompted_clean250_run{i}.jsonl"
         clean[f"rpal_plus_run{i}"] = clean_summary(
             clean_labels_from_rpal(load_jsonl(p), questions, use_stored_verdict=False))
+    vq_labels = clean_labels_from_vq(vq_rows, set(questions))
+    from scipy.stats import binomtest
+
+    def mcnemar(a_lab, b_lab, key):
+        f = (lambda L, i: L.get(i, "abstain") != "abstain") if key == "coverage" else (lambda L, i: L.get(i) == "correct")
+        x = sum(1 for i in questions if f(a_lab, i) and not f(b_lab, i))
+        y = sum(1 for i in questions if f(b_lab, i) and not f(a_lab, i))
+        return {"vq_only": x, "other_only": y, "p": binomtest(x, x + y, 0.5).pvalue if x + y else 1.0}
+
     for variant in ("s1", "s2"):
-        shards = sorted(R.glob(f"staged_{variant}_clean250_shard*.jsonl"))
-        if not shards:
-            continue
-        v_rows = [row for p in shards for row in load_jsonl(p)]
-        v_labels = clean_labels_from_rpal(v_rows, questions, use_stored_verdict=False)
-        key = f"{variant}_run1"
-        clean[key] = {**clean_summary(v_labels), "rows": len(v_rows)}
-        diag_counts: Dict[str, int] = defaultdict(int)
-        exec_fail = 0
-        for row in v_rows:
-            a = row.get("assessment") or {}
-            diag_counts[str(a.get("diagnostic", "FAIL"))] += 1
-            exec_fail += a.get("stopped_at") == "program" and row.get("output") is None
-        clean[key]["diagnostic_counts"] = dict(sorted(diag_counts.items()))
-        clean[key]["program_failures"] = exec_fail
+        # run 1 was written without a run tag; runs 2 and 3 (E16) carry one.
+        run_globs = [f"staged_{variant}_clean250_shard*.jsonl"] + [
+            f"staged_{variant}_clean250_run{r}_shard*.jsonl" for r in (2, 3)]
+        per_run = []
+        for r, pattern in enumerate(run_globs, 1):
+            shards = sorted(R.glob(pattern))
+            if not shards:
+                continue
+            v_rows = [row for p in shards for row in load_jsonl(p)]
+            v_labels = clean_labels_from_rpal(v_rows, questions, use_stored_verdict=False)
+            summ = {**clean_summary(v_labels), "rows": len(v_rows)}
+            diag_counts: Dict[str, int] = defaultdict(int)
+            exec_fail = 0
+            for row in v_rows:
+                a = row.get("assessment") or {}
+                diag_counts[str(a.get("diagnostic", "FAIL"))] += 1
+                exec_fail += a.get("stopped_at") == "program" and row.get("output") is None
+            summ["diagnostic_counts"] = dict(sorted(diag_counts.items()))
+            summ["program_failures"] = exec_fail
+            summ["mcnemar_vs_vq_coverage"] = mcnemar(vq_labels, v_labels, "coverage")
+            summ["mcnemar_vs_vq_accuracy"] = mcnemar(vq_labels, v_labels, "accuracy")
+            clean[f"{variant}_run{r}"] = summ
+            per_run.append(summ)
+        if per_run:
+            clean[f"{variant}_mean"] = {
+                k: statistics.mean(x[k] for x in per_run)
+                for k in ("accuracy", "swr", "coverage", "selective_accuracy", "abstain", "program_failures")
+            } | {"runs": len(per_run), "complete_rows": [x["rows"] for x in per_run]}
     report["clean250"] = {k: {kk: (round(vv, 4) if isinstance(vv, float) else vv) for kk, vv in v.items()}
                           for k, v in clean.items()}
 
@@ -223,8 +245,14 @@ def main() -> None:
             print(f"  {k:32s} {v['point']:+.4f}  CI [{v['ci95'][0]:+.3f}, {v['ci95'][1]:+.3f}]")
     print("\nClean 250 (acc / SWR / coverage / selective acc):")
     for k, v in report["clean250"].items():
-        print(f"  {k:42s} {v['accuracy']:.3f} / {v['swr']:.3f} / {v['coverage']:.3f} / {v['selective_accuracy']:.3f}"
-              f"  n={v['n']}" + (f"  diag={v.get('diagnostic_counts')}" if v.get("diagnostic_counts") else ""))
+        extra = ""
+        if "mcnemar_vs_vq_coverage" in v:
+            mc, ma = v["mcnemar_vs_vq_coverage"], v["mcnemar_vs_vq_accuracy"]
+            extra = (f"  prog_fail={v['program_failures']}  vs VQ cov {mc['vq_only']}/{mc['other_only']} p={mc['p']:.4f}"
+                     f"  acc {ma['vq_only']}/{ma['other_only']} p={ma['p']:.4f}")
+        elif "runs" in v:
+            extra = f"  (mean of {v['runs']} runs, rows {v['complete_rows']}, prog_fail {v['program_failures']:.1f})"
+        print(f"  {k:42s} {v['accuracy']:.3f} / {v['swr']:.3f} / {v['coverage']:.3f} / {v['selective_accuracy']:.3f}{extra}")
     for name in ("s1", "s2"):
         if name in report["systems"]:
             print(f"\n{name} stopped_at (pooled): {report['systems'][name].get('stopped_at_pooled')}")

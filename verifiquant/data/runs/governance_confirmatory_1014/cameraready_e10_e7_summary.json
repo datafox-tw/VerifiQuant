@@ -789,7 +789,91 @@
         "N": 3,
         "READY": 128
       },
-      "program_failures": 9
+      "program_failures": 9,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 57,
+        "other_only": 19,
+        "p": 1.4836899336372366e-05
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 55,
+        "other_only": 23,
+        "p": 0.00037779201420676267
+      }
+    },
+    "s1_run2": {
+      "n": 250,
+      "correct": 162,
+      "silent_wrong": 1,
+      "abstain": 87,
+      "accuracy": 0.648,
+      "swr": 0.004,
+      "coverage": 0.652,
+      "selective_accuracy": 0.9939,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 19,
+        "F": 6,
+        "I_HARD": 40,
+        "I_SOFT": 54,
+        "N": 3,
+        "READY": 128
+      },
+      "program_failures": 19,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 67,
+        "other_only": 20,
+        "p": 4.3053681250011935e-07
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 63,
+        "other_only": 22,
+        "p": 9.811984308900493e-06
+      }
+    },
+    "s1_run3": {
+      "n": 250,
+      "correct": 167,
+      "silent_wrong": 1,
+      "abstain": 82,
+      "accuracy": 0.668,
+      "swr": 0.004,
+      "coverage": 0.672,
+      "selective_accuracy": 0.994,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 18,
+        "F": 6,
+        "I_HARD": 41,
+        "I_SOFT": 57,
+        "N": 2,
+        "READY": 126
+      },
+      "program_failures": 15,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 59,
+        "other_only": 17,
+        "p": 1.3968718113140028e-06
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 57,
+        "other_only": 21,
+        "p": 5.5711164864691095e-05
+      }
+    },
+    "s1_mean": {
+      "accuracy": 0.6667,
+      "swr": 0.004,
+      "coverage": 0.6707,
+      "selective_accuracy": 0.994,
+      "abstain": 82.3333,
+      "program_failures": 14.3333,
+      "runs": 3,
+      "complete_rows": [
+        250,
+        250,
+        250
+      ]
     },
     "s2_run1": {
       "n": 250,
@@ -809,7 +893,91 @@
         "N": 4,
         "READY": 98
       },
-      "program_failures": 18
+      "program_failures": 18,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 36,
+        "other_only": 14,
+        "p": 0.0026021714567221466
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 36,
+        "other_only": 17,
+        "p": 0.012660335802414213
+      }
+    },
+    "s2_run2": {
+      "n": 250,
+      "correct": 183,
+      "silent_wrong": 2,
+      "abstain": 65,
+      "accuracy": 0.732,
+      "swr": 0.008,
+      "coverage": 0.74,
+      "selective_accuracy": 0.9892,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 18,
+        "F": 8,
+        "I_HARD": 19,
+        "I_SOFT": 95,
+        "N": 4,
+        "READY": 106
+      },
+      "program_failures": 16,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 43,
+        "other_only": 18,
+        "p": 0.001868101030975251
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 41,
+        "other_only": 21,
+        "p": 0.015134080997447081
+      }
+    },
+    "s2_run3": {
+      "n": 250,
+      "correct": 185,
+      "silent_wrong": 3,
+      "abstain": 62,
+      "accuracy": 0.74,
+      "swr": 0.012,
+      "coverage": 0.752,
+      "selective_accuracy": 0.984,
+      "rows": 250,
+      "diagnostic_counts": {
+        "E": 20,
+        "F": 7,
+        "I_HARD": 16,
+        "I_SOFT": 101,
+        "N": 4,
+        "READY": 102
+      },
+      "program_failures": 15,
+      "mcnemar_vs_vq_coverage": {
+        "vq_only": 40,
+        "other_only": 18,
+        "p": 0.005354859650800294
+      },
+      "mcnemar_vs_vq_accuracy": {
+        "vq_only": 38,
+        "other_only": 20,
+        "p": 0.024746035842440804
+      }
+    },
+    "s2_mean": {
+      "accuracy": 0.736,
+      "swr": 0.012,
+      "coverage": 0.748,
+      "selective_accuracy": 0.984,
+      "abstain": 63,
+      "program_failures": 16.3333,
+      "runs": 3,
+      "complete_rows": [
+        250,
+        250,
+        250
+      ]
     }
   }
 }
