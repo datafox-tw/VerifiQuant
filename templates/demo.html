@@ -1,43 +1,118 @@
 {% extends "base.html" %}
-{% block title %}Demo &mdash; VerifiQuant{% endblock %}
+{% block title %}Demo &middot; VerifiQuant (ICAIF '26){% endblock %}
 
 {% block content %}
 <div class="demo-container">
   <div class="demo-header">
-    <h1>Diagnostic Console</h1>
-    <p>Submit a financial question with context. The pipeline will classify it through the M/N/F/E/I/C funnel and return a verified diagnostic report.</p>
-    <div class="rate-limit-bar" id="rate-limit-bar"></div>
+    <p class="eyebrow">ACM ICAIF '26 &middot; companion demo</p>
+    <h1>See the funnel decide</h1>
+    <p>Replay the recorded runs behind the paper's tables, try a verified repair, or send your own question to the live system.
+      Everything runs on the paper's 250-contract library with the top 4 contracts retrieved, on Gemini 2.5 Flash.</p>
   </div>
 
-  <nav class="tab-nav">
-    <button id="tab-chat" class="tab-btn active" type="button">Conversation</button>
-    <button id="tab-qa" class="tab-btn" type="button">Single Query</button>
-    <button id="tab-cards" class="tab-btn" type="button">FIC Cards</button>
+  <nav class="tab-nav" role="tablist">
+    <button id="tab-replay" data-tab="replay" class="tab-btn active" type="button">Paper replay</button>
+    <button id="tab-repair" data-tab="repair" class="tab-btn" type="button">Verified repair</button>
+    <button id="tab-chat" data-tab="chat" class="tab-btn" type="button">Try it live</button>
+    <button id="tab-qa" data-tab="qa" class="tab-btn" type="button">Single query</button>
+    <button id="tab-cards" data-tab="cards" class="tab-btn" type="button">Contract library</button>
   </nav>
 
-  <section id="panel-chat" class="panel active">
+  <section id="panel-replay" class="panel active">
+    <p class="replay-intro">
+      Every output on this tab is a recorded run from the paper's experiments, scored by the paper's scorer. Nothing here calls a
+      model. All three systems use Gemini 2.5 Flash and see the same four retrieved contracts.
+    </p>
+    <div class="replay-layout">
+      <aside class="replay-nav" aria-label="Cases">
+        <h4>Walkthrough</h4>
+        <ol class="story-list" id="story-list"></ol>
+        <h4>All 80 traps</h4>
+        <div class="trap-filter" id="trap-filter"></div>
+        <select class="trap-select" id="trap-select" aria-label="Choose a trap"></select>
+        <div class="trap-count" id="trap-count"></div>
+      </aside>
+      <div class="case-view" id="case-view">
+        <div class="loader"><div class="spinner"></div><span>Loading the recorded runs&hellip;</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-repair" class="panel">
+    <p class="replay-intro">
+      A convention that changes the computation is handled by an edit declared on the contract at build time and checked before it
+      runs. The model never rewrites the code. This tab calls the live verifier, which uses no LLM.
+    </p>
+    <div class="repair-layout">
+      <div class="repair-panel">
+        <p class="eyebrow">Contract &middot; fic_article_2164</p>
+        <h3>Monthly loan payment</h3>
+        <div class="repair-inputs">
+          <label>principal <input id="rp-principal" type="number" value="250000" step="1000" min="1" /></label>
+          <label>annual_interest_rate <input id="rp-rate" type="number" value="0.06" step="0.005" min="0" /></label>
+          <label>loan_term_years <input id="rp-term" type="number" value="30" step="1" min="1" /></label>
+        </div>
+        <p class="sub-label">Declared convention &middot; payment timing (SOFT)</p>
+        <div class="choice-row" id="rp-choices">
+          <label class="choice active"><input type="radio" name="rp-timing" value="end_of_period" checked />
+            <span>End of period (ordinary annuity)<small>Default. The contract's code is the default, so no edit applies.</small></span></label>
+          <label class="choice"><input type="radio" name="rp-timing" value="beginning_of_period" />
+            <span>Beginning of period (annuity-due)<small>Applies the declared output transform once it passes verification.</small></span></label>
+        </div>
+        <button id="rp-run" type="button" class="btn btn-primary">Run the verifier</button>
+        <div class="repair-result" id="rp-result" style="margin-top:1rem"></div>
+      </div>
+      <div class="repair-panel">
+        <h3>What the verifier checks</h3>
+        <div class="spec-box">
+          <div class="row"><span>result_expr</span><code>result / (1 + annual_interest_rate / 12)</code></div>
+          <div class="row"><span>invariant</span><code>result_new * (1 + annual_interest_rate / 12) == result_old</code></div>
+          <div class="row"><span>max_expr_nodes</span><code>13</code></div>
+        </div>
+        <ul class="check-list" style="margin-top:0.8rem">
+          <li><span class="ok">&check;</span><span><strong>Bounded.</strong> The expression's AST stays within the declared node count.</span></li>
+          <li><span class="ok">&check;</span><span><strong>Safe.</strong> Whitelisted names only: no imports, no dunders, no new calls.</span></li>
+          <li><span class="ok">&check;</span><span><strong>Matches.</strong> Deterministic, finite, and agrees with the declared invariant on sampled bindings.</span></li>
+        </ul>
+        <p class="sub-label" style="margin-top:1.1rem">Code patch &middot; NPV timing (proof of concept)</p>
+        <div class="ast-diff"><span class="del">- for t, cf in enumerate(cash_flows, start=<b>1</b>):</span>
+<span class="add">+ for t, cf in enumerate(cash_flows, start=<b>0</b>):</span>
+
+Call enumerate
+├─ Name cash_flows
+└─ keyword start
+   └─ Constant 1 → 0      the only changed AST node</div>
+        <p class="table-note">Accepted only if the pattern occurs exactly once and the patched output equals
+          <code>(result + initial_investment) * (1 + discount_rate) - initial_investment</code>.
+          On RepairBench the verifier rejects 97.7% of 879 wrong patches (20 false accepts, 2.3%). This is bounded numerical
+          validation, not formal equivalence.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-chat" class="panel">
+    <div class="live-note">
+      <strong>Live system.</strong> Each send makes real Gemini 2.5 Flash calls through the full funnel, so a result can differ from the
+      recorded runs: selection, binding and ambiguity detection are LLM steps. <span class="rate-limit-bar" id="rate-limit-bar"></span>
+    </div>
     <div class="sample-toolbar">
       <label>
-        Showcase (one per funnel class)
+        A case from the paper
         <select id="chat-showcase"></select>
       </label>
       <label>
-        Or a sample from the bank
-        <select id="chat-sample"><option value="">Choose a sample…</option></select>
+        Or one of the 250 clean questions
+        <select id="chat-sample"><option value="">Choose a question…</option></select>
       </label>
       <button id="chat-reset" type="button" class="btn btn-outline btn-sm">New conversation</button>
     </div>
     <div class="chat-compare-bar">
       <label class="chat-compare-toggle">
-        <input id="chat-compare" type="checkbox" /> Compare with raw AI (no guardrails)
+        <input id="chat-compare" type="checkbox" /> Also ask raw Gemini 2.5 Flash (no contracts, no funnel)
       </label>
-      <label>
-        Control model
-        <select id="chat-baseline-model">
-          <option value="gemini">Gemini (gemini-2.5-flash)</option>
-          <option value="gpt">GPT (gpt-5.2)</option>
-        </select>
-      </label>
+      <select id="chat-baseline-model" hidden aria-hidden="true">
+        <option value="gemini" selected>Gemini (gemini-2.5-flash)</option>
+      </select>
     </div>
     <div id="chat-showcase-note" class="sample-meta"></div>
     <div id="chat-gold-badge" class="gold-badge" style="display:none"></div>
@@ -45,8 +120,8 @@
 
     <div id="chat-thread" class="chat-thread">
       <div class="chat-empty">
-        Ask a financial question. The funnel screens, estimates, and solves &mdash; then
-        points out a verified answer or the exact issue, and asks for what it needs.
+        Ask a financial question, or pick a case from the paper above. The funnel either computes with a contract's code
+        or stops at a named exit and asks for what it needs.
       </div>
     </div>
 
@@ -75,7 +150,7 @@
     <form id="question-form" class="demo-form">
       <div class="sample-toolbar">
         <label>
-          Paper v1 sample fuel
+          One of the 250 clean questions
           <select id="sample-question"></select>
         </label>
         <button id="load-sample" type="button" class="btn btn-outline btn-sm">Load Sample</button>
@@ -109,7 +184,7 @@
         <div class="inline-row">
           <label>
             top_k
-            <input id="top-k" name="top_k" type="number" min="1" value="3" />
+            <input id="top-k" name="top_k" type="number" min="1" max="8" value="4" />
           </label>
           <label>
             m_min_top_score
@@ -141,7 +216,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='diagnostic_render.js') }}"></script>
-<script src="{{ url_for('static', filename='demo.js') }}"></script>
-<script src="{{ url_for('static', filename='conversation.js') }}"></script>
+<script src="{{ url_for('static', filename='diagnostic_render.js', v=asset_version) }}"></script>
+<script src="{{ url_for('static', filename='replay.js', v=asset_version) }}"></script>
+<script src="{{ url_for('static', filename='demo.js', v=asset_version) }}"></script>
+<script src="{{ url_for('static', filename='conversation.js', v=asset_version) }}"></script>
 {% endblock %}

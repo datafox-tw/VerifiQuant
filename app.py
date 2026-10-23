@@ -92,7 +92,8 @@ RUNS_DIR = os.path.join(ROOT_DIR, "verifiquant", "data", "runs")
 #      — and a questions_*.jsonl, preferably questions_50.jsonl);
 #   2. allowlist that run in .dockerignore so it ships into the container.
 # Explicit VERIFIQUANT_DB_URL / VERIFIQUANT_DEMO_QUESTION_BANK still override.
-DEFAULT_DEMO_RUN = os.environ.get("VERIFIQUANT_DEMO_RUN", "paper_v1")
+# Default: paper_v2_250, the 250-contract library the ICAIF '26 paper evaluates.
+DEFAULT_DEMO_RUN = os.environ.get("VERIFIQUANT_DEMO_RUN", "paper_v2_250")
 
 
 def _resolve_run_db_path(run: str) -> str:
@@ -129,7 +130,8 @@ DEFAULT_DB_URL = os.environ.get(
     "VERIFIQUANT_DB_URL",
     f"sqlite:///{DEFAULT_DB_PATH}",
 )
-DEFAULT_TOP_K = int(os.environ.get("VERIFIQUANT_TOP_K", "3"))
+# The paper retrieves the top 4 contracts for every system.
+DEFAULT_TOP_K = int(os.environ.get("VERIFIQUANT_TOP_K", "4"))
 DEFAULT_SELECTOR_MODEL = os.environ.get("VERIFIQUANT_SELECTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_EXTRACTOR_MODEL = os.environ.get("VERIFIQUANT_EXTRACTOR_MODEL", "gemini-2.5-flash")
 DEFAULT_JUDGE_MODEL = os.environ.get("VERIFIQUANT_JUDGE_MODEL", "gemini-2.5-flash")
@@ -140,6 +142,17 @@ DEFAULT_DEMO_QUESTION_BANK = os.environ.get(
     _resolve_run_question_bank(DEFAULT_DEMO_RUN),
 )
 DEMO_MODE = os.environ.get("VERIFIQUANT_DEMO_MODE", "").lower() in ("1", "true", "yes")
+
+# Appended to static URLs so a redeploy is never served from a stale browser cache.
+ASSET_VERSION = os.environ.get("VERIFIQUANT_ASSET_VERSION") or str(int(time.time()))
+
+# Paper links shown in the site header, footer and citation block.
+PAPER_DOI = os.environ.get("VERIFIQUANT_PAPER_DOI", "10.1145/3858063.3858688")
+PAPER_LINKS = {
+    "doi_id": PAPER_DOI,
+    "doi": f"https://doi.org/{PAPER_DOI}",
+    "repo": os.environ.get("VERIFIQUANT_REPO_URL", "https://github.com/datafox-tw/icaif-verifiquant"),
+}
 
 # Control-group ("raw AI, no funnel") baseline models. Same brain as VerifiQuant's, but no
 # FIC/funnel scaffolding — used purely for side-by-side comparison in the demo.
@@ -255,6 +268,10 @@ def create_app() -> Flask:
         template_folder=os.path.join(ROOT_DIR, "templates"),
         static_folder=os.path.join(ROOT_DIR, "static"),
     )
+
+    @app.context_processor
+    def inject_paper_links() -> Dict[str, Any]:
+        return {"links": PAPER_LINKS, "asset_version": ASSET_VERSION}
 
     if public_lockdown:
         @app.after_request

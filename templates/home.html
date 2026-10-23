@@ -1,115 +1,317 @@
 {% extends "base.html" %}
-{% block title %}VerifiQuant &mdash; Verifiable Financial Diagnostics{% endblock %}
+{% block title %}VerifiQuant &middot; Governance-by-Execution for Financial LLM Workflows (ICAIF '26){% endblock %}
 
 {% block content %}
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-badge">Open Research Project</div>
-    <h1 class="hero-title">
-      Don't trust the answer.<br />
-      <span class="gradient-text">Verify the failure.</span>
-    </h1>
-    <p class="hero-subtitle">
-      VerifiQuant is a 6-layer diagnostic pipeline for financial computations.
-      Instead of chasing higher LLM accuracy, it delivers
-      <strong>predictable, verifiable failure behavior</strong> &mdash;
-      intercepting broken inferences at the right layer and applying
-      mathematically verified repairs.
+<section class="paper-hero">
+  <div class="paper-hero-inner">
+    <div class="venue-badge"><span class="dot"></span>ACM ICAIF '26 &middot; 7th ACM International Conference on AI in Finance &middot; Milan, November 14&ndash;17, 2026</div>
+    <h1>VerifiQuant</h1>
+    <p class="paper-subtitle">Governance-by-Execution for Financial LLM Workflows</p>
+    <p class="paper-authors">Yu-Chi Ko<sup>1</sup> &middot; Mi-Yen Yeh<sup>1</sup> &middot; Shou-De Lin<sup>2</sup></p>
+    <p class="paper-affils">
+      <sup>1</sup>Data Science Degree Program, National Taiwan University and Academia Sinica<br />
+      <sup>2</sup>Department of Computer Science and Information Engineering, National Taiwan University
     </p>
-    <div class="hero-actions">
-      <a href="/demo" class="btn btn-primary">Try the Demo</a>
-      <a href="https://github.com/datafox-tw" class="btn btn-outline" target="_blank" rel="noopener">GitHub &nearr;</a>
+    <p class="paper-tagline">Keep the spreadsheet. Let the LLM fill it in.</p>
+    <div class="paper-actions">
+      <a href="/demo" class="btn btn-primary">Replay the paper's runs</a>
+      <a href="/demo#live" class="btn btn-outline">Try it live</a>
+      <a href="{{ links.doi }}" class="btn btn-outline" target="_blank" rel="noopener">Paper (DOI) &nearr;</a>
+      <a href="{{ links.repo }}" class="btn btn-outline" target="_blank" rel="noopener">Code &amp; data &nearr;</a>
+      <a href="#cite" class="btn btn-outline">Cite</a>
     </div>
   </div>
 </section>
 
-<section class="features">
-  <div class="features-inner">
-    <h2 class="section-title">The M/N/F/E/I/C Funnel</h2>
-    <p class="section-subtitle">Six layers of defense. Each gate intercepts a specific class of failure before it
-      reaches the user.</p>
-    <div class="funnel-grid">
-      <div class="funnel-card">
-        <div class="funnel-letter">M</div>
-        <h3>Mismatch</h3>
-        <p>No relevant Financial Inference Contract found. The question is out of scope &mdash; refuse cleanly rather
-          than hallucinate.</p>
+<section class="page-section">
+  <div class="page-inner">
+    <p class="eyebrow">The problem</p>
+    <h2>A number is not an answer</h2>
+    <p class="lede">
+      An LLM in a financial workflow fails most dangerously with a confident, well-formatted, wrong number, and nothing marks it as
+      different from a correct one. Program-aided reasoning makes the arithmetic reliable. It does not make the answer legitimate:
+      a program that runs returns a clean number even when the input cannot justify one.
+    </p>
+    <div class="trap-showcase" style="margin-top:1.4rem">
+      <div class="quote-card">
+        <p class="sub-label">Trap E-test-1080, from the paper's evaluation</p>
+        <p class="q">&ldquo;What is the Price Rate of Change (Price ROC) of the stock over the week? Provide your answer as a percentage to two decimal places.&rdquo;</p>
+        <p class="ctx">
+          At the beginning of the week, the stock was priced at <mark class="edit"><s>$150</s>$2.5</mark> per share.
+          By the end of the week, the stock's price changed to $165 per share.
+        </p>
+        <p class="edit-line" style="margin:0.7rem 0 0;font-size:0.82rem;color:var(--text-muted)">
+          One value was changed so that no valid number exists. The contract for this formula declares the check
+          <code>abs(current &minus; previous) / previous &gt; 2.0</code>.
+        </p>
       </div>
-      <div class="funnel-card">
-        <div class="funnel-letter">N</div>
-        <h3>Novel / OOD</h3>
-        <p>Question is partially matched but outside the trained distribution. Flag uncertainty instead of guessing.</p>
-      </div>
-      <div class="funnel-card">
-        <div class="funnel-letter">F</div>
-        <h3>Field Missing</h3>
-        <p>Required inputs are absent. Ask the user to provide them rather than inventing values.</p>
-      </div>
-      <div class="funnel-card">
-        <div class="funnel-letter">E</div>
-        <h3>Execution Error</h3>
-        <p>Code runs but produces invalid results &mdash; scale violations, NaN, infinity. Deterministic checks catch
-          what LLMs miss.</p>
-      </div>
-      <div class="funnel-card">
-        <div class="funnel-letter">I</div>
-        <h3>Interpretation Ambiguity</h3>
-        <p>Multiple valid interpretations exist (e.g., annuity-due vs. ordinary). Surface the choice with verifiable
-          transform specs.</p>
-      </div>
-      <div class="funnel-card">
-        <div class="funnel-letter">C</div>
-        <h3>Correct</h3>
-        <p>All gates passed. The computation is verified against invariants and delivered with full provenance.</p>
+      <div class="outcome-list">
+        <div class="outcome-row bad">
+          <span class="who">R-PAL</span><span class="val">6,500.00%</span>
+          <span class="how">Sees the same four retrieved contracts, writes a program, runs it. Silent wrong.</span>
+        </div>
+        <div class="outcome-row bad">
+          <span class="who">R-PAL<sup>+</sup></span><span class="val">6,500.00%</span>
+          <span class="how">Same, with every check described in its prompt. Answers in 3 of 3 runs.</span>
+        </div>
+        <div class="outcome-row good">
+          <span class="who">VerifiQuant</span><span class="val">Stopped at E</span>
+          <span class="how">Executes the contract's declared check <code>price_coherence_extreme_change</code>. Stops in 3 of 3 runs.</span>
+        </div>
+        <a href="/demo#E-test-1080" class="btn btn-outline btn-sm" style="justify-self:start">Replay this trap and 79 more &rarr;</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="results-section">
-  <div class="results-inner">
-    <h2 class="section-title">Benchmark Results</h2>
-    <p class="section-subtitle">50-question medium-difficulty set, Gemini 2.5 Flash, April 2025</p>
-    <div class="results-table-wrap">
-      <table class="results-table">
-        <thead>
-          <tr>
-            <th>System</th>
-            <th>Accuracy</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>JPMorgan Multi-Agent (paper)</td>
-            <td><strong>0.46</strong> Pass@1</td>
-            <td>Published baseline</td>
-          </tr>
-          <tr>
-            <td>CoT Self-Improve (no GT)</td>
-            <td><strong>0.90</strong> (45/50)</td>
-            <td>Chain-of-thought with self-correction</td>
-          </tr>
-          <tr class="highlight-row">
-            <td>VerifiQuant Framework-Guided</td>
-            <td><strong>0.88</strong> (44/50)</td>
-            <td>28% recovery rate on initially failed cases</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="results-note">
-      VerifiQuant's advantage is in <em>failure-mode behavior</em> on trap and incomplete questions,
-      not clean-question accuracy. The system knows <em>when</em> and <em>why</em> it fails.
+<section class="page-section alt">
+  <div class="page-inner narrow">
+    <p class="eyebrow">Abstract</p>
+    <h2>Governability, not accuracy</h2>
+    <p>
+      Large language models embedded in financial workflows fail most dangerously by emitting confident, well-formatted but wrong
+      numbers with no signal distinguishing them from correct ones. We argue that the central deployment problem is
+      <em>governability</em>: a system must determine when a question supports a numeric answer and when it should instead clarify,
+      intercept, or refuse. We present <strong>VerifiQuant</strong>, a governance-by-execution framework that packages financial logic
+      into inference contracts and evaluates each query through an executable diagnostic funnel before deterministic computation.
+      This separation makes computation, clarification, and refusal structured and auditable while keeping financial arithmetic
+      outside the language model. Against matched retrieval-and-execution baselines, and within a declared contract library, the
+      principal benefit is not higher accuracy on well-posed questions but safer behavior when an input does not justify a number.
+      When it finds no applicable contract, it says so instead of guessing. Coverage sweeps and failure analysis put a price on this
+      boundary: safety is bought with coverage rather than with accuracy, and residual failures remain attributable to specific
+      runtime frontiers.
     </p>
   </div>
 </section>
 
-<section class="cta-section">
-  <div class="cta-inner">
-    <h2>See it in action</h2>
-    <p>Submit a financial question and watch the 6-layer funnel classify, diagnose, and repair in real time.</p>
-    <a href="/demo" class="btn btn-primary btn-lg">Open Demo Console</a>
+<section class="page-section">
+  <div class="page-inner">
+    <p class="eyebrow">Named exits</p>
+    <h2>Five ways a question fails to justify a number</h2>
+    <p class="lede">
+      Every response is a correct number, a silent wrong, or a named exit that says why no number was given.
+      The deployment question is not &ldquo;how accurate?&rdquo; but &ldquo;when is emitting a number legitimate?&rdquo;
+    </p>
+    <div class="exit-grid">
+      <div class="exit-card">
+        <span class="letter">N</span>
+        <h3>Out of scope</h3>
+        <p>No contract covers the ask. VerifiQuant refuses and says so.</p>
+        <span class="chip chip-code">retrieval score</span> <span class="chip chip-llm">selector</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">M</span>
+        <h3>Unclear intent</h3>
+        <p>Several quantities could be meant. It asks which one.</p>
+        <span class="chip chip-llm">selector</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">F</span>
+        <h3>Missing input</h3>
+        <p>A required value is absent. It asks for the field by name.</p>
+        <span class="chip chip-code">input gate</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">E</span>
+        <h3>Impossible value</h3>
+        <p>An input breaks a declared boundary. The alert names the check and the value.</p>
+        <span class="chip chip-code">boundary gate</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">I</span>
+        <h3>Open convention</h3>
+        <p>Percent or decimal? Start or end of period? HARD: stop and ask. SOFT: answer with a warning.</p>
+        <span class="chip chip-llm">ambiguity gate</span>
+      </div>
+      <div class="exit-card c">
+        <span class="letter">C</span>
+        <h3>Compute</h3>
+        <p>Every gate passes. The contract's own Python computes the number.</p>
+        <span class="chip chip-code">locked code</span>
+      </div>
+    </div>
   </div>
 </section>
+
+<section class="page-section alt">
+  <div class="page-inner">
+    <p class="eyebrow">The mechanism</p>
+    <h2>An executable funnel decides before anything is computed</h2>
+    <p class="lede">
+      An analyst does not re-derive a loan formula for each client. They open a vetted sheet, type in the inputs, and its validation
+      refuses impossible values. VerifiQuant turns each formula family into such a sheet, a <strong>Financial Inference Contract</strong>:
+      typed inputs, boundary checks, declared conventions with their options, and locked code.
+    </p>
+    <div class="funnel-flow" aria-label="VerifiQuant funnel">
+      <div class="flow-node"><div class="k">code</div><div class="t">Retrieve</div><div class="d">BM25 over contract metadata, top 4</div><div class="exits"><span class="chip chip-exit">N</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 1</div><div class="t">Select</div><div class="d">One contract, or none</div><div class="exits"><span class="chip chip-exit">N</span><span class="chip chip-exit">M</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 2</div><div class="t">Bind</div><div class="d">Text to typed inputs</div></div>
+      <div class="flow-node"><div class="k">code</div><div class="t">Inputs</div><div class="d">Every required input present?</div><div class="exits"><span class="chip chip-exit">F</span></div></div>
+      <div class="flow-node"><div class="k">code</div><div class="t">Boundary</div><div class="d">Declared checks hold?</div><div class="exits"><span class="chip chip-exit">E</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 3</div><div class="t">Ambiguity</div><div class="d">Declared convention left open?</div><div class="exits"><span class="chip chip-exit">I-hard</span><span class="chip chip-llm">I-soft warn</span></div></div>
+      <div class="flow-node"><div class="k">code</div><div class="t">Compute</div><div class="d">The contract's own Python</div></div>
+      <div class="flow-node out"><div class="k">output</div><div class="t">Number + report</div><div class="d">DiagnosticReport on every path</div></div>
+    </div>
+    <div class="flow-legend"><span class="l-llm">LLM step</span><span class="l-code">deterministic code</span><span class="l-exit">named exit</span><span class="l-num">a number leaves</span></div>
+
+    <div class="stack-block" style="margin-top:1.6rem">
+      <div>
+        <h3>The LLM gets three jobs, and only three</h3>
+        <p style="margin:0 0 0.6rem">Pick the contract from the four retrieved, or none. Bind values in the text to its typed inputs.
+          Flag which declared conventions the text leaves open. It never computes, and it never edits the formula.</p>
+        <p style="margin:0;color:var(--text-muted);font-size:0.92rem">Every path writes a DiagnosticReport: contract and version,
+          candidates and scores, bound values, checks passed, and why it stopped. Deterministic steps replay exactly from the stored
+          binding. The 250 contracts were built offline (three LLM calls per formula family, then lint and smoke tests), none was
+          hand-tuned, and all are fixed at run time.</p>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table text-table">
+          <thead><tr><th>Who does what</th><th>Picks formula</th><th>Arithmetic</th><th>Decides if a number may leave</th></tr></thead>
+          <tbody>
+            <tr><td>CoT</td><td>LLM</td><td>LLM</td><td>LLM</td></tr>
+            <tr><td>PAL, R-PAL</td><td>LLM writes a program</td><td>interpreter</td><td>nothing checks</td></tr>
+            <tr><td>R-PAL<sup>+</sup></td><td>LLM writes a program</td><td>interpreter</td><td>LLM, told the checks</td></tr>
+            <tr class="vq"><td>VerifiQuant</td><td>LLM selects a contract</td><td>contract's code</td><td>executable gates</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section" id="results">
+  <div class="page-inner">
+    <p class="eyebrow">Results</p>
+    <h2>Execution is not governance</h2>
+    <p class="lede">
+      Every system uses Gemini 2.5 Flash, the same top-4 retrieved contracts, deterministic execution and one scorer.
+      R-PAL<sup>+</sup> and VerifiQuant trap figures are means of three runs.
+    </p>
+    <div class="result-grid">
+      <div class="result-card">
+        <h3>Traps: false numeric acceptance (lower is safer)</h3>
+        <p style="margin-top:0">80 traps built so that no valid number exists (F, E, I and N, 20 each). FNAR is the share still answered with a number.</p>
+        <div class="bars">
+          <div class="bar-row"><span class="name">R-PAL</span><span class="bar-track"><span class="bar-fill" style="width:48.8%"></span></span><span class="v">48.8%</span></div>
+          <div class="bar-row"><span class="name">R-PAL<sup>+</sup></span><span class="bar-track"><span class="bar-fill" style="width:27.5%"></span></span><span class="v">27.5%</span></div>
+          <div class="bar-row vq"><span class="name">VerifiQuant</span><span class="bar-track"><span class="bar-fill" style="width:10.4%"></span></span><span class="v">10.4%</span></div>
+        </div>
+        <p><strong>&minus;17.1 points</strong> versus R-PAL<sup>+</sup>, base-question-clustered 95% CI [6.8, 27.0]. Describing the checks in a prompt is not the same as enforcing them.</p>
+        <div class="data-table-wrap" style="margin-top:0.8rem">
+          <table class="data-table">
+            <thead><tr><th>FNAR by trap type</th><th>R-PAL</th><th>R-PAL<sup>+</sup></th><th>VerifiQuant</th></tr></thead>
+            <tbody>
+              <tr><td>E &middot; boundary</td><td>90%</td><td>30%</td><td><strong>8.3%</strong></td></tr>
+              <tr><td>I &middot; ambiguity</td><td>95%</td><td>80%</td><td><strong>21.7%</strong></td></tr>
+              <tr><td>F &middot; missing input</td><td>10%</td><td>0%</td><td>10%</td></tr>
+              <tr><td>N &middot; scope</td><td>0%</td><td>0%</td><td>1.7%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">The gain sits in E and I. A missing field or a blatant out-of-scope ask is visible enough for a prompt to refuse.</p>
+      </div>
+
+      <div class="result-card">
+        <h3>The price: safety costs coverage, not accuracy</h3>
+        <p style="margin-top:0">250 well-posed questions. Matched execution already does well here, and governance adds no accuracy.</p>
+        <div class="data-table-wrap" style="margin-top:0.8rem">
+          <table class="data-table">
+            <thead><tr><th>Clean set (n = 250)</th><th>Acc</th><th>SWR</th><th>Coverage</th></tr></thead>
+            <tbody>
+              <tr><td>CoT, single shot</td><td>77.6</td><td>18.0</td><td>95.6</td></tr>
+              <tr><td>PAL, no retrieval</td><td>91.2</td><td>7.2</td><td>98.4</td></tr>
+              <tr><td>R-PAL, top-4 contracts</td><td>96.8</td><td>2.4</td><td>99.2</td></tr>
+              <tr><td>R-PAL<sup>+</sup>, checks in prompt</td><td>92.0</td><td>0.9</td><td>92.9</td></tr>
+              <tr class="vq"><td>VerifiQuant, K = 1</td><td>81.2</td><td>2.8</td><td>84.0</td></tr>
+              <tr class="sub"><td>VerifiQuant, K = 3 &dagger;</td><td>93.6</td><td>3.2</td><td>96.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">SWR = silent-wrong rate. K = 1 is fully autonomous. &dagger; K = 3 is an intent-oracle upper bound: the oracle sees the intent specification, never the answer.</p>
+        <p>A staged control that reads the same contract text matches VerifiQuant on traps (8.8%) but answers fewer clean questions
+          (74.8% vs 84.0%), mostly because its self-written programs fail to run. The full funnel takes 12.2 s per question against
+          10.5 s for R-PAL, about 1.2&times;.</p>
+      </div>
+
+      <div class="result-card">
+        <h3>Outside the library: a scope signal, not more answers</h3>
+        <div class="big">88.9% <small>of 199 out-of-library questions declined</small></div>
+        <p>against 19.6% of in-library ones, on a fixed split whose 199 questions come from formula families absent from a 50-family
+          library (same benchmark). R-PAL declines 0.5% and answers 95.0% correctly from parametric memory, with no signal when it is
+          wrong. VerifiQuant is not more accurate out of library: it answers 7.0% correctly, and its silent-wrong rate there is no
+          lower (4.0% vs 4.5%). The paper names this as the result that most constrains its claim.</p>
+        <p>On an 80-query set labeled blind by five finance-trained annotators (Fleiss &kappa; = 0.84), VerifiQuant emits a number on
+          8.7% of the 46 queries that call for none, against 13.0% for R-PAL<sup>+</sup>, 21.7% for CoT and 56.5% for R-PAL. Only the
+          gap to R-PAL is significant, most of VerifiQuant's declines are scope refusals, and it answers 20.6% of the answerable items.</p>
+      </div>
+
+      <div class="result-card">
+        <h3>Verified edits, not regeneration</h3>
+        <div class="big">97.7% <small>of 879 wrong patches rejected</small></div>
+        <p>A non-default convention changes the computation through an edit declared on the contract at build time and checked before it
+          runs: bounded AST size, whitelisted names, and agreement with a declared algebraic relation on sampled bindings.
+          179 transform specs &times; 6 patch-error classes gave 906 mutants, 27 of them equivalent and excluded.
+          20 false accepts remain (2.3%), and 100% of structural attacks are rejected.</p>
+        <p>This is bounded numerical validation, not formal equivalence: the 20 false accepts sit in conditional transforms whose guard
+          branch none of the five bindings exercised. <a href="/demo#repair">Try the loan transform &rarr;</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="page-inner">
+    <p class="eyebrow">Boundary</p>
+    <h2>Where the claim holds, and where it fails</h2>
+    <div class="boundary-grid">
+      <div class="about-card">
+        <h3>Holds for</h3>
+        <p>Single-number, formula-grounded questions whose formula family is in the library and whose contract is correct.</p>
+      </div>
+      <div class="about-card">
+        <h3>Fails at</h3>
+        <p>Residual silent wrongs trace to three LLM steps: contract selection, input binding, and recall of a declared convention.
+          Gates check schema and bounds, not where a value came from.</p>
+      </div>
+      <div class="about-card">
+        <h3>Next</h3>
+        <p>A larger library evaluated with selection, letting the model synthesize computation inside a contract's declared conditions,
+          and better retrieval.</p>
+      </div>
+    </div>
+    <p style="margin-top:1.2rem">The demo's replay shows both kinds of failure from the recorded runs: a trap that gets through and a clean
+      question VerifiQuant declined although R-PAL answered it correctly. <a href="/demo#F-test-1263">See them &rarr;</a></p>
+  </div>
+</section>
+
+<section class="page-section" id="cite">
+  <div class="page-inner narrow">
+    <p class="eyebrow">Cite</p>
+    <h2>BibTeX</h2>
+    <pre class="bibtex" id="bibtex"><button class="copy-btn" type="button" data-copy="bibtex">Copy</button>@inproceedings{ko2026verifiquant,
+  title     = {VerifiQuant: Governance-by-Execution for Financial LLM Workflows},
+  author    = {Ko, Yu-Chi and Yeh, Mi-Yen and Lin, Shou-De},
+  booktitle = {Proceedings of the 7th ACM International Conference on AI in Finance (ICAIF '26)},
+  year      = {2026},
+  address   = {Milan, Italy},
+  publisher = {ACM},
+  doi       = {{ "{" ~ links.doi_id ~ "}" }}
+}</pre>
+    <p class="table-note">Published under CC BY 4.0. The DOI resolves once the ICAIF '26 proceedings are online.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const pre = document.getElementById(btn.dataset.copy);
+      const text = Array.from(pre.childNodes).filter((n) => n !== btn).map((n) => n.textContent).join('');
+      try { await navigator.clipboard.writeText(text.trim()); btn.textContent = 'Copied'; }
+      catch (_) { btn.textContent = 'Select and copy'; }
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+    });
+  });
+</script>
 {% endblock %}

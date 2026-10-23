@@ -1,86 +1,82 @@
 {% extends "base.html" %}
-{% block title %}About &mdash; VerifiQuant{% endblock %}
+{% block title %}About &middot; VerifiQuant (ICAIF '26){% endblock %}
 
 {% block content %}
 <section class="about-section">
   <div class="about-inner">
+    <p class="eyebrow">About</p>
     <h1>About VerifiQuant</h1>
 
     <div class="about-card">
-      <h2>The Problem</h2>
+      <h2>The paper</h2>
       <p>
-        Large Language Models are increasingly used for financial computations, but they fail silently.
-        A wrong NPV, a misinterpreted discount rate, or an invented input can propagate through
-        downstream decisions with no warning. Current approaches focus on making the model "more accurate"
-        &mdash; but accuracy without verifiability is a liability.
+        <strong>VerifiQuant: Governance-by-Execution for Financial LLM Workflows.</strong>
+        Yu-Chi Ko, Mi-Yen Yeh and Shou-De Lin. In <em>Proceedings of the 7th ACM International Conference on AI in Finance
+        (ICAIF '26)</em>, Milan, Italy, November 14&ndash;17, 2026. ACM.
+        <a href="{{ links.doi }}" target="_blank" rel="noopener">doi:{{ links.doi_id }}</a>.
+        Published under CC BY 4.0.
       </p>
+      <div class="author-links">
+        <a href="/#cite" class="btn btn-primary">BibTeX</a>
+        <a href="{{ links.repo }}" class="btn btn-outline" target="_blank" rel="noopener">Code, contracts and datasets &nearr;</a>
+      </div>
     </div>
 
     <div class="about-card">
-      <h2>The Approach</h2>
-      <p>
-        VerifiQuant doesn't try to make LLMs better at math. Instead, it builds a <strong>diagnostic funnel</strong>
-        around the computation: six layers (M/N/F/E/I/C) that classify failure modes, intercept broken inferences,
-        and apply <strong>mathematically verified repairs</strong> when possible. The system uses
-        <em>Financial Inference Contracts (FICs)</em> &mdash; pre-built, auditable computation cards with
-        declared invariants, scale checks, and semantic hints.
-      </p>
-    </div>
-
-    <div class="about-card">
-      <h2>Key Ideas</h2>
+      <h2>What this site shows</h2>
       <ul class="about-list">
-        <li><strong>Predictable failure</strong> &mdash; Every failure is classified, not hidden</li>
-        <li><strong>Verifiable transforms</strong> &mdash; I-class repairs are bound by algebraic invariants</li>
-        <li><strong>No SymPy, no magic</strong> &mdash; Pure Python AST analysis + numerical verification</li>
-        <li><strong>Normalization is the hard gate</strong> &mdash; LLM prompts are aspirational; post-processing
-          filters are the real safety net</li>
-        <li><strong>Deterministic layers are the stable part</strong> &mdash; E/F checks don't vary run-to-run</li>
+        <li><strong>Paper replay.</strong> Recorded outputs of R-PAL, R-PAL<sup>+</sup> and VerifiQuant on all 80 traps and three clean
+          questions, taken from the runs behind the paper's tables and scored with the paper's scorer. The replay makes no model calls.</li>
+        <li><strong>Verified repair.</strong> The loan contract's declared annuity-due transform, checked live by the same verifier the
+          paper evaluates. It makes no model calls.</li>
+        <li><strong>Try it live.</strong> The full funnel on the paper's 250-contract library with the top 4 contracts retrieved, on
+          Gemini 2.5 Flash. Selection, binding and ambiguity detection are LLM steps, so a live result can differ from a recorded one.</li>
       </ul>
     </div>
 
     <div class="about-card">
-      <h2>Tech Stack</h2>
+      <h2>What the system guarantees, and what it does not</h2>
+      <ul class="about-list">
+        <li><strong>Arithmetic stays outside the model.</strong> A number comes only from a contract's own code, after every gate passes.</li>
+        <li><strong>Inputs are checked for schema and bounds,</strong> not for provenance. A gate cannot tell whether a bound value came
+          from the right field.</li>
+        <li><strong>Records replay as stored.</strong> Deterministic steps re-execute exactly from the stored binding. A fresh run from the
+          raw text can take a different path.</li>
+        <li><strong>Repairs are bounded numerical validation,</strong> not formal equivalence: an edit must agree with a declared invariant
+          on sampled bindings.</li>
+        <li><strong>Out of library it gives a scope signal, not more answers.</strong> Out-of-library means a formula family absent from
+          the library, within the same benchmark.</li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <h2>Setup</h2>
       <div class="tech-grid">
-        <div class="tech-item">
-          <strong>Model</strong>
-          <span>Gemini 2.5 Flash</span>
-        </div>
-        <div class="tech-item">
-          <strong>Backend</strong>
-          <span>Python 3.11 / Flask / SQLAlchemy</span>
-        </div>
-        <div class="tech-item">
-          <strong>FIC Store</strong>
-          <span>SQLite + FTS5</span>
-        </div>
-        <div class="tech-item">
-          <strong>Retrieval</strong>
-          <span>BM25 + Sentence Transformers</span>
-        </div>
-        <div class="tech-item">
-          <strong>Deploy</strong>
-          <span>Google Cloud Run</span>
-        </div>
-        <div class="tech-item">
-          <strong>Verification</strong>
-          <span>AST analysis + numerical checks</span>
-        </div>
+        <div class="tech-item"><strong>Backbone</strong><span>Gemini 2.5 Flash, every compared system</span></div>
+        <div class="tech-item"><strong>Contract library</strong><span>250 FICs, built offline, fixed at run time</span></div>
+        <div class="tech-item"><strong>Retrieval</strong><span>BM25 over contract metadata, top 4</span></div>
+        <div class="tech-item"><strong>LLM calls per question</strong><span>Select, bind, ambiguity</span></div>
+        <div class="tech-item"><strong>Verification</strong><span>AST bounds + numerical invariant checks</span></div>
+        <div class="tech-item"><strong>Serving</strong><span>Python 3.11, Flask, SQLite, Google Cloud Run</span></div>
       </div>
     </div>
 
-    <div class="about-card about-author">
-      <h2>Author</h2>
+    <div class="about-card">
+      <h2>Acknowledgments</h2>
       <p>
-        Built by <strong>Vincent Ko aka Datafox</strong>.
-        For more projects and writings, visit
+        This work was supported in part by the National Science and Technology Council, Taiwan, R.O.C., under Grant
+        113-2628-E-001-003-MY4; the National Taiwan University and Academia Sinica Innovative Joint Program under Grant AS-NTU-114-06;
+        and the Institute of Information Science and the Research Center for Information Technology Innovation, Academia Sinica.
+      </p>
+    </div>
+
+    <div class="about-card about-author">
+      <h2>Contact</h2>
+      <p>
+        Yu-Chi Ko, Data Science Degree Program, National Taiwan University and Academia Sinica.
+        <a href="mailto:r14946005@ntu.edu.tw">r14946005@ntu.edu.tw</a>. More projects at
         <a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a>.
       </p>
-      <div class="author-links">
-        <a href="https://datafox.tw" class="btn btn-primary" target="_blank" rel="noopener">datafox.tw &nearr;</a>
-        <a href="https://github.com/datafox-tw" class="btn btn-outline" target="_blank" rel="noopener">GitHub
-          &nearr;</a>
-      </div>
     </div>
   </div>
 </section>

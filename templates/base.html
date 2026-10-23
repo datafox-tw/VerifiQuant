@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}VerifiQuant{% endblock %}</title>
+    <meta name="description" content="VerifiQuant: Governance-by-Execution for Financial LLM Workflows. ACM ICAIF '26 paper, interactive demo and replay of the paper's recorded runs." />
+    <meta property="og:title" content="VerifiQuant · ACM ICAIF '26" />
+    <meta property="og:description" content="Keep the spreadsheet, let the LLM fill it in. Executable contract gates decide whether a financial number may leave." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=asset_version) }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='paper.css', v=asset_version) }}" />
     {% block head %}{% endblock %}
   </head>
-  <body>
+  <body data-asset-version="{{ asset_version }}">
     <nav class="site-nav">
       <div class="nav-inner">
         <a href="/" class="nav-logo">
@@ -18,20 +24,20 @@
           <span class="logo-text">VerifiQuant</span>
         </a>
         <div class="nav-links">
-          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Home</a>
+          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Paper</a>
           <a href="/demo" class="nav-link {% if active_page == 'demo' %}active{% endif %}">Demo</a>
           <a href="/about" class="nav-link {% if active_page == 'about' %}active{% endif %}">About</a>
-          <a href="https://datafox.tw" class="nav-link external" target="_blank" rel="noopener">datafox.tw &nearr;</a>
+          <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">Code &nearr;</a>
         </div>
         <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="mobile-menu hidden" id="mobile-menu">
-        <a href="/" class="nav-link">Home</a>
+        <a href="/" class="nav-link">Paper</a>
         <a href="/demo" class="nav-link">Demo</a>
         <a href="/about" class="nav-link">About</a>
-        <a href="https://datafox.tw" class="nav-link external" target="_blank" rel="noopener">datafox.tw &nearr;</a>
+        <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">Code &nearr;</a>
       </div>
     </nav>
 
@@ -41,7 +47,12 @@
 
     <footer class="site-footer">
       <div class="footer-inner">
-        <p>&copy; 2026 VerifiQuant &middot; Built by <a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a></p>
+        <p>
+          Ko, Yeh and Lin. <em>VerifiQuant: Governance-by-Execution for Financial LLM Workflows.</em>
+          ACM ICAIF '26, Milan &middot;
+          <a href="{{ links.doi }}" target="_blank" rel="noopener">doi:{{ links.doi_id }}</a> &middot;
+          <a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a>
+        </p>
       </div>
     </footer>
 

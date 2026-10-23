@@ -665,47 +665,46 @@
     seedFrom(item, "");
   }
 
-  /* ── Curated showcase + trap set (grouped) ── */
+  /* ── Paper cases: the replay's walkthrough + all 80 traps (static/data/paper_replay.json) ── */
   let cvTrap = [];
-  const TRAP_PATH = "verifiquant/data/runs/paper_v1/trap/trap_set.jsonl";
 
-  async function loadShowcase() {
+  function populateShowcase(data) {
+    if (!showcaseEl || !data) return;
+    const byId = Object.fromEntries((data.cases || []).map((c) => [c.id, c]));
+    const toItem = (c, label, note) => ({
+      question: c.question,
+      context: c.context,
+      // A trap admits no valid number, so it is judged by behaviour (expected exit), never
+      // by matching a number; a clean question keeps its gold answer.
+      ground_truth: c.set === "clean" ? c.gold : null,
+      expected_class: c.set === "trap" ? c.expected : null,
+      demo_label: label,
+      demo_note: note,
+    });
+    cvShowcase = (data.featured || []).filter((f) => byId[f.id]).map((f) => {
+      const c = byId[f.id];
+      const note = c.set === "trap" ? `Paper trap ${c.id} · expected exit ${c.expected}. ${c.edit_note || ""}` : `Paper clean question ${c.id} · gold ${c.gold}.`;
+      return toItem(c, `${f.chapter} · ${f.title}`, note);
+    });
+    cvTrap = (data.cases || []).filter((c) => c.set === "trap").map((c) =>
+      toItem(c, `${c.id} · ${truncate(c.question, 52)}`, `Paper trap ${c.id} · expected exit ${c.expected}. ${c.edit_note || ""}`));
+    const groups = { E: [], I: [], F: [], N: [] };
+    cvTrap.forEach((item, idx) => { const op = item.demo_label.charAt(0); if (groups[op]) groups[op].push([item, idx]); });
+    let html = `<option value="">Choose a case…</option>`;
+    html += `<optgroup label="Walkthrough">` +
+      cvShowcase.map((item, idx) => `<option value="s:${idx}">${escapeHtml(item.demo_label)}</option>`).join("") + `</optgroup>`;
+    Object.entries(groups).forEach(([op, rows]) => {
+      html += `<optgroup label="Traps · ${op} (${rows.length})">` +
+        rows.map(([item, idx]) => `<option value="t:${idx}">${escapeHtml(item.demo_label)}</option>`).join("") + `</optgroup>`;
+    });
+    showcaseEl.innerHTML = html;
+  }
+
+  function loadShowcase() {
     if (!showcaseEl) return;
-    try {
-      const [scRes, trRes] = await Promise.all([
-        fetch("/api/demo/questions?showcase=1").then((r) => r.json()).catch(() => ({})),
-        fetch(`/api/demo/questions?path=${encodeURIComponent(TRAP_PATH)}`).then((r) => r.json()).catch(() => ({})),
-      ]);
-      cvShowcase = (scRes && scRes.status === "ok") ? (scRes.questions || []) : [];
-      // Surface ONE representative trap per funnel class (M/N/F/E/I) so the dropdown shows the
-      // full "five kinds of falls" set rather than several of the same class.
-      const allTrap = (trRes && trRes.status === "ok") ? (trRes.questions || []) : [];
-      const order = ["M", "N", "F", "E", "I"];
-      const firstByClass = {};
-      allTrap.forEach((q) => {
-        const cls = String(q.expected_diagnostic || "").trim().toUpperCase().charAt(0);
-        if (order.includes(cls) && !firstByClass[cls]) firstByClass[cls] = q;
-      });
-      cvTrap = order.map((cls) => firstByClass[cls]).filter(Boolean);
-
-      let html = `<option value="">Choose a showcase…</option>`;
-      if (cvShowcase.length) {
-        html += `<optgroup label="Curated (one per class)">` +
-          cvShowcase.map((item, idx) => `<option value="s:${idx}">${escapeHtml(item.demo_label || item.question)}</option>`).join("") +
-          `</optgroup>`;
-      }
-      if (cvTrap.length) {
-        html += `<optgroup label="Trap set">` +
-          cvTrap.map((item, idx) => {
-            const d = item.expected_diagnostic || "?";
-            return `<option value="t:${idx}">trap · ${escapeHtml(d)} · ${escapeHtml(truncate(item.question, 48))}</option>`;
-          }).join("") +
-          `</optgroup>`;
-      }
-      showcaseEl.innerHTML = html;
-    } catch (err) {
-      showcaseEl.innerHTML = `<option value="">Showcase unavailable</option>`;
-    }
+    showcaseEl.innerHTML = `<option value="">Loading the paper's cases…</option>`;
+    if (window.VQReplay && window.VQReplay.data) populateShowcase(window.VQReplay.data);
+    else document.addEventListener("vq-replay-ready", (e) => populateShowcase(e.detail), { once: true });
   }
 
   function truncate(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
@@ -714,19 +713,9 @@
     const raw = showcaseEl.value;
     if (!raw) return;
     if (sampleEl) sampleEl.value = "";
-    if (raw.startsWith("t:")) {
-      const item = cvTrap[Number(raw.slice(2))];
-      const naive = (item.ground_truth !== undefined && item.ground_truth !== null)
-        ? ` A blind calculation yields ${item.ground_truth} — which is the trap.` : "";
-      const note = `Trap · expected ${item.expected_diagnostic || "?"} (${item.expected_behavior || "recover"}).${naive}`;
-      // The trap's stored ground_truth is the NAIVE (wrong) number; correct behaviour is to
-      // flag/ask, so judge by behaviour (expected class), not by matching that number.
-      seedFrom({ ...item, ground_truth: null }, note);
-    } else {
-      const item = cvShowcase[Number(raw.slice(2))];
-      const cls = item.expected_class ? `Expected: ${item.expected_class}-class. ` : "";
-      seedFrom(item, cls + (item.demo_note || ""));
-    }
+    const item = raw.startsWith("t:") ? cvTrap[Number(raw.slice(2))] : cvShowcase[Number(raw.slice(2))];
+    if (!item) return;
+    seedFrom(item, item.demo_note || "");
   }
 
   /* ── Sample seeding (independent fetch; chat tab may open before QA tab) ── */
@@ -737,7 +726,7 @@
       const data = await res.json();
       if (data.status !== "ok") throw new Error(data.message || "failed");
       cvSamples = data.questions || [];
-      sampleEl.innerHTML = `<option value="">Choose a sample…</option>` + cvSamples.map((item, idx) => {
+      sampleEl.innerHTML = `<option value="">Choose a question…</option>` + cvSamples.map((item, idx) => {
         const title = item.article_title || item.function_id || `Sample ${idx + 1}`;
         return `<option value="${idx}">${String(idx + 1).padStart(2, "0")} · ${escapeHtml(title)}</option>`;
       }).join("");
@@ -767,5 +756,12 @@
   updateComposerMode();
 
   // Expose a hook so demo.js's tab switch can lazy-load samples if needed.
-  window.VQChat = { loadSamples };
+  window.VQChat = {
+    loadSamples,
+    seed(item, note) {
+      if (showcaseEl) showcaseEl.value = "";
+      if (sampleEl) sampleEl.value = "";
+      seedFrom(item, note);
+    },
+  };
 })();

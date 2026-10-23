@@ -12,12 +12,8 @@ const sampleQuestionEl = document.getElementById("sample-question");
 const sampleMetaEl = document.getElementById("sample-meta");
 const loadSampleBtn = document.getElementById("load-sample");
 
-const tabChat = document.getElementById("tab-chat");
 const tabQa = document.getElementById("tab-qa");
 const tabCards = document.getElementById("tab-cards");
-const panelChat = document.getElementById("panel-chat");
-const panelQa = document.getElementById("panel-qa");
-const panelCards = document.getElementById("panel-cards");
 
 // Shared renderers (defined in diagnostic_render.js, loaded first).
 const {
@@ -55,14 +51,22 @@ function setCardsLoading(isLoading) {
   cardsLoader.classList.toggle("hidden", !isLoading);
 }
 
+// Tabs are `.tab-btn[data-tab=X]` buttons paired with `#panel-X` sections.
+let cardsLoaded = false;
+
 function activateTab(target) {
-  if (tabChat) tabChat.classList.toggle("active", target === "chat");
-  tabQa.classList.toggle("active", target === "qa");
-  tabCards.classList.toggle("active", target === "cards");
-  if (panelChat) panelChat.classList.toggle("active", target === "chat");
-  panelQa.classList.toggle("active", target === "qa");
-  panelCards.classList.toggle("active", target === "cards");
+  document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === target);
+  });
+  document.querySelectorAll(".panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === `panel-${target}`);
+  });
+  if (target === "cards" && !cardsLoaded) {
+    cardsLoaded = true;
+    loadCardsOverview();
+  }
 }
+window.VQTabs = { activate: activateTab };
 
 function toSlotToken(text) {
   return String(text || "").toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
@@ -394,11 +398,11 @@ form.addEventListener("submit", async (event) => {
 document.getElementById("refresh-cards").addEventListener("click", loadCardsOverview);
 if (loadSampleBtn) loadSampleBtn.addEventListener("click", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
 if (sampleQuestionEl) sampleQuestionEl.addEventListener("change", () => applySampleQuestion(Number(sampleQuestionEl.value || 0)));
-if (tabChat) tabChat.addEventListener("click", () => activateTab("chat"));
-tabQa.addEventListener("click", () => activateTab("qa"));
-tabCards.addEventListener("click", () => {
-  activateTab("cards");
-  if (!cardsResult.innerHTML.trim()) loadCardsOverview();
+document.querySelectorAll(".tab-btn[data-tab]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    activateTab(btn.dataset.tab);
+    if (history.replaceState) history.replaceState(null, "", `#${btn.dataset.tab === "chat" ? "live" : btn.dataset.tab}`);
+  });
 });
 setupPdfAttachment({
   fileId: "qa-pdf-file",
