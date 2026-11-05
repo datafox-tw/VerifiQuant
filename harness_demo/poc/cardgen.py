@@ -129,7 +129,7 @@ def describe_output(code: str) -> dict | None:
     except json.JSONDecodeError:
         return None
     levels = raw.get("levels") if isinstance(raw, dict) else None
-    if not isinstance(levels, list) or not 1 <= len(levels) <= 3 or any(x not in LEVELS for x in levels):
+    if not isinstance(levels, list) or not 1 <= len(levels) <= 3 or any(not isinstance(x, str) or x not in LEVELS for x in levels):
         return None
     fields = [x for x in raw.get("fields") or [] if isinstance(x, dict) and isinstance(x.get("key"), (str, int))
               and not isinstance(x.get("key"), bool) and x.get("name")]
