@@ -1,0 +1,10 @@
+# Upload only the app; never local keys or caches.
+.gcloudignore
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*
+static/_*
+# the PoC (runs, auto cards, trap sets) is offline research code; the app never imports it
+poc/

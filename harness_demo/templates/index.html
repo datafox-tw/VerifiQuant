@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>可驗證財金程式 Harness</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='harness.css') }}">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>可驗證財金程式 Harness</h1>
+    <p>LLM 負責寫程式，harness 負責決定這個程式能不能信。每一步用到的概念都連到真正討論它的論文。</p>
+  </div>
+  <div class="mode" role="tablist" aria-label="模式">
+    <button class="mode-btn active" data-mode="scripted" role="tab">示範模式</button>
+    <button class="mode-btn" data-mode="live" role="tab" id="live-btn">即時 Gemini</button>
+    <button class="mode-btn" data-mode="lens" role="tab">單篇論文套用</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="side">
+    <section id="case-list" class="panel">
+      <h2>例子</h2>
+      <div id="cases"></div>
+      <p class="hint">示範模式的候選程式是人工撰寫、重現常見 LLM 錯誤的替身；驗證與執行全部是真的。</p>
+    </section>
+    <section id="live-box" class="panel hidden">
+      <h2>輸入問題</h2>
+      <textarea id="live-q" rows="5" maxlength="300" placeholder="例如：我每月存 5,000 元，年利率 2%，存 10 年，最後有多少？"></textarea>
+      <div id="live-examples" class="examples"></div>
+      <button id="live-run" class="primary">交給 harness</button>
+      <p class="hint">會呼叫 Gemini 2.5 Flash：抽取規格 1 次、候選程式 4 次、檢查員 1 次、對照組 1 次。</p>
+    </section>
+    <section id="lens-list" class="panel">
+      <h2>只套用一篇論文</h2>
+      <div id="lens-buttons"></div>
+      <p class="hint">拿掉 harness 的其他步驟，只用這篇論文的機制處理同一批例子。程式與檢查都真的執行；「是不是 bug」的人工標註只用來評分。</p>
+    </section>
+    <nav class="panel steps-nav">
+      <h2>流程</h2>
+      <ol id="nav"></ol>
+    </nav>
+  </aside>
+
+  <section class="main">
+    <div id="question" class="question panel"></div>
+    <div class="compare">
+      <div class="panel baseline">
+        <div class="eyebrow">沒有 harness 的 LLM</div>
+        <div id="baseline"></div>
+      </div>
+      <div class="panel outcome">
+        <div class="eyebrow">harness 的輸出</div>
+        <div id="decision"></div>
+      </div>
+    </div>
+    <div id="pipeline"></div>
+
+    <section id="lens-view"></section>
+
+    <section class="panel lit" id="lit">
+      <h2>概念 × 論文對照</h2>
+      <p class="hint">每一列是 harness 用到的一個概念：它在程式哪裡、真實討論它的論文怎麼說、以及這裡的做法差在哪。「讀過」= 出現在週會筆記；「建議補讀」是依概念補上的。查證標記說明出處資訊（作者、出處、編號）怎麼確認；論文主張摘自摘要或你的筆記，引用數字前仍請回原文核對。</p>
+      <div class="table-wrap"><table id="lit-table"></table></div>
+      <h2 class="mt">論文清單</h2>
+      <div class="table-wrap"><table id="paper-table"></table></div>
+    </section>
+  </section>
+</main>
+
+<div id="pop" class="pop hidden" role="dialog"></div>
+<script src="{{ url_for('static', filename='harness.js') }}"></script>
+<script src="{{ url_for('static', filename='lens.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+{
+  "protocol": "harness_poc_test_traps_v1",
+  "created_at": "2026-11-05T15:14:31",
+  "per_operator": 20,
+  "max_ops_per_base": 2,
+  "total_traps": 77,
+  "needs_review": 0,
+  "sources": {
+    "questions": {
+      "path": "/Users/blackwingedkite/Desktop/verifiquant-update/harness_demo/poc/traps_test/questions_excluding_dev_bases.jsonl",
+      "sha256": "0fce73d887ca8e84e81ff3cc7176389d331b303c7e9243c937afdf452c543488"
+    },
+    "canonical": {
+      "path": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250/results/vq_flash/output.jsonl",
+      "sha256": "6119f14b09c803e4f9195a94b2309712280ba742fc2ec03a66b581ae2af82800"
+    },
+    "cards_db": {
+      "path": "/Users/blackwingedkite/Desktop/verifiquant-update/verifiquant/data/runs/paper_v2_250/fic/cards.db",
+      "sha256": "97e3f963b2809e23751d155af3c652e4ca7e8165eb1d0ea1cd05da3658438922"
+    }
+  },
+  "operators": {
+    "E": {
+      "family_counts": {
+        "magnitude": 6,
+        "negativity": 8,
+        "nonpositive_zero": 4,
+        "rate_out_of_unit": 2
+      },
+      "target": 20,
+      "produced": 20,
+      "candidates": 515
+    },
+    "I": {
+      "family_counts": {
+        "soft": 20
+      },
+      "target": 20,
+      "produced": 20,
+      "candidates": 67
+    },
+    "F": {
+      "family_counts": {
+        "balance": 5,
+        "count": 3,
+        "other": 5,
+        "price": 5,
+        "rate": 2
+      },
+      "target": 20,
+      "produced": 20,
+      "candidates": 381
+    },
+    "N": {
+      "family_counts": {
+        "exotic": 14,
+        "near_miss": 6
+      },
+      "target": 20,
+      "produced": 20,
+      "candidates": 191
+    }
+  },
+  "distinct_base_questions": 47,
+  "base_cluster_sizes": {
+    "max_ops_on_one_base": 2
+  },
+  "i_hard_supply": {
+    "cases_with_hard_rule": 32,
+    "groundable": 0,
+    "phrase_absent": 16,
+    "no_pattern": 18
+  },
+  "known_constraints": [
+    "I_HARD is capped by phrase-deletion supply: only 0 of 32 hard-ambiguity cases carry a deletable disambiguator phrase; the rest are context-implied or method/basis choices needing hand/Tier-2 construction (deferred to the ACL-phase hard set). Report I_HARD and I_SOFT FNAR separately; do not generalize the small hard stratum.",
+    "F field-kind coverage is data-limited to kinds present in selected FICs; 'rate'/'time' removals were scarce in this pool."
+  ],
+  "trap_set_sha256": "1a4919f59d16e66dbb355bf426593b49601e810b94edf61762cee6234a4af749",
+  "split": "test",
+  "excluded_dev_bases": [
+    "test-1003",
+    "test-1004",
+    "test-1006",
+    "test-1007",
+    "test-1008",
+    "test-1014",
+    "test-1016",
+    "test-1017",
+    "test-1020",
+    "test-1022",
+    "test-1023",
+    "test-1026",
+    "test-1028",
+    "test-1032",
+    "test-1034",
+    "test-1035",
+    "test-1036",
+    "test-1037",
+    "test-1039",
+    "test-1043",
+    "test-1057",
+    "test-1062",
+    "test-1064",
+    "test-1067",
+    "test-1070",
+    "test-1075",
+    "test-1080",
+    "test-1082",
+    "test-1086",
+    "test-1088",
+    "test-1092",
+    "test-1094",
+    "test-1097",
+    "test-1100",
+    "test-1102",
+    "test-1105",
+    "test-1108",
+    "test-1122",
+    "test-1128",
+    "test-1263",
+    "test-1264",
+    "test-1271",
+    "test-1422",
+    "test-1559",
+    "test-1561",
+    "test-1591",
+    "test-1648",
+    "test-1668",
+    "test-1879",
+    "test-1952",
+    "test-1980",
+    "test-2163"
+  ],
+  "n_pool": 198,
+  "n_templates": [
+    "exotic_lsm",
+    "exotic_garch",
+    "exotic_hullwhite",
+    "exotic_es",
+    "exotic_ml_pd",
+    "near_miss_sortino",
+    "near_miss_calmar"
+  ],
+  "dropped_construction_errors": {
+    "F-test-1490": [
+      "redaction landed inside another number",
+      "removed value 25.0 is still stated in the text"
+    ],
+    "F-test-1545": [
+      "removed value 85000.0 is still stated in the text"
+    ],
+    "F-test-1435": [
+      "removed value 1.15 is still stated in the text"
+    ]
+  }
+}

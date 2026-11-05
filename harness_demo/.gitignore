@@ -1,0 +1,3 @@
+# run logs are console noise; results.jsonl under runs/ is the record
+poc/*.log
+__pycache__/
