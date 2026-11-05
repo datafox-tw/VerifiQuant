@@ -190,6 +190,7 @@ def search(text: str, k: int = TOP_K) -> list[dict]:
 class PocProvider(LiveProvider):
     mode = "poc"
     verify_inspector = False  # v5 as run on 11/05; turning it on is the v6 experiment
+    self_check = False  # v6b: drop the invariants the reference itself violates (selfcheck.py)
 
     def retrieve(self, question):
         hits = search(question)
@@ -204,7 +205,11 @@ class PocProvider(LiveProvider):
         return card_id, table, f"全文檢索取前 {len(hits)} 張，由 {providers.MODEL} 選卡（回答：{reply}）"
 
     def get_card(self, card_id):
-        return cardgen.get(card_id)["card"]
+        card = cardgen.get(card_id)["card"]
+        if self.self_check:
+            from . import selfcheck
+            card = selfcheck.apply(card)
+        return card
 
     def ground(self, slot, quote, claimed, text):
         return ground(slot, quote, claimed, text)

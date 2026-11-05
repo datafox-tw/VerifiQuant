@@ -12,10 +12,10 @@ RUNNER = Path(__file__).with_name("_runner.py")
 
 def run(code: str, inputs: dict, invariants: list[dict] | None = None, extra: dict | None = None,
         timeout: float = 5.0, allow: list[str] | None = None, path: list | None = None,
-        mutate: bool = False) -> dict:
+        mutate: bool = False, raw: bool = False) -> dict:
     """path: pick the result out of a structured return value; mutate: run the element probe."""
     job = {"code": code, "inputs": inputs, "invariants": invariants or [], "extra": extra or {},
-           "allow": allow or [], "path": path, "mutate": mutate}
+           "allow": allow or [], "path": path, "mutate": mutate, "raw": raw}
     try:
         proc = subprocess.run([sys.executable, "-I", str(RUNNER)], input=json.dumps(job),
                               capture_output=True, text=True, timeout=timeout)

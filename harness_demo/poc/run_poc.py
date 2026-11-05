@@ -107,9 +107,13 @@ def main():
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--allow-rounding", action="store_true",
                     help="turn the rounding gate off (it is on by default since v5; v3 had it off)")
+    ap.add_argument("--verify-inspector", action="store_true", help="v6: the inspector must pass the card first")
+    ap.add_argument("--self-check", action="store_true", help="v6b: drop invariants the reference violates")
     ap.add_argument("--ids", default=None, help="comma-separated question ids (default: the frozen sample)")
     args = ap.parse_args()
     PocProvider.reject_rounding = not args.allow_rounding
+    PocProvider.verify_inspector = args.verify_inspector
+    PocProvider.self_check = args.self_check
     ids = args.ids.split(",") if args.ids else sample_ids()[: args.n] if args.n else sample_ids()
     out_dir = RUNS / args.tag
     out_dir.mkdir(parents=True, exist_ok=True)

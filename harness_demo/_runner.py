@@ -77,11 +77,14 @@ def main():
             g = f
             f = lambda *a, **k: bump(g(*a, **k), path or [])
         full = f(**job["inputs"])
-        value = float(pick(full, path) if path is not None else full)
-        if not math.isfinite(value):
-            raise ValueError("result is not finite")
-        out["result"] = value
-        result = full if path is not None else value
+        if job.get("raw"):  # card self-check: the invariants see whatever the reference returns, nothing is projected
+            result = full
+        else:
+            value = float(pick(full, path) if path is not None else full)
+            if not math.isfinite(value):
+                raise ValueError("result is not finite")
+            out["result"] = value
+            result = full if path is not None else value
         if path is not None:
             out["preview"] = json.dumps(full, default=str)[:300]
     except Exception as exc:  # the candidate failed to even run

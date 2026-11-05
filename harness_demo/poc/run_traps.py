@@ -171,10 +171,14 @@ def main():
     ap.add_argument("--split", choices=sorted(SPLITS), default="dev")
     ap.add_argument("--score", default=None, help="comma-separated run tags to score")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--verify-inspector", action="store_true", help="v6: the inspector must pass the card first")
+    ap.add_argument("--self-check", action="store_true", help="v6b: drop invariants the reference violates")
     ap.add_argument("--ids", default=None, help="comma-separated trap ids (default: all 80)")
     args = ap.parse_args()
     global split
     split = args.split
+    PocProvider.verify_inspector = args.verify_inspector
+    PocProvider.self_check = args.self_check
     if args.score:
         print(score(args.score.split(",")))
         return
