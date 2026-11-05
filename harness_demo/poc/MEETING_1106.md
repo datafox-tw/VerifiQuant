@@ -101,17 +101,17 @@ FNAR = 陷阱題仍給出數字的比例，越低越好。評分直接呼叫論�
   依一條結構規則刪除（被拿掉的值仍出現在原文就不算陷阱），開發集用同一條規則檢查是 0 題。
   其餘 77 題還沒經過同學的人工檢查。
 
-### 和沒有 harness 比（開發集，論文舊結果，簡報第 18 頁）
+### 和沒有 harness 比（簡報第 18 頁）
 
-| 系統 | FNAR | 不含 I_SOFT |
-|---|---|---|
-| R-PAL plain（LLM 讀檢索函式寫程式，無治理） | 48.8% | 37.9% |
-| R-PAL+（同上，提示可以拒答，三次） | 27.5% | **13.6%** |
-| harness（四次） | 27.2% | 19.3% |
-| VQ（三次） | 10.4% | 8.1% |
+| 系統 | 開發集 FNAR | 不含 I_SOFT | 測試集 FNAR | 不含 I_SOFT |
+|---|---|---|---|---|
+| R-PAL plain（LLM 讀檢索函式寫程式，無治理） | 48.8% | 37.9% | 49.4% | 31.6% |
+| R-PAL+（同上，提示可以拒答，三次） | 27.5% | **13.6%** | **19.9%** | **11.7%** |
+| harness | 27.2% | 19.3% | 29.0% | 14.0% |
+| VQ（三次） | 10.4% | 8.1% | 7.4% | 8.2% |
 
-harness 的總 FNAR 和 R-PAL+ 一樣；拿掉 I_SOFT 甚至比 R-PAL+ 差。為什麼、以及接下來的實驗（借用 Agenthon 九月的
-控制），完整分析在 [FNAR_ANALYSIS.md](FNAR_ANALYSIS.md)，簡報第 19–20 頁。測試集上的 R-PAL 正在跑。
+開發集上 harness 的總 FNAR 和 R-PAL+ 一樣，測試集上 R-PAL+ 反而比較好（19.9% 對 29.0%）；拿掉 I_SOFT 兩邊都是 harness 較差。開發集 R-PAL 是論文舊結果，測試集是這次重跑。為什麼、以及接下來的實驗（借用 Agenthon 九月的
+控制），完整分析在 [FNAR_ANALYSIS.md](FNAR_ANALYSIS.md)，簡報第 19–20 頁。
 
 開發集用 v5 再跑一次是 27.5%（不含 I_SOFT 19.7%），和 v3 相同：v4、v5 的改動只影響答不答得對，不影響給不給數字。
 
@@ -157,7 +157,7 @@ harness 的總 FNAR 和 R-PAL+ 一樣；拿掉 I_SOFT 甚至比 R-PAL+ 差。為
 ## 5. 還在跑、或出國期間可以跑的
 
 - 250 題已跑完一次（`runs/full250_v5_r1/REPORT.md`）；出國期間可再跑兩次。
-- VQ 在測試集上三次已跑完（7.4%）。R-PAL 在測試集上正在跑，完成後 `python3 -m harness_demo.poc.fnar_breakdown --split test` 會自動補上。
+- 測試集上 VQ、R-PAL plain、R-PAL+ 都已跑完（`python3 -m harness_demo.poc.fnar_breakdown --split test`）。
 - 測試集同學人工檢查：需要你安排，77 題。
 
 ## 檔案
