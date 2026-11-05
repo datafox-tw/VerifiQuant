@@ -281,7 +281,9 @@ def run(provider, question: str, answers: dict) -> dict:
         return finish({"action": "ABSTAIN", "headline": "拒答：卡片無法驗證程式",
                        "text": "沒有後置條件或變形關係，任何程式都會「通過」，所以不輸出答案。"})
     steps.append(_step("contract", "info",
-                       f"卡片提供 {len(card['invariants'])} 條不變量；它們由專家按問題類型撰寫，不是 LLM 當場生成。",
+                       f"卡片提供 {len(card['invariants'])} 條不變量；" + (
+                           "由 LLM 只讀函式庫函式自動產生，經過洩題稽核" + ("與參考函式自我檢查" if card.get("self_check") else "")
+                           + "，不是看了題目當場生成。" if provider.mode == "poc" else "它們由專家按問題類型撰寫，不是 LLM 當場生成。"),
                        _contract_body(card)))
 
     # 4 precheck ---------------------------------------------------------

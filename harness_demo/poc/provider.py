@@ -189,7 +189,7 @@ def search(text: str, k: int = TOP_K) -> list[dict]:
 
 class PocProvider(LiveProvider):
     mode = "poc"
-    verify_inspector = False  # v5 as run on 11/05; turning it on is the v6 experiment
+    verify_inspector = False  # on = v6a/v6b; measured harmful (test-1043), so off by default
     self_check = False  # v6b: drop the invariants the reference itself violates (selfcheck.py)
 
     def retrieve(self, question):

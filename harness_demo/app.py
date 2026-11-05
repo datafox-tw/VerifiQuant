@@ -15,6 +15,7 @@ from flask import Flask, jsonify, render_template, request
 from . import harness
 from .cards import CARDS
 from .cases import CASES, CASES_BY_ID
+from . import replays
 from .papers import CONCEPTS, PAPERS
 from .lenses import compute as compute_lenses
 from .providers import LiveProvider, ScriptedProvider, live_available
@@ -58,7 +59,7 @@ def index():
 @app.get("/api/meta")
 def meta():
     return jsonify({
-        "cases": [{k: c[k] for k in ("id", "title", "tag", "question", "story")} for c in CASES],
+        "cases": [{k: c[k] for k in ("id", "title", "tag", "question", "story")} for c in CASES] + replays.meta_entries(),
         "papers": PAPERS,
         "concepts": CONCEPTS,
         "steps": harness.STEP_TITLES,
@@ -90,6 +91,8 @@ def run():
             return jsonify(harness.run(LiveProvider(), question, answers))
         except Exception as exc:
             return jsonify({"error": f"Gemini 呼叫失敗：{type(exc).__name__}: {exc}"}), 502
+    if body.get("case_id") in replays.REPLAYS_BY_ID:  # PoC runs recorded offline; answers cannot continue them
+        return jsonify(replays.load(body["case_id"]))
     case = CASES_BY_ID.get(body.get("case_id"))
     if not case:
         return jsonify({"error": "unknown case"}), 404

@@ -115,7 +115,9 @@ def _spec_names(card):
 class LiveProvider:
     mode = "live"
     can_regenerate = True
-    verify_inspector = True  # the PoC turns this off until it is measured (v6)
+    # off: measured on 11/05 (PoC v6), forcing the inspector through the card made it inherit a card error
+    # (test-1043). The inspector's value is that it does not depend on the card.
+    verify_inspector = False
 
     def __init__(self, k: int = 4):
         self.k = k

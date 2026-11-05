@@ -10,6 +10,7 @@ const SOURCE = { dbc: "Design by Contract", metamorphic: "變形測試", inducti
 
 function fmtVal(v, unit) {
   if (v === null || v === undefined) return "—";
+  if (typeof v === "object") return esc(JSON.stringify(v));
   if (unit === "小數") return (v * 100).toFixed(2) + "%";
   if (unit === "元") return Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 }) + " 元";
   return String(v);
@@ -64,7 +65,10 @@ function setMode(mode) {
 }
 
 function renderCases() {
-  $("#cases").innerHTML = S.meta.cases.map((c) =>
+  const firstPoc = S.meta.cases.findIndex((c) => c.id.startsWith("poc_"));
+  $("#cases").innerHTML = S.meta.cases.map((c, i) => (i === firstPoc
+    ? `<div class="hint"><b>PoC 實測紀錄</b>：論文的英文題與陷阱題。卡片、候選程式、檢查員全部由 Gemini 自動產生，錄下完整執行後在這裡重播，失敗案例也一併列出。</div>`
+    : "") +
     `<button class="case" data-id="${c.id}"><div class="t">${esc(c.title)}</div><div class="tag">${esc(c.tag)}</div></button>`).join("");
   document.querySelectorAll(".case").forEach((b) => b.addEventListener("click", () => selectCase(b.dataset.id)));
 }
@@ -236,24 +240,40 @@ function codeBlock(code, hl = []) {
 
 const BODY = {
   scope(b) {
-    const rows = b.table.map((r) => `<tr><td>${esc(r.title)}</td><td>${r.hits.map(esc).join("、") || '<span class="na">—</span>'}</td><td class="mono">${r.score}</td></tr>`).join("");
-    return `<table><thead><tr><th>卡片</th><th>命中關鍵字</th><th>分數</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="note">方法：${esc(b.how)}。分數不足或兩張卡同分就不硬選，直接拒答。這是 VerifiQuant N 閘的簡化版。</div>`;
+    // PoC replays come from full-text search over the 250-card library: rows carry card / id, no keyword hits
+    const poc = b.table.length && b.table[0].card !== undefined;
+    const rows = b.table.map((r) => poc
+      ? `<tr class="${r.id === b.card ? "" : "lost"}"><td>${esc(r.card)}</td><td class="mono">${esc(r.id)}${r.id === b.card ? " ← 選中" : ""}</td><td class="mono">${r.score}</td></tr>`
+      : `<tr><td>${esc(r.title)}</td><td>${r.hits.map(esc).join("、") || '<span class="na">—</span>'}</td><td class="mono">${r.score}</td></tr>`).join("");
+    const head = poc ? "<th>卡片</th><th>卡片編號</th><th>檢索名次分</th>" : "<th>卡片</th><th>命中關鍵字</th><th>分數</th>";
+    return `<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>
+      <div class="note">方法：${esc(b.how)}。${poc ? "卡片庫是論文的 250 張卡，卡片內容由 LLM 自動產生。" : "分數不足或兩張卡同分就不硬選，直接拒答。這是 VerifiQuant N 閘的簡化版。"}</div>`;
   },
 
   intent(b, s, data) {
     const label = { grounded: ["有出處", "pass"], user: ["使用者補充", "info"], missing: ["原文沒有", "ask"],
-      ungrounded: ["無出處，不採用", "fail"], mismatch: ["數值不符，不採用", "fail"], bad_user: ["無法解析", "fail"] };
+      ungrounded: ["無出處，不採用", "fail"], mismatch: ["數值不符，不採用", "fail"], bad_user: ["無法解析", "fail"],
+      default: ["沿用預設值", "info"] };
+    const show = (v) => (v !== null && typeof v === "object" ? JSON.stringify(v) : v ?? "—");
+    const quote = (q) => (Array.isArray(q) ? q.map((x) => "「" + esc(x) + "」").join(" ") : q ? "「" + esc(q) + "」" : '<span class="na">—</span>');
+    const sel = b.select ? `<div class="block-title">選取路徑（卡片輸出是一個結構，題目要其中一格）</div>
+      <div class="note">結構：${esc(b.select.structure)}<br>LLM 宣稱的路徑 <code>${esc(JSON.stringify(b.select.claimed))}</code>，原文引用 ${quote(b.select.quote)}
+      → <span class="chip s-${b.select.status === "grounded" ? "pass" : "fail"}">${b.select.status === "grounded" ? "每一層都由引用文字決定" : "不採用"}</span> ${esc(b.select.note)}</div>` : "";
+    if (!b.slots) {
+      if (b.asked !== undefined) return `<div class="note">題目問的量：「${esc(b.asked)}」。卡片算的是「${esc(b.card_output && b.card_output.label)}」。兩者不同，卡片不適用。</div>`;
+      return sel;
+    }
     const rows = b.slots.map((r) => {
       const [t, c] = label[r.status];
       return `<tr><td>${esc(r.label)}<div class="sub mono">${r.name}</div></td>
-        <td class="mono">${r.claimed ?? "—"}</td><td>${r.quote ? "「" + esc(r.quote) + "」" : '<span class="na">—</span>'}</td>
-        <td class="mono">${r.parsed ?? "—"}</td><td><span class="chip s-${c}">${t}</span><div class="sub">${esc(r.note)}</div></td></tr>`;
+        <td class="mono">${esc(show(r.claimed))}</td><td>${quote(r.quote)}</td>
+        <td class="mono">${esc(show(r.parsed))}</td><td><span class="chip s-${c}">${t}</span><div class="sub">${esc(r.note)}</div></td></tr>`;
     }).join("");
     const conv = b.conventions.map((c) => `<li><b>${esc(c.label)}</b>：${c.value ? `<span class="chip s-${c.status === "user" ? "info" : "pass"}">${esc(c.value)}</span>` : '<span class="chip s-ask">未決定</span>'} <span class="sub">${esc(c.note)}${c.quote ? "（原文：「" + esc(c.quote) + "」）" : ""}</span></li>`).join("");
     const fixed = b.fixed.map((f) => `<li>${esc(f.text)}</li>`).join("");
     let html = `<div class="table-wrap"><table><thead><tr><th>欄位</th><th>LLM 宣稱</th><th>原文引用</th><th>重新解析</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
       <div class="note callout">LLM 只負責「指出原文哪幾個字是這個欄位」。數值由程式從引用文字重新解析；引用不在原文裡、或解析結果對不上，一律不採用。</div>`;
+    html += sel;
     if (conv) html += `<div class="block-title">約定（convention）</div><ul>${conv}</ul>`;
     if (fixed) html += `<div class="block-title">卡片的固定假設（程式會比問題多做的部分，先攤給使用者看）</div><ul>${fixed}</ul>`;
     html += `<div class="block-title">凍結後的函式簽名</div><code>${esc(b.signature)}</code>`;
@@ -314,8 +334,11 @@ const BODY = {
         ${b.conventions.length ? `<td class="sub conv">${conv}</td>` : ""}<td class="verdict">${verdict}${bug}</td></tr>`;
     }).join("");
     const legend = invs.map((inv, i) => `<div><b class="k-${inv.kind}">I${i + 1}</b> ${esc(inv.text)}</div>`).join("");
+    const probe = b.element_probe ? `<div class="note callout"><b>元素探針：</b>把題目要的那一格改動 0.1%，${b.element_probe.caught_by.length
+      ? `有 ${b.element_probe.caught_by.length} 條不變量發現（${b.element_probe.caught_by.map(failName(invs)).join("、")}），卡片管得到這一格。`
+      : "沒有任何不變量發現：卡片沒有約束題目要的值，拒答。"}</div>` : "";
     return `<div class="table-wrap"><table class="matrix"><thead><tr><th>候選</th><th>答案</th>${head}${b.conventions.length ? "<th>約定：宣稱 vs 行為</th>" : ""}<th>判定</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="legend">${legend}</div>
+      <div class="legend">${legend}</div>${probe}
       <div class="note callout">規則不是寫在 prompt 裡請模型「自我檢查」（VERAFI 的做法），而是在模型外面真的執行。${b.conventions.length ? "約定釘子（橘色）只檢查程式宣稱的那個約定；◦ 表示程式沒宣稱、但行為符合。程式的自我說明不被信任，宣稱和行為對不上就淘汰。" : ""}</div>`;
   },
 
