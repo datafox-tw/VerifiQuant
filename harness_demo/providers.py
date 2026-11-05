@@ -96,7 +96,8 @@ def _ask(prompt: str, temperature: float = 0.2, as_json: bool = False, think: bo
             return resp.text or ""
         except Exception as exc:
             if attempt == 4 or not any(t in str(exc) for t in ("429", "500", "502", "503", "504", "RESOURCE_EXHAUSTED",
-                                                                "UNAVAILABLE", "DEADLINE", "imeout")):
+                                                                "UNAVAILABLE", "DEADLINE", "imeout", "ConnectError",
+                                                                "nodename", "Connection")):
                 raise
             time.sleep(2 ** attempt * 3)
 
