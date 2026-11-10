@@ -4,8 +4,30 @@
     {
       "name": "verifiquant",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["app.py"],
+      "runtimeArgs": [
+        "app.py"
+      ],
       "port": 6222
+    },
+    {
+      "name": "poster",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "poster"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "harness-demo",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "harness_demo/serve.py"
+      ],
+      "port": 6230
     }
   ]
 }

@@ -69,7 +69,7 @@
     if (!trace.trim()) return "";
     return `
       <details class="bubble-details">
-        <summary>How this was derived &amp; verified</summary>
+        <summary>${t("How this was derived &amp; checked")}</summary>
         <div class="bubble-details-body">${trace}</div>
       </details>`;
   }
@@ -97,8 +97,8 @@
     if (!Number.isFinite(gold) || v === null) return "";
     const ok = Math.abs(v - gold) <= Math.max(1e-6, Math.abs(gold) * 0.01);
     return ok
-      ? `<span class="verdict verdict-ok">✓ matches gold (${escapeHtml(gold)})</span>`
-      : `<span class="verdict verdict-bad">✗ differs from gold (${escapeHtml(gold)})</span>`;
+      ? `<span class="verdict verdict-ok">${escapeHtml(t("✓ matches gold ({gold})", { gold }))}</span>`
+      : `<span class="verdict verdict-bad">${escapeHtml(t("✗ differs from gold ({gold})", { gold }))}</span>`;
   }
 
   // VerifiQuant did the right thing if it raised the EXACT gate the case expects.
@@ -106,10 +106,10 @@
     const exp = expectedFlagClass();
     if (exp) {
       const dt = String(data.diagnostic_type || "").trim().toUpperCase().charAt(0);
-      if (dt === exp) return `<span class="verdict verdict-ok">✓ correctly raised ${escapeHtml(exp)}-gate</span>`;
-      if (data.status === "success") return `<span class="verdict verdict-bad">✗ answered (expected ${escapeHtml(exp)}-gate)</span>`;
+      if (dt === exp) return `<span class="verdict verdict-ok">${escapeHtml(t("✓ stopped at the expected {gate} gate", { gate: exp }))}</span>`;
+      if (data.status === "success") return `<span class="verdict verdict-bad">${escapeHtml(t("✗ answered (expected the {gate} gate)", { gate: exp }))}</span>`;
       // Flagged, but at a different gate than expected.
-      return `<span class="verdict verdict-bad">✗ raised ${escapeHtml(dt || "?")}-gate (expected ${escapeHtml(exp)})</span>`;
+      return `<span class="verdict verdict-bad">${escapeHtml(t("✗ stopped at {got} (expected {gate})", { got: dt || "?", gate: exp }))}</span>`;
     }
     return data.status === "success" ? verdictChip(data.output_value) : "";
   }
@@ -119,8 +119,8 @@
     const exp = expectedFlagClass();
     if (exp) {
       return answerNum !== null
-        ? `<span class="verdict verdict-bad">✗ answered anyway (expected ${escapeHtml(exp)}-gate)</span>`
-        : `<span class="verdict verdict-ok">✓ declined to answer</span>`;
+        ? `<span class="verdict verdict-bad">${escapeHtml(t("✗ answered anyway (expected the {gate} gate)", { gate: exp }))}</span>`
+        : `<span class="verdict verdict-ok">${escapeHtml(t("✓ declined to answer"))}</span>`;
     }
     return answerNum !== null ? verdictChip(answerNum) : "";
   }
@@ -155,22 +155,22 @@
     let body = "";
     if (status === "success") {
       body = `
-        <p class="chat-answer"><span class="verified-check">✓ verified</span>
+        <p class="chat-answer"><span class="verified-check">${escapeHtml(t("✓ every gate passed"))}</span>
           <code>${escapeHtml(data.output_var || "result")}</code> =
           <strong>${escapeHtml(data.output_value)}</strong></p>
-        <p class="chat-derived">Derived from contract <code>${escapeHtml(data.fic_id || "(none)")}</code> and verified numerically.</p>`;
+        <p class="chat-derived">${t("Computed by the code of contract <code>{fic}</code> after every gate passed.", { fic: escapeHtml(data.fic_id || "(none)") })}</p>`;
       // A successful answer may still carry soft (I-class) refinements / transforms.
       body += softWarningWidget(data);
     } else if (status === "needs_clarification" || (Array.isArray(data.soft_warnings) && data.soft_warnings.length)) {
-      body = `<p class="chat-text">${escapeHtml(data.reason || "I need a clarification before I can give a verified answer.")}</p>`;
+      body = `<p class="chat-text">${escapeHtml(data.reason || t("I need a clarification before I can compute this."))}</p>`;
       body += hardClarificationWidget(data);
       body += softWarningWidget(data);
     } else if (Array.isArray(data.repair_hints) && data.repair_hints.some((h) => (h.ask_user_for || []).length)) {
-      body = `<p class="chat-text">${escapeHtml(data.reason || "Some required fields are missing.")}</p>`;
+      body = `<p class="chat-text">${escapeHtml(data.reason || t("Some required fields are missing."))}</p>`;
       body += repairWidget(data);
     } else {
       // refusal / alert / error
-      const msg = data.reason || data.message || "Unable to produce a verified answer.";
+      const msg = data.reason || data.message || t("The funnel stopped before computing a number.");
       body = `<p class="chat-text">${escapeHtml(msg)}</p>`;
     }
 
@@ -191,7 +191,7 @@
     const value = optValue(o);
     const hasTransform = typeof o === "object" && o && o.has_transform;
     const cls = hasTransform ? "btn btn-primary btn-sm cv-opt" : "btn btn-outline btn-sm cv-opt";
-    const tag = hasTransform ? ' <span class="cv-tag">verified transform</span>' : "";
+    const tag = hasTransform ? ` <span class="cv-tag">${escapeHtml(t("verified transform"))}</span>` : "";
     return `<button type="button" class="${cls}" data-w="${idx}" data-o="${oi}"
               data-hint="${escapeHtml(hintId || "")}"
               data-value="${escapeHtml(value)}" data-label="${escapeHtml(label)}"
@@ -216,8 +216,8 @@
             <p class="cv-q">${escapeHtml(g.question)}</p>
             <div class="cv-opts">${buttons}</div>
           </div>
-          <div class="cv-field"><input class="cv-free" type="text" placeholder="or type a precise answer" /></div>
-          <button type="button" class="btn btn-outline btn-sm cv-submit">Submit typed answer</button>
+          <div class="cv-field"><input class="cv-free" type="text" placeholder="${escapeHtml(t("or type a precise answer"))}" /></div>
+          <button type="button" class="btn btn-outline btn-sm cv-submit">${escapeHtml(t("Submit typed answer"))}</button>
         </div>`;
     }
     if (groups.length > 1) {
@@ -227,14 +227,14 @@
         return `
           <div class="cv-group" data-hint="${escapeHtml(g.hint_id)}">
             <p class="cv-q">${escapeHtml(g.question)}</p>
-            <select class="cv-gselect"><option value="">Choose…</option>${opts}</select>
+            <select class="cv-gselect"><option value="">${escapeHtml(t("Choose…"))}</option>${opts}</select>
           </div>`;
       }).join("");
       return `
         <div class="cv-widget" data-kind="clarification-multi">
-          <p class="cv-hint-note">Answer each question, then submit together.</p>
+          <p class="cv-hint-note">${escapeHtml(t("Answer each question, then submit together."))}</p>
           ${blocks}
-          <button type="button" class="btn btn-primary btn-sm cv-multi-submit">Submit answers</button>
+          <button type="button" class="btn btn-primary btn-sm cv-multi-submit">${escapeHtml(t("Submit answers"))}</button>
         </div>`;
     }
 
@@ -247,8 +247,8 @@
     return `
       <div class="cv-widget" data-kind="clarification">
         <div class="cv-soft">${questions}${buttons ? `<div class="cv-opts">${buttons}</div>` : ""}</div>
-        <div class="cv-field"><input class="cv-free" type="text" placeholder="or type a precise answer" /></div>
-        <button type="button" class="btn btn-outline btn-sm cv-submit">Submit typed answer</button>
+        <div class="cv-field"><input class="cv-free" type="text" placeholder="${escapeHtml(t("or type a precise answer"))}" /></div>
+        <button type="button" class="btn btn-outline btn-sm cv-submit">${escapeHtml(t("Submit typed answer"))}</button>
       </div>`;
   }
 
@@ -262,9 +262,9 @@
       const buttons = (w.options || []).map((o, oi) => optionButton(o, idx, oi, w.hint_id)).join("");
       return `
         <div class="cv-soft" data-w="${idx}" data-hint="${escapeHtml(w.hint_id || "")}">
-          <p class="cv-assumption">Default if unanswered: <em>${escapeHtml(w.assumption_if_not_clarified || "-")}</em></p>
+          <p class="cv-assumption">${escapeHtml(t("Default if unanswered:"))} <em>${escapeHtml(w.assumption_if_not_clarified || "-")}</em></p>
           <p class="cv-q">${escapeHtml(w.clarification_question || "-")}</p>
-          <div class="cv-opts">${buttons || "<em>(no options)</em>"}</div>
+          <div class="cv-opts">${buttons || `<em>${escapeHtml(t("(no options)"))}</em>`}</div>
         </div>`;
     }).join("");
     return `<div class="cv-widget" data-kind="soft">${blocks}</div>`;
@@ -288,7 +288,7 @@
     return `
       <div class="cv-widget" data-kind="repair">
         ${fields.join("")}
-        <button type="button" class="btn btn-primary btn-sm cv-submit">Provide &amp; continue</button>
+        <button type="button" class="btn btn-primary btn-sm cv-submit">${t("Provide &amp; continue")}</button>
       </div>`;
   }
 
@@ -306,7 +306,7 @@
         const kind = widget.dataset.kind;
         const { updates, summary } = collectWidget(widget, kind);
         if (!Object.keys(updates).length) {
-          alert("Please answer at least one field.");
+          alert(t("Please answer at least one field."));
           return;
         }
         if (widget.dataset.hint) cvAnsweredHints.add(widget.dataset.hint);
@@ -329,7 +329,7 @@
           parts.push(`Regarding "${q.trim()}", the answer is: ${val}`);
           if (g.dataset.hint) cvAnsweredHints.add(g.dataset.hint);
         });
-        if (!parts.length) { alert("Please answer at least one question."); return; }
+        if (!parts.length) { alert(t("Please answer at least one question.")); return; }
         lockWidgets(bubble);
         await runRepairTurn({ user_context_note: parts.join(" ; ") }, parts.join(" ; "));
       });
@@ -393,8 +393,8 @@
     // I_HARD blocks execution, so inputs come from provided_inputs; I_soft has execution_trace.
     const inputs = (et.inputs && Object.keys(et.inputs).length) ? et.inputs : (data.provided_inputs || {});
     cvBusy = true;
-    appendUser(`Use: ${chosenLabel}`);
-    const pending = appendStatus("Applying & verifying atomic transform…");
+    appendUser(t("Use: {label}", { label: chosenLabel }));
+    const pending = appendStatus(t("Checking and applying the declared transform…"));
     try {
       const res = await fetch("/api/transform/apply", {
         method: "POST",
@@ -406,7 +406,7 @@
       renderTransformResult(td, chosenLabel);
     } catch (err) {
       pending.remove();
-      appendBubble("assistant", `<p class="chat-text">Transform request failed: ${escapeHtml(err.message)}</p>`);
+      appendBubble("assistant", `<p class="chat-text">${escapeHtml(t("Transform request failed: {error}", { error: err.message }))}</p>`);
     } finally {
       cvBusy = false;
     }
@@ -417,40 +417,40 @@
     if (td.status === "ok") {
       const ts = new Date().toLocaleString();
       const codeBlock = td.python_code
-        ? `<p>Python execution (<code>${escapeHtml(td.entrypoint || "")}</code>):</p><pre>${escapeHtml(td.python_code)}</pre>`
+        ? `<p>${t("Python execution (<code>{entry}</code>):", { entry: escapeHtml(td.entrypoint || "") })}</p><pre>${escapeHtml(td.python_code)}</pre>`
         : "";
       appendBubble("assistant audit", `
-        <div class="chat-verdict"><span class="badge badge-success">Diagnostic Report · verified transform</span></div>
-        <p class="chat-answer"><span class="verified-check">✓ verified</span> ${escapeHtml(label)}:
+        <div class="chat-verdict"><span class="badge badge-success">${escapeHtml(t("Diagnostic report · verified transform"))}</span></div>
+        <p class="chat-answer"><span class="verified-check">${escapeHtml(t("✓ passed verification"))}</span> ${escapeHtml(label)}:
           <strong>${escapeHtml(fmtNum(td.result_old))} → ${escapeHtml(fmtNum(td.result_new))}</strong></p>
         <div class="audit-report">
-          <div class="audit-row"><span class="audit-k">Adopted contract</span>
+          <div class="audit-row"><span class="audit-k">${escapeHtml(t("Contract used"))}</span>
             <span class="audit-v">${escapeHtml(td.fic_name || "-")} · <code>${escapeHtml(td.fic_id || "-")}</code></span></div>
-          <div class="audit-row"><span class="audit-k">Human-in-the-loop</span>
-            <span class="audit-v">User selected "${escapeHtml(label)}" at ${escapeHtml(ts)}</span></div>
-          <div class="audit-row"><span class="audit-k">Default (auto)</span>
-            <span class="audit-v">${escapeHtml(fmtNum(td.result_old))} — what a raw model would have returned</span></div>
-          <div class="audit-row"><span class="audit-k">Verified result</span>
+          <div class="audit-row"><span class="audit-k">${escapeHtml(t("Human choice"))}</span>
+            <span class="audit-v">${escapeHtml(t("Selected {label} at {time}", { label, time: ts }))}</span></div>
+          <div class="audit-row"><span class="audit-k">${escapeHtml(t("Default convention"))}</span>
+            <span class="audit-v">${escapeHtml(t("{value} (the contract's code as written)", { value: fmtNum(td.result_old) }))}</span></div>
+          <div class="audit-row"><span class="audit-k">${escapeHtml(t("Result after the transform"))}</span>
             <span class="audit-v"><strong>${escapeHtml(fmtNum(td.result_new))}</strong></span></div>
         </div>
         <details class="bubble-details" open>
-          <summary>Computation &amp; verification</summary>
+          <summary>${t("Computation &amp; verification")}</summary>
           <div class="bubble-details-body">
             <section class="trace-section">
-              <p>Transform: <code>result → ${escapeHtml(td.result_expr)}</code></p>
-              <p>Invariant: <code>${escapeHtml(td.invariant)}</code> → <strong>${escapeHtml(td.invariant_check)}</strong></p>
-              <p>Checked on ${escapeHtml(td.numerical_samples)} numerical sample(s) · rule <code>${escapeHtml(td.rule_id || "-")}</code></p>
+              <p>${escapeHtml(t("Transform:"))} <code>result → ${escapeHtml(td.result_expr)}</code></p>
+              <p>${escapeHtml(t("Invariant:"))} <code>${escapeHtml(td.invariant)}</code> → <strong>${escapeHtml(td.invariant_check)}</strong></p>
+              <p>${t("Checked on {n} numerical sample(s) · rule <code>{rule}</code>", { n: escapeHtml(td.numerical_samples), rule: escapeHtml(td.rule_id || "-") })}</p>
               ${codeBlock}
             </section>
           </div>
         </details>`);
     } else if (td.status === "rejected") {
       appendBubble("assistant", `
-        <div class="chat-verdict"><span class="badge badge-alert">transform rejected</span></div>
-        <p class="chat-text">${escapeHtml(td.message || "Transform failed verification; result unchanged.")}</p>
-        <p class="chat-derived">Invariant <code>${escapeHtml(td.invariant || "-")}</code> → ${escapeHtml(td.invariant_check || "-")}</p>`);
+        <div class="chat-verdict"><span class="badge badge-alert">${escapeHtml(t("transform rejected"))}</span></div>
+        <p class="chat-text">${escapeHtml(td.message || t("Transform failed verification; result unchanged."))}</p>
+        <p class="chat-derived">${escapeHtml(t("Invariant"))} <code>${escapeHtml(td.invariant || "-")}</code> → ${escapeHtml(td.invariant_check || "-")}</p>`);
     } else {
-      appendBubble("assistant", `<p class="chat-text">${escapeHtml(td.message || "Transform error.")}</p>`);
+      appendBubble("assistant", `<p class="chat-text">${escapeHtml(td.message || t("Transform error."))}</p>`);
     }
   }
 
@@ -459,7 +459,7 @@
     if (!compareEl || !compareEl.checked) return;
     const provider = baselineModelEl ? baselineModelEl.value : "gemini";
     const pending = appendBubble("assistant baseline pending",
-      `<p class="chat-text"><span class="spinner spinner-sm"></span> Raw ${escapeHtml(provider)} (no guardrails) is answering…</p>`);
+      `<p class="chat-text"><span class="spinner spinner-sm"></span> ${escapeHtml(t("Raw {provider} (no contracts, no funnel) is answering…", { provider }))}</p>`);
     try {
       const res = await fetch("/api/baseline", {
         method: "POST",
@@ -469,18 +469,18 @@
       const bd = await res.json();
       pending.remove();
       if (bd.status !== "ok") {
-        appendBubble("assistant baseline", `<p class="chat-text">Raw ${escapeHtml(provider)} failed: ${escapeHtml(bd.message || "error")}</p>`);
+        appendBubble("assistant baseline", `<p class="chat-text">${escapeHtml(t("Raw {provider} failed: {error}", { provider, error: bd.message || "error" }))}</p>`);
         return;
       }
       const parsed = parseNumber(bd.answer);
       appendBubble("assistant baseline", `
-        <div class="chat-verdict"><span class="badge badge-refusal">Raw ${escapeHtml(bd.model)} · no funnel</span>
+        <div class="chat-verdict"><span class="badge badge-refusal">${escapeHtml(t("Raw {model} · no funnel", { model: bd.model }))}</span>
           ${baselineVerdict(parsed)}</div>
         <p class="chat-text">${escapeHtml(bd.answer)}</p>
-        <p class="chat-derived">No FIC, no gate — it commits to an assumption without flagging it.</p>`);
+        <p class="chat-derived">${escapeHtml(t("No contract and no gate: whatever it assumes goes unflagged."))}</p>`);
     } catch (err) {
       pending.remove();
-      appendBubble("assistant baseline", `<p class="chat-text">Raw model request failed: ${escapeHtml(err.message)}</p>`);
+      appendBubble("assistant baseline", `<p class="chat-text">${escapeHtml(t("Raw model request failed: {error}", { error: err.message }))}</p>`);
     }
   }
 
@@ -488,7 +488,7 @@
   async function runFirstTurn() {
     const question = (inputEl.value || "").trim();
     if (!question) {
-      alert("Enter a question to start.");
+      alert(t("Enter a question to start."));
       return;
     }
     if (cvBusy) return;
@@ -502,9 +502,9 @@
     cvAnsweredHints = new Set();
     cvStarted = true;
 
-    appendUser(question + (cvOriginalContext ? `\n\ncontext: ${cvOriginalContext}` : ""));
+    appendUser(question + (cvOriginalContext ? `\n\n${t("context: {text}", { text: cvOriginalContext })}` : ""));
     inputEl.value = "";
-    const pending = appendStatus("Running the M/N/F/E/I/C funnel…");
+    const pending = appendStatus(t("Running the M/N/F/E/I/C funnel…"));
 
     try {
       const data = await apiDiagnose(cvOriginalQuestion, cvOriginalContext);
@@ -512,7 +512,7 @@
       renderAssistant(data);
     } catch (err) {
       pending.remove();
-      appendBubble("assistant", `<p class="chat-text">Request failed: ${escapeHtml(err.message)}</p>`);
+      appendBubble("assistant", `<p class="chat-text">${escapeHtml(t("Request failed: {error}", { error: err.message }))}</p>`);
     } finally {
       cvBusy = false;
       sendBtn.disabled = false;
@@ -534,8 +534,8 @@
       delete incoming.user_context_note;
     }
     cvAccumulatedUpdates = { ...cvAccumulatedUpdates, ...incoming };
-    appendUser(summary || "(answer provided)");
-    const pending = appendStatus("Re-diagnosing with your answer…");
+    appendUser(summary || t("(answer provided)"));
+    const pending = appendStatus(t("Re-diagnosing with your answer…"));
 
     // Compose original + structured fields + the FULL clarification transcript.
     const composeUpdates = { ...cvAccumulatedUpdates };
@@ -550,7 +550,7 @@
       renderAssistant(data);
     } catch (err) {
       pending.remove();
-      appendBubble("assistant", `<p class="chat-text">Request failed: ${escapeHtml(err.message)}</p>`);
+      appendBubble("assistant", `<p class="chat-text">${escapeHtml(t("Request failed: {error}", { error: err.message }))}</p>`);
     } finally {
       cvBusy = false;
     }
@@ -619,8 +619,8 @@
     const wrap = document.getElementById("chat-context-wrap");
     if (wrap) wrap.style.display = cvStarted ? "none" : "";
     inputEl.placeholder = cvStarted
-      ? "Add a follow-up or correction…"
-      : "Ask a financial question to start a verified diagnosis…";
+      ? t("Add a follow-up or correction…")
+      : t("Ask a financial question to start a verified diagnosis…");
   }
 
   // Upfront gold display: when a showcase/sample case has a numeric ground truth,
@@ -636,7 +636,7 @@
       return;
     }
     el.style.display = "";
-    el.innerHTML = `✦ 此題有正確答案 (correct answer): <strong>${escapeHtml(cvActiveGroundTruth)}</strong>`;
+    el.innerHTML = t("✦ This question has a gold answer: <strong>{gold}</strong>", { gold: escapeHtml(cvActiveGroundTruth) });
   }
 
   function seedFrom(item, note) {
@@ -683,18 +683,23 @@
     });
     cvShowcase = (data.featured || []).filter((f) => byId[f.id]).map((f) => {
       const c = byId[f.id];
-      const note = c.set === "trap" ? `Paper trap ${c.id} · expected exit ${c.expected}. ${c.edit_note || ""}` : `Paper clean question ${c.id} · gold ${c.gold}.`;
-      return toItem(c, `${f.chapter} · ${f.title}`, note);
+      const note = c.set === "trap"
+        ? t("Paper trap {id} · expected exit {exit}.", { id: c.id, exit: c.expected }) + ` ${c.edit_note || ""}`
+        : t("Paper clean question {id} · gold {gold}.", { id: c.id, gold: c.gold });
+      const chapter = (window.VQ_ZH && f.chapter_zh) || f.chapter;
+      const title = (window.VQ_ZH && f.title_zh) || f.title;
+      return toItem(c, `${chapter} · ${title}`, note);
     });
     cvTrap = (data.cases || []).filter((c) => c.set === "trap").map((c) =>
-      toItem(c, `${c.id} · ${truncate(c.question, 52)}`, `Paper trap ${c.id} · expected exit ${c.expected}. ${c.edit_note || ""}`));
+      toItem(c, `${c.id} · ${truncate(c.question, 52)}`,
+        t("Paper trap {id} · expected exit {exit}.", { id: c.id, exit: c.expected }) + ` ${c.edit_note || ""}`));
     const groups = { E: [], I: [], F: [], N: [] };
     cvTrap.forEach((item, idx) => { const op = item.demo_label.charAt(0); if (groups[op]) groups[op].push([item, idx]); });
-    let html = `<option value="">Choose a case…</option>`;
-    html += `<optgroup label="Walkthrough">` +
+    let html = `<option value="">${escapeHtml(t("Choose a case…"))}</option>`;
+    html += `<optgroup label="${escapeHtml(t("Walkthrough"))}">` +
       cvShowcase.map((item, idx) => `<option value="s:${idx}">${escapeHtml(item.demo_label)}</option>`).join("") + `</optgroup>`;
     Object.entries(groups).forEach(([op, rows]) => {
-      html += `<optgroup label="Traps · ${op} (${rows.length})">` +
+      html += `<optgroup label="${escapeHtml(t("Traps · {op} ({n})", { op, n: rows.length }))}">` +
         rows.map(([item, idx]) => `<option value="t:${idx}">${escapeHtml(item.demo_label)}</option>`).join("") + `</optgroup>`;
     });
     showcaseEl.innerHTML = html;
@@ -702,7 +707,7 @@
 
   function loadShowcase() {
     if (!showcaseEl) return;
-    showcaseEl.innerHTML = `<option value="">Loading the paper's cases…</option>`;
+    showcaseEl.innerHTML = `<option value="">${escapeHtml(t("Loading the paper's cases…"))}</option>`;
     if (window.VQReplay && window.VQReplay.data) populateShowcase(window.VQReplay.data);
     else document.addEventListener("vq-replay-ready", (e) => populateShowcase(e.detail), { once: true });
   }
@@ -726,13 +731,13 @@
       const data = await res.json();
       if (data.status !== "ok") throw new Error(data.message || "failed");
       cvSamples = data.questions || [];
-      sampleEl.innerHTML = `<option value="">Choose a question…</option>` + cvSamples.map((item, idx) => {
-        const title = item.article_title || item.function_id || `Sample ${idx + 1}`;
+      sampleEl.innerHTML = `<option value="">${escapeHtml(t("Choose a question…"))}</option>` + cvSamples.map((item, idx) => {
+        const title = item.article_title || item.function_id || t("Question {n}", { n: idx + 1 });
         return `<option value="${idx}">${String(idx + 1).padStart(2, "0")} · ${escapeHtml(title)}</option>`;
       }).join("");
-      if (sampleMetaEl) sampleMetaEl.textContent = `${cvSamples.length} samples · source: ${data.source || "questions"}`;
+      if (sampleMetaEl) sampleMetaEl.textContent = t("{n} questions · source: {source}", { n: cvSamples.length, source: data.source || "questions" });
     } catch (err) {
-      if (sampleMetaEl) sampleMetaEl.textContent = `Failed to load samples: ${err.message}`;
+      if (sampleMetaEl) sampleMetaEl.textContent = t("Failed to load questions: {error}", { error: err.message });
     }
   }
 

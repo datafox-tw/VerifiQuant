@@ -34,6 +34,7 @@
   color: var(--code-ink);
   margin: 0 0 0.4rem;
 }
+.eyebrow code { text-transform: none; letter-spacing: 0; }
 .lede { font-size: 1.05rem; color: var(--text-muted); max-width: 46rem; }
 .chip {
   display: inline-flex;
@@ -553,6 +554,11 @@ pre.code {
   .trap-showcase, .repair-layout { grid-template-columns: minmax(0, 1fr); }
 }
 .tab-nav { flex-wrap: wrap; }
+
+/* Traditional Chinese: CJK text reads better with a little more leading and no negative tracking. */
+.lang-zh { line-height: 1.75; }
+.lang-zh .paper-hero h1, .lang-zh .page-section h2, .lang-zh .case-head h2 { letter-spacing: 0; }
+.lang-toggle { font-weight: 700; }
 
 @media (max-width: 640px) {
   .page-section { padding: 2.5rem 1rem; }

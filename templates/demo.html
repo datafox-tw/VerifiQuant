@@ -1,114 +1,108 @@
 {% extends "base.html" %}
-{% block title %}Demo &middot; VerifiQuant (ICAIF '26){% endblock %}
+{% block title %}{{ t("Demo") }} &middot; VerifiQuant (ICAIF '26){% endblock %}
 
 {% block content %}
 <div class="demo-container">
   <div class="demo-header">
-    <p class="eyebrow">ACM ICAIF '26 &middot; companion demo</p>
-    <h1>See the funnel decide</h1>
-    <p>Replay the recorded runs behind the paper's tables, try a verified repair, or send your own question to the live system.
-      Everything runs on the paper's 250-contract library with the top 4 contracts retrieved, on Gemini 2.5 Flash.</p>
+    <p class="eyebrow">{{ t("ACM ICAIF '26 · companion demo") }}</p>
+    <h1>{{ t("See the funnel decide") }}</h1>
+    <p>{{ t("Replay the recorded runs behind the paper's tables, try a verified repair, or send your own question to the live system. Everything runs on the paper's 250-contract library with the top 4 contracts retrieved, on Gemini 2.5 Flash.") }}</p>
   </div>
 
   <nav class="tab-nav" role="tablist">
-    <button id="tab-replay" data-tab="replay" class="tab-btn active" type="button">Paper replay</button>
-    <button id="tab-repair" data-tab="repair" class="tab-btn" type="button">Verified repair</button>
-    <button id="tab-chat" data-tab="chat" class="tab-btn" type="button">Try it live</button>
-    <button id="tab-qa" data-tab="qa" class="tab-btn" type="button">Single query</button>
-    <button id="tab-cards" data-tab="cards" class="tab-btn" type="button">Contract library</button>
+    <button id="tab-replay" data-tab="replay" class="tab-btn active" type="button">{{ t("Paper replay") }}</button>
+    <button id="tab-repair" data-tab="repair" class="tab-btn" type="button">{{ t("Verified repair") }}</button>
+    <button id="tab-chat" data-tab="chat" class="tab-btn" type="button">{{ t("Try it live") }}</button>
+    <button id="tab-qa" data-tab="qa" class="tab-btn" type="button">{{ t("Single query") }}</button>
+    <button id="tab-cards" data-tab="cards" class="tab-btn" type="button">{{ t("Contract library") }}</button>
   </nav>
 
   <section id="panel-replay" class="panel active">
     <p class="replay-intro">
-      Every output on this tab is a recorded run from the paper's experiments, scored by the paper's scorer. Nothing here calls a
-      model. All three systems use Gemini 2.5 Flash and see the same four retrieved contracts.
+      {{ t("Every output on this tab is a recorded run from the paper's experiments, scored by the paper's scorer. Nothing here calls a model. All three systems use Gemini 2.5 Flash and see the same four retrieved contracts.") }}{% if zh %}{{ t("Questions and system outputs stay in the original English.") }}{% endif %}
     </p>
     <div class="replay-layout">
-      <aside class="replay-nav" aria-label="Cases">
-        <h4>Walkthrough</h4>
+      <aside class="replay-nav" aria-label="{{ t("Cases") }}">
+        <h4>{{ t("Walkthrough") }}</h4>
         <ol class="story-list" id="story-list"></ol>
-        <h4>All 80 traps</h4>
+        <h4>{{ t("All 80 traps") }}</h4>
         <div class="trap-filter" id="trap-filter"></div>
-        <select class="trap-select" id="trap-select" aria-label="Choose a trap"></select>
+        <select class="trap-select" id="trap-select" aria-label="{{ t("Choose a trap") }}"></select>
         <div class="trap-count" id="trap-count"></div>
       </aside>
       <div class="case-view" id="case-view">
-        <div class="loader"><div class="spinner"></div><span>Loading the recorded runs&hellip;</span></div>
+        <div class="loader"><div class="spinner"></div><span>{{ t("Loading the recorded runs…") }}</span></div>
       </div>
     </div>
   </section>
 
   <section id="panel-repair" class="panel">
     <p class="replay-intro">
-      A convention that changes the computation is handled by an edit declared on the contract at build time and checked before it
-      runs. The model never rewrites the code. This tab calls the live verifier, which uses no LLM.
+      {{ t("A convention that changes the computation is handled by an edit declared on the contract at build time and checked before it runs. The model never rewrites the code. This tab calls the live verifier, which uses no LLM.") }}
     </p>
     <div class="repair-layout">
       <div class="repair-panel">
-        <p class="eyebrow">Contract &middot; fic_article_2164</p>
-        <h3>Monthly loan payment</h3>
+        <p class="eyebrow">{{ t("Contract") }} &middot; <code>fic_article_2164</code></p>
+        <h3>{{ t("Monthly loan payment") }}</h3>
         <div class="repair-inputs">
           <label>principal <input id="rp-principal" type="number" value="250000" step="1000" min="1" /></label>
           <label>annual_interest_rate <input id="rp-rate" type="number" value="0.06" step="0.005" min="0" /></label>
           <label>loan_term_years <input id="rp-term" type="number" value="30" step="1" min="1" /></label>
         </div>
-        <p class="sub-label">Declared convention &middot; payment timing (SOFT)</p>
+        <p class="sub-label">{{ t("Declared convention · payment timing (SOFT)") }}</p>
         <div class="choice-row" id="rp-choices">
           <label class="choice active"><input type="radio" name="rp-timing" value="end_of_period" checked />
-            <span>End of period (ordinary annuity)<small>Default. The contract's code is the default, so no edit applies.</small></span></label>
+            <span>{{ t("End of period (ordinary annuity)") }}<small>{{ t("Default. The contract's code is the default, so no edit applies.") }}</small></span></label>
           <label class="choice"><input type="radio" name="rp-timing" value="beginning_of_period" />
-            <span>Beginning of period (annuity-due)<small>Applies the declared output transform once it passes verification.</small></span></label>
+            <span>{{ t("Beginning of period (annuity-due)") }}<small>{{ t("Applies the declared output transform once it passes verification.") }}</small></span></label>
         </div>
-        <button id="rp-run" type="button" class="btn btn-primary">Run the verifier</button>
+        <button id="rp-run" type="button" class="btn btn-primary">{{ t("Run the verifier") }}</button>
         <div class="repair-result" id="rp-result" style="margin-top:1rem"></div>
       </div>
       <div class="repair-panel">
-        <h3>What the verifier checks</h3>
+        <h3>{{ t("What the verifier checks") }}</h3>
         <div class="spec-box">
           <div class="row"><span>result_expr</span><code>result / (1 + annual_interest_rate / 12)</code></div>
           <div class="row"><span>invariant</span><code>result_new * (1 + annual_interest_rate / 12) == result_old</code></div>
           <div class="row"><span>max_expr_nodes</span><code>13</code></div>
         </div>
         <ul class="check-list" style="margin-top:0.8rem">
-          <li><span class="ok">&check;</span><span><strong>Bounded.</strong> The expression's AST stays within the declared node count.</span></li>
-          <li><span class="ok">&check;</span><span><strong>Safe.</strong> Whitelisted names only: no imports, no dunders, no new calls.</span></li>
-          <li><span class="ok">&check;</span><span><strong>Matches.</strong> Deterministic, finite, and agrees with the declared invariant on sampled bindings.</span></li>
+          <li><span class="ok">&check;</span><span>{{ t("<strong>Bounded.</strong> The expression's AST stays within the declared node count.") }}</span></li>
+          <li><span class="ok">&check;</span><span>{{ t("<strong>Safe.</strong> Whitelisted names only: no imports, no dunders, no new calls.") }}</span></li>
+          <li><span class="ok">&check;</span><span>{{ t("<strong>Matches.</strong> Deterministic, finite, and agrees with the declared invariant on sampled bindings.") }}</span></li>
         </ul>
-        <p class="sub-label" style="margin-top:1.1rem">Code patch &middot; NPV timing (proof of concept)</p>
+        <p class="sub-label" style="margin-top:1.1rem">{{ t("Code patch · NPV timing (proof of concept)") }}</p>
         <div class="ast-diff"><span class="del">- for t, cf in enumerate(cash_flows, start=<b>1</b>):</span>
 <span class="add">+ for t, cf in enumerate(cash_flows, start=<b>0</b>):</span>
 
 Call enumerate
 ├─ Name cash_flows
 └─ keyword start
-   └─ Constant 1 → 0      the only changed AST node</div>
-        <p class="table-note">Accepted only if the pattern occurs exactly once and the patched output equals
-          <code>(result + initial_investment) * (1 + discount_rate) - initial_investment</code>.
-          On RepairBench the verifier rejects 97.7% of 879 wrong patches (20 false accepts, 2.3%). This is bounded numerical
-          validation, not formal equivalence.</p>
+   └─ Constant 1 → 0      {{ t("the only changed AST node") }}</div>
+        <p class="table-note">{{ t("Accepted only if the pattern occurs exactly once and the patched output equals <code>(result + initial_investment) * (1 + discount_rate) - initial_investment</code>. On RepairBench the verifier rejects 97.7% of 879 wrong patches (20 false accepts, 2.3%). This is bounded numerical validation, not formal equivalence.") }}</p>
       </div>
     </div>
   </section>
 
   <section id="panel-chat" class="panel">
     <div class="live-note">
-      <strong>Live system.</strong> Each send makes real Gemini 2.5 Flash calls through the full funnel, so a result can differ from the
-      recorded runs: selection, binding and ambiguity detection are LLM steps. <span class="rate-limit-bar" id="rate-limit-bar"></span>
+      {{ t("<strong>Live system.</strong> Each send makes real Gemini 2.5 Flash calls through the full funnel, so a result can differ from the recorded runs: selection, binding and ambiguity detection are LLM steps.") }}{% if zh %}{{ t("Questions and model output stay in English.") }}{% endif %}
+      <span class="rate-limit-bar" id="rate-limit-bar"></span>
     </div>
     <div class="sample-toolbar">
       <label>
-        A case from the paper
+        {{ t("A case from the paper") }}
         <select id="chat-showcase"></select>
       </label>
       <label>
-        Or one of the 250 clean questions
-        <select id="chat-sample"><option value="">Choose a question…</option></select>
+        {{ t("Or one of the 250 clean questions") }}
+        <select id="chat-sample"><option value="">{{ t("Choose a question…") }}</option></select>
       </label>
-      <button id="chat-reset" type="button" class="btn btn-outline btn-sm">New conversation</button>
+      <button id="chat-reset" type="button" class="btn btn-outline btn-sm">{{ t("New conversation") }}</button>
     </div>
     <div class="chat-compare-bar">
       <label class="chat-compare-toggle">
-        <input id="chat-compare" type="checkbox" /> Also ask raw Gemini 2.5 Flash (no contracts, no funnel)
+        <input id="chat-compare" type="checkbox" /> {{ t("Also ask raw Gemini 2.5 Flash (no contracts, no funnel)") }}
       </label>
       <select id="chat-baseline-model" hidden aria-hidden="true">
         <option value="gemini" selected>Gemini (gemini-2.5-flash)</option>
@@ -120,29 +114,28 @@ Call enumerate
 
     <div id="chat-thread" class="chat-thread">
       <div class="chat-empty">
-        Ask a financial question, or pick a case from the paper above. The funnel either computes with a contract's code
-        or stops at a named exit and asks for what it needs.
+        {{ t("Ask a financial question, or pick a case from the paper above. The funnel either computes with a contract's code or stops at a named exit and asks for what it needs.") }}
       </div>
     </div>
 
     <div id="chat-context-wrap" class="chat-context-panel">
       <label>
-        Context from PDF or notes
-        <textarea id="chat-context" rows="4" placeholder='Upload a financial report PDF, or paste relevant context here.'></textarea>
+        {{ t("Context from PDF or notes") }}
+        <textarea id="chat-context" rows="4" placeholder="{{ t("Upload a financial report PDF, or paste relevant context here.") }}"></textarea>
       </label>
       <div class="pdf-attach">
         <input id="chat-pdf-file" type="file" accept="application/pdf,.pdf" />
-        <button id="chat-pdf-attach" type="button" class="btn btn-outline btn-sm">Attach PDF</button>
+        <button id="chat-pdf-attach" type="button" class="btn btn-outline btn-sm">{{ t("Attach PDF") }}</button>
         <span id="chat-pdf-status" class="pdf-status"></span>
       </div>
     </div>
 
     <div class="chat-composer">
       <div class="chat-composer-row">
-        <textarea id="chat-input" rows="2" placeholder="Ask a financial question to start a verified diagnosis…"></textarea>
-        <button id="chat-send" type="button" class="btn btn-primary">Send</button>
+        <textarea id="chat-input" rows="2" placeholder="{{ t("Ask a financial question to start a verified diagnosis…") }}"></textarea>
+        <button id="chat-send" type="button" class="btn btn-primary">{{ t("Send") }}</button>
       </div>
-      <p class="chat-hint">Press &#8984;/Ctrl + Enter to send.</p>
+      <p class="chat-hint">{{ t("Press ⌘/Ctrl + Enter to send.") }}</p>
     </div>
   </section>
 
@@ -150,37 +143,37 @@ Call enumerate
     <form id="question-form" class="demo-form">
       <div class="sample-toolbar">
         <label>
-          One of the 250 clean questions
+          {{ t("One of the 250 clean questions") }}
           <select id="sample-question"></select>
         </label>
-        <button id="load-sample" type="button" class="btn btn-outline btn-sm">Load Sample</button>
+        <button id="load-sample" type="button" class="btn btn-outline btn-sm">{{ t("Load sample") }}</button>
       </div>
       <div id="sample-meta" class="sample-meta"></div>
       <label>
-        Question
-        <textarea id="question" name="question" rows="3" placeholder='e.g. Calculate the NPV of this investment' required></textarea>
+        {{ t("Question") }}
+        <textarea id="question" name="question" rows="3" placeholder="{{ t("e.g. Calculate the NPV of this investment") }}" required></textarea>
       </label>
       <label>
-        Context (JSON recommended)
+        {{ t("Context (JSON recommended)") }}
         <textarea id="context" name="context" rows="5" placeholder='{"initial_investment": 100000, "cash_flows": [30000, 40000, 50000], "discount_rate": 0.1}'></textarea>
       </label>
       <div class="pdf-attach">
         <input id="qa-pdf-file" type="file" accept="application/pdf,.pdf" />
-        <button id="qa-pdf-attach" type="button" class="btn btn-outline btn-sm">Attach PDF</button>
+        <button id="qa-pdf-attach" type="button" class="btn btn-outline btn-sm">{{ t("Attach PDF") }}</button>
         <span id="qa-pdf-status" class="pdf-status"></span>
       </div>
       <div class="inline-row">
         <label>
-          Domain <span class="optional">(optional)</span>
+          {{ t("Domain") }} <span class="optional">{{ t("(optional)") }}</span>
           <input id="domain" name="domain" type="text" placeholder="investment_analysis" />
         </label>
         <label>
-          Topic <span class="optional">(optional)</span>
+          {{ t("Topic") }} <span class="optional">{{ t("(optional)") }}</span>
           <input id="topic" name="topic" type="text" placeholder="npv" />
         </label>
       </div>
       <details class="advanced-toggle">
-        <summary>Advanced Parameters</summary>
+        <summary>{{ t("Advanced parameters") }}</summary>
         <div class="inline-row">
           <label>
             top_k
@@ -192,23 +185,23 @@ Call enumerate
           </label>
         </div>
       </details>
-      <button type="submit" class="btn btn-primary btn-block">Run Diagnosis</button>
+      <button type="submit" class="btn btn-primary btn-block">{{ t("Run diagnosis") }}</button>
     </form>
     <div id="loader" class="loader hidden">
       <div class="spinner"></div>
-      <span>Running diagnostic pipeline...</span>
+      <span>{{ t("Running the diagnostic pipeline…") }}</span>
     </div>
     <section id="result" class="result hidden"></section>
   </section>
 
   <section id="panel-cards" class="panel">
     <div class="cards-toolbar">
-      <button id="refresh-cards" type="button" class="btn btn-outline btn-sm">Refresh Cards</button>
+      <button id="refresh-cards" type="button" class="btn btn-outline btn-sm">{{ t("Refresh contracts") }}</button>
       <span id="cards-meta"></span>
     </div>
     <div id="cards-loader" class="loader hidden">
       <div class="spinner"></div>
-      <span>Loading cards...</span>
+      <span>{{ t("Loading contracts…") }}</span>
     </div>
     <section id="cards-result" class="result"></section>
   </section>

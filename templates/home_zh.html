@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}VerifiQuant &middot; 用執行來治理金融 LLM 工作流程（ICAIF '26）{% endblock %}
+
+{% block content %}
+<section class="paper-hero">
+  <div class="paper-hero-inner">
+    <div class="venue-badge"><span class="dot"></span>ACM ICAIF '26 &middot; 第七屆 ACM 金融人工智慧國際會議 &middot; 米蘭，2026 年 11 月 14 至 17 日</div>
+    <h1>VerifiQuant</h1>
+    <p class="paper-subtitle">Governance-by-Execution for Financial LLM Workflows</p>
+    <p class="paper-authors">Yu-Chi Ko<sup>1</sup> &middot; Mi-Yen Yeh<sup>1</sup> &middot; Shou-De Lin<sup>2</sup></p>
+    <p class="paper-affils">
+      <sup>1</sup>國立臺灣大學與中央研究院 資料科學學位學程<br />
+      <sup>2</sup>國立臺灣大學 資訊工程學系
+    </p>
+    <p class="paper-tagline">試算表不變，讓 LLM 來填格子。</p>
+    <div class="paper-actions">
+      <a href="/demo" class="btn btn-primary">重播論文裡的實驗</a>
+      <a href="/demo#live" class="btn btn-outline">直接試用</a>
+      <a href="{{ links.doi }}" class="btn btn-outline" target="_blank" rel="noopener">論文 (DOI) &nearr;</a>
+      <a href="{{ links.repo }}" class="btn btn-outline" target="_blank" rel="noopener">程式碼與資料 &nearr;</a>
+      <a href="#cite" class="btn btn-outline">引用</a>
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="page-inner">
+    <p class="eyebrow">問題</p>
+    <h2>算得出數字，不代表有答案</h2>
+    <p class="lede">
+      LLM 放進金融工作流程之後，最麻煩的失誤是給出一個格式漂亮、語氣篤定、但錯的數字，而且它看起來和對的數字一模一樣。讓模型寫程式來算（PAL）可以把算術做對，卻管不到這個數字該不該出現。只要程式跑得起來，就算輸入根本算不出合理答案，它還是會交出一個乾淨的數字。
+    </p>
+    <div class="trap-showcase" style="margin-top:1.4rem">
+      <div class="quote-card">
+        <p class="sub-label">論文評估用的陷阱題 E-test-1080（原題為英文）</p>
+        <p class="q">這檔股票本週的價格變動率（Price ROC）是多少？請以百分比表示，取到小數點後兩位。</p>
+        <p class="ctx">
+          週初股價是每股 <mark class="edit"><s>$150</s>$2.5</mark>，到了週末變成每股 $165。
+        </p>
+        <p class="edit-line" style="margin:0.7rem 0 0;font-size:0.82rem;color:var(--text-muted)">
+          我們只改了一個數值，讓這題沒有合理答案。這個公式對應的合約裡，本來就宣告了一條檢查：<code>abs(current &minus; previous) / previous &gt; 2.0</code>。
+        </p>
+      </div>
+      <div class="outcome-list">
+        <div class="outcome-row bad">
+          <span class="who">R-PAL</span><span class="val">6,500.00%</span>
+          <span class="how">拿到同樣檢索出來的四張合約，自己寫程式、跑出結果。錯了，也沒有任何標記。</span>
+        </div>
+        <div class="outcome-row bad">
+          <span class="who">R-PAL<sup>+</sup></span><span class="val">6,500.00%</span>
+          <span class="how">條件一樣，提示裡還寫了每一條檢查。三次執行都給了數字。</span>
+        </div>
+        <div class="outcome-row good">
+          <span class="who">VerifiQuant</span><span class="val">停在 E</span>
+          <span class="how">直接執行合約宣告的檢查 <code>price_coherence_extreme_change</code>，三次執行都停下來。</span>
+        </div>
+        <a href="/demo#E-test-1080" class="btn btn-outline btn-sm" style="justify-self:start">重播這一題和另外 79 題 &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="page-inner narrow">
+    <p class="eyebrow">摘要</p>
+    <h2>核心問題是可治理性</h2>
+    <p>
+      嵌在金融工作流程裡的大型語言模型，最危險的失敗方式是給出篤定、格式完整但錯誤的數字，而且沒有任何訊號能把它和正確的數字區分開來。我們認為部署時的核心問題是可治理性：系統必須判斷一個問題什麼時候撐得起一個數字，什麼時候該改成澄清、攔下或拒答。我們提出 <strong>VerifiQuant</strong>，一個以執行來治理的框架。它把金融邏輯包成推論合約，每個查詢在確定性計算之前，都要先走過一個可以執行的診斷漏斗。這樣分工之後，計算、澄清和拒答都有固定的結構，可以稽核，金融算術也留在語言模型之外。和檢索、執行條件都相同的基線相比，在宣告的合約庫範圍內，主要的好處出現在輸入撐不起一個數字的時候，那時它比較安全；定義清楚的問題，它並沒有答得更準。找不到適用的合約時，它會直接說找不到，不會用猜的。合約庫規模的掃描和失敗分析替這條界線標上了價格：安全的代價落在覆蓋率上，不在準確率上，剩下的失敗也都能追到特定的執行環節。
+    </p>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="page-inner">
+    <p class="eyebrow">有名字的出口</p>
+    <h2>一個問題撐不起數字，有五種情況</h2>
+    <p class="lede">
+      每個回應只會是三種結果之一：正確的數字、沒被標記的錯數字，或是一個寫明為什麼不給數字的出口。部署時真正要回答的是：什麼時候給出數字才算正當？
+    </p>
+    <div class="exit-grid">
+      <div class="exit-card">
+        <span class="letter">N</span>
+        <h3>超出範圍</h3>
+        <p>庫裡沒有合約涵蓋這個問題。VerifiQuant 會拒答，並說明原因。</p>
+        <span class="chip chip-code">檢索分數</span> <span class="chip chip-llm">選擇器</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">M</span>
+        <h3>意圖不明</h3>
+        <p>題目可能指好幾個不同的量。它會問你要的是哪一個。</p>
+        <span class="chip chip-llm">選擇器</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">F</span>
+        <h3>少了輸入</h3>
+        <p>缺一個必要的數值。它會直接講出缺的是哪個欄位。</p>
+        <span class="chip chip-code">輸入檢查</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">E</span>
+        <h3>數值越界</h3>
+        <p>某個輸入超出合約宣告的範圍。警示會寫出是哪一條檢查、哪一個數值。</p>
+        <span class="chip chip-code">邊界檢查</span>
+      </div>
+      <div class="exit-card">
+        <span class="letter">I</span>
+        <h3>慣例沒講清楚</h3>
+        <p>百分比還是小數？期初還是期末付款？會改變結果的（HARD）先停下來問，只影響解讀的（SOFT）照樣給數字，但附上警告。</p>
+        <span class="chip chip-llm">歧義檢查</span>
+      </div>
+      <div class="exit-card c">
+        <span class="letter">C</span>
+        <h3>計算</h3>
+        <p>每一關都通過，由合約自己的 Python 程式算出數字。</p>
+        <span class="chip chip-code">鎖定的程式碼</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="page-inner">
+    <p class="eyebrow">機制</p>
+    <h2>先由可執行的漏斗決定，之後才計算</h2>
+    <p class="lede">
+      分析師不會每接一個客戶就重新推一次貸款公式。他會打開一張驗證過的試算表，把數字填進去，表格本身的驗證規則會擋掉不可能的值。
+      VerifiQuant 把每個公式家族都做成這樣一張表，我們叫它<strong>金融推論合約</strong>（FIC）：有型別的輸入欄位、邊界檢查、事先宣告的慣例和選項，以及鎖定的程式碼。
+    </p>
+    <div class="funnel-flow" aria-label="VerifiQuant 的漏斗">
+      <div class="flow-node"><div class="k">程式</div><div class="t">檢索</div><div class="d">用 BM25 比對合約描述，取前 4 名</div><div class="exits"><span class="chip chip-exit">N</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 1</div><div class="t">選擇</div><div class="d">選一張合約，或一張都不選</div><div class="exits"><span class="chip chip-exit">N</span><span class="chip chip-exit">M</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 2</div><div class="t">綁定</div><div class="d">把題目裡的數值填進輸入欄位</div></div>
+      <div class="flow-node"><div class="k">程式</div><div class="t">輸入</div><div class="d">必要的輸入都有嗎？</div><div class="exits"><span class="chip chip-exit">F</span></div></div>
+      <div class="flow-node"><div class="k">程式</div><div class="t">邊界</div><div class="d">宣告的檢查都通過嗎？</div><div class="exits"><span class="chip chip-exit">E</span></div></div>
+      <div class="flow-node llm"><div class="k">LLM 3</div><div class="t">歧義</div><div class="d">有宣告過的慣例沒講清楚嗎？</div><div class="exits"><span class="chip chip-exit">I-hard</span><span class="chip chip-llm">I-soft 警告</span></div></div>
+      <div class="flow-node"><div class="k">程式</div><div class="t">計算</div><div class="d">合約自己的 Python</div></div>
+      <div class="flow-node out"><div class="k">輸出</div><div class="t">數字與報告</div><div class="d">每條路徑都留下 DiagnosticReport</div></div>
+    </div>
+    <div class="flow-legend"><span class="l-llm">LLM 步驟</span><span class="l-code">確定性程式</span><span class="l-exit">有名字的出口</span><span class="l-num">給出數字</span></div>
+
+    <div class="stack-block" style="margin-top:1.6rem">
+      <div>
+        <h3>LLM 只做三件事</h3>
+        <p style="margin:0 0 0.6rem">從檢索到的四張合約裡選一張，或一張都不選。把題目裡的數值填進合約的輸入欄位。指出合約宣告過、但題目沒講清楚的慣例。它不負責計算，也不改公式。</p>
+        <p style="margin:0;color:var(--text-muted);font-size:0.92rem">每條路徑都會寫下一份 DiagnosticReport：用了哪張合約和哪個版本、候選合約和分數、填進去的數值、通過了哪些檢查，以及停在哪裡、為什麼停。確定性的步驟可以照儲存下來的綁定原樣重跑。250 張合約都是離線產生的，每個公式家族呼叫三次 LLM，再經過 lint 和冒煙測試。沒有一張經過人工調整，執行時也固定不變。</p>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table text-table">
+          <thead><tr><th>誰負責什麼</th><th>選公式</th><th>算術</th><th>決定數字能不能給</th></tr></thead>
+          <tbody>
+            <tr><td>CoT</td><td>LLM</td><td>LLM</td><td>LLM</td></tr>
+            <tr><td>PAL、R-PAL</td><td>LLM 寫程式</td><td>直譯器</td><td>沒有人檢查</td></tr>
+            <tr><td>R-PAL<sup>+</sup></td><td>LLM 寫程式</td><td>直譯器</td><td>LLM，提示裡寫了檢查規則</td></tr>
+            <tr class="vq"><td>VerifiQuant</td><td>LLM 選合約</td><td>合約的程式碼</td><td>可執行的關卡</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section" id="results">
+  <div class="page-inner">
+    <p class="eyebrow">結果</p>
+    <h2>程式跑得動，不等於有治理</h2>
+    <p class="lede">
+      所有系統都用 Gemini 2.5 Flash，看到同樣的前 4 名合約，用確定性的方式執行，由同一套計分程式評分。
+      R-PAL<sup>+</sup> 和 VerifiQuant 在陷阱題上的數字是三次執行的平均。
+    </p>
+    <div class="result-grid">
+      <div class="result-card">
+        <h3>陷阱題的誤收率（越低越安全）</h3>
+        <p style="margin-top:0">80 題刻意做成沒有合理答案，F、E、I、N 各 20 題。誤收率（FNAR）是其中仍然被回答了一個數字的比例。</p>
+        <div class="bars">
+          <div class="bar-row"><span class="name">R-PAL</span><span class="bar-track"><span class="bar-fill" style="width:48.8%"></span></span><span class="v">48.8%</span></div>
+          <div class="bar-row"><span class="name">R-PAL<sup>+</sup></span><span class="bar-track"><span class="bar-fill" style="width:27.5%"></span></span><span class="v">27.5%</span></div>
+          <div class="bar-row vq"><span class="name">VerifiQuant</span><span class="bar-track"><span class="bar-fill" style="width:10.4%"></span></span><span class="v">10.4%</span></div>
+        </div>
+        <p>比 R-PAL<sup>+</sup> 低 <strong>17.1 個百分點</strong>，以基礎題分群計算的 95% 信賴區間是 [6.8, 27.0]。把檢查寫進提示，和真的去執行檢查，結果並不一樣。</p>
+        <div class="data-table-wrap" style="margin-top:0.8rem">
+          <table class="data-table">
+            <thead><tr><th>各類陷阱題的誤收率</th><th>R-PAL</th><th>R-PAL<sup>+</sup></th><th>VerifiQuant</th></tr></thead>
+            <tbody>
+              <tr><td>E &middot; 數值越界</td><td>90%</td><td>30%</td><td><strong>8.3%</strong></td></tr>
+              <tr><td>I &middot; 慣例不清</td><td>95%</td><td>80%</td><td><strong>21.7%</strong></td></tr>
+              <tr><td>F &middot; 少了輸入</td><td>10%</td><td>0%</td><td>10%</td></tr>
+              <tr><td>N &middot; 超出範圍</td><td>0%</td><td>0%</td><td>1.7%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">差距集中在 E 和 I。缺欄位或明顯超出範圍的題目夠顯眼，光靠提示也擋得下來。</p>
+      </div>
+
+      <div class="result-card">
+        <h3>代價：少答一些題，答出來的差不多一樣準</h3>
+        <p style="margin-top:0">250 題定義清楚的乾淨題。條件相同的執行基線在這裡本來就表現不錯，加上治理並沒有讓準確率變高。</p>
+        <div class="data-table-wrap" style="margin-top:0.8rem">
+          <table class="data-table">
+            <thead><tr><th>乾淨題（n = 250）</th><th>準確率</th><th>SWR</th><th>覆蓋率</th></tr></thead>
+            <tbody>
+              <tr><td>CoT，單次</td><td>77.6</td><td>18.0</td><td>95.6</td></tr>
+              <tr><td>PAL，不檢索</td><td>91.2</td><td>7.2</td><td>98.4</td></tr>
+              <tr><td>R-PAL，前 4 名合約</td><td>96.8</td><td>2.4</td><td>99.2</td></tr>
+              <tr><td>R-PAL<sup>+</sup>，提示裡寫檢查</td><td>92.0</td><td>0.9</td><td>92.9</td></tr>
+              <tr class="vq"><td>VerifiQuant，K = 1</td><td>81.2</td><td>2.8</td><td>84.0</td></tr>
+              <tr class="sub"><td>VerifiQuant，K = 3 &dagger;</td><td>93.6</td><td>3.2</td><td>96.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">SWR 是給出錯誤數字的比例。K = 1 完全自主運作。&dagger; K = 3 是有意圖 oracle 的上限：oracle 看得到題目要算什麼，看不到答案。</p>
+        <p>另一組分階段讀同一份合約文字的對照組，在陷阱題上和 VerifiQuant 差不多（8.8%），但乾淨題答得比較少（74.8% 對 84.0%），主要原因是它自己寫的程式跑不起來。
+          VerifiQuant 作答的題目裡有 96.7% 答對，R-PAL 是 97.6%。完整的漏斗每題約 12.2 秒，R-PAL 是 10.5 秒，大約是 1.2 倍的時間。</p>
+      </div>
+
+      <div class="result-card">
+        <h3>庫外題：多了範圍訊號，答題數沒有變多</h3>
+        <div class="big">88.9% <small>的 199 題庫外問題被拒答</small></div>
+        <p>庫內題的拒答率是 19.6%。這是一組固定的切分：199 題的公式家族不在一個 50 個家族的合約庫裡，題目來自同一個基準資料集。
+          R-PAL 只拒答 0.5%，靠模型本身的知識答對 95.0%，答錯時也沒有任何訊號。VerifiQuant 在庫外並沒有比較準，只答對 7.0%，錯答率也沒有比較低（4.0% 對 4.5%）。論文把這一點列為最限制主張的結果。</p>
+        <p>另外有一組 80 題的資料，由五位有金融背景的標註者在看不到任何系統輸出的情況下標記（Fleiss &kappa; = 0.84）。其中 46 題不該給數字，VerifiQuant 給了數字的比例是 8.7%，R-PAL<sup>+</sup> 是 13.0%，CoT 是 21.7%，R-PAL 是 56.5%。只有和 R-PAL 的差距達到統計顯著。VerifiQuant 的拒答大多是範圍拒答，可以回答的題目它只答了 20.6%。</p>
+      </div>
+
+      <div class="result-card">
+        <h3>經過驗證的修改，不重新生成</h3>
+        <div class="big">97.7% <small>的錯誤修補被擋下（共 879 個）</small></div>
+        <p>非預設的慣例會改變計算。這時套用的是建庫時就寫在合約上的修改，而且執行前要先通過驗證：AST 大小有上限、只能用白名單裡的名稱、在取樣的輸入上要符合宣告的代數關係。
+          179 份轉換規格配上 6 類修補錯誤，共產生 906 個變異，其中 27 個在算術上等價，不列入計算。最後有 20 個被誤放（2.3%），結構性攻擊則全部被擋下。</p>
+        <p>這是有範圍的數值驗證，並不是形式上的等價證明。那 20 個誤放都出現在有條件分支的轉換裡，五組取樣輸入都沒走到那個分支。<a href="/demo#repair">試試貸款的轉換 &rarr;</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page-section alt">
+  <div class="page-inner">
+    <p class="eyebrow">界線</p>
+    <h2>這些主張在哪裡成立，在哪裡不成立</h2>
+    <div class="boundary-grid">
+      <div class="about-card">
+        <h3>成立的範圍</h3>
+        <p>答案是單一數字、以公式為基礎的問題，公式家族在合約庫裡，而且合約本身是對的。</p>
+      </div>
+      <div class="about-card">
+        <h3>失效的地方</h3>
+        <p>剩下的沒標記錯答，都能追到三個 LLM 步驟：選合約、填數值、想起合約宣告過的慣例。關卡檢查的是格式和範圍，不檢查一個數值是從哪裡來的。</p>
+      </div>
+      <div class="about-card">
+        <h3>接下來</h3>
+        <p>擴大合約庫並連同選擇步驟一起評估，讓模型在合約宣告的條件內自己組合計算，以及改進檢索。</p>
+      </div>
+    </div>
+    <p style="margin-top:1.2rem">Demo 的重播裡兩種失敗都看得到：一題陷阱題被放了過去，還有一題乾淨題，R-PAL 答對了，VerifiQuant 卻拒答。<a href="/demo#F-test-1263">去看看 &rarr;</a></p>
+  </div>
+</section>
+
+<section class="page-section" id="cite">
+  <div class="page-inner narrow">
+    <p class="eyebrow">引用</p>
+    <h2>BibTeX</h2>
+    <pre class="bibtex" id="bibtex"><button class="copy-btn" type="button" data-copy="bibtex">複製</button>@inproceedings{ko2026verifiquant,
+  title     = {VerifiQuant: Governance-by-Execution for Financial LLM Workflows},
+  author    = {Ko, Yu-Chi and Yeh, Mi-Yen and Lin, Shou-De},
+  booktitle = {Proceedings of the 7th ACM International Conference on AI in Finance (ICAIF '26)},
+  year      = {2026},
+  address   = {Milan, Italy},
+  publisher = {ACM},
+  doi       = {{ "{" ~ links.doi_id ~ "}" }}
+}</pre>
+    <p class="table-note">論文以 CC BY 4.0 授權發表。DOI 要等 ICAIF '26 論文集上線後才會生效。</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const pre = document.getElementById(btn.dataset.copy);
+      const text = Array.from(pre.childNodes).filter((n) => n !== btn).map((n) => n.textContent).join('');
+      try { await navigator.clipboard.writeText(text.trim()); btn.textContent = '已複製'; }
+      catch (_) { btn.textContent = '請手動選取複製'; }
+      setTimeout(() => { btn.textContent = '複製'; }, 1600);
+    });
+  });
+</script>
+{% endblock %}

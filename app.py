@@ -10,7 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, g, jsonify, render_template, request, send_file
+from markupsafe import Markup
 from werkzeug.utils import secure_filename
 
 from verifiquant.card_store import SQLAlchemyArtifactStore
@@ -148,6 +149,15 @@ DEMO_MODE = os.environ.get("VERIFIQUANT_DEMO_MODE", "").lower() in ("1", "true",
 # Appended to static URLs so a redeploy is never served from a stale browser cache.
 ASSET_VERSION = os.environ.get("VERIFIQUANT_ASSET_VERSION") or str(int(time.time()))
 
+# Interface language. English is the default; a visitor switches with ?lang=zh-TW (the nav
+# button links there) and the choice is kept in a cookie. UI strings live in one dictionary,
+# static/i18n/zh-TW.json, keyed by the English text, so templates and JavaScript share it.
+# Recorded runs, questions and live model output stay in their original English.
+SUPPORTED_LANGS = ("en", "zh-TW")
+LANG_COOKIE = "vq_lang"
+with open(os.path.join(ROOT_DIR, "static", "i18n", "zh-TW.json"), encoding="utf-8") as _fh:
+    ZH_TW_STRINGS: Dict[str, str] = json.load(_fh)
+
 # Paper links shown in the site header, footer and citation block.
 PAPER_DOI = os.environ.get("VERIFIQUANT_PAPER_DOI", "10.1145/3858063.3858688")
 PAPER_LINKS = {
@@ -271,9 +281,44 @@ def create_app() -> Flask:
         static_folder=os.path.join(ROOT_DIR, "static"),
     )
 
+    @app.before_request
+    def pick_language() -> None:
+        asked = request.args.get("lang")
+        g.lang_from_query = asked if asked in SUPPORTED_LANGS else None
+        cookie = request.cookies.get(LANG_COOKIE)
+        g.lang = g.lang_from_query or (cookie if cookie in SUPPORTED_LANGS else "en")
+
+    @app.after_request
+    def remember_language(response: Any) -> Any:
+        if getattr(g, "lang_from_query", None):
+            response.set_cookie(LANG_COOKIE, g.lang_from_query, max_age=365 * 24 * 3600, samesite="Lax")
+        return response
+
+    def translate(text: str, **values: Any) -> Markup:
+        """Return the interface string in the visitor's language. Dictionary values are our own
+        copy (some carry inline HTML), so they are marked safe; {name} slots are filled from values."""
+        out = ZH_TW_STRINGS.get(text, text) if getattr(g, "lang", "en") == "zh-TW" else text
+        for key, value in values.items():
+            out = out.replace("{" + key + "}", str(Markup.escape(value)))
+        return Markup(out)
+
     @app.context_processor
     def inject_paper_links() -> Dict[str, Any]:
-        return {"links": PAPER_LINKS, "asset_version": ASSET_VERSION}
+        lang = getattr(g, "lang", "en")
+        return {
+            "links": PAPER_LINKS,
+            "asset_version": ASSET_VERSION,
+            "lang": lang,
+            "zh": lang == "zh-TW",
+            "t": translate,
+            "i18n_strings": ZH_TW_STRINGS if lang == "zh-TW" else {},
+        }
+
+    def page(name: str, **kwargs: Any) -> str:
+        """Render <name>_zh.html for zh-TW visitors when that variant exists (the long prose pages)."""
+        if getattr(g, "lang", "en") == "zh-TW" and os.path.exists(os.path.join(ROOT_DIR, "templates", f"{name}_zh.html")):
+            return render_template(f"{name}_zh.html", **kwargs)
+        return render_template(f"{name}.html", **kwargs)
 
     if public_lockdown:
         @app.after_request
@@ -343,7 +388,7 @@ def create_app() -> Flask:
 
     @app.get("/")
     def index() -> str:
-        return render_template("home.html", active_page="home")
+        return page("home", active_page="home")
 
     @app.get("/demo")
     def demo() -> str:
@@ -351,7 +396,7 @@ def create_app() -> Flask:
 
     @app.get("/about")
     def about() -> str:
-        return render_template("about.html", active_page="about")
+        return page("about", active_page="about")
 
     @app.get("/api/cards/overview")
     def cards_overview() -> Any:

@@ -35,7 +35,7 @@ async function fetchRateLimit() {
     const data = await res.json();
     const bar = document.getElementById("rate-limit-bar");
     if (bar && data.status === "ok") {
-      bar.textContent = `Remaining diagnoses: ${data.remaining} / ${data.limit} per hour`;
+      bar.textContent = t("Remaining diagnoses: {remaining} / {limit} per hour", { remaining: data.remaining, limit: data.limit });
     }
   } catch (_) {}
 }
@@ -88,15 +88,15 @@ function applySampleQuestion(index) {
   questionEl.value = item.question || "";
   contextEl.value = item.context || "";
   sampleMetaEl.textContent = [
-    item.case_id ? `case: ${item.case_id}` : "",
-    item.level ? `level: ${item.level}` : "",
-    item.ground_truth !== undefined && item.ground_truth !== null ? `gold: ${item.ground_truth}` : "",
+    item.case_id ? t("case: {id}", { id: item.case_id }) : "",
+    item.level ? t("level: {level}", { level: item.level }) : "",
+    item.ground_truth !== undefined && item.ground_truth !== null ? t("gold: {gold}", { gold: item.ground_truth }) : "",
   ].filter(Boolean).join(" · ");
 }
 
 async function loadDemoQuestionBank() {
   if (!sampleQuestionEl) return;
-  sampleQuestionEl.innerHTML = `<option value="">Loading latest 50...</option>`;
+  sampleQuestionEl.innerHTML = `<option value="">${escapeHtml(t("Loading questions…"))}</option>`;
   try {
     const response = await fetch("/api/demo/questions");
     const data = await response.json();
@@ -108,13 +108,13 @@ async function loadDemoQuestionBank() {
     if (demoQuestions.length) {
       applySampleQuestion(0);
       const source = data.source || "questions";
-      sampleMetaEl.textContent = `${sampleMetaEl.textContent} · source: ${source}`;
+      sampleMetaEl.textContent = `${sampleMetaEl.textContent} · ${t("source: {source}", { source })}`;
     } else {
-      sampleQuestionEl.innerHTML = `<option value="">No samples found</option>`;
-      sampleMetaEl.textContent = "No demo samples found.";
+      sampleQuestionEl.innerHTML = `<option value="">${escapeHtml(t("No questions found"))}</option>`;
+      sampleMetaEl.textContent = t("No questions found");
     }
   } catch (error) {
-    sampleQuestionEl.innerHTML = `<option value="">Failed to load samples</option>`;
+    sampleQuestionEl.innerHTML = `<option value="">${escapeHtml(t("Failed to load questions"))}</option>`;
     sampleMetaEl.textContent = error.message;
   }
 }
@@ -192,20 +192,20 @@ function setupPdfAttachment({ fileId, buttonId, statusId, targetId }) {
   buttonEl.addEventListener("click", async () => {
     const file = fileEl.files && fileEl.files[0];
     if (!file) {
-      statusEl.textContent = "Choose a PDF first.";
+      statusEl.textContent = t("Choose a PDF first.");
       return;
     }
     const formData = new FormData();
     formData.append("file", file);
     buttonEl.disabled = true;
-    statusEl.textContent = "Extracting...";
+    statusEl.textContent = t("Extracting…");
     try {
       const response = await fetch("/api/pdf/extract", { method: "POST", body: formData });
       const data = await response.json();
       if (data.status !== "ok") throw new Error(data.message || "PDF extraction failed");
       appendContextBlock(targetEl, data.context_block);
-      const clipped = data.truncated ? " · truncated" : "";
-      statusEl.textContent = `Attached ${data.pages_read}/${data.pages_total} pages, ${data.text_chars} chars${clipped}`;
+      const clipped = data.truncated ? t(" · truncated") : "";
+      statusEl.textContent = t("Attached {read}/{total} pages, {chars} characters", { read: data.pages_read, total: data.pages_total, chars: data.text_chars }) + clipped;
     } catch (error) {
       statusEl.textContent = error.message;
     } finally {
@@ -227,18 +227,18 @@ function renderRepairHints(repairHints) {
     }).join("");
     return `
       <article class="repair-card">
-        <h4>${escapeHtml(hint.title || hint.rule_id || "Repair Hint")}</h4>
+        <h4>${escapeHtml(hint.title || hint.rule_id || t("Repair hint"))}</h4>
         <p>${escapeHtml(hint.user_message || "")}</p>
         ${asks ? `<div class="repair-grid">${asks}</div>` : ""}
       </article>`;
   }).join("");
   return `
     <section class="repair-section">
-      <h3>Repair Guide</h3>
+      <h3>${escapeHtml(t("Repair guide"))}</h3>
       ${blocks}
       <div class="repair-actions">
-        <button id="apply-repair-btn" type="button" class="btn btn-outline btn-sm">Apply repair to context</button>
-        <button id="rerun-btn" type="button" class="btn btn-primary btn-sm">Re-diagnose with fix</button>
+        <button id="apply-repair-btn" type="button" class="btn btn-outline btn-sm">${escapeHtml(t("Apply repair to context"))}</button>
+        <button id="rerun-btn" type="button" class="btn btn-primary btn-sm">${escapeHtml(t("Re-diagnose with fix"))}</button>
       </div>
     </section>`;
 }
@@ -261,10 +261,10 @@ function renderInteractiveAssistant(data) {
         const options = (clarification.options || []).map(optionHtml).join("");
         return `
           <article class="interactive-answer-card" data-slot="${slot}">
-            <h4>Clarification ${idx + 1}</h4>
+            <h4>${escapeHtml(t("Clarification {n}", { n: idx + 1 }))}</h4>
             <p class="interactive-question">${escapeHtml(q)}</p>
-            ${options ? `<label>Select answer<select class="interactive-option"><option value="">Choose...</option>${options}</select></label>` : ""}
-            <label>Or enter manually<input class="interactive-free" type="text" placeholder="Enter a more precise answer" /></label>
+            ${options ? `<label>${escapeHtml(t("Select answer"))}<select class="interactive-option"><option value="">${escapeHtml(t("Choose…"))}</option>${options}</select></label>` : ""}
+            <label>${escapeHtml(t("Or enter manually"))}<input class="interactive-free" type="text" placeholder="${escapeHtml(t("Enter a more precise answer"))}" /></label>
           </article>`;
       }).join("") : "";
 
@@ -274,23 +274,23 @@ function renderInteractiveAssistant(data) {
     const options = (w.options || []).map(optionHtml).join("");
     return `
       <article class="interactive-answer-card" data-slot="${slot}">
-        <h4>Soft Warning ${idx + 1}</h4>
-        <p><strong>Default assumption</strong>: ${escapeHtml(w.assumption_if_not_clarified || "-")}</p>
-        <p class="interactive-question"><strong>Question</strong>: ${escapeHtml(w.clarification_question || "-")}</p>
-        ${options ? `<label>Options<select class="interactive-option"><option value="">Choose...</option>${options}</select></label>` : ""}
-        <label>Or enter manually<input class="interactive-free" type="text" placeholder="Enter your answer" /></label>
+        <h4>${escapeHtml(t("Soft warning {n}", { n: idx + 1 }))}</h4>
+        <p><strong>${escapeHtml(t("Default assumption"))}</strong>: ${escapeHtml(w.assumption_if_not_clarified || "-")}</p>
+        <p class="interactive-question"><strong>${escapeHtml(t("Question"))}</strong>: ${escapeHtml(w.clarification_question || "-")}</p>
+        ${options ? `<label>${escapeHtml(t("Options"))}<select class="interactive-option"><option value="">${escapeHtml(t("Choose…"))}</option>${options}</select></label>` : ""}
+        <label>${escapeHtml(t("Or enter manually"))}<input class="interactive-free" type="text" placeholder="${escapeHtml(t("Enter your answer"))}" /></label>
       </article>`;
   }).join("");
 
   return `
     <section class="trace-section interaction-priority">
-      <h3>Interactive Clarification (Priority)</h3>
-      <label>Rewrite question (optional)<input id="interactive-question-rewrite" type="text" placeholder="Rewrite the question for more precision" /></label>
-      <label>Add context (optional)<input id="interactive-context-note" type="text" placeholder="e.g., use end-of-year cash flows, 10% discount rate" /></label>
+      <h3>${escapeHtml(t("Clarification"))}</h3>
+      <label>${escapeHtml(t("Rewrite question (optional)"))}<input id="interactive-question-rewrite" type="text" placeholder="${escapeHtml(t("Rewrite the question for more precision"))}" /></label>
+      <label>${escapeHtml(t("Add context (optional)"))}<input id="interactive-context-note" type="text" placeholder="${escapeHtml(t("e.g. use end-of-year cash flows, 10% discount rate"))}" /></label>
       <div class="interactive-grid">${clarificationCards}${softCards}</div>
       <div class="repair-actions">
-        <button id="apply-interactive-btn" type="button" class="btn btn-outline btn-sm">Apply to context</button>
-        <button id="rerun-interactive-btn" type="button" class="btn btn-primary btn-sm">Apply & re-diagnose</button>
+        <button id="apply-interactive-btn" type="button" class="btn btn-outline btn-sm">${escapeHtml(t("Apply to context"))}</button>
+        <button id="rerun-interactive-btn" type="button" class="btn btn-primary btn-sm">${escapeHtml(t("Apply and re-diagnose"))}</button>
       </div>
     </section>`;
 }
@@ -300,17 +300,17 @@ function renderResult(data) {
   const summary = `
     <div class="meta-row">
       ${statusBadge(data.status, data.diagnostic_type)}
-      <span>Gate: <code>${escapeHtml(data.funnel_layer || "-")}</code> / <code>${escapeHtml(data.gate_action || "-")}</code></span>
+      <span>${escapeHtml(t("Gate:"))} <code>${escapeHtml(data.funnel_layer || "-")}</code> / <code>${escapeHtml(data.gate_action || "-")}</code></span>
     </div>
-    <p>Reason: ${escapeHtml(data.reason || "-")}</p>
-    <p>Card: <code>${escapeHtml(data.fic_id || "(none)")}</code></p>
-    <p>Candidates: <code>${escapeHtml((data.candidate_ids || []).join(", "))}</code></p>
-    <p>Inputs:</p><pre>${escapeHtml(JSON.stringify(data.provided_inputs || {}, null, 2))}</pre>`;
+    <p>${escapeHtml(t("Reason:"))} ${escapeHtml(data.reason || "-")}</p>
+    <p>${escapeHtml(t("Contract:"))} <code>${escapeHtml(data.fic_id || "(none)")}</code></p>
+    <p>${escapeHtml(t("Candidates:"))} <code>${escapeHtml((data.candidate_ids || []).join(", "))}</code></p>
+    <p>${escapeHtml(t("Inputs:"))}</p><pre>${escapeHtml(JSON.stringify(data.provided_inputs || {}, null, 2))}</pre>`;
 
   const successPart = data.status === "success"
     ? `<p class="result-output">${escapeHtml(data.output_var)} = <strong>${escapeHtml(data.output_value)}</strong></p>` : "";
   const rulePart = data.triggered_rule_ids?.length
-    ? `<p>Triggered rules: <code>${escapeHtml(data.triggered_rule_ids.join(", "))}</code></p>` : "";
+    ? `<p>${escapeHtml(t("Triggered rules:"))} <code>${escapeHtml(data.triggered_rule_ids.join(", "))}</code></p>` : "";
 
   resultEl.innerHTML = [
     summary, rulePart, successPart,
@@ -319,9 +319,9 @@ function renderResult(data) {
     renderRepairHints(data.repair_hints),
     renderSelectionSummary(data.selection_trace),
     renderPipelineTimeline(data.pipeline_timeline),
-    renderTraceBlock("Extraction Trace", data.extraction_trace),
-    renderTraceBlock("F/E Checks", data.echeck_trace),
-    renderTraceBlock("I Gate", data.critic_trace),
+    renderTraceBlock(t("Extraction trace"), data.extraction_trace),
+    renderTraceBlock(t("F/E checks"), data.echeck_trace),
+    renderTraceBlock(t("I gate"), data.critic_trace),
     renderPipelineLogs(data.pipeline_logs),
   ].join("");
 
@@ -346,20 +346,20 @@ async function loadCardsOverview() {
     const response = await fetch("/api/cards/overview");
     const data = await response.json();
     if (data.status !== "ok") throw new Error(data.message || "load cards failed");
-    cardsMeta.textContent = `${data.domain_count} domains, ${data.card_count} cards`;
+    cardsMeta.textContent = t("{domains} domains, {cards} contracts", { domains: data.domain_count, cards: data.card_count });
     const domains = Object.keys(data.grouped || {}).sort();
     cardsResult.innerHTML = domains.map((domain) => {
       const domainData = data.grouped[domain];
       const topicsHtml = Object.keys(domainData.topics || {}).sort().map((topic) => {
-        const t = domainData.topics[topic];
-        const cards = (t.cards || []).slice(0, 20).map((c) =>
+        const tp = domainData.topics[topic];
+        const cards = (tp.cards || []).slice(0, 20).map((c) =>
           `<li><code>${escapeHtml(c.fic_id)}</code> ${escapeHtml(c.title || "")}</li>`).join("");
-        return `<details><summary>${escapeHtml(topic)} (${t.count})</summary><ul class="card-list">${cards}</ul></details>`;
+        return `<details><summary>${escapeHtml(topic)} (${tp.count})</summary><ul class="card-list">${cards}</ul></details>`;
       }).join("");
       return `<section class="domain-block"><h3>${escapeHtml(domain)} <span style="color:var(--text-light)">(${domainData.total})</span></h3>${topicsHtml}</section>`;
-    }).join("") || "<p>No cards found.</p>";
+    }).join("") || `<p>${escapeHtml(t("No contracts found."))}</p>`;
   } catch (error) {
-    cardsResult.innerHTML = `<p>Failed to load: ${escapeHtml(error.message)}</p>`;
+    cardsResult.innerHTML = `<p>${escapeHtml(t("Failed to load: {error}", { error: error.message }))}</p>`;
   } finally {
     setCardsLoading(false);
   }

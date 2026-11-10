@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ 'zh-Hant-TW' if zh else 'en' }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}VerifiQuant{% endblock %}</title>
-    <meta name="description" content="VerifiQuant: Governance-by-Execution for Financial LLM Workflows. ACM ICAIF '26 paper, interactive demo and replay of the paper's recorded runs." />
+    <meta name="description" content="{{ t("VerifiQuant: Governance-by-Execution for Financial LLM Workflows. ACM ICAIF '26 paper, interactive demo and replay of the paper's recorded runs.") }}" />
     <meta property="og:title" content="VerifiQuant · ACM ICAIF '26" />
-    <meta property="og:description" content="Keep the spreadsheet, let the LLM fill it in. Executable contract gates decide whether a financial number may leave." />
+    <meta property="og:description" content="{{ t("Keep the spreadsheet, let the LLM fill it in. Executable contract gates decide whether a financial number may leave.") }}" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
+    <link rel="alternate" hreflang="en" href="?lang=en" />
+    <link rel="alternate" hreflang="zh-Hant-TW" href="?lang=zh-TW" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=asset_version) }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='paper.css', v=asset_version) }}" />
+    <script>
+      window.VQ_LANG = {{ lang|tojson }};
+      window.VQ_I18N = {{ i18n_strings|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='i18n.js', v=asset_version) }}"></script>
     {% block head %}{% endblock %}
   </head>
-  <body data-asset-version="{{ asset_version }}">
+  <body data-asset-version="{{ asset_version }}" class="{{ 'lang-zh' if zh else 'lang-en' }}">
     <nav class="site-nav">
       <div class="nav-inner">
         <a href="/" class="nav-logo">
@@ -24,20 +31,22 @@
           <span class="logo-text">VerifiQuant</span>
         </a>
         <div class="nav-links">
-          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">Paper</a>
-          <a href="/demo" class="nav-link {% if active_page == 'demo' %}active{% endif %}">Demo</a>
-          <a href="/about" class="nav-link {% if active_page == 'about' %}active{% endif %}">About</a>
-          <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">Code &nearr;</a>
+          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">{{ t("Paper") }}</a>
+          <a href="/demo" class="nav-link {% if active_page == 'demo' %}active{% endif %}">{{ t("Demo") }}</a>
+          <a href="/about" class="nav-link {% if active_page == 'about' %}active{% endif %}">{{ t("About") }}</a>
+          <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">{{ t("Code") }} &nearr;</a>
+          <a href="?lang={{ 'en' if zh else 'zh-TW' }}" class="nav-link lang-toggle" data-lang-switch="{{ 'en' if zh else 'zh-TW' }}" lang="{{ 'en' if zh else 'zh-Hant-TW' }}">{{ 'English' if zh else '中文' }}</a>
         </div>
-        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="{{ t("Toggle menu") }}">
           <span></span><span></span><span></span>
         </button>
       </div>
       <div class="mobile-menu hidden" id="mobile-menu">
-        <a href="/" class="nav-link">Paper</a>
-        <a href="/demo" class="nav-link">Demo</a>
-        <a href="/about" class="nav-link">About</a>
-        <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">Code &nearr;</a>
+        <a href="/" class="nav-link">{{ t("Paper") }}</a>
+        <a href="/demo" class="nav-link">{{ t("Demo") }}</a>
+        <a href="/about" class="nav-link">{{ t("About") }}</a>
+        <a href="{{ links.repo }}" class="nav-link external" target="_blank" rel="noopener">{{ t("Code") }} &nearr;</a>
+        <a href="?lang={{ 'en' if zh else 'zh-TW' }}" class="nav-link lang-toggle" data-lang-switch="{{ 'en' if zh else 'zh-TW' }}" lang="{{ 'en' if zh else 'zh-Hant-TW' }}">{{ 'English' if zh else '中文' }}</a>
       </div>
     </nav>
 
@@ -65,6 +74,13 @@
           menuBtn.classList.toggle('open');
         });
       }
+      // Keep the current tab or case (the #hash) when switching language.
+      document.querySelectorAll('[data-lang-switch]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          location.href = `${location.pathname}?lang=${a.dataset.langSwitch}${location.hash}`;
+        });
+      });
     </script>
     {% block scripts %}{% endblock %}
   </body>

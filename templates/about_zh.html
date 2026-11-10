@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}關於 &middot; VerifiQuant（ICAIF '26）{% endblock %}
+
+{% block content %}
+<section class="about-section">
+  <div class="about-inner">
+    <p class="eyebrow">關於</p>
+    <h1>關於 VerifiQuant</h1>
+
+    <div class="about-card">
+      <h2>論文</h2>
+      <p>
+        <strong>VerifiQuant: Governance-by-Execution for Financial LLM Workflows.</strong>
+        Yu-Chi Ko, Mi-Yen Yeh, Shou-De Lin. 收錄於 <em>Proceedings of the 7th ACM International Conference on AI in Finance
+        (ICAIF '26)</em>，義大利米蘭，2026 年 11 月 14 至 17 日，ACM 出版。<a href="{{ links.doi }}" target="_blank" rel="noopener">doi:{{ links.doi_id }}</a>。以 CC BY 4.0 授權發表。
+      </p>
+      <div class="author-links">
+        <a href="/#cite" class="btn btn-primary">BibTeX</a>
+        <a href="{{ links.repo }}" class="btn btn-outline" target="_blank" rel="noopener">程式碼、合約與資料集 &nearr;</a>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h2>這個網站有什麼</h2>
+      <ul class="about-list">
+        <li><strong>論文重播。</strong>R-PAL、R-PAL<sup>+</sup> 和 VerifiQuant 在全部 80 題陷阱題和三題乾淨題上的實際輸出，取自論文表格背後的那幾次執行，用論文自己的計分程式評分。這一頁不呼叫任何模型。</li>
+        <li><strong>驗證過的修改。</strong>貸款合約宣告的期初付款轉換，由論文評估的同一個驗證器即時檢查，同樣不呼叫模型。</li>
+        <li><strong>直接試用。</strong>完整的漏斗，跑在論文用的 250 張合約上，檢索前 4 名，模型是 Gemini 2.5 Flash。選合約、填數值和判斷歧義都是 LLM 步驟，所以即時結果可能和紀錄裡的不一樣。</li>
+      </ul>
+      <p style="margin-top:0.8rem">中文介面只翻譯網站本身。題目、合約內容、實驗紀錄和即時的模型輸出都保留英文原文，因為翻譯它們會改變紀錄的內容。</p>
+    </div>
+
+    <div class="about-card">
+      <h2>系統保證什麼，不保證什麼</h2>
+      <ul class="about-list">
+        <li><strong>算術不經過模型。</strong>數字只會由合約自己的程式算出來，而且要先通過每一道關卡。</li>
+        <li><strong>輸入只檢查格式和範圍，</strong>不檢查來源。關卡看不出一個填進去的數值是不是從正確的欄位拿來的。</li>
+        <li><strong>紀錄可以照原樣重跑。</strong>確定性的步驟會依照儲存下來的綁定重新執行。如果從原始題目重新跑一次，走的路徑可能不同。</li>
+        <li><strong>修改的驗證是有範圍的數值檢查，</strong>不是形式上的等價證明：修改後的結果要在取樣的輸入上符合宣告的不變式。</li>
+        <li><strong>在庫外，它給的是範圍訊號，答題數沒有變多。</strong>這裡的庫外是指公式家族不在合約庫裡，題目仍來自同一個基準資料集。</li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <h2>實驗設定</h2>
+      <div class="tech-grid">
+        <div class="tech-item"><strong>模型</strong><span>Gemini 2.5 Flash，所有比較的系統都一樣</span></div>
+        <div class="tech-item"><strong>合約庫</strong><span>250 張 FIC，離線建立，執行時固定</span></div>
+        <div class="tech-item"><strong>檢索</strong><span>以 BM25 比對合約描述，取前 4 名</span></div>
+        <div class="tech-item"><strong>每題的 LLM 呼叫</strong><span>選合約、填數值、判斷歧義</span></div>
+        <div class="tech-item"><strong>驗證</strong><span>AST 大小上限加上數值不變式檢查</span></div>
+        <div class="tech-item"><strong>部署</strong><span>Python 3.11、Flask、SQLite、Google Cloud Run</span></div>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h2>致謝</h2>
+      <p>
+        本研究部分由國家科學及技術委員會（計畫編號 113-2628-E-001-003-MY4）、國立臺灣大學與中央研究院創新合作計畫（AS-NTU-114-06），以及中央研究院資訊科學研究所與資訊科技創新研究中心支持。
+      </p>
+    </div>
+
+    <div class="about-card about-author">
+      <h2>聯絡</h2>
+      <p>
+        Yu-Chi Ko，國立臺灣大學與中央研究院 資料科學學位學程。<a href="mailto:r14946005@ntu.edu.tw">r14946005@ntu.edu.tw</a>。其他作品請見<a href="https://datafox.tw" target="_blank" rel="noopener">datafox.tw</a>。
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

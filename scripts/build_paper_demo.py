@@ -61,7 +61,8 @@ CODE_LIMIT = 2400
 TEXT_LIMIT = 600
 
 # The story the demo walks through, in order. Captions are written to stay inside what the
-# paper shows (see the calibration notes in docs and the paper's section 5).
+# paper shows (see the calibration notes in docs and the paper's section 5). The *_zh fields
+# are the Traditional Chinese interface's versions of the same captions.
 FEATURED: List[Dict[str, str]] = [
     {
         "id": "E-test-1080", "set": "trap", "chapter": "The problem",
@@ -70,6 +71,8 @@ FEATURED: List[Dict[str, str]] = [
                    "Both baselines see the same four contracts, write code that runs, and report a 6,500% weekly gain "
                    "in every run. VerifiQuant binds the two prices to the contract's inputs, and the contract's declared "
                    "boundary check fires before anything is computed.",
+        "chapter_zh": "問題所在", "title_zh": "程式跑得起來，不代表答案成立",
+        "caption_zh": "我們只改了一個輸入，讓這題沒有合理答案：週初股價從 $150 改成 $2.5。兩個基線看到同樣的四張合約，寫出能執行的程式，每一次都回報這週漲了 6,500%。VerifiQuant 把兩個價格填進合約的輸入欄位，在任何計算之前，合約宣告的邊界檢查就先擋下來了。",
     },
     {
         "id": "F-test-1023", "set": "trap", "chapter": "Exit F",
@@ -77,6 +80,8 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "The tax liability was redacted. VerifiQuant's input gate finds the contract's required field empty "
                    "and asks for exactly that field. R-PAL+ asks for it too: a missing field is conspicuous enough for "
                    "a prompt to catch, which is why F and N show little gap in the paper.",
+        "chapter_zh": "出口 F", "title_zh": "少了輸入：直接講出缺的欄位",
+        "caption_zh": "稅額被遮掉了。VerifiQuant 的輸入關卡發現合約的必要欄位是空的，就只問那一個欄位。R-PAL+ 這題也會問。缺欄位這種問題夠顯眼，寫在提示裡就擋得下來，這也是論文裡 F 和 N 差距很小的原因。",
     },
     {
         "id": "I-test-2163", "set": "trap", "chapter": "Exit I (hard)",
@@ -84,6 +89,8 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "The word \"call\" was removed, so the option type is no longer stated. The contract declares this "
                    "ambiguity as HARD, so VerifiQuant shows the contract's options instead of a number. R-PAL+ assumes "
                    "and answers in all three runs.",
+        "chapter_zh": "出口 I（hard）", "title_zh": "沒講清楚的慣例會改變數字：先停下來問",
+        "caption_zh": "我們刪掉 call 這個字，題目就沒說是哪一種選擇權。合約把這個歧義宣告成 HARD，所以 VerifiQuant 改成列出合約的選項，不給數字。R-PAL+ 三次都自己假設了一種，直接作答。",
     },
     {
         "id": "I-test-1026", "set": "trap", "chapter": "Exit I (soft)",
@@ -91,6 +98,8 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "\"As a percentage\" was removed. The contract declares output scale as a SOFT ambiguity, so the "
                    "number goes out with a warning that names the assumption (decimal). R-PAL+ answers in all three "
                    "runs with no warning (0.06 twice, 6.0 once), which the paper counts as a false acceptance.",
+        "chapter_zh": "出口 I（soft）", "title_zh": "只影響解讀的慣例：照樣作答，附上警告",
+        "caption_zh": "題目裡的 as a percentage 被刪掉了。合約把輸出的單位宣告成 SOFT 歧義，所以數字照樣給出，同時附上警告，寫明它假設的是小數。R-PAL+ 三次都直接作答（兩次 0.06、一次 6.0），沒有任何警告，論文把這算成誤收。",
     },
     {
         "id": "N-test-1006", "set": "trap", "chapter": "Exit N",
@@ -98,6 +107,8 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "The question was replaced with a Value-at-Risk ask that no contract covers. VerifiQuant's selector "
                    "finds no applicable contract among the four retrieved and refuses. R-PAL+ also refuses: a blatant "
                    "out-of-scope ask is easy to spot.",
+        "chapter_zh": "出口 N", "title_zh": "超出範圍：說找不到，不要用猜的",
+        "caption_zh": "問題被換成問風險值（VaR），沒有任何合約涵蓋。VerifiQuant 的選擇器在檢索到的四張合約裡找不到適用的，就拒答。R-PAL+ 這題也拒答，這麼明顯的超範圍問題本來就容易看出來。",
     },
     {
         "id": "test-2231", "set": "clean", "chapter": "Exit M",
@@ -105,12 +116,16 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "A well-posed question from the clean set. Two retrieved contracts price a European call (Black-Scholes "
                    "and Heston), and the question does not say which, so VerifiQuant asks. R-PAL picks Black-Scholes and "
                    "matches the gold answer. On clean questions an M exit is a cost, not a catch.",
+        "chapter_zh": "出口 M", "title_zh": "意圖不明：你要的是哪一個模型？",
+        "caption_zh": "這是乾淨題裡一題定義清楚的問題。檢索到的合約裡有兩張都能算歐式買權的價格（Black-Scholes 和 Heston），題目沒說用哪一個，所以 VerifiQuant 開口問。R-PAL 選了 Black-Scholes，答案和標準答案一致。在乾淨題上停在 M 出口是一種成本，並沒有攔下任何錯誤。",
     },
     {
         "id": "test-1969", "set": "clean", "chapter": "Exit C",
         "title": "Every gate passes: the contract's own code computes",
         "caption": "Inputs complete and within bounds. The contract's Python returns 579.98, which matches the gold "
                    "answer, and the declared SOFT convention (payment timing) still travels with the number as a warning.",
+        "chapter_zh": "出口 C", "title_zh": "每一關都通過：由合約自己的程式碼計算",
+        "caption_zh": "輸入齊全，也都在範圍內。合約的 Python 算出 579.98，和標準答案一致。合約宣告的 SOFT 慣例（付款時點）仍然以警告的形式，跟著數字一起給出。",
     },
     {
         "id": "F-test-1263", "set": "trap", "chapter": "Where it fails",
@@ -118,6 +133,8 @@ FEATURED: List[Dict[str, str]] = [
         "caption": "The share count was redacted, but the contract marks that input optional with a default of 100, so "
                    "the input gate has nothing to flag and VerifiQuant computes with the default. R-PAL+ asks. The paper "
                    "reports this: the two F acceptances come from traps that break the F definition.",
+        "chapter_zh": "失效的地方", "title_zh": "一題被放過的陷阱題",
+        "caption_zh": "股數被遮掉了，但合約把這個輸入標成選填、預設 100 股，所以輸入關卡沒有東西可以攔，VerifiQuant 就用預設值算了。R-PAL+ 則開口問。論文有寫到這一點：VerifiQuant 的兩題 F 誤收，都來自這種不符合 F 定義的陷阱題。",
     },
     {
         "id": "test-1993", "set": "clean", "chapter": "What it costs",
@@ -126,6 +143,8 @@ FEATURED: List[Dict[str, str]] = [
                    "outside the top four, and the selector judged that none of the four fit. VerifiQuant refuses at N; "
                    "R-PAL writes its own program and is right. This is the coverage the paper says safety costs "
                    "(84.0% vs 99.2% on the clean set).",
+        "chapter_zh": "代價", "title_zh": "拒答了一題其實答得出來的問題",
+        "caption_zh": "一般的房貸月付額。檢索把另一張攤還相關的合約排在第一，真正的貸款合約沒有進前四名，選擇器判斷這四張都不適用。VerifiQuant 停在 N 拒答，R-PAL 自己寫程式，答對了。論文說安全要付出覆蓋率，指的就是這種情況（乾淨題 84.0% 對 99.2%）。",
     },
 ]
 

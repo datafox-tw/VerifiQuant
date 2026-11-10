@@ -13,30 +13,30 @@
   const DATA_URL = `/static/data/paper_replay.json?v=${document.body.dataset.assetVersion || ""}`;
 
   const SYSTEMS = {
-    rpal: { name: "R-PAL", desc: "Writes a program from the four retrieved contracts and runs it." },
-    rpal_plus: { name: "R-PAL+", desc: "Same, with the full M/N/F/E/I taxonomy and its checks described in the prompt." },
-    vq: { name: "VerifiQuant", desc: "Selects a contract. Executable gates decide whether a number may leave." },
+    rpal: { name: "R-PAL", desc: t("Writes a program from the four retrieved contracts and runs it.") },
+    rpal_plus: { name: "R-PAL+", desc: t("Same, with the full M/N/F/E/I taxonomy and its checks described in the prompt.") },
+    vq: { name: "VerifiQuant", desc: t("Selects a contract. Executable gates decide whether a number may leave.") },
   };
   const EXIT_LABEL = {
-    N: "Out of scope · N",
-    M: "Which quantity? · M",
-    F: "Missing input · F",
-    E: "Boundary alert · E",
-    I_HARD: "Clarify convention · I (hard)",
-    I_SOFT: "Number with warning · I (soft)",
-    I_SOFT_MISMATCH: "Number with an unrelated warning",
-    READY: "Number",
-    C: "Stopped at compute",
+    N: t("Out of scope · N"),
+    M: t("Which quantity? · M"),
+    F: t("Missing input · F"),
+    E: t("Boundary alert · E"),
+    I_HARD: t("Clarify convention · I (hard)"),
+    I_SOFT: t("Number with warning · I (soft)"),
+    I_SOFT_MISMATCH: t("Number with an unrelated warning"),
+    READY: t("Number"),
+    C: t("Stopped at compute"),
   };
-  const OPERATOR_LABEL = { E: "boundary", I: "ambiguity", F: "missing input", N: "scope" };
+  const OPERATOR_LABEL = { E: t("boundary"), I: t("ambiguity"), F: t("missing input"), N: t("scope") };
   const STAGES = [
-    { key: "retrieve", label: "Retrieve", kind: "code" },
-    { key: "select", label: "Select", kind: "llm" },
-    { key: "bind", label: "Bind", kind: "llm" },
-    { key: "inputs", label: "Inputs · F", kind: "code" },
-    { key: "boundary", label: "Boundary · E", kind: "code" },
-    { key: "ambiguity", label: "Ambiguity · I", kind: "llm" },
-    { key: "compute", label: "Compute", kind: "code" },
+    { key: "retrieve", label: t("Retrieve"), kind: "code" },
+    { key: "select", label: t("Select"), kind: "llm" },
+    { key: "bind", label: t("Bind"), kind: "llm" },
+    { key: "inputs", label: t("Inputs · F"), kind: "code" },
+    { key: "boundary", label: t("Boundary · E"), kind: "code" },
+    { key: "ambiguity", label: t("Ambiguity · I"), kind: "llm" },
+    { key: "compute", label: t("Compute"), kind: "code" },
   ];
   const STOP_AT = { N: 1, M: 1, F: 3, E: 4, I_HARD: 5, C: 6 };
 
@@ -61,6 +61,11 @@
     if (value === null || value === undefined) return "";
     if (typeof value === "number") return value.toLocaleString("en-US", { maximumFractionDigits: 6 });
     return String(value).trim();
+  }
+
+  // Walkthrough copy comes in both languages (chapter_zh, title_zh, caption_zh in the data).
+  function loc(item, key) {
+    return (window.VQ_ZH && item[`${key}_zh`]) || item[key];
   }
 
   function plainExpr(expr) {
@@ -89,8 +94,8 @@
     storyEl.innerHTML = rpData.featured.map((f, i) => `
       <li><button class="story-btn" type="button" data-case="${escapeHtml(f.id)}">
         <span class="n">${i + 1}</span>
-        <span class="ch">${escapeHtml(f.chapter)}</span>
-        <span class="tt">${escapeHtml(f.title)}</span>
+        <span class="ch">${escapeHtml(loc(f, "chapter"))}</span>
+        <span class="tt">${escapeHtml(loc(f, "title"))}</span>
       </button></li>`).join("");
     storyEl.querySelectorAll("[data-case]").forEach((btn) => {
       btn.addEventListener("click", () => selectCase(btn.dataset.case, true));
@@ -99,8 +104,8 @@
 
   function renderFilter() {
     const opts = [
-      ["all", "All"], ["E", "E"], ["I", "I"], ["F", "F"], ["N", "N"],
-      ["vq_miss", "VerifiQuant let one through"], ["plus_miss", "R-PAL+ let one through"],
+      ["all", t("All")], ["E", "E"], ["I", "I"], ["F", "F"], ["N", "N"],
+      ["vq_miss", t("VerifiQuant let one through")], ["plus_miss", t("R-PAL+ let one through")],
     ];
     filterEl.innerHTML = opts.map(([v, label]) =>
       `<button type="button" class="filter-btn ${v === rpFilter ? "active" : ""}" data-filter="${v}">${escapeHtml(label)}</button>`
@@ -112,13 +117,13 @@
 
   function renderTrapSelect() {
     const traps = rpData.cases.filter(trapMatches);
-    selectEl.innerHTML = `<option value="">Choose a trap (${traps.length})…</option>` + traps.map((c) => {
+    selectEl.innerHTML = `<option value="">${escapeHtml(t("Choose a trap ({n})…", { n: traps.length }))}</option>` + traps.map((c) => {
       const vq = falseAccepts(c.systems.vq);
       const plus = falseAccepts(c.systems.rpal_plus);
       const q = c.question.length > 54 ? `${c.question.slice(0, 53)}…` : c.question;
       return `<option value="${escapeHtml(c.id)}" ${c.id === rpCurrent ? "selected" : ""}>${escapeHtml(c.id)} · VQ ${vq}/3 · R-PAL+ ${plus}/3 · ${escapeHtml(q)}</option>`;
     }).join("");
-    countEl.textContent = "Counts are false numeric acceptances out of three runs.";
+    countEl.textContent = t("Counts are false numeric acceptances out of three runs.");
   }
 
   function selectCase(id, fromUser) {
@@ -160,28 +165,34 @@
     const e = c.edit || {};
     if (c.set !== "trap") return "";
     if (e.kind === "value") {
-      return `Trap edit: <code>${escapeHtml(e.field)}</code> changed from ${escapeHtml(fmtNum(Number(e.from)))} to
-        ${escapeHtml(fmtNum(Number(e.to)))}, which violates the contract check <code>${escapeHtml(e.rule_id)}</code>
-        (<code>${escapeHtml(plainExpr(e.expression))}</code>).`;
+      return t("Trap edit: <code>{field}</code> changed from {from} to {to}, which violates the contract check <code>{rule}</code> (<code>{expr}</code>).", {
+        field: escapeHtml(e.field), from: escapeHtml(fmtNum(Number(e.from))), to: escapeHtml(fmtNum(Number(e.to))),
+        rule: escapeHtml(e.rule_id), expr: escapeHtml(plainExpr(e.expression)),
+      });
     }
     if (e.kind === "removed_field") {
-      return `Trap edit: the required input <code>${escapeHtml(e.field)}</code> (value ${escapeHtml(fmtNum(Number(e.value)))}) was redacted.`;
+      return t("Trap edit: the required input <code>{field}</code> (value {value}) was redacted.", {
+        field: escapeHtml(e.field), value: escapeHtml(fmtNum(Number(e.value))),
+      });
     }
     if (e.kind === "removed_phrase") {
-      return `Trap edit: the phrase &ldquo;${escapeHtml(e.phrase)}&rdquo; was removed, leaving the convention the contract declares in
-        <code>${escapeHtml(e.rule_id)}</code> unstated.`;
+      return t("Trap edit: the phrase &ldquo;{phrase}&rdquo; was removed, leaving the convention the contract declares in <code>{rule}</code> unstated.", {
+        phrase: escapeHtml(e.phrase), rule: escapeHtml(e.rule_id),
+      });
     }
-    return `Trap edit: the question was replaced with an out-of-scope ask (template <code>${escapeHtml(e.template)}</code>); no contract should match.`;
+    return t("Trap edit: the question was replaced with an out-of-scope ask (template <code>{template}</code>); no contract should match.", {
+      template: escapeHtml(e.template),
+    });
   }
 
   function expectedChip(c) {
     if (c.set === "clean") {
-      return `<span class="chip chip-muted">clean question · ${escapeHtml(c.level || "")}</span>
-        <span class="chip chip-num">gold answer ${escapeHtml(fmtNum(c.gold))}</span>`;
+      return `<span class="chip chip-muted">${escapeHtml(t("clean question · {level}", { level: c.level || "" }))}</span>
+        <span class="chip chip-num">${escapeHtml(t("gold answer {gold}", { gold: fmtNum(c.gold) }))}</span>`;
     }
-    return `<span class="chip chip-muted">trap · ${escapeHtml(c.operator)} (${escapeHtml(OPERATOR_LABEL[c.operator] || "")}) · ${escapeHtml(c.family || "")}</span>
-      <span class="chip chip-exit">expected exit: ${escapeHtml(EXIT_LABEL[c.expected] || c.expected)}</span>
-      <span class="chip chip-risk">no valid number exists</span>`;
+    return `<span class="chip chip-muted">${escapeHtml(t("trap · {op} ({label}) · {family}", { op: c.operator, label: OPERATOR_LABEL[c.operator] || "", family: c.family || "" }))}</span>
+      <span class="chip chip-exit">${escapeHtml(t("expected exit: {exit}", { exit: EXIT_LABEL[c.expected] || c.expected }))}</span>
+      <span class="chip chip-risk">${escapeHtml(t("no valid number exists"))}</span>`;
   }
 
   /* ── Funnel strip (VerifiQuant's path for the selected run) ── */
@@ -195,11 +206,12 @@
       if (stop === undefined || i < stop) cls += " pass";
       if (stop === i) cls += " stop";
       if (emitted && s.key === "ambiguity" && /I_SOFT/.test(rec.exit)) cls += " warn";
-      const label = stop === i ? `${s.label} · stopped` : s.label;
+      const label = stop === i ? t("{stage} · stopped", { stage: s.label }) : s.label;
       return `<span class="${cls}">${escapeHtml(label)}</span>`;
     });
-    if (emitted) nodes.push(`<span class="strip-node emit ${risky ? "risk" : ""}">${risky ? "Number (silent wrong)" : "Number"}</span>`);
-    return `<div class="strip" aria-label="VerifiQuant's path"><span class="strip-label">VerifiQuant's path</span>${nodes.join('<span class="strip-arrow">→</span>')}</div>`;
+    if (emitted) nodes.push(`<span class="strip-node emit ${risky ? "risk" : ""}">${escapeHtml(risky ? t("Number (silent wrong)") : t("Number"))}</span>`);
+    const path = escapeHtml(t("VerifiQuant's path"));
+    return `<div class="strip" aria-label="${path}"><span class="strip-label">${path}</span>${nodes.join('<span class="strip-arrow">→</span>')}</div>`;
   }
 
   /* ── One system column ── */
@@ -211,33 +223,33 @@
   function verdictBox(c, sysKey, rec) {
     const risky = recordRisky(c, rec);
     if (rec.numeric) {
-      let label = "Number";
+      let label = t("Number");
       if (c.set === "trap") {
-        label = risky ? "False numeric acceptance" : "Number with the expected warning";
+        label = risky ? t("False numeric acceptance") : t("Number with the expected warning");
       } else {
-        label = rec.verdict === "correct" ? "Correct · matches gold" : (risky ? "Silent wrong" : "Number");
+        label = rec.verdict === "correct" ? t("Correct · matches gold") : (risky ? t("Silent wrong") : t("Number"));
       }
       return `<div class="verdict-box ${risky ? "risk" : "num"}"><div class="vlabel">${escapeHtml(label)}</div>
         <div class="vvalue">${escapeHtml(fmtNum(rec.output))}</div></div>`;
     }
     let label;
     if (c.set === "trap") {
-      label = rec.exit_correct ? "No number · expected exit" : "No number · different exit";
+      label = rec.exit_correct ? t("No number · expected exit") : t("No number · different exit");
     } else {
-      label = "No number · counts against coverage";
+      label = t("No number · counts against coverage");
     }
     let exit = EXIT_LABEL[rec.exit] || rec.exit;
-    if (sysKey !== "vq" && rec.exit === "READY") exit = "Program failed to return a number";
+    if (sysKey !== "vq" && rec.exit === "READY") exit = t("Program failed to return a number");
     return `<div class="verdict-box"><div class="vlabel">${escapeHtml(label)}</div><div class="vexit">${escapeHtml(exit)}</div></div>`;
   }
 
   function runTabs(c, sysKey, records) {
-    if (records.length < 2) return `<div class="run-tabs"><span class="chip chip-muted">1 recorded run</span></div>`;
+    if (records.length < 2) return `<div class="run-tabs"><span class="chip chip-muted">${escapeHtml(t("1 recorded run"))}</span></div>`;
     const sel = rpRun[sysKey] || 0;
     return `<div class="run-tabs">${records.map((r, i) => {
       const pip = recordRisky(c, r) ? "risk" : (r.numeric ? "num" : "");
       return `<button type="button" class="run-tab ${i === sel ? "active" : ""}" data-sys="${sysKey}" data-run="${i}">
-        <span class="pip ${pip}"></span>Run ${i + 1}</button>`;
+        <span class="pip ${pip}"></span>${escapeHtml(t("Run {n}", { n: i + 1 }))}</button>`;
     }).join("")}</div>`;
   }
 
@@ -248,18 +260,18 @@
     const selector = rec.selector_reason || first.selector_reason || "";
     const parts = [];
     if (cands.length) {
-      parts.push(`<div><p class="sub-label">Retrieved contracts (BM25, top 4)</p><ul class="cand-list">${cands.map((k) =>
-        `<li class="${k.fic_id === rec.fic_id ? "chosen" : ""}"><span>${escapeHtml(k.title || k.fic_id)}${k.fic_id === rec.fic_id ? " ← selected" : ""}</span>
+      parts.push(`<div><p class="sub-label">${escapeHtml(t("Retrieved contracts (BM25, top 4)"))}</p><ul class="cand-list">${cands.map((k) =>
+        `<li class="${k.fic_id === rec.fic_id ? "chosen" : ""}"><span>${escapeHtml(k.title || k.fic_id)}${k.fic_id === rec.fic_id ? escapeHtml(t(" ← selected")) : ""}</span>
         <span class="s">${k.score !== null && k.score !== undefined ? escapeHtml(String(k.score)) : ""}</span></li>`).join("")}</ul></div>`);
     }
-    if (selector) parts.push(`<div><p class="sub-label">Selector (LLM 1)</p><p class="sys-msg">${escapeHtml(selector)}</p></div>`);
+    if (selector) parts.push(`<div><p class="sub-label">${escapeHtml(t("Selector (LLM 1)"))}</p><p class="sys-msg">${escapeHtml(selector)}</p></div>`);
     const keys = Object.keys(inputs);
     if (keys.length) {
-      parts.push(`<div><p class="sub-label">Bound inputs (LLM 2)</p><dl class="kv">${keys.map((k) =>
+      parts.push(`<div><p class="sub-label">${escapeHtml(t("Bound inputs (LLM 2)"))}</p><dl class="kv">${keys.map((k) =>
         `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(typeof inputs[k] === "object" ? JSON.stringify(inputs[k]) : String(inputs[k]))}</dd>`).join("")}</dl></div>`);
     }
     if ((rec.rule_ids || []).length) {
-      parts.push(`<div><p class="sub-label">Checks that fired</p><p class="sys-msg">${rec.rule_ids.map((r) => `<code>${escapeHtml(r)}</code>`).join(", ")}</p></div>`);
+      parts.push(`<div><p class="sub-label">${escapeHtml(t("Checks that fired"))}</p><p class="sys-msg">${rec.rule_ids.map((r) => `<code>${escapeHtml(r)}</code>`).join(", ")}</p></div>`);
     }
     if (!parts.length) return "";
     return `<details><summary>DiagnosticReport</summary><div class="inner">${parts.join("")}</div></details>`;
@@ -272,28 +284,28 @@
     const meta = SYSTEMS[sysKey];
     let body = verdictBox(c, sysKey, rec);
     if (sysKey === "vq") {
-      if (rec.fic_id) body += `<p class="sys-msg"><span class="who">Contract</span>${escapeHtml(rec.fic_title || rec.fic_id)} <code>${escapeHtml(rec.fic_id)}</code></p>`;
+      if (rec.fic_id) body += `<p class="sys-msg"><span class="who">${escapeHtml(t("Contract"))}</span>${escapeHtml(rec.fic_title || rec.fic_id)} <code>${escapeHtml(rec.fic_id)}</code></p>`;
       if ((rec.requested_fields || []).length) {
-        body += `<p class="sys-msg"><span class="who">Asks the user for</span>${rec.requested_fields.map((r) => `<code>${escapeHtml(r)}</code>`).join(", ")}</p>`;
+        body += `<p class="sys-msg"><span class="who">${escapeHtml(t("Asks the user for"))}</span>${rec.requested_fields.map((r) => `<code>${escapeHtml(r)}</code>`).join(", ")}</p>`;
       }
-      if (rec.message) body += `<p class="sys-msg"><span class="who">What the user sees</span>${escapeHtml(rec.message)}</p>`;
+      if (rec.message) body += `<p class="sys-msg"><span class="who">${escapeHtml(t("What the user sees"))}</span>${escapeHtml(rec.message)}</p>`;
       if ((rec.options || []).length) {
-        body += `<div><p class="sub-label">Contract's declared options</p><ul class="opt-list">${rec.options.map((o) =>
+        body += `<div><p class="sub-label">${escapeHtml(t("Contract's declared options"))}</p><ul class="opt-list">${rec.options.map((o) =>
           `<li>${escapeHtml(o.label)}</li>`).join("")}</ul></div>`;
       }
       if (rec.numeric && (rec.soft_warnings || []).length && !rec.message) {
-        body += `<p class="sys-msg"><span class="who">Warning</span>${escapeHtml(rec.soft_warnings[0].question || "")}</p>`;
+        body += `<p class="sys-msg"><span class="who">${escapeHtml(t("Warning"))}</span>${escapeHtml(rec.soft_warnings[0].question || "")}</p>`;
       }
       body += vqDetails(c, rec);
     } else {
       if (sysKey === "rpal_plus" && rec.decision) {
-        body += `<p class="sys-msg"><span class="who">Its decision</span>${escapeHtml(rec.decision)} · ${escapeHtml(rec.exit)}</p>`;
+        body += `<p class="sys-msg"><span class="who">${escapeHtml(t("Its decision"))}</span>${escapeHtml(rec.decision)} · ${escapeHtml(rec.exit)}</p>`;
       }
       if (rec.message) {
-        body += `<details><summary>${sysKey === "rpal_plus" ? "Its stated reason" : "Note"}</summary><div class="inner"><p class="sys-msg">${escapeHtml(rec.message)}</p></div></details>`;
+        body += `<details><summary>${escapeHtml(sysKey === "rpal_plus" ? t("Its stated reason") : t("Note"))}</summary><div class="inner"><p class="sys-msg">${escapeHtml(rec.message)}</p></div></details>`;
       }
       const code = records[0].code;
-      if (code) body += `<details><summary>Program it wrote${records.length > 1 ? " (run 1)" : ""}</summary><div class="inner"><pre class="code">${escapeHtml(code)}</pre></div></details>`;
+      if (code) body += `<details><summary>${escapeHtml(records.length > 1 ? t("Program it wrote (run 1)") : t("Program it wrote"))}</summary><div class="inner"><pre class="code">${escapeHtml(code)}</pre></div></details>`;
     }
     return `<div class="sys-col ${sysKey === "vq" ? "vq" : ""}">
       <div><div class="sys-name">${escapeHtml(meta.name)}</div><div class="sys-desc">${escapeHtml(meta.desc)}</div></div>
@@ -306,17 +318,17 @@
     if (c.set !== "trap") return "";
     const parts = ["rpal", "rpal_plus", "vq"].map((k) => {
       const recs = c.systems[k];
-      return `${SYSTEMS[k].name} ${falseAccepts(recs)} of ${recs.length}`;
+      return t("{name} {k} of {n}", { name: SYSTEMS[k].name, k: falseAccepts(recs), n: recs.length });
     });
-    return `False numeric acceptances across recorded runs: ${parts.join(" · ")}.`;
+    return t("False numeric acceptances across recorded runs: {parts}.", { parts: parts.join(" · ") });
   }
 
   function renderCase(c) {
     const f = rpFeatured[c.id];
     const vqRec = c.systems.vq[rpRun.vq || 0];
     const head = f
-      ? `<p class="eyebrow">${escapeHtml(f.chapter)}</p><h2>${escapeHtml(f.title)}</h2><p class="case-caption">${escapeHtml(f.caption)}</p>`
-      : `<p class="eyebrow">Trap ${escapeHtml(c.id)}</p><h2>${escapeHtml(c.question)}</h2><p class="case-caption">${escapeHtml(summaryLine(c))}</p>`;
+      ? `<p class="eyebrow">${escapeHtml(loc(f, "chapter"))}</p><h2>${escapeHtml(loc(f, "title"))}</h2><p class="case-caption">${escapeHtml(loc(f, "caption"))}</p>`
+      : `<p class="eyebrow">${escapeHtml(t("Trap {id}", { id: c.id }))}</p><h2>${escapeHtml(c.question)}</h2><p class="case-caption">${escapeHtml(summaryLine(c))}</p>`;
     const order = c.set === "trap" ? ["rpal", "rpal_plus", "vq"] : ["rpal", "vq"];
     const prov = rpData.meta.sources_display[c.set];
     viewEl.innerHTML = `
@@ -328,13 +340,13 @@
         ${c.set === "trap" ? `<p class="edit-line">${editLine(c)}</p>` : ""}
       </div>
       <div class="case-actions">
-        <button type="button" class="btn btn-outline btn-sm" id="rp-live">Send this question to the live system →</button>
-        <span class="hint">The live run makes fresh LLM calls and can differ from the recorded ones.</span>
+        <button type="button" class="btn btn-outline btn-sm" id="rp-live">${escapeHtml(t("Send this question to the live system →"))}</button>
+        <span class="hint">${escapeHtml(t("The live run makes fresh LLM calls and can differ from the recorded ones."))}</span>
       </div>
       ${renderStrip(vqRec, recordRisky(c, vqRec))}
       <div class="sys-grid ${order.length === 2 ? "two" : ""}">${order.map((k) => systemColumn(c, k)).join("")}</div>
       ${f && c.set === "trap" ? `<p class="table-note" style="margin-top:0.8rem">${escapeHtml(summaryLine(c))}</p>` : ""}
-      <p class="provenance">Recorded in <code>verifiquant/data/runs/</code>: ${escapeHtml(prov)}. Scored with <code>${escapeHtml(rpData.meta.scorer)}</code>.</p>`;
+      <p class="provenance">${t("Recorded in <code>verifiquant/data/runs/</code>: {prov}. Scored with <code>{scorer}</code>.", { prov: escapeHtml(prov), scorer: escapeHtml(rpData.meta.scorer) })}</p>`;
 
     viewEl.querySelectorAll(".run-tab").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -349,8 +361,8 @@
   function sendLive(c) {
     if (!window.VQChat || !window.VQChat.seed) return;
     const note = c.set === "trap"
-      ? `Paper trap ${c.id} · expected exit ${c.expected}. ${c.edit_note || ""}`
-      : `Paper clean question ${c.id} · gold ${c.gold}.`;
+      ? t("Paper trap {id} · expected exit {exit}.", { id: c.id, exit: c.expected }) + ` ${c.edit_note || ""}`
+      : t("Paper clean question {id} · gold {gold}.", { id: c.id, gold: c.gold });
     window.VQChat.seed({
       question: c.question,
       context: c.context,
@@ -368,7 +380,7 @@
       const res = await fetch(DATA_URL);
       rpData = await res.json();
     } catch (err) {
-      viewEl.innerHTML = `<p>Could not load the recorded runs: ${escapeHtml(err.message)}</p>`;
+      viewEl.innerHTML = `<p>${escapeHtml(t("Could not load the recorded runs: {error}", { error: err.message }))}</p>`;
       return;
     }
     rpById = Object.fromEntries(rpData.cases.map((c) => [c.id, c]));
@@ -406,7 +418,7 @@
   async function runRepair() {
     const choice = (document.querySelector('input[name="rp-timing"]:checked') || {}).value || "end_of_period";
     const inputs = repairInputs();
-    rpResultEl.innerHTML = `<div class="loader"><div class="spinner"></div><span>Verifying…</span></div>`;
+    rpResultEl.innerHTML = `<div class="loader"><div class="spinner"></div><span>${escapeHtml(t("Verifying…"))}</span></div>`;
     try {
       // The default option has no transform (the contract's code is the default), so the
       // verifier is always asked about the declared alternative; result_old is the default.
@@ -417,16 +429,16 @@
       });
       const data = await res.json();
       if (data.status === "rejected") {
-        rpResultEl.innerHTML = `<div class="verdict-box risk"><div class="vlabel">Rejected by the verifier</div>
-          <div class="vexit">Result not changed</div></div><p class="sys-msg">${escapeHtml(data.error || data.message || "")}</p>`;
+        rpResultEl.innerHTML = `<div class="verdict-box risk"><div class="vlabel">${escapeHtml(t("Rejected by the verifier"))}</div>
+          <div class="vexit">${escapeHtml(t("Result not changed"))}</div></div><p class="sys-msg">${escapeHtml(data.error || data.message || "")}</p>`;
         return;
       }
       if (data.status !== "ok") throw new Error(data.message || "verifier error");
       const fmt = (v) => Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (choice === "end_of_period") {
-        rpResultEl.innerHTML = `<div class="verdict-box num"><div class="vlabel">Contract code, default convention</div>
+        rpResultEl.innerHTML = `<div class="verdict-box num"><div class="vlabel">${escapeHtml(t("Contract code, default convention"))}</div>
           <div class="vvalue">${fmt(data.result_old)}</div></div>
-          <p class="sys-msg">No edit applies: the contract's own code computes the ordinary annuity. Switch the convention to see the declared transform.</p>`;
+          <p class="sys-msg">${escapeHtml(t("No edit applies: the contract's own code computes the ordinary annuity. Switch the convention to see the declared transform."))}</p>`;
         return;
       }
       const samples = data.numerical_samples;
@@ -434,14 +446,16 @@
       rpResultEl.innerHTML = `
         <div class="flow-nums"><span class="old">${fmt(data.result_old)}</span><span class="arrow">→</span><span class="new">${fmt(data.result_new)}</span></div>
         <ul class="check-list">
-          <li><span class="ok">&check;</span><span>Declared transform found on rule <code>${escapeHtml(data.rule_id || "")}</code>.</span></li>
-          <li><span class="ok">&check;</span><span>AST bound, safe names and determinism passed.</span></li>
-          <li><span class="ok">&check;</span><span>Invariant <code>${escapeHtml(data.invariant)}</code> holds${nSamples ? ` on ${nSamples} sampled binding${nSamples === 1 ? "" : "s"}` : ""}.</span></li>
+          <li><span class="ok">&check;</span><span>${t("Declared transform found on rule <code>{rule}</code>.", { rule: escapeHtml(data.rule_id || "") })}</span></li>
+          <li><span class="ok">&check;</span><span>${escapeHtml(t("AST bound, safe names and determinism passed."))}</span></li>
+          <li><span class="ok">&check;</span><span>${nSamples
+            ? t("Invariant <code>{inv}</code> holds on {n} sampled binding(s).", { inv: escapeHtml(data.invariant), n: nSamples })
+            : t("Invariant <code>{inv}</code> holds.", { inv: escapeHtml(data.invariant) })}</span></li>
         </ul>
-        <details><summary class="sub-label" style="cursor:pointer">The contract's locked code</summary>
+        <details><summary class="sub-label" style="cursor:pointer">${escapeHtml(t("The contract's locked code"))}</summary>
           <pre class="code" style="margin-top:0.5rem">${escapeHtml(data.python_code || "")}</pre></details>`;
     } catch (err) {
-      rpResultEl.innerHTML = `<p class="sys-msg">Verifier unavailable: ${escapeHtml(err.message)}</p>`;
+      rpResultEl.innerHTML = `<p class="sys-msg">${escapeHtml(t("Verifier unavailable: {error}", { error: err.message }))}</p>`;
     }
   }
 
