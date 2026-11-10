@@ -1,0 +1,60 @@
+<section id="tradeoff" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Safety vs. utility</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Staging cuts FNAR, code keeps coverage</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="position:relative;width:1000px;height:600px">
+<svg aria-label="Scatter plot of clean coverage against trap FNAR. R-PAL at 99.2 and 48.8, R-PAL plus at 92.9 and 27.5, VerifiQuant at 84.0 and 10.4, Staged at 67.1 and 15.8, Staged plus Spec at 74.8 and 8.8. The ideal corner is full coverage with zero FNAR." width="1000" height="600" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+<line x1="100" y1="30" x2="100" y2="500" stroke="#DCE4E8" stroke-width="2"/>
+<line x1="535" y1="30" x2="535" y2="500" stroke="#DCE4E8" stroke-width="2"/>
+<line x1="970" y1="30" x2="970" y2="500" stroke="#DCE4E8" stroke-width="2"/>
+<line x1="100" y1="30" x2="970" y2="30" stroke="#DCE4E8" stroke-width="2"/>
+<line x1="100" y1="265" x2="970" y2="265" stroke="#DCE4E8" stroke-width="2"/>
+<line x1="100" y1="500" x2="970" y2="500" stroke="#B8C6CE" stroke-width="2"/>
+<polyline points="622,402 816,241 953,41" fill="none" stroke="#AFC0C9" stroke-width="3" stroke-dasharray="10 8"/>
+<polygon points="970,480 975,493.1 989,493.8 978.1,502.6 981.8,516.2 970,508.5 958.2,516.2 961.9,502.6 951,493.8 965,493.1" fill="#679452" stroke="#F5F3EE" stroke-width="2"/>
+<circle cx="254" cy="351" r="14" fill="#F5F3EE" stroke="#4F6A7D" stroke-width="3"/>
+<circle cx="422" cy="417" r="14" fill="#F5F3EE" stroke="#4F6A7D" stroke-width="3"/>
+<circle cx="953" cy="41" r="14" fill="#AFC0C9" stroke="#F5F3EE" stroke-width="3"/>
+<circle cx="816" cy="241" r="14" fill="#6D8C9A" stroke="#F5F3EE" stroke-width="3"/>
+<circle cx="622" cy="402" r="18" fill="#679452" stroke="#F5F3EE" stroke-width="3"/>
+</svg>
+<p style="position:absolute;left:0px;top:12px;width:88px;font-size:26px;color:#4F6A7D;text-align:right">50%</p>
+<p style="position:absolute;left:0px;top:247px;width:88px;font-size:26px;color:#4F6A7D;text-align:right">25%</p>
+<p style="position:absolute;left:0px;top:482px;width:88px;font-size:26px;color:#4F6A7D;text-align:right">0%</p>
+<p style="position:absolute;left:100px;top:524px;width:120px;font-size:26px;color:#4F6A7D">60%</p>
+<p style="position:absolute;left:475px;top:524px;width:120px;font-size:26px;color:#4F6A7D;text-align:center">80%</p>
+<p style="position:absolute;left:850px;top:524px;width:120px;font-size:26px;color:#4F6A7D;text-align:right">100%</p>
+<p style="position:absolute;left:112px;top:44px;width:300px;font-size:26px;font-weight:600;color:#4F6A7D">↑ trap FNAR</p>
+<p style="position:absolute;left:335px;top:562px;width:400px;font-size:26px;font-weight:600;color:#4F6A7D;text-align:center">clean coverage →</p>
+<p style="position:absolute;left:727px;top:23px;width:200px;font-size:26px;font-weight:600;color:#16324A;text-align:right">R-PAL</p>
+<p style="position:absolute;left:590px;top:223px;width:200px;font-size:26px;font-weight:600;color:#16324A;text-align:right">R-PAL⁺</p>
+<p style="position:absolute;left:472px;top:334px;width:300px;font-size:32px;font-weight:700;color:#3E6A2C;text-align:center">VerifiQuant</p>
+<p style="position:absolute;left:278px;top:333px;width:160px;font-size:26px;font-weight:600;color:#16324A">Staged</p>
+<p style="position:absolute;left:272px;top:440px;width:300px;font-size:26px;font-weight:600;color:#16324A;text-align:center">Staged+Spec</p>
+<p style="position:absolute;left:810px;top:452px;width:130px;font-size:26px;font-weight:700;color:#3E6A2C;text-align:right">ideal</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:14px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:600;color:#16324A">Staged</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Same stages, no contract content. 15.8% FNAR at 67.1% coverage.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:14px;padding:24px 28px">
+<h3 style="font-size:32px;font-weight:600;color:#16324A">Staged+Spec</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Judges the contract text in stages. Ties at 8.8%, covers only 74.8%.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#18405D;border-radius:14px;padding:24px 28px">
+<p style="font-size:26px;line-height:1.4;color:#C9D6DE">Clean answers lost per trap avoided<br>Baseline: R-PAL⁺</p>
+<div style="display:flex;flex-direction:row;justify-content:space-between;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><p style="font-size:40px;font-weight:700;color:#A8D08D">2.0</p><p style="font-size:26px;color:#F3F6F8">VerifiQuant</p></div>
+<div style="display:flex;flex-direction:column;gap:2px"><p style="font-size:40px;font-weight:700;color:#F3F6F8">3.1</p><p style="font-size:26px;color:#F3F6F8">Staged+Spec</p></div>
+<div style="display:flex;flex-direction:column;gap:2px"><p style="font-size:40px;font-weight:700;color:#F3F6F8">6.8</p><p style="font-size:26px;color:#F3F6F8">Staged</p></div>
+</div>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">13</p>
+<aside>Safety and utility on one picture: clean coverage across, trap false acceptance up. The ideal is the lower right. The hollow points answer a fair question: does the gain just come from splitting the prompt into stages? Staging alone reaches 15.8%, but only by refusing much more, at 67% coverage. Staging plus the contract text reaches 8.8%, level with us, but covers only 75%, mostly because its own programs fail to run. So staging over what the contract declares lowers false acceptance, and running the contract’s own code keeps coverage. Priced against R-PAL plus, each trap number avoided costs 2.0 correct clean answers for VerifiQuant, 3.1 for Staged+Spec, 6.8 for Staged.</aside>
+</section>

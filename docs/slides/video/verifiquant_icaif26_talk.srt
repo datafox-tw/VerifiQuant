@@ -1,0 +1,563 @@
+1
+00:00:00,545 --> 00:00:05,761
+This is VerifiQuant, governance by execution for financial LLM workflows.
+
+2
+00:00:05,852 --> 00:00:10,380
+It is joint work by Yu-Chi Ko, Mi-Yen Yeh and Shou-De Lin,
+
+3
+00:00:10,416 --> 00:00:14,669
+at National Taiwan University and Academia Sinica.
+
+4
+00:00:14,760 --> 00:00:18,988
+The one-line version is: keep the spreadsheet, and let the LLM fill it in.
+
+5
+00:00:20,033 --> 00:00:24,058
+LLMs in finance now sit in workflows that end in a number.
+
+6
+00:00:24,149 --> 00:00:27,992
+Valuation memos, client calculators, regulatory reports.
+
+7
+00:00:28,082 --> 00:00:30,094
+They rarely fail by crashing.
+
+8
+00:00:30,185 --> 00:00:33,972
+They fail with a clean, wrong number, and nothing marks it as wrong.
+
+9
+00:00:34,062 --> 00:00:38,672
+Program-aided reasoning fixes the arithmetic, because an interpreter runs the code.
+
+10
+00:00:38,762 --> 00:00:42,802
+But it does not decide whether the question justifies a number at all.
+
+11
+00:00:43,847 --> 00:00:46,775
+Here is a real trap from our evaluation.
+
+12
+00:00:46,866 --> 00:00:50,222
+It asks for a stock’s price rate of change over one week.
+
+13
+00:00:50,313 --> 00:00:54,818
+We changed the opening price from 150 dollars to 2.5 dollars.
+
+14
+00:00:54,909 --> 00:00:59,950
+R-PAL sees the same retrieved contracts and runs code. It reports 6,500 percent.
+
+15
+00:01:00,041 --> 00:01:04,499
+R-PAL plus also gets every one of our checks described in its prompt.
+
+16
+00:01:04,590 --> 00:01:08,690
+It still reports 6,500 percent, in all three runs.
+
+17
+00:01:08,781 --> 00:01:11,634
+VerifiQuant stops at gate E in all three runs,
+
+18
+00:01:11,671 --> 00:01:16,575
+and shows the check that failed: a weekly price change above 200 percent.
+
+19
+00:01:16,666 --> 00:01:22,503
+Same model, same contracts. The difference is whether the check is executed or only described.
+
+20
+00:01:23,549 --> 00:01:26,975
+So the question we ask is not how accurate the system is.
+
+21
+00:01:27,066 --> 00:01:29,924
+It is when a number may leave the system at all.
+
+22
+00:01:30,014 --> 00:01:33,727
+Every response is one of three things: a correct number,
+
+23
+00:01:33,764 --> 00:01:37,162
+a silent wrong, or a named exit that says why.
+
+24
+00:01:37,253 --> 00:01:40,261
+The goal is to turn silent wrongs into named exits,
+
+25
+00:01:40,297 --> 00:01:43,601
+while keeping as many correct numbers as possible.
+
+26
+00:01:44,646 --> 00:01:49,473
+There are five reasons a question may not justify a number, and each gets a letter.
+
+27
+00:01:49,564 --> 00:01:52,649
+N: nothing in the library covers the question.
+
+28
+00:01:52,740 --> 00:01:58,306
+M: the intent is unclear, like “the return” without saying holding-period or annualized.
+
+29
+00:01:58,397 --> 00:02:01,054
+F: a required input is missing.
+
+30
+00:02:01,145 --> 00:02:05,701
+E: a value breaks a declared check, like that 2.5-dollar price.
+
+31
+00:02:05,792 --> 00:02:10,998
+I: a convention is left open, like whether payments come at the start or the end of each period.
+
+32
+00:02:11,089 --> 00:02:14,043
+These letters are also the gates of the pipeline.
+
+33
+00:02:15,088 --> 00:02:18,260
+To catch them, we borrow from how analysts already work.
+
+34
+00:02:18,351 --> 00:02:22,219
+An analyst does not re-derive a loan formula for each client.
+
+35
+00:02:22,310 --> 00:02:27,540
+They open a vetted sheet, type in the inputs, and the sheet refuses impossible values.
+
+36
+00:02:27,631 --> 00:02:33,034
+We write each formula family once as such a sheet. We call it a Financial Inference Contract.
+
+37
+00:02:33,125 --> 00:02:34,894
+The library holds 250 of them,
+
+38
+00:02:34,930 --> 00:02:39,883
+generated offline and checked with lint and smoke tests. None was hand-tuned.
+
+39
+00:02:39,974 --> 00:02:43,388
+The LLM gets three jobs, and only three.
+
+40
+00:02:43,478 --> 00:02:48,943
+Pick the sheet. Fill the input cells. Flag which declared conventions the text leaves open.
+
+41
+00:02:49,034 --> 00:02:53,843
+It never computes the answer, and it never freely rewrites the formula.
+
+42
+00:02:54,888 --> 00:02:58,479
+This is the real loan contract, drawn as a sheet.
+
+43
+00:02:58,570 --> 00:03:02,867
+The orange rows are what the LLM fills: principal, rate and term.
+
+44
+00:03:02,958 --> 00:03:04,989
+The blue rows are data validation,
+
+45
+00:03:05,026 --> 00:03:10,086
+run as code. The principal must be positive, and the rate must stay below 1.0.
+
+46
+00:03:10,177 --> 00:03:12,280
+Then come declared conventions.
+
+47
+00:03:12,371 --> 00:03:16,710
+Rate scale is hard, because it changes the computation, so the system asks.
+
+48
+00:03:16,801 --> 00:03:20,188
+Payment timing is soft, because it changes how you read the number,
+
+49
+00:03:20,225 --> 00:03:22,178
+so the system answers and warns.
+
+50
+00:03:22,269 --> 00:03:27,891
+The green row is locked Python code, which returns 1,498.88.
+
+51
+00:03:27,982 --> 00:03:33,351
+Now suppose the LLM binds “6 percent” as 6 instead of 0.06.
+
+52
+00:03:33,442 --> 00:03:38,970
+The rate check fails, and the query ends at an alert that names the check. No number leaves.
+
+53
+00:03:40,016 --> 00:03:44,308
+At run time, every query goes through this funnel, from left to right.
+
+54
+00:03:44,399 --> 00:03:48,187
+Retrieval is BM25 over the contracts, top four.
+
+55
+00:03:48,278 --> 00:03:53,061
+Then three LLM steps, in orange, alternate with code steps, in blue.
+
+56
+00:03:53,152 --> 00:03:57,659
+Select picks one contract, or none. Bind fills the inputs.
+
+57
+00:03:57,750 --> 00:04:03,191
+Code then checks that every required input is present, and that every declared boundary holds.
+
+58
+00:04:03,282 --> 00:04:06,558
+The ambiguity step asks whether a convention is still open.
+
+59
+00:04:06,649 --> 00:04:10,781
+Only a query that passes every gate reaches the contract’s own code.
+
+60
+00:04:11,827 --> 00:04:13,985
+Every stop is a named exit.
+
+61
+00:04:14,076 --> 00:04:20,330
+N refuses. M asks which quantity you meant. F asks for the missing field by name.
+
+62
+00:04:20,421 --> 00:04:23,269
+E names the failed check and the bound value.
+
+63
+00:04:23,360 --> 00:04:26,906
+For conventions, a soft one returns the number with a warning.
+
+64
+00:04:26,997 --> 00:04:31,966
+A hard one asks the user to pick a declared option, and then applies a verified edit.
+
+65
+00:04:32,057 --> 00:04:34,315
+Every path, with a number or without one,
+
+66
+00:04:34,351 --> 00:04:38,195
+writes a DiagnosticReport that replays from the stored binding.
+
+67
+00:04:39,241 --> 00:04:41,058
+Now the main result.
+
+68
+00:04:41,149 --> 00:04:45,414
+We derived 80 traps from the contracts: 20 each of missing input,
+
+69
+00:04:45,451 --> 00:04:49,211
+impossible value, open convention, and out of scope.
+
+70
+00:04:49,301 --> 00:04:52,329
+We count how often a system still gives an unqualified
+
+71
+00:04:52,366 --> 00:04:55,294
+number. We call this false numeric acceptance.
+
+72
+00:04:55,385 --> 00:04:58,440
+R-PAL plus has our whole checklist in its prompt,
+
+73
+00:04:58,476 --> 00:05:01,759
+and it still answers 27.5 percent of the traps.
+
+74
+00:05:01,850 --> 00:05:06,693
+VerifiQuant runs the same checks in stages, and answers 10.4 percent.
+
+75
+00:05:06,784 --> 00:05:12,634
+That is 17 points lower, with a 95 percent interval from about 7 to 27 points.
+
+76
+00:05:12,725 --> 00:05:18,965
+Every system uses Gemini 2.5 Flash and the same top-four contracts, averaged over three runs.
+
+77
+00:05:20,011 --> 00:05:23,938
+Where does the gap come from? Boundary and ambiguity traps.
+
+78
+00:05:24,029 --> 00:05:30,540
+On impossible values, R-PAL plus accepts 30 percent, and VerifiQuant 8.3.
+
+79
+00:05:30,631 --> 00:05:34,204
+On open conventions, 80 percent against 21.7.
+
+80
+00:05:34,294 --> 00:05:39,416
+There, the right answer depends on an executed check or an unstated convention.
+
+81
+00:05:39,507 --> 00:05:42,022
+On missing inputs and out-of-scope questions,
+
+82
+00:05:42,059 --> 00:05:45,495
+a prompt already refuses, and VerifiQuant is no better.
+
+83
+00:05:45,586 --> 00:05:51,417
+Plain R-PAL, which only runs code, answers 48.8 percent of all traps.
+
+84
+00:05:52,463 --> 00:05:54,887
+This is not an accuracy result.
+
+85
+00:05:54,978 --> 00:06:00,579
+On 250 well-posed questions, R-PAL reaches 96.8 percent accuracy.
+
+86
+00:06:00,670 --> 00:06:05,596
+VerifiQuant reaches 81.2 percent, because it declines about 16 percent of them.
+
+87
+00:06:05,687 --> 00:06:10,770
+Its silent-wrong rate stays close to R-PAL’s, 2.8 against 2.4 percent.
+
+88
+00:06:10,861 --> 00:06:14,338
+The grey row is an upper bound, not a deployment result.
+
+89
+00:06:14,429 --> 00:06:19,505
+There, an oracle that knows the intended computation, but never the answer,
+
+90
+00:06:19,541 --> 00:06:23,948
+may clarify up to twice. Accuracy then reaches 93.6 percent.
+
+91
+00:06:24,994 --> 00:06:28,227
+This chart puts safety and utility on one picture.
+
+92
+00:06:28,318 --> 00:06:31,150
+Coverage on clean questions runs across. False
+
+93
+00:06:31,186 --> 00:06:35,120
+acceptance on traps runs up. The ideal is the lower right.
+
+94
+00:06:35,211 --> 00:06:39,992
+The two hollow points test whether the gain comes only from splitting the prompt into stages.
+
+95
+00:06:40,084 --> 00:06:45,009
+Staging alone reaches 15.8 percent, but only by refusing much more.
+
+96
+00:06:45,100 --> 00:06:48,800
+Staging plus the contract text ties VerifiQuant on traps,
+
+97
+00:06:48,837 --> 00:06:53,220
+at 8.8 percent, but covers only 75 percent of clean questions.
+
+98
+00:06:53,310 --> 00:06:56,267
+So staging over the declared contract lowers false acceptance,
+
+99
+00:06:56,303 --> 00:06:59,083
+and running the contract’s own code keeps coverage.
+
+100
+00:06:59,174 --> 00:07:00,908
+Measured against R-PAL plus,
+
+101
+00:07:00,945 --> 00:07:05,626
+each trap number avoided costs VerifiQuant 2.0 correct clean answers.
+
+102
+00:07:06,671 --> 00:07:11,168
+One more technical piece: what happens when a user picks a non-default convention.
+
+103
+00:07:11,258 --> 00:07:14,745
+The computation has to change. If the LLM rewrote the code,
+
+104
+00:07:14,781 --> 00:07:17,966
+it would reopen the door the funnel just closed.
+
+105
+00:07:18,057 --> 00:07:21,421
+So every edit is declared on the contract at build time.
+
+106
+00:07:21,512 --> 00:07:26,844
+For the loan, paying at the start of each period means dividing by one plus the monthly rate.
+
+107
+00:07:26,935 --> 00:07:31,428
+The invariant says: multiply back, and you recover the old payment.
+
+108
+00:07:31,519 --> 00:07:38,488
+The payment moves from 1,498.88 to 1,491.42.
+
+109
+00:07:38,578 --> 00:07:40,760
+Before the edit runs, three checks.
+
+110
+00:07:40,851 --> 00:07:44,408
+Bounded: 13 syntax-tree nodes, the declared limit.
+
+111
+00:07:44,498 --> 00:07:47,186
+Safe: whitelisted names only.
+
+112
+00:07:47,277 --> 00:07:51,177
+Matches: the invariant holds on five sampled inputs.
+
+113
+00:07:52,222 --> 00:07:56,870
+To test the verifier, we generated 906 faulty patches on purpose.
+
+114
+00:07:56,961 --> 00:07:59,868
+27 turned out to be equivalent to the original.
+
+115
+00:07:59,959 --> 00:08:06,469
+Of the other 879, the verifier rejects 97.7 percent, including every structural attack.
+
+116
+00:08:06,560 --> 00:08:08,158
+20 get through.
+
+117
+00:08:08,248 --> 00:08:11,636
+This is bounded numerical validation, not a formal proof.
+
+118
+00:08:11,727 --> 00:08:16,218
+Most of the 20 sit in branches that none of the sampled inputs reached.
+
+119
+00:08:17,264 --> 00:08:20,062
+Outside the library, we ran two separate tests.
+
+120
+00:08:20,153 --> 00:08:24,063
+First, we rebuilt the library from 50 formula families,
+
+121
+00:08:24,100 --> 00:08:27,504
+so 199 questions have no matching contract.
+
+122
+00:08:27,595 --> 00:08:30,822
+VerifiQuant abstains on 88.9 percent of them.
+
+123
+00:08:30,913 --> 00:08:35,773
+R-PAL abstains on half a percent. It is right 95 percent of the time from memory,
+
+124
+00:08:35,810 --> 00:08:38,365
+but gives no signal when it is wrong.
+
+125
+00:08:38,456 --> 00:08:43,571
+So out of library, VerifiQuant is not more accurate. What it offers is a scope signal.
+
+126
+00:08:43,662 --> 00:08:48,743
+Second, five finance-trained annotators labeled 80 natural queries blind.
+
+127
+00:08:48,834 --> 00:08:52,155
+On the 46 that call for no number, the ordering holds,
+
+128
+00:08:52,191 --> 00:08:55,431
+but only the gap to plain R-PAL is significant.
+
+129
+00:08:56,477 --> 00:08:58,000
+To be clear about the boundary.
+
+130
+00:08:58,091 --> 00:08:59,799
+The claim holds for single-number,
+
+131
+00:08:59,836 --> 00:09:03,797
+formula-grounded questions inside the library, with a correct contract.
+
+132
+00:09:03,887 --> 00:09:07,551
+The silent wrongs that remain trace to three LLM steps:
+
+133
+00:09:07,587 --> 00:09:11,067
+selection, binding, and recalling a convention.
+
+134
+00:09:11,157 --> 00:09:14,908
+The gates check schema and bounds, not where a value came from.
+
+135
+00:09:14,999 --> 00:09:19,261
+And this is not a compliance claim. Traceable records are a design target.
+
+136
+00:09:20,307 --> 00:09:23,922
+So: keep the spreadsheet, and let the LLM fill it in.
+
+137
+00:09:24,013 --> 00:09:28,758
+It pays wherever an unflagged wrong number costs more than a declined question,
+
+138
+00:09:28,794 --> 00:09:32,622
+as in valuation, reporting, and client-facing calculation.
+
+139
+00:09:32,713 --> 00:09:35,833
+If coverage is all you need, R-PAL is the better choice.
+
+140
+00:09:35,924 --> 00:09:40,308
+The live demo at verifiquant.com replays every trap from the paper.
+
+141
+00:09:40,399 --> 00:09:45,295
+The QR codes on screen link to the demo, the code, and the paper. Thank you.

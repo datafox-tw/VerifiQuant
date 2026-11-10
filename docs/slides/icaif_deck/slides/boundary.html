@@ -1,0 +1,31 @@
+<section id="boundary" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Boundary</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Where the claim holds, and where it fails</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px;flex:1;justify-content:center">
+<div style="display:flex;flex-direction:row;align-items:start;gap:32px;border-bottom:2px solid #DCE4E8;padding:0 0 20px 0">
+<x-icon name="CheckCircle" style="color:#3E6A2C;width:56px;height:56px"></x-icon>
+<h3 style="width:360px;font-size:32px;font-weight:600;line-height:1.4;color:#3E6A2C">Holds</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#3B5366">Single-number, formula-grounded questions whose family is in the library and whose contract is correct.</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:32px;border-bottom:2px solid #DCE4E8;padding:0 0 20px 0">
+<x-icon name="Warning" style="color:#B24A1B;width:56px;height:56px"></x-icon>
+<h3 style="width:360px;font-size:32px;font-weight:600;line-height:1.4;color:#B24A1B">Residual silent wrongs</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#3B5366">They trace to three LLM steps: contract selection, input binding, and recall of a declared convention.</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:32px;border-bottom:2px solid #DCE4E8;padding:0 0 20px 0">
+<x-icon name="Search" style="color:#2F6578;width:56px;height:56px"></x-icon>
+<h3 style="width:360px;font-size:32px;font-weight:600;line-height:1.4;color:#2F6578">Not checked</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#3B5366">Where a bound value came from. Gates check schema and bounds, not provenance.</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:32px">
+<x-icon name="Trust" style="color:#18405D;width:56px;height:56px"></x-icon>
+<h3 style="width:360px;font-size:32px;font-weight:600;line-height:1.4;color:#18405D">Not a compliance claim</h3>
+<p style="flex:1;font-size:32px;line-height:1.4;color:#3B5366">Traceable records and other requirements shared by model-risk guidance and the EU AI Act are design targets.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">17</p>
+<aside>Where the claim stops. It holds for single-number, formula-grounded questions inside the library with a correct contract. The silent wrongs that remain trace to the three LLM steps: selection, binding, and recalling a convention. We check that a value fits the schema and bounds, not where it came from. And we do not claim compliance. If asked about a bigger model: Gemini 2.5 Pro narrows the gap to 11.7 points, 95% CI [1.7, 21.5], mostly in ambiguity. If asked about scale: as the library grows tenfold, in-library accuracy stays between 83 and 87%, while out-of-library silent wrongs rise from 2.2 to 4.8%, not monotonically.</aside>
+</section>

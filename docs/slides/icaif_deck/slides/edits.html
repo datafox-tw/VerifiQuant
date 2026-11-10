@@ -1,0 +1,41 @@
+<section id="edits" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Verified repair · AST-bounded</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Verified edits, not regeneration</h2>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#3B5366">The edit is declared on the contract at build time and verified before it runs.</p>
+<div style="display:grid;grid-template-columns:540px 600px 1fr;gap:32px;flex:1">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:28px">
+<p style="font-size:26px;font-weight:600;color:#16324A">Loan, with payments at the start of each period</p>
+<p style="font-size:26px;color:#4F6A7D">result_expr</p>
+<p style="font-size:26px;line-height:1.4;font-family:'IBM Plex Mono', 'Courier New', monospace;color:#16324A">result / (1 + annual_interest_rate / 12)</p>
+<p style="font-size:26px;color:#4F6A7D">invariant</p>
+<p style="font-size:26px;line-height:1.4;font-family:'IBM Plex Mono', 'Courier New', monospace;color:#16324A">result_new * (1 + annual_interest_rate / 12) == result_old</p>
+<div style="flex:1"></div>
+<p style="font-size:40px;font-weight:700;color:#3E6A2C;font-variant-numeric:tabular-nums">1,498.88 → 1,491.42</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;background:#ECEAE4;border-radius:16px;padding:28px 32px">
+<p style="font-size:26px;font-weight:600;color:#16324A">AST of result_expr</p>
+<p style="font-size:26px;line-height:1.4;font-family:'IBM Plex Mono', 'Courier New', monospace;color:#16324A;white-space:nowrap">BinOp /<br>├─ Name result<br>└─ BinOp +<br>&#160;&#160;&#160;├─ Constant 1<br>&#160;&#160;&#160;└─ BinOp /<br>&#160;&#160;&#160;&#160;&#160;&#160;├─ Name annual_interest_rate<br>&#160;&#160;&#160;&#160;&#160;&#160;└─ Constant 12</p>
+<div style="flex:1"></div>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">13 nodes counted: these 7, plus 3 operators, 2 load contexts and the root.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:row;align-items:start;gap:16px">
+<x-icon name="CheckCircle" style="color:#3E6A2C;width:44px;height:44px"></x-icon>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px"><h3 style="font-size:32px;font-weight:600;color:#16324A">Bounded</h3><p style="font-size:26px;line-height:1.4;color:#3B5366">13 nodes, the declared limit. A larger edit is rejected.</p></div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:16px">
+<x-icon name="CheckCircle" style="color:#3E6A2C;width:44px;height:44px"></x-icon>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px"><h3 style="font-size:32px;font-weight:600;color:#16324A">Safe</h3><p style="font-size:26px;line-height:1.4;color:#3B5366">Whitelisted names only. No imports, dunders, or new calls.</p></div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:16px">
+<x-icon name="CheckCircle" style="color:#3E6A2C;width:44px;height:44px"></x-icon>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px"><h3 style="font-size:32px;font-weight:600;color:#16324A">Matches</h3><p style="font-size:26px;line-height:1.4;color:#3B5366">The invariant holds on 5 sampled bindings.</p></div>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">14</p>
+<aside>When a user picks a non-default convention, say payments at the start of each period, the computation must change. If we let the LLM rewrite the code, we reopen the door the funnel just closed. So every edit is declared on the contract at build time. For the loan it is an output transform: divide by one plus the monthly rate. Its invariant: multiply the new payment back and you recover the old one. The payment moves from 1,498.88 to 1,491.42. Three checks: bounded at 13 AST nodes, safe names only, and the invariant holds numerically on five sampled bindings. If asked about code patches: in a proof of concept, a one-node patch for NPV timing (start=1 to start=0) is accepted only if its output matches the declared relation. The library itself uses output transforms.</aside>
+</section>

@@ -1,0 +1,39 @@
+<section id="exits" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Named exits</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Every stop says why</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;flex:1">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">N · refuse</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">No candidate, or the top score is too low. Or no candidate fits.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">M · which one?</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Several contracts fit. It asks the user to choose.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">F · ask</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Names the missing required field and asks for it.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">E · alert</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Names the violated check and the bound value.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">I-HARD · clarify</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Offers the declared options, then applies a verified edit.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FCFBF8;border:2px solid #DCE4E8;border-left:10px solid #18405D;border-radius:14px;padding:28px">
+<h3 style="font-size:32px;font-weight:600;color:#18405D">I-SOFT · warn</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Returns the number with a warning about the open convention.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:28px;background:#18405D;border-radius:16px;padding:24px 40px">
+<x-icon name="Database" style="color:#F7B267;width:56px;height:56px"></x-icon>
+<p style="flex:1;font-size:32px;font-weight:500;line-height:1.4;color:#F3F6F8">Every path writes a DiagnosticReport: the contract, bound values, checks passed, and why it stopped. Deterministic steps replay from the stored binding.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">9</p>
+<aside>Every stop is a named exit. N refuses as out of scope. M asks which quantity you meant. F asks for the missing field by name. E names the violated check and the value. I either warns, for a soft convention, or asks the user to pick a declared option and then applies a verified edit, which comes later. Every path, number or not, writes a DiagnosticReport. Wording to keep: it replays from the stored binding. It is not traced back to a span in the original document.</aside>
+</section>

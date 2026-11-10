@@ -1,0 +1,63 @@
+<section id="funnel" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">The mechanism</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">A funnel decides before anything is computed</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px;flex:1;justify-content:center">
+<div style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:24px">
+<p style="font-size:26px;font-weight:600;color:#16324A;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:999px;padding:6px 22px">In: question + context</p>
+<div style="display:flex;flex-direction:row;align-items:center;gap:28px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px"><div style="width:28px;height:28px;background:#F48F24;border-radius:6px"></div><p style="font-size:26px;color:#3B5366">LLM step</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:10px"><div style="width:28px;height:28px;background:#417A8F;border-radius:6px"></div><p style="font-size:26px;color:#3B5366">code</p></div>
+</div>
+<p style="font-size:26px;font-weight:600;color:#FCFBF8;background:#3E6A2C;border-radius:999px;padding:6px 22px">Out: number + report</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch">
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#417A8F;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#E6F0F4">N · code</p>
+<p style="font-size:32px;font-weight:600;color:#FCFBF8">Retrieve</p>
+<p style="font-size:26px;line-height:1.3;color:#F3F6F8">BM25, top 4</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#F48F24;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#16324A">N·M · LLM 1</p>
+<p style="font-size:32px;font-weight:600;color:#16324A">Select</p>
+<p style="font-size:26px;line-height:1.3;color:#16324A">one of the top 4, or none</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#F48F24;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#16324A">LLM 2</p>
+<p style="font-size:32px;font-weight:600;color:#16324A">Bind</p>
+<p style="font-size:26px;line-height:1.3;color:#16324A">text values into typed inputs</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#417A8F;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#E6F0F4">F · code</p>
+<p style="font-size:32px;font-weight:600;color:#FCFBF8">Inputs</p>
+<p style="font-size:26px;line-height:1.3;color:#F3F6F8">all required present?</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#417A8F;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#E6F0F4">E · code</p>
+<p style="font-size:32px;font-weight:600;color:#FCFBF8">Boundary</p>
+<p style="font-size:26px;line-height:1.3;color:#F3F6F8">declared checks hold?</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#F48F24;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#16324A">I · LLM 3</p>
+<p style="font-size:32px;font-weight:600;color:#16324A">Ambiguity</p>
+<p style="font-size:26px;line-height:1.3;color:#16324A">a convention left open?</p>
+</div>
+<x-connector style="width:32px;color:#4F6A7D;align-self:center"></x-connector>
+<div style="width:210px;display:flex;flex-direction:column;gap:10px;background:#417A8F;border-radius:14px;padding:20px 16px">
+<p style="font-size:26px;font-weight:600;color:#E6F0F4">C · code</p>
+<p style="font-size:32px;font-weight:600;color:#FCFBF8">Compute</p>
+<p style="font-size:26px;line-height:1.3;color:#F3F6F8">the contract’s own Python</p>
+</div>
+</div>
+<p style="font-size:32px;font-weight:500;line-height:1.4;color:#F3F6F8;background:#18405D;border-radius:16px;padding:24px 40px">Only a query that passes every gate reaches the contract’s code. Bind has no exit of its own, because the next gates check what was bound.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">8</p>
+<aside>The funnel runs left to right. Retrieval is BM25 over contract metadata, top four. Three LLM steps, in orange, alternate with code steps, in blue. Select picks one of the four, or none. Bind copies values from the text into typed inputs. Then code checks that every required input is present and that the declared boundaries hold. The ambiguity step asks whether a declared convention is still open. Only then does the contract’s own code compute. The letters on top are the same N, M, F, E, I, C from the taxonomy.</aside>
+</section>

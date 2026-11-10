@@ -1,0 +1,20 @@
+<section id="price" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">The price · 250 well-posed questions</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Safety costs coverage, not accuracy</h2>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:32px;color:#16324A">
+<tr style="background:#18405D"><th style="width:46%;color:#F3F6F8">System</th><th style="width:18%;color:#F3F6F8;text-align:right">Accuracy</th><th style="width:18%;color:#F3F6F8;text-align:right">Silent wrong</th><th style="width:18%;color:#F3F6F8;text-align:right">Coverage</th></tr>
+<tr style="background:#FCFBF8"><td>R-PAL</td><td style="text-align:right">96.8</td><td style="text-align:right">2.4</td><td style="text-align:right">99.2</td></tr>
+<tr style="background:#FCFBF8"><td>R-PAL⁺</td><td style="text-align:right">92.0</td><td style="text-align:right">0.9</td><td style="text-align:right">92.9</td></tr>
+<tr style="background:#E1ECDA"><td>VerifiQuant, K = 1 (autonomous)</td><td style="text-align:right">81.2</td><td style="text-align:right">2.8</td><td style="text-align:right">84.0</td></tr>
+<tr style="background:#ECEAE4"><td style="color:#4F6A7D">VerifiQuant, K = 3 †</td><td style="text-align:right;color:#4F6A7D">93.6</td><td style="text-align:right;color:#4F6A7D">3.2</td><td style="text-align:right;color:#4F6A7D">96.8</td></tr>
+</table>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;flex:1;align-items:start">
+<p style="font-size:32px;font-weight:500;line-height:1.4;color:#16324A">Governance adds no accuracy on well-posed questions. VerifiQuant declines about 16% of them instead, with a silent-wrong rate close to R-PAL’s.</p>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">† K = 3 is an intent-oracle upper bound, not a deployment result: up to two clarification turns from an oracle that sees the intended computation, never the answer. K = 1 is fully autonomous. Values in %.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">12</p>
+<aside>This is not an accuracy paper. On 250 well-posed questions R-PAL reaches 96.8% and we reach 81.2% at 84% coverage. Our silent-wrong rate is close to R-PAL’s, 2.8 versus 2.4. The K = 3 row is an upper bound: up to two clarification turns from an oracle that knows the intended computation but never the answer. If asked about the clean set: it is in-library by construction, so it measures routing, binding and gating, not deriving an unseen formula. Runtime: 12.2 s per question versus 10.5 s for plain R-PAL, about 1.2 times. Five-sample self-consistency takes 38.1 s.</aside>
+</section>

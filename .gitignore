@@ -35,3 +35,8 @@ paper/
 /icaif-2026-media-kit.zip
 /taps_upload/
 /poster/
+
+# Talk-video render output (regenerate with docs/slides/video/*.py). Sources, narration
+# and the .srt are tracked; the 170 MB frame/audio cache and the rendered .mp4 are not.
+/docs/slides/video/build/
+/docs/slides/video/*.mp4

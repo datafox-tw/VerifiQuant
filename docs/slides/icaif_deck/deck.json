@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-11-10T09:00:00Z"},
+  "lists": "css",
+  "title": "VerifiQuant at ICAIF ’26",
+  "cover": "cover",
+  "order": ["cover", "problem", "trap", "legit", "five", "sheet", "contract", "funnel", "exits", "headline", "traptypes", "price", "tradeoff", "edits", "repairbench", "ood", "boundary", "close"],
+  "sections": {
+    "s1": {"description": "The problem: a confident wrong number, and the five ways a question fails to justify one.", "start": "cover"},
+    "s2": {"description": "The design: contracts as vetted spreadsheets, and an executable funnel with named exits.", "start": "sheet"},
+    "s3": {"description": "The results: lower false numeric acceptance on traps, paid for with clean coverage.", "start": "headline"},
+    "s4": {"description": "Verified repair: declared, AST-bounded edits instead of regenerated code.", "start": "edits"},
+    "s5": {"description": "Scope and boundary: what happens outside the library, where the claim stops, and how to try it.", "start": "ood"}
+  },
+  "faces": {
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"},
+    "ibm-plex-mono": {"family": "IBM Plex Mono", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

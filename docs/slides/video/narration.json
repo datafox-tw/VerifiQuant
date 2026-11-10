@@ -1,0 +1,160 @@
+{
+  "voice": "Charon",
+  "style": "",
+  "say_as": {"VerifiQuant": "Verify Quant", "R-PAL": "R-PAL", "BM25": "B M 25", "Yu-Chi Ko": "Yu-Chee Ko", "Mi-Yen Yeh": "Mee-Yen Yeh","Shou-De Lin": "Show-Duh Lin"},
+  "slides": [
+    {"id": "cover", "lines": [
+      "This is VerifiQuant, governance by execution for financial LLM workflows.",
+      "It is joint work by Yu-Chi Ko, Mi-Yen Yeh and Shou-De Lin, at National Taiwan University and Academia Sinica.",
+      "The one-line version is: keep the spreadsheet, and let the LLM fill it in."
+    ]},
+    {"id": "problem", "lines": [
+      "LLMs in finance now sit in workflows that end in a number.",
+      "Valuation memos, client calculators, regulatory reports.",
+      "They rarely fail by crashing.",
+      "They fail with a clean, wrong number, and nothing marks it as wrong.",
+      "Program-aided reasoning fixes the arithmetic, because an interpreter runs the code.",
+      "But it does not decide whether the question justifies a number at all."
+    ]},
+    {"id": "trap", "lines": [
+      "Here is a real trap from our evaluation.",
+      "It asks for a stock’s price rate of change over one week.",
+      "We changed the opening price from 150 dollars to 2.5 dollars.",
+      "R-PAL sees the same retrieved contracts and runs code. It reports 6,500 percent.",
+      "R-PAL plus also gets every one of our checks described in its prompt.",
+      "It still reports 6,500 percent, in all three runs.",
+      "VerifiQuant stops at gate E in all three runs, and shows the check that failed: a weekly price change above 200 percent.",
+      "Same model, same contracts. The difference is whether the check is executed or only described."
+    ]},
+    {"id": "legit", "lines": [
+      "So the question we ask is not how accurate the system is.",
+      "It is when a number may leave the system at all.",
+      "Every response is one of three things: a correct number, a silent wrong, or a named exit that says why.",
+      "The goal is to turn silent wrongs into named exits, while keeping as many correct numbers as possible."
+    ]},
+    {"id": "five", "lines": [
+      "There are five reasons a question may not justify a number, and each gets a letter.",
+      "N: nothing in the library covers the question.",
+      "M: the intent is unclear, like “the return” without saying holding-period or annualized.",
+      "F: a required input is missing.",
+      "E: a value breaks a declared check, like that 2.5-dollar price.",
+      "I: a convention is left open, like whether payments come at the start or the end of each period.",
+      "These letters are also the gates of the pipeline."
+    ]},
+    {"id": "sheet", "lines": [
+      "To catch them, we borrow from how analysts already work.",
+      "An analyst does not re-derive a loan formula for each client.",
+      "They open a vetted sheet, type in the inputs, and the sheet refuses impossible values.",
+      "We write each formula family once as such a sheet. We call it a Financial Inference Contract.",
+      "The library holds 250 of them, generated offline and checked with lint and smoke tests. None was hand-tuned.",
+      "The LLM gets three jobs, and only three.",
+      "Pick the sheet. Fill the input cells. Flag which declared conventions the text leaves open.",
+      "It never computes the answer, and it never freely rewrites the formula."
+    ]},
+    {"id": "contract", "lines": [
+      "This is the real loan contract, drawn as a sheet.",
+      "The orange rows are what the LLM fills: principal, rate and term.",
+      "The blue rows are data validation, run as code. The principal must be positive, and the rate must stay below 1.0.",
+      "Then come declared conventions.",
+      "Rate scale is hard, because it changes the computation, so the system asks.",
+      "Payment timing is soft, because it changes how you read the number, so the system answers and warns.",
+      "The green row is locked Python code, which returns 1,498.88.",
+      "Now suppose the LLM binds “6 percent” as 6 instead of 0.06.",
+      "The rate check fails, and the query ends at an alert that names the check. No number leaves."
+    ]},
+    {"id": "funnel", "lines": [
+      "At run time, every query goes through this funnel, from left to right.",
+      "Retrieval is BM25 over the contracts, top four.",
+      "Then three LLM steps, in orange, alternate with code steps, in blue.",
+      "Select picks one contract, or none. Bind fills the inputs.",
+      "Code then checks that every required input is present, and that every declared boundary holds.",
+      "The ambiguity step asks whether a convention is still open.",
+      "Only a query that passes every gate reaches the contract’s own code."
+    ]},
+    {"id": "exits", "lines": [
+      "Every stop is a named exit.",
+      "N refuses. M asks which quantity you meant. F asks for the missing field by name.",
+      "E names the failed check and the bound value.",
+      "For conventions, a soft one returns the number with a warning.",
+      "A hard one asks the user to pick a declared option, and then applies a verified edit.",
+      "Every path, with a number or without one, writes a DiagnosticReport that replays from the stored binding."
+    ]},
+    {"id": "headline", "lines": [
+      "Now the main result.",
+      "We derived 80 traps from the contracts: 20 each of missing input, impossible value, open convention, and out of scope.",
+      "We count how often a system still gives an unqualified number. We call this false numeric acceptance.",
+      "R-PAL plus has our whole checklist in its prompt, and it still answers 27.5 percent of the traps.",
+      "VerifiQuant runs the same checks in stages, and answers 10.4 percent.",
+      "That is 17 points lower, with a 95 percent interval from about 7 to 27 points.",
+      "Every system uses Gemini 2.5 Flash and the same top-four contracts, averaged over three runs."
+    ]},
+    {"id": "traptypes", "lines": [
+      "Where does the gap come from? Boundary and ambiguity traps.",
+      "On impossible values, R-PAL plus accepts 30 percent, and VerifiQuant 8.3.",
+      "On open conventions, 80 percent against 21.7.",
+      "There, the right answer depends on an executed check or an unstated convention.",
+      "On missing inputs and out-of-scope questions, a prompt already refuses, and VerifiQuant is no better.",
+      "Plain R-PAL, which only runs code, answers 48.8 percent of all traps."
+    ]},
+    {"id": "price", "lines": [
+      "This is not an accuracy result.",
+      "On 250 well-posed questions, R-PAL reaches 96.8 percent accuracy.",
+      "VerifiQuant reaches 81.2 percent, because it declines about 16 percent of them.",
+      "Its silent-wrong rate stays close to R-PAL’s, 2.8 against 2.4 percent.",
+      "The grey row is an upper bound, not a deployment result.",
+      "There, an oracle that knows the intended computation, but never the answer, may clarify up to twice. Accuracy then reaches 93.6 percent."
+    ]},
+    {"id": "tradeoff", "lines": [
+      "This chart puts safety and utility on one picture.",
+      "Coverage on clean questions runs across. False acceptance on traps runs up. The ideal is the lower right.",
+      "The two hollow points test whether the gain comes only from splitting the prompt into stages.",
+      "Staging alone reaches 15.8 percent, but only by refusing much more.",
+      "Staging plus the contract text ties VerifiQuant on traps, at 8.8 percent, but covers only 75 percent of clean questions.",
+      "So staging over the declared contract lowers false acceptance, and running the contract’s own code keeps coverage.",
+      "Measured against R-PAL plus, each trap number avoided costs VerifiQuant 2.0 correct clean answers."
+    ]},
+    {"id": "edits", "lines": [
+      "One more technical piece: what happens when a user picks a non-default convention.",
+      "The computation has to change. If the LLM rewrote the code, it would reopen the door the funnel just closed.",
+      "So every edit is declared on the contract at build time.",
+      "For the loan, paying at the start of each period means dividing by one plus the monthly rate.",
+      "The invariant says: multiply back, and you recover the old payment.",
+      "The payment moves from 1,498.88 to 1,491.42.",
+      "Before the edit runs, three checks.",
+      "Bounded: 13 syntax-tree nodes, the declared limit.",
+      "Safe: whitelisted names only.",
+      "Matches: the invariant holds on five sampled inputs."
+    ]},
+    {"id": "repairbench", "lines": [
+      "To test the verifier, we generated 906 faulty patches on purpose.",
+      "27 turned out to be equivalent to the original.",
+      "Of the other 879, the verifier rejects 97.7 percent, including every structural attack.",
+      "20 get through.",
+      "This is bounded numerical validation, not a formal proof.",
+      "Most of the 20 sit in branches that none of the sampled inputs reached."
+    ]},
+    {"id": "ood", "lines": [
+      "Outside the library, we ran two separate tests.",
+      "First, we rebuilt the library from 50 formula families, so 199 questions have no matching contract.",
+      "VerifiQuant abstains on 88.9 percent of them.",
+      "R-PAL abstains on half a percent. It is right 95 percent of the time from memory, but gives no signal when it is wrong.",
+      "So out of library, VerifiQuant is not more accurate. What it offers is a scope signal.",
+      "Second, five finance-trained annotators labeled 80 natural queries blind.",
+      "On the 46 that call for no number, the ordering holds, but only the gap to plain R-PAL is significant."
+    ]},
+    {"id": "boundary", "lines": [
+      "To be clear about the boundary.",
+      "The claim holds for single-number, formula-grounded questions inside the library, with a correct contract.",
+      "The silent wrongs that remain trace to three LLM steps: selection, binding, and recalling a convention.",
+      "The gates check schema and bounds, not where a value came from.",
+      "And this is not a compliance claim. Traceable records are a design target."
+    ]},
+    {"id": "close", "lines": [
+      "So: keep the spreadsheet, and let the LLM fill it in.",
+      "It pays wherever an unflagged wrong number costs more than a declined question, as in valuation, reporting, and client-facing calculation.",
+      "If coverage is all you need, R-PAL is the better choice.",
+      "The live demo at verifiquant.com replays every trap from the paper.",
+      "The QR codes on screen link to the demo, the code, and the paper. Thank you."
+    ]}
+  ]
+}

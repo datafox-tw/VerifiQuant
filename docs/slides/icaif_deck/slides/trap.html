@@ -1,0 +1,58 @@
+<section id="trap" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">A real trap from our evaluation · E-test-1080</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">One impossible price, three systems</h2>
+</div>
+<div style="display:grid;grid-template-columns:580px 1fr;gap:40px;flex:1">
+<div style="display:flex;flex-direction:column;gap:24px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:44px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#4F6A7D">The question</p>
+<p style="font-size:32px;line-height:1.4;color:#16324A">“What is the Price Rate of Change of the stock over the week?”</p>
+<hr style="border-top:2px solid #DCE4E8">
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-size:26px;color:#4F6A7D">Start of week</p>
+<p style="font-size:40px;font-weight:600;color:#B24A1B">$2.5 per share</p>
+<p style="font-size:26px;color:#4F6A7D">changed from $150</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-size:26px;color:#4F6A7D">End of week</p>
+<p style="font-size:40px;font-weight:600;color:#16324A">$165 per share</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:32px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:28px 36px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:32px;font-weight:600;color:#16324A">R-PAL</p>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Same retrieved contracts. Writes code and runs it.</p>
+</div>
+<div style="width:380px;display:flex;flex-direction:column;align-items:end;gap:10px">
+<p style="font-size:40px;font-weight:700;color:#B24A1B;font-variant-numeric:tabular-nums">6,500.00%</p>
+<p style="font-size:26px;font-weight:600;color:#FCFBF8;background:#B24A1B;padding:4px 16px;border-radius:999px">silent wrong</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:32px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:28px 36px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:32px;font-weight:600;color:#16324A">R-PAL⁺</p>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Same, plus every one of our checks described in its prompt.</p>
+</div>
+<div style="width:380px;display:flex;flex-direction:column;align-items:end;gap:10px">
+<p style="font-size:40px;font-weight:700;color:#B24A1B;font-variant-numeric:tabular-nums">6,500.00%</p>
+<p style="font-size:26px;font-weight:600;color:#FCFBF8;background:#B24A1B;padding:4px 16px;border-radius:999px">silent wrong · 3 of 3 runs</p>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:32px;background:#EEF4EA;border:2px solid #679452;border-radius:16px;padding:28px 36px">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:32px;font-weight:600;color:#16324A">VerifiQuant</p>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">Runs the contract’s own boundary check.</p>
+<p style="font-size:26px;font-family:'IBM Plex Mono', 'Courier New', monospace;color:#16324A">abs(165 − 2.5) / 2.5 &gt; 2.0</p>
+</div>
+<div style="width:380px;display:flex;flex-direction:column;align-items:end;gap:10px">
+<p style="font-size:40px;font-weight:700;color:#3E6A2C">Stopped at gate E</p>
+<p style="font-size:26px;font-weight:600;color:#FCFBF8;background:#18405D;padding:4px 16px;border-radius:999px">named exit · 3 of 3 runs</p>
+</div>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">3</p>
+<aside>A real trap. We changed the opening price from 150 to 2.5 dollars. R-PAL sees the same retrieved contracts and runs code: 6,500%. R-PAL plus also gets every one of our checks in its prompt: still 6,500%, in all three runs. VerifiQuant stops at gate E in all three runs and shows the check that failed: a weekly price change above 200%. Same model (Gemini 2.5 Flash), same contracts. The difference is whether the check is executed or only described.</aside>
+</section>

@@ -1,0 +1,27 @@
+<section id="repairbench" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Auditing the verifier · RepairBench</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Wrong patches are rejected, within bounds</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 600px;gap:64px;flex:1;align-items:center">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:160px;font-weight:700;line-height:1;color:#3E6A2C;font-variant-numeric:tabular-nums">97.7%</p>
+<p style="font-size:40px;font-weight:600;color:#16324A">of 879 wrong patches rejected</p>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">906 mutants from 179 specs and 6 error classes, generated on purpose. 27 turned out equivalent and are excluded.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:4px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:28px 36px">
+<p style="font-size:64px;font-weight:700;line-height:1.1;color:#16324A">100%</p>
+<p style="font-size:26px;color:#3B5366">of structural attacks rejected</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:28px 36px">
+<p style="font-size:64px;font-weight:700;line-height:1.1;color:#B24A1B">20</p>
+<p style="font-size:26px;color:#3B5366">false accepts (2.3%)</p>
+</div>
+</div>
+</div>
+<p style="font-size:32px;font-weight:500;line-height:1.4;color:#F3F6F8;background:#18405D;border-radius:16px;padding:24px 40px">Bounded numerical validation, not formal equivalence. Most false accepts sit in guard branches that no sampled binding reached.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">15</p>
+<aside>To test the verifier we generated 906 faulty patches on purpose, from 179 specs and six error classes. 27 turned out to be equivalent to the original. Of the other 879 it rejects 97.7%, including every structural attack such as imports or dunder access. 20 pass. This is bounded numerical validation, not a formal proof. A wrong invariant paired with a compensating patch would also pass. Most of the 20 sit in guard branches that none of the five sampled bindings reached. Always say the denominator: 879.</aside>
+</section>

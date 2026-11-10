@@ -1,0 +1,46 @@
+<section id="sheet" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">The design</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Keep the spreadsheet. Let the LLM fill it in.</h2>
+</div>
+<div style="display:grid;grid-template-columns:860px 1fr;gap:64px;flex:1">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.4;color:#3B5366">An analyst does not re-derive a loan formula for each client. They open a vetted sheet.</p>
+<p style="font-size:32px;line-height:1.4;color:#16324A">Each formula family becomes such a sheet: a <b>Financial Inference Contract</b>, with typed inputs, validation rules, declared conventions, and locked code.</p>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">Spreadsheet analogy, implemented as stored contracts. No Excel runs.</p>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:32px 36px">
+<h3 style="font-size:32px;font-weight:600;color:#16324A">Built offline, fixed at run time</h3>
+<p style="font-size:26px;line-height:1.4;color:#3B5366">250 contracts, three LLM calls each, then lint and smoke tests. None hand-tuned.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<h3 style="font-size:32px;font-weight:600;color:#16324A">The LLM gets three jobs, and only three</h3>
+<div style="display:flex;flex-direction:row;align-items:start;gap:24px">
+<div style="width:64px;height:64px;background:#F48F24;border-radius:999px;display:flex;align-items:center;justify-content:center"><p style="font-size:32px;font-weight:700;color:#16324A">1</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:32px;font-weight:600;color:#16324A">Pick the sheet</p>
+<p style="font-size:26px;color:#3B5366">one of the top 4 retrieved, or none</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:24px">
+<div style="width:64px;height:64px;background:#F48F24;border-radius:999px;display:flex;align-items:center;justify-content:center"><p style="font-size:32px;font-weight:700;color:#16324A">2</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:32px;font-weight:600;color:#16324A">Fill the input cells</p>
+<p style="font-size:26px;color:#3B5366">bind values from the text</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:start;gap:24px">
+<div style="width:64px;height:64px;background:#F48F24;border-radius:999px;display:flex;align-items:center;justify-content:center"><p style="font-size:32px;font-weight:700;color:#16324A">3</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:32px;font-weight:600;color:#16324A">Flag open conventions</p>
+<p style="font-size:26px;color:#3B5366">which declared choices the text leaves open</p>
+</div>
+</div>
+<div style="flex:1"></div>
+<p style="font-size:32px;font-weight:500;line-height:1.4;color:#F3F6F8;background:#18405D;border-radius:16px;padding:28px 40px">It never computes the answer or freely rewrites the formula.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">6</p>
+<aside>The design borrows from how analysts already work. You do not re-derive the loan formula per client. You open a vetted sheet, type in the inputs, and its validation refuses impossible values. We write each formula family once as such a sheet, a Financial Inference Contract. The LLM gets three jobs: pick the sheet, fill the cells, flag open conventions. It never computes the answer. If asked: it is an analogy, there is no Excel integration. Contracts are generated automatically, three LLM calls per family plus lint and smoke tests, none hand-tuned.</aside>
+</section>

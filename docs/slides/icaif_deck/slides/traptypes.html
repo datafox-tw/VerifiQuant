@@ -1,0 +1,30 @@
+<section id="traptypes" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Where the gain sits</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Boundary and ambiguity traps</h2>
+</div>
+<div style="display:grid;grid-template-columns:520px 1fr;gap:56px;flex:1">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.4;color:#16324A">80 contract-derived traps, 20 per type.</p>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">Gemini 2.5 Flash, same top-4 contracts, one scorer. 3-run means (plain R-PAL: one run).</p>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">A number with the correct I-SOFT warning does not count as a false acceptance.</p>
+<div style="flex:1"></div>
+<p style="font-size:26px;line-height:1.4;color:#16324A;background:#FCFBF8;border:2px solid #DCE4E8;border-radius:16px;padding:24px 28px">On F and N, a prompt already refuses. VerifiQuant is no better there.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#4F6A7D">FNAR by trap type, % (lower is safer)</p>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:32px;color:#16324A">
+<tr style="background:#18405D"><th style="width:34%;color:#F3F6F8">Trap type</th><th style="width:20%;color:#F3F6F8;text-align:right">R-PAL</th><th style="width:20%;color:#F3F6F8;text-align:right">R-PAL⁺</th><th style="width:26%;color:#F3F6F8;text-align:right">VerifiQuant</th></tr>
+<tr style="background:#E1ECDA"><td>E boundary</td><td style="text-align:right">90</td><td style="text-align:right">30</td><td style="text-align:right;color:#3E6A2C">8.3</td></tr>
+<tr style="background:#E1ECDA"><td>I ambiguity</td><td style="text-align:right">95</td><td style="text-align:right">80</td><td style="text-align:right;color:#3E6A2C">21.7</td></tr>
+<tr style="background:#FCFBF8"><td>F missing input</td><td style="text-align:right">10</td><td style="text-align:right">0</td><td style="text-align:right">10</td></tr>
+<tr style="background:#FCFBF8"><td>N out of scope</td><td style="text-align:right">0</td><td style="text-align:right">0</td><td style="text-align:right">1.7</td></tr>
+<tr style="background:#DCE9EE"><td>All 80 traps</td><td style="text-align:right">48.8</td><td style="text-align:right">27.5</td><td style="text-align:right;color:#3E6A2C">10.4</td></tr>
+</table>
+<p style="font-size:26px;line-height:1.4;color:#4F6A7D">Green rows: where an executed check or a declared convention decides the answer.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">11</p>
+<aside>Where do the 17 points come from? Boundary and ambiguity. On E, R-PAL plus still accepts 30%, we accept 8.3%. On I, 80% versus 21.7%. Those are the cases where correctness depends on an executable check or an unstated convention. On missing fields and blatant out-of-scope asks, a prompt already refuses, and we are no better. Plain R-PAL, which only executes code, answers 48.8% of all traps. If asked why not just prompt the checks: R-PAL plus names the problem 65.4% of the time but takes the matching action only 55.8%. VerifiQuant goes from 76.7 to 75.4.</aside>
+</section>

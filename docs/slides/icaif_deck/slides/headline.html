@@ -1,0 +1,26 @@
+<section id="headline" data-transition="fade" style="background:#18405D;color:#F3F6F8;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#9FC3D3">Main result · 80 contract-derived traps</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#F3F6F8">Execution is not governance</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:96px;flex:1">
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:160px;font-weight:700;line-height:1;color:#C9D6DE;font-variant-numeric:tabular-nums">27.5%</p>
+<p style="font-size:40px;font-weight:600;color:#F3F6F8">R-PAL⁺</p>
+<p style="font-size:32px;color:#C9D6DE">same checks, in one prompt</p>
+</div>
+<x-shape kind="arrow-right" style="background:#9FC3D3;width:140px;height:70px"></x-shape>
+<div style="display:flex;flex-direction:column;gap:8px">
+<p style="font-size:160px;font-weight:700;line-height:1;color:#A8D08D;font-variant-numeric:tabular-nums">10.4%</p>
+<p style="font-size:40px;font-weight:600;color:#F3F6F8">VerifiQuant</p>
+<p style="font-size:32px;color:#C9D6DE">same checks, run in stages</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:32px;font-weight:600;color:#F3F6F8">−17.1 points · 95% CI [−27.0, −6.8], clustered by base question</p>
+<p style="font-size:26px;line-height:1.4;color:#C9D6DE">False numeric acceptance (FNAR): the share of traps that receive an unqualified number. Lower is safer. Gemini 2.5 Flash, same top-4 contracts, one scorer, 3-run means.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#9FC3D3">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#9FC3D3;text-align:right">10</p>
+<aside>The headline. 80 traps derived from the contracts, 20 each of missing input, impossible value, open convention and out of scope. We count how often a system still gives an unqualified number. R-PAL plus has our full checklist in its prompt and still answers 27.5%. VerifiQuant runs the same checks in stages and answers 10.4%. That is 17 points lower, 95% interval from 7 to 27. A number that carries the correct soft-ambiguity warning is the right handling, so it does not count. If challenged on contract-derived traps: yes, this is a stress test of the mechanism, not a real-world rate. The blind human-labeled set (slide 16) reproduces the ordering.</aside>
+</section>

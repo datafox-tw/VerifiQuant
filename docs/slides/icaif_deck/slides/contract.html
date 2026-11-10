@@ -1,0 +1,33 @@
+<section id="contract" data-transition="fade" style="background:#F5F3EE;color:#16324A;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<p style="font-size:26px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#2F6578">Anatomy of a contract · the Loan card</p>
+<h2 style="font-size:64px;font-weight:600;line-height:1.1;color:#16324A">Four blocks, four gates</h2>
+</div>
+<div style="display:grid;grid-template-columns:460px 1fr;gap:56px;flex:1">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:26px;color:#4F6A7D">Illustrative query on <span style="color:#16324A">fic_article_2164</span></p>
+<p style="font-size:32px;line-height:1.4;color:#16324A">“I’m borrowing $250,000 at 6% for 30 years. What is my monthly payment?”</p>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px"><div style="width:32px;height:32px;background:#FBE1C4;border:2px solid #F48F24;border-radius:6px"></div><p style="font-size:26px;color:#3B5366">filled or flagged by the LLM</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px"><div style="width:32px;height:32px;background:#DCE9EE;border:2px solid #417A8F;border-radius:6px"></div><p style="font-size:26px;color:#3B5366">checked by code</p></div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:16px"><div style="width:32px;height:32px;background:#E1ECDA;border:2px solid #679452;border-radius:6px"></div><p style="font-size:26px;color:#3B5366">computed by the contract</p></div>
+</div>
+<div style="flex:1"></div>
+<p style="font-size:26px;line-height:1.4;color:#16324A;background:#FCFBF8;border:2px solid #D15B22;border-radius:16px;padding:24px 28px">If “6%” were bound as 6, the rate check fails. The query ends at an E alert that names the check, and no number leaves.</p>
+</div>
+<table style="font-family:'IBM Plex Sans', Arial, sans-serif;font-size:28px;color:#16324A">
+<tr style="background:#18405D"><th style="width:40%;color:#F3F6F8">Field</th><th style="width:16%;color:#F3F6F8">Value</th><th style="width:34%;color:#F3F6F8">Rule</th><th style="width:10%;color:#F3F6F8;text-align:center">Gate</th></tr>
+<tr style="background:#FBE1C4"><td>principal</td><td>250,000</td><td>required number</td><td style="text-align:center">F</td></tr>
+<tr style="background:#FBE1C4"><td>annual_interest_rate</td><td>0.06</td><td>required, as a decimal</td><td style="text-align:center">F</td></tr>
+<tr style="background:#FBE1C4"><td>loan_term_years</td><td>30</td><td>required integer</td><td style="text-align:center">F</td></tr>
+<tr style="background:#DCE9EE"><td>principal &gt; 0</td><td>pass</td><td>else error</td><td style="text-align:center">E</td></tr>
+<tr style="background:#DCE9EE"><td>annual_interest_rate &lt; 1.0</td><td>pass</td><td>else alert: 100% or more</td><td style="text-align:center">E</td></tr>
+<tr style="background:#FBE1C4"><td>rate scale</td><td>decimal</td><td>HARD: ask before computing</td><td style="text-align:center">I</td></tr>
+<tr style="background:#FBE1C4"><td>payment timing</td><td>end</td><td>SOFT: answer and warn</td><td style="text-align:center">I</td></tr>
+<tr style="background:#E1ECDA"><td>monthly_payment</td><td>1,498.88</td><td>locked Python code</td><td style="text-align:center">C</td></tr>
+</table>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:26px;color:#4F6A7D">VerifiQuant · ICAIF ’26</p>
+<p style="position:absolute;left:1592px;bottom:64px;width:200px;font-size:26px;color:#4F6A7D;text-align:right">7</p>
+<aside>This is the real loan contract, drawn as a sheet. Typed inputs are the cells the LLM fills: principal, rate, term. Data validation is code: principal must be positive, the rate must stay below 1.0. Declared conventions carry options. Rate scale is HARD because it changes the computation, so we ask. Payment timing is SOFT because it changes how you read the number, so we answer and warn. The locked Python code computes 1,498.88. The query is illustrative. 1,498.88 is what the card’s own code returns for it.</aside>
+</section>
